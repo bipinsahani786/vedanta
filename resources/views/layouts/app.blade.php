@@ -290,9 +290,37 @@
                     class="px-5 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</a>
             </div>
         </nav>
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" class="lg:hidden text-text-main text-2xl focus:outline-none">
+            <i class="fas fa-bars"></i>
+        </button>
     </header>
 
-    
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenu" class="fixed inset-0 bg-primary-bg z-[105] transform translate-x-full transition-transform duration-300 lg:hidden flex flex-col">
+        <div class="flex justify-between items-center p-6 border-b border-card-border">
+            <img src="/images/logo.png" alt="Logo" class="h-10 w-auto">
+            <button id="closeMobileMenuBtn" class="text-text-main text-2xl focus:outline-none"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="flex-grow overflow-y-auto p-6 flex flex-col gap-6">
+            <ul class="flex flex-col gap-5 text-lg font-semibold">
+                <li><a href="{{ route('home') }}" class="text-text-main hover:text-accent-blue">Home</a></li>
+                <li><a href="{{ route('about') }}" class="text-text-main hover:text-accent-blue">About us</a></li>
+                <li><a href="{{ route('services') }}" class="text-text-main hover:text-accent-blue">Our Services</a></li>
+                <li><a href="{{ route('jobs') }}" class="text-text-main hover:text-accent-blue">Jobs</a></li>
+                <li><a href="{{ route('hiring') }}" class="text-text-main hover:text-accent-blue">Hiring Process</a></li>
+                <li><a href="{{ route('contact') }}" class="text-text-main hover:text-accent-blue">Contact us</a></li>
+            </ul>
+            
+            <div class="h-px bg-card-border w-full"></div>
+            
+            <div class="flex flex-col gap-3">
+                <a href="/login" class="px-5 py-3.5 rounded-xl font-medium text-center bg-white/10 text-text-main">Login</a>
+                <a href="/register" class="px-5 py-3.5 rounded-xl font-medium text-center bg-accent-blue text-white shadow-glow-blue">Register</a>
+            </div>
+        </div>
+    </div>
+
     <main class="min-h-screen">
         @yield('content')
     </main>
@@ -553,6 +581,24 @@
         }
     </script>
     <script>
+        
+        // Mobile Menu Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const closeMobileMenuBtn = document.getElementById('closeMobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if(mobileMenuBtn && closeMobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.remove('translate-x-full');
+                });
+
+                closeMobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.add('translate-x-full');
+                });
+            }
+        });
+
         // Theme and Font Switcher Logic
         document.addEventListener('DOMContentLoaded', () => {
             const themeBtn = document.getElementById('themeSwitcherBtn');
