@@ -1,13 +1,8 @@
 @extends('layouts.app')
 @section('content')
-<div class="pt-32 pb-20 px-6 lg:px-[5%] relative">
-    <div class="absolute top-0 right-0 w-1/3 h-1/3 bg-accent-blue/10 blur-3xl rounded-full z-0 pointer-events-none"></div>
-    <div class="absolute bottom-0 left-0 w-1/3 h-1/3 bg-accent-yellow/5 blur-3xl rounded-full z-0 pointer-events-none"></div>
+<x-page-header title="Contact Us" :breadcrumbs="['Home' => route('home'), 'Contact Us' => null]" />
 
-    <div class="text-center mb-16 relative z-10 reveal">
-        <h4 class="text-accent-blue text-sm font-bold mb-2 uppercase tracking-wider">Contact Us</h4>
-        <h1 class="text-4xl md:text-5xl font-extrabold text-text-main">Let's Get In Touch</h1>
-    </div>
+<div class="py-20 px-6 lg:px-[5%] relative">
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-10 relative z-10 max-w-6xl mx-auto">
         <!-- Contact Form -->

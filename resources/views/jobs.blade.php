@@ -1,8 +1,8 @@
 @extends('layouts.app')
 @section('content')
-<div class="pt-32 pb-12 px-6 lg:px-[5%] bg-card-bg/30 border-b border-card-border">
+<x-page-header title="Find Your Dream Role" :breadcrumbs="['Home' => route('home'), 'Jobs' => null]" />
+<div class="py-12 px-6 lg:px-[5%] bg-card-bg/30 border-b border-card-border">
     <div class="max-w-4xl mx-auto text-center reveal">
-        <h1 class="text-3xl md:text-5xl font-extrabold text-text-main mb-6">Find Your Dream Role</h1>
         <!-- Search Bar -->
         <div class="bg-primary-bg border border-card-border p-2 rounded-full flex items-center shadow-lg mx-auto mb-6 transition-all focus-within:border-accent-blue focus-within:shadow-[0_4px_20px_rgba(var(--theme-accent-blue-rgb),0.2)]">
             <div class="px-4 text-text-main opacity-50"><i class="fas fa-search"></i></div>
@@ -49,54 +49,53 @@
 
     <!-- Job List -->
     <div class="w-full lg:w-3/4 space-y-4">
-        <!-- Job Card 1 -->
+        @forelse($jobs as $job)
         <div class="bg-card-bg border border-card-border rounded-xl p-6 hover:border-accent-blue/50 hover:shadow-lg transition-all group reveal">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 bg-white rounded-lg flex items-center justify-center p-2"><img src="https://ui-avatars.com/api/?name=DPS&background=random" class="rounded"></div>
+                    <div class="w-14 h-14 bg-white rounded-lg flex items-center justify-center p-2">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($job->school_name) }}&background=random" class="rounded">
+                    </div>
                     <div>
-                        <h3 class="text-lg font-bold text-text-main group-hover:text-accent-blue transition-colors">Senior Mathematics Teacher</h3>
-                        <p class="text-sm text-text-main opacity-60">Delhi Public School • Patna, Bihar</p>
+                        <h3 class="text-lg font-bold text-text-main group-hover:text-accent-blue transition-colors">{{ $job->title ?? 'Job Requirement' }}</h3>
+                        <p class="text-sm text-text-main opacity-60">{{ $job->school_name }} • {{ $job->location->city }}, {{ $job->location->state }}</p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <span class="bg-accent-blue/10 text-accent-blue px-3 py-1 rounded-full text-xs font-bold">Full Time</span>
-                    <p class="text-xs text-text-main opacity-50 mt-2">Posted 2 days ago</p>
+                    <span class="bg-accent-blue/10 text-accent-blue px-3 py-1 rounded-full text-xs font-bold">{{ $job->category->name }}</span>
+                    <p class="text-xs text-text-main opacity-50 mt-2">Posted {{ $job->created_at->diffForHumans() }}</p>
                 </div>
             </div>
-            <p class="text-sm text-text-main opacity-70 leading-relaxed mb-4">We are looking for an experienced Mathematics teacher for senior secondary classes. Must have minimum 5 years of experience in CBSE curriculum.</p>
+            <p class="text-sm text-text-main opacity-70 leading-relaxed mb-4">
+                {{ Str::limit($job->description, 150) }}
+            </p>
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+                <span class="bg-card-bg border border-card-border px-2.5 py-1 rounded-lg text-[11px] font-semibold text-text-main opacity-80 flex items-center gap-1.5">
+                    <i class="fas fa-book text-accent-blue text-[9px]"></i> {{ $job->subject->name }}
+                </span>
+                <span class="bg-card-bg border border-card-border px-2.5 py-1 rounded-lg text-[11px] font-semibold text-text-main opacity-80 flex items-center gap-1.5">
+                    <i class="fas fa-graduation-cap text-accent-blue text-[9px]"></i> {{ $job->qualification->name }}
+                </span>
+            </div>
             <div class="flex justify-between items-center border-t border-card-border pt-4">
                 <div class="flex gap-4 text-xs text-text-main opacity-60">
-                    <span><i class="fas fa-rupee-sign"></i> 40k - 60k / month</span>
-                    <span><i class="fas fa-briefcase"></i> 5+ Years Exp.</span>
+                    @if($job->salary_range)
+                    <span><i class="fas fa-rupee-sign"></i> {{ $job->salary_range }}</span>
+                    @endif
                 </div>
                 <a href="{{ route('apply') }}" class="text-accent-blue font-semibold text-sm hover:underline">Apply Now <i class="fas fa-arrow-right ml-1"></i></a>
             </div>
         </div>
+        @empty
+        <div class="text-center py-12 border border-card-border rounded-xl">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4"><i class="fas fa-briefcase"></i></div>
+            <h3 class="text-lg font-bold text-text-main mb-2">No Active Jobs</h3>
+            <p class="text-text-main opacity-60 text-sm">We currently don't have any job openings that match your criteria.</p>
+        </div>
+        @endforelse
 
-        <!-- Job Card 2 -->
-        <div class="bg-card-bg border border-card-border rounded-xl p-6 hover:border-accent-blue/50 hover:shadow-lg transition-all group reveal reveal-delay-1">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 bg-white rounded-lg flex items-center justify-center p-2"><img src="https://ui-avatars.com/api/?name=SA&background=random" class="rounded"></div>
-                    <div>
-                        <h3 class="text-lg font-bold text-text-main group-hover:text-accent-blue transition-colors">Primary English Coordinator</h3>
-                        <p class="text-sm text-text-main opacity-60">St. Albert's Academy • Online / Remote</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <span class="bg-accent-yellow/20 text-accent-yellow px-3 py-1 rounded-full text-xs font-bold">Contract</span>
-                    <p class="text-xs text-text-main opacity-50 mt-2">Posted 5 days ago</p>
-                </div>
-            </div>
-            <p class="text-sm text-text-main opacity-70 leading-relaxed mb-4">Seeking a dynamic English coordinator to design primary curriculum and mentor junior staff. Work from home flexibility available.</p>
-            <div class="flex justify-between items-center border-t border-card-border pt-4">
-                <div class="flex gap-4 text-xs text-text-main opacity-60">
-                    <span><i class="fas fa-rupee-sign"></i> 30k - 45k / month</span>
-                    <span><i class="fas fa-briefcase"></i> 3+ Years Exp.</span>
-                </div>
-                <a href="{{ route('apply') }}" class="text-accent-blue font-semibold text-sm hover:underline">Apply Now <i class="fas fa-arrow-right ml-1"></i></a>
-            </div>
+        <div class="mt-8">
+            {{ $jobs->links() }}
         </div>
     </div>
 </div>

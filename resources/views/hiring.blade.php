@@ -1,10 +1,7 @@
 @extends('layouts.app')
 @section('content')
-<div class="pt-32 pb-20 px-6 lg:px-[5%] text-center">
-    <h4 class="text-accent-blue text-sm font-bold mb-3 uppercase tracking-wider">How We Work</h4>
-    <h1 class="text-4xl md:text-5xl font-extrabold text-text-main mb-6">Our Hiring Process</h1>
-    <p class="text-text-main opacity-70 max-w-2xl mx-auto mb-16">A streamlined, transparent 4-step process designed to connect the best educators with the perfect institutions efficiently.</p>
-
+<x-page-header title="Our Hiring Process" :breadcrumbs="['Home' => route('home'), 'Hiring Process' => null]" />
+<div class="py-20 px-6 lg:px-[5%] text-center">
     <!-- Vertical Timeline -->
     <div class="max-w-3xl mx-auto relative text-left">
         <!-- Line -->

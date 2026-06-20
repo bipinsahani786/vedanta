@@ -1,19 +1,6 @@
 @extends('layouts.app')
 @section('content')
-<!-- Hero Section -->
-<div class="relative pt-32 pb-20 px-6 lg:px-[5%] flex flex-col items-center justify-center text-center overflow-hidden">
-    <div class="absolute inset-0 z-0">
-        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80" alt="Team" class="w-full h-full object-cover opacity-20">
-        <div class="absolute inset-0 bg-primary-bg/90 backdrop-blur-sm"></div>
-    </div>
-    <div class="relative z-10 max-w-3xl mx-auto reveal">
-        <h4 class="text-accent-yellow text-sm md:text-base font-bold mb-3 uppercase tracking-[0.2em]">Our Story</h4>
-        <h1 class="text-4xl md:text-6xl font-extrabold text-text-main mb-6 leading-tight">Empowering Education Since 2020</h1>
-        <p class="text-text-main opacity-80 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
-            We are dedicated to bridging the gap between exceptional educators and premier institutions across India.
-        </p>
-    </div>
-</div>
+<x-page-header title="About Us" :breadcrumbs="['Home' => route('home'), 'About Us' => null]" />
 
 <!-- Split Content -->
 <div class="py-20 px-6 lg:px-[5%]">

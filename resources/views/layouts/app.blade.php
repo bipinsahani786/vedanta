@@ -173,19 +173,19 @@
         <nav class="hidden lg:flex items-center">
             <ul class="flex gap-6 mr-8 list-none">
                 <li><a href="{{ route('home') }}"
-                        class="text-text-main font-medium text-[13px] transition-all hover:text-accent-blue relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[2px] after:bg-accent-blue after:transition-all hover:after:w-full">Home</a>
+                        class="{{ request()->routeIs('home') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('home') ? 'after:w-0' : '' }}">Home</a>
                 </li>
                 <li><a href="{{ route('about') }}"
-                        class="text-text-main opacity-80 font-medium text-[13px] transition-all hover:text-accent-blue relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[2px] after:bg-accent-blue after:transition-all hover:after:w-full">About us</a></li>
+                        class="{{ request()->routeIs('about') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('about') ? 'after:w-0' : '' }}">About us</a></li>
                 <li><a href="{{ route('services') }}"
-                        class="text-text-main opacity-80 font-medium text-[13px] transition-all hover:text-accent-blue relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[2px] after:bg-accent-blue after:transition-all hover:after:w-full">Our Services</a></li>
+                        class="{{ request()->routeIs('services') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('services') ? 'after:w-0' : '' }}">Our Services</a></li>
                 <li><a href="{{ route('jobs') }}"
-                        class="text-text-main opacity-80 font-medium text-[13px] transition-all hover:text-accent-blue relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[2px] after:bg-accent-blue after:transition-all hover:after:w-full">Jobs</a>
+                        class="{{ request()->routeIs('jobs') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('jobs') ? 'after:w-0' : '' }}">Jobs</a>
                 </li>
                 <li><a href="{{ route('hiring') }}"
-                        class="text-text-main opacity-80 font-medium text-[13px] transition-all hover:text-accent-blue relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[2px] after:bg-accent-blue after:transition-all hover:after:w-full">Hiring Process</a></li>
+                        class="{{ request()->routeIs('hiring') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('hiring') ? 'after:w-0' : '' }}">Hiring Process</a></li>
                 <li><a href="{{ route('contact') }}"
-                        class="text-text-main opacity-80 font-medium text-[13px] transition-all hover:text-accent-blue relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[2px] after:bg-accent-blue after:transition-all hover:after:w-full">Contact us</a></li>
+                        class="{{ request()->routeIs('contact') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact us</a></li>
             </ul>
             <div class="flex gap-3 items-center">
                 <!-- Theme Switcher -->
@@ -196,7 +196,21 @@
                     <!-- Dropdown -->
                     <div id="themeDropdown" class="absolute right-0 mt-3 w-80 bg-card-bg border border-card-border rounded-2xl shadow-2xl p-3 hidden opacity-0 transition-opacity duration-200 z-[110]">
                         <h4 class="text-[11px] uppercase tracking-wider text-text-dark font-bold mb-2 px-2">Theme</h4>
-                        <div class="grid grid-cols-5 gap-2 mb-4 px-2">
+                        <div class="grid grid-cols-6 gap-2 mb-4 px-2">
+                            <button data-set-theme="brand" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Brand Light Theme">
+                                <div class="w-1/2 h-full bg-[#ffffff]"></div>
+                                <div class="w-1/2 h-full flex flex-col">
+                                    <div class="h-1/2 w-full bg-[#00a8e8]"></div>
+                                    <div class="h-1/2 w-full bg-[#f26522]"></div>
+                                </div>
+                            </button>
+                            <button data-set-theme="brand-dark" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Brand Dark Theme">
+                                <div class="w-1/2 h-full bg-[#031b4e]"></div>
+                                <div class="w-1/2 h-full flex flex-col">
+                                    <div class="h-1/2 w-full bg-[#00a8e8]"></div>
+                                    <div class="h-1/2 w-full bg-[#f26522]"></div>
+                                </div>
+                            </button>
                             <button data-set-theme="dark" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-accent-blue cursor-pointer transition-transform hover:scale-110" title="Dark Theme">
                                 <div class="w-1/2 h-full bg-[#031b4e]"></div>
                                 <div class="w-1/2 h-full flex flex-col">
@@ -284,10 +298,24 @@
                     </div>
                 </div>
 
-                <a href="/login"
-                    class="px-5 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-white/10 text-text-main hover:bg-white/20 border border-white/15">Login</a>
-                <a href="/register"
-                    class="px-5 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</a>
+                @auth
+                    <a href="{{ auth()->user()->role === 'candidate' ? route('candidate.dashboard') : (auth()->user()->role === 'employer' ? route('employer.dashboard') : route('admin.dashboard')) }}"
+                        class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-white/10 text-text-main hover:bg-white/20 border border-white/15 flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full bg-accent-blue text-white flex items-center justify-center text-[10px] font-bold">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                        Dashboard
+                    </a>
+                    <form action="{{ route('logout') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all text-red-400 hover:bg-red-500/10 border border-red-500/20 flex items-center gap-1.5">
+                            <i class="fas fa-sign-out-alt text-xs"></i> Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="/login"
+                        class="px-5 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-white/10 text-text-main hover:bg-white/20 border border-white/15">Login</a>
+                    <a href="/register"
+                        class="px-5 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</a>
+                @endauth
             </div>
         </nav>
         <!-- Mobile Menu Button -->
@@ -304,19 +332,31 @@
         </div>
         <div class="flex-grow overflow-y-auto p-6 flex flex-col gap-6">
             <ul class="flex flex-col gap-5 text-lg font-semibold">
-                <li><a href="{{ route('home') }}" class="text-text-main hover:text-accent-blue">Home</a></li>
-                <li><a href="{{ route('about') }}" class="text-text-main hover:text-accent-blue">About us</a></li>
-                <li><a href="{{ route('services') }}" class="text-text-main hover:text-accent-blue">Our Services</a></li>
-                <li><a href="{{ route('jobs') }}" class="text-text-main hover:text-accent-blue">Jobs</a></li>
-                <li><a href="{{ route('hiring') }}" class="text-text-main hover:text-accent-blue">Hiring Process</a></li>
-                <li><a href="{{ route('contact') }}" class="text-text-main hover:text-accent-blue">Contact us</a></li>
+                <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Home</a></li>
+                <li><a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">About us</a></li>
+                <li><a href="{{ route('services') }}" class="{{ request()->routeIs('services') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Our Services</a></li>
+                <li><a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Jobs</a></li>
+                <li><a href="{{ route('hiring') }}" class="{{ request()->routeIs('hiring') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Hiring Process</a></li>
+                <li><a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Contact us</a></li>
             </ul>
             
             <div class="h-px bg-card-border w-full"></div>
             
             <div class="flex flex-col gap-3">
-                <a href="/login" class="px-5 py-3.5 rounded-xl font-medium text-center bg-white/10 text-text-main">Login</a>
-                <a href="/register" class="px-5 py-3.5 rounded-xl font-medium text-center bg-accent-blue text-white shadow-glow-blue">Register</a>
+                @auth
+                    <a href="{{ auth()->user()->role === 'candidate' ? route('candidate.dashboard') : (auth()->user()->role === 'employer' ? route('employer.dashboard') : route('admin.dashboard')) }}" class="px-5 py-3.5 rounded-xl font-medium text-center bg-accent-blue text-white shadow-glow-blue flex items-center justify-center gap-2">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full px-5 py-3.5 rounded-xl font-medium text-center text-red-400 border border-red-500/20 hover:bg-red-500/10 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="/login" class="px-5 py-3.5 rounded-xl font-medium text-center bg-white/10 text-text-main">Login</a>
+                    <a href="/register" class="px-5 py-3.5 rounded-xl font-medium text-center bg-accent-blue text-white shadow-glow-blue">Register</a>
+                @endauth
             </div>
         </div>
     </div>
@@ -697,6 +737,7 @@
             }
         });
     </script>
+    @stack('scripts')
 </body>
 
 </html>

@@ -1,11 +1,6 @@
 @extends('layouts.app')
 @section('content')
-<div class="pt-32 pb-16 px-6 lg:px-[5%] text-center">
-    <h4 class="text-accent-blue text-sm font-bold mb-3 uppercase tracking-wider">What We Offer</h4>
-    <h1 class="text-4xl md:text-5xl font-extrabold text-text-main mb-6">Our Premium Services</h1>
-    <p class="text-text-main opacity-70 max-w-2xl mx-auto">We provide a comprehensive suite of services designed specifically for the education sector.</p>
-</div>
-
+<x-page-header title="Our Premium Services" :breadcrumbs="['Home' => route('home'), 'Services' => null]" />
 <!-- Deep Dive 1 -->
 <div class="py-16 px-6 lg:px-[5%] border-t border-card-border">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">

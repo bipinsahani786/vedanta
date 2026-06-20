@@ -299,62 +299,40 @@
             <div class="zigzag-divider w-16 h-2 mx-auto"></div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-            <!-- Job Card 1 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+            @forelse($recentJobs as $job)
             <div
-                class="bg-card-bg border border-card-border rounded-2xl p-6 text-text-dark transition-all duration-300 hover:-translate-y-1.5 shadow-card hover:shadow-card-hover flex flex-col group reveal reveal-delay-1">
-                <h3 class="text-lg font-bold mb-3 text-text-main">Required math teacher</h3>
+                class="bg-card-bg border border-card-border rounded-2xl p-6 text-text-dark transition-all duration-300 hover:-translate-y-1.5 shadow-card hover:shadow-card-hover flex flex-col group reveal">
+                <h3 class="text-lg font-bold mb-3 text-text-main">{{ $job->title ?? 'Job Requirement' }}</h3>
                 <p class="text-xs text-text-main opacity-60 mb-4 flex items-center gap-3">
-                    <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> Bokaro, Jharkhand</span>
-                    <span><i class="far fa-calendar-alt mr-0.5"></i> 04 May 2026</span>
+                    <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> {{ $job->location->city }}, {{ $job->location->state }}</span>
+                    <span><i class="far fa-calendar-alt mr-0.5"></i> {{ $job->created_at->format('d M Y') }}</span>
                 </p>
                 <div class="flex flex-wrap gap-2 mb-4">
-                    <span
-                        class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5"><i
-                            class="fas fa-user text-[9px]"></i> 2 Openings</span>
-                    <span
-                        class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5"><i
-                            class="fas fa-graduation-cap text-[9px]"></i> Lower Primary - I - IV</span>
-                    <span
-                        class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5"><i
-                            class="fas fa-laptop text-[9px]"></i> Offline</span>
+                    <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
+                        <i class="fas fa-folder-open text-[9px]"></i> {{ $job->category->name }}
+                    </span>
+                    <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
+                        <i class="fas fa-book text-[9px]"></i> {{ $job->subject->name }}
+                    </span>
+                    <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
+                        <i class="fas fa-graduation-cap text-[9px]"></i> {{ $job->qualification->name }}
+                    </span>
                 </div>
-                <p class="text-[13px] text-text-main opacity-60 leading-relaxed mb-6 flex-grow">Lorem Ipsum is simply dummy text of
-                    the printing and typesetting industry. Lorem Ipsum has been the industry's...</p>
+                <p class="text-[13px] text-text-main opacity-60 leading-relaxed mb-6 flex-grow">
+                    {{ Str::limit($job->description, 100) }}
+                </p>
                 <a href="#"
                     class="text-accent-blue font-semibold text-[13px] inline-flex items-center gap-2 self-start group-hover:gap-3 transition-all">View
                     Details <span
                         class="bg-accent-yellow text-[#031b4e] w-5 h-5 rounded-full flex items-center justify-center text-[9px]"><i
                             class="fas fa-chevron-right"></i></span></a>
             </div>
-
-            <!-- Job Card 2 -->
-            <div
-                class="bg-card-bg border border-card-border rounded-2xl p-6 text-text-dark transition-all duration-300 hover:-translate-y-1.5 shadow-card hover:shadow-card-hover flex flex-col group reveal reveal-delay-2">
-                <h3 class="text-lg font-bold mb-3 text-text-main">Required Science teacher</h3>
-                <p class="text-xs text-text-main opacity-60 mb-4 flex items-center gap-3">
-                    <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> Ranchi, Jharkhand</span>
-                    <span><i class="far fa-calendar-alt mr-0.5"></i> 10 May 2026</span>
-                </p>
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <span
-                        class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5"><i
-                            class="fas fa-user text-[9px]"></i> 1 Openings</span>
-                    <span
-                        class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5"><i
-                            class="fas fa-graduation-cap text-[9px]"></i> Secondary - VIII - X</span>
-                    <span
-                        class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5"><i
-                            class="fas fa-laptop text-[9px]"></i> Offline</span>
-                </div>
-                <p class="text-[13px] text-text-main opacity-60 leading-relaxed mb-6 flex-grow">Lorem Ipsum is simply dummy text of
-                    the printing and typesetting industry. Lorem Ipsum has been the industry's...</p>
-                <a href="#"
-                    class="text-accent-blue font-semibold text-[13px] inline-flex items-center gap-2 self-start group-hover:gap-3 transition-all">View
-                    Details <span
-                        class="bg-accent-yellow text-[#031b4e] w-5 h-5 rounded-full flex items-center justify-center text-[9px]"><i
-                            class="fas fa-chevron-right"></i></span></a>
+            @empty
+            <div class="col-span-full text-center py-10 opacity-60">
+                <p>No recent job openings available at the moment.</p>
             </div>
+            @endforelse
         </div>
     </section>
 
@@ -362,41 +340,16 @@
     <section class="py-14 px-6 lg:px-[5%] relative bg-cover bg-center bg-fixed" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
         <div class="absolute inset-0 bg-[#0f172a]/90 backdrop-blur-sm z-0"></div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 relative z-10">
+            @foreach($categories as $category)
             <div
-                class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center text-text-main transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-accent-blue/50 cursor-pointer group reveal reveal-delay-1">
-                <i class="fas fa-briefcase text-3xl mb-4 block text-accent-blue group-hover:scale-110 transition-transform"></i>
-                <h3 class="text-sm font-semibold mb-4">Admin</h3>
-                <div class="bg-white/20 backdrop-blur-md text-text-main px-3 py-1.5 rounded-full text-[11px] font-semibold inline-block">0
-                    Active Jobs</div>
+                class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center text-text-main transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-accent-blue/50 cursor-pointer group reveal">
+                <i class="fas fa-folder-open text-3xl mb-4 block text-accent-blue group-hover:scale-110 transition-transform"></i>
+                <h3 class="text-sm font-semibold mb-4">{{ $category->name }}</h3>
+                <div class="bg-white/20 backdrop-blur-md text-text-main px-3 py-1.5 rounded-full text-[11px] font-semibold inline-block">
+                    {{ $category->jobs_count }} Active Jobs
+                </div>
             </div>
-            <div
-                class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center text-text-main transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-accent-blue/50 cursor-pointer group reveal reveal-delay-2">
-                <i class="fas fa-palette text-3xl mb-4 block text-accent-blue group-hover:scale-110 transition-transform"></i>
-                <h3 class="text-sm font-semibold mb-4">Art & Craft</h3>
-                <div class="bg-white/20 backdrop-blur-md text-text-main px-3 py-1.5 rounded-full text-[11px] font-semibold inline-block">0
-                    Active Jobs</div>
-            </div>
-            <div
-                class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center text-text-main transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-accent-blue/50 cursor-pointer group reveal reveal-delay-3">
-                <i class="fas fa-music text-3xl mb-4 block text-accent-blue group-hover:scale-110 transition-transform"></i>
-                <h3 class="text-sm font-semibold mb-4">Dance Teacher</h3>
-                <div class="bg-white/20 backdrop-blur-md text-text-main px-3 py-1.5 rounded-full text-[11px] font-semibold inline-block">1
-                    Active Jobs</div>
-            </div>
-            <div
-                class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center text-text-main transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-accent-blue/50 cursor-pointer group reveal reveal-delay-4">
-                <i class="fas fa-chart-line text-3xl mb-4 block text-accent-blue group-hover:scale-110 transition-transform"></i>
-                <h3 class="text-sm font-semibold mb-4">Management</h3>
-                <div class="bg-white/20 backdrop-blur-md text-text-main px-3 py-1.5 rounded-full text-[11px] font-semibold inline-block">1
-                    Active Jobs</div>
-            </div>
-            <div
-                class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center text-text-main transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-accent-blue/50 cursor-pointer group reveal reveal-delay-1">
-                <i class="fas fa-guitar text-3xl mb-4 block text-accent-blue group-hover:scale-110 transition-transform"></i>
-                <h3 class="text-sm font-semibold mb-4">Music Teacher</h3>
-                <div class="bg-white/20 backdrop-blur-md text-text-main px-3 py-1.5 rounded-full text-[11px] font-semibold inline-block">1
-                    Active Jobs</div>
-            </div>
+            @endforeach
         </div>
     </section>
 
@@ -412,16 +365,16 @@
         </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
-            <!-- Card 1 -->
-            <div class="relative bg-card-bg border border-card-border p-7 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-accent-blue/50 group overflow-hidden reveal reveal-delay-1">
+            @forelse($services as $index => $service)
+            <div class="relative bg-card-bg border border-card-border p-7 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-accent-blue/50 group overflow-hidden reveal reveal-delay-{{ ($index % 4) + 1 }}">
                 <div class="absolute -top-24 -right-24 w-48 h-48 bg-accent-blue opacity-5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 z-0"></div>
                 <div class="relative z-10">
                     <div class="w-12 h-12 rounded-xl bg-accent-blue text-white flex items-center justify-center text-xl mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 shadow-lg">
-                        <i class="fas fa-users-cog"></i>
+                        <i class="{{ $service->icon }}"></i>
                     </div>
-                    <h3 class="text-text-main font-bold text-lg mb-2">Recruitment Services</h3>
+                    <h3 class="text-text-main font-bold text-lg mb-2">{{ $service->title }}</h3>
                     <p class="text-text-main opacity-60 text-sm leading-relaxed mb-6">
-                        End-to-end talent acquisition connecting top educators with premier institutions.
+                        {{ $service->description }}
                     </p>
                     <a href="#" class="inline-flex items-center gap-2 text-accent-blue font-semibold text-sm group/link">
                         Explore Service 
@@ -429,60 +382,11 @@
                     </a>
                 </div>
             </div>
-
-            <!-- Card 2 -->
-            <div class="relative bg-card-bg border border-card-border p-7 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-accent-blue/50 group overflow-hidden reveal reveal-delay-2">
-                <div class="absolute -top-24 -right-24 w-48 h-48 bg-accent-blue opacity-5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 z-0"></div>
-                <div class="relative z-10">
-                    <div class="w-12 h-12 rounded-xl bg-accent-blue text-white flex items-center justify-center text-xl mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 shadow-lg">
-                        <i class="fas fa-globe"></i>
-                    </div>
-                    <h3 class="text-text-main font-bold text-lg mb-2">Digital Support</h3>
-                    <p class="text-text-main opacity-60 text-sm leading-relaxed mb-6">
-                        Comprehensive IT and digital infrastructure setup for modern schools.
-                    </p>
-                    <a href="#" class="inline-flex items-center gap-2 text-accent-blue font-semibold text-sm group/link">
-                        Explore Service 
-                        <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/link:translate-x-1"></i>
-                    </a>
-                </div>
+            @empty
+            <div class="col-span-full text-center py-10 opacity-60">
+                <p>No services currently available.</p>
             </div>
-
-            <!-- Card 3 -->
-            <div class="relative bg-card-bg border border-card-border p-7 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-accent-blue/50 group overflow-hidden reveal reveal-delay-3">
-                <div class="absolute -top-24 -right-24 w-48 h-48 bg-accent-blue opacity-5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 z-0"></div>
-                <div class="relative z-10">
-                    <div class="w-12 h-12 rounded-xl bg-accent-blue text-white flex items-center justify-center text-xl mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 shadow-lg">
-                        <i class="fas fa-file-signature"></i>
-                    </div>
-                    <h3 class="text-text-main font-bold text-lg mb-2">Resume Services</h3>
-                    <p class="text-text-main opacity-60 text-sm leading-relaxed mb-6">
-                        Professional resume drafting to help candidates stand out to top employers.
-                    </p>
-                    <a href="#" class="inline-flex items-center gap-2 text-accent-blue font-semibold text-sm group/link">
-                        Explore Service 
-                        <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/link:translate-x-1"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Card 4 -->
-            <div class="relative bg-card-bg border border-card-border p-7 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-accent-blue/50 group overflow-hidden reveal reveal-delay-4">
-                <div class="absolute -top-24 -right-24 w-48 h-48 bg-accent-blue opacity-5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 z-0"></div>
-                <div class="relative z-10">
-                    <div class="w-12 h-12 rounded-xl bg-accent-blue text-white flex items-center justify-center text-xl mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 shadow-lg">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                    </div>
-                    <h3 class="text-text-main font-bold text-lg mb-2">Training & Dev</h3>
-                    <p class="text-text-main opacity-60 text-sm leading-relaxed mb-6">
-                        Advanced upskilling and training programs for teachers and school staff.
-                    </p>
-                    <a href="#" class="inline-flex items-center gap-2 text-accent-blue font-semibold text-sm group/link">
-                        Explore Service 
-                        <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/link:translate-x-1"></i>
-                    </a>
-                </div>
-            </div>
+            @endforelse
         </div>
     </section>
 
@@ -500,223 +404,50 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 px-0 lg:px-4 relative z-10">
-            <div
-                class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-7 pt-6 relative shadow-card hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 reveal reveal-delay-1">
-                <div class="absolute top-5 right-6 text-white/20 text-2xl"><i
-                        class="fas fa-quote-right"></i></div>
-                <div
-                    class="w-14 h-14 rounded-full -mt-[52px] mx-auto mb-4 border-4 border-secondary-bg relative bg-white overflow-hidden">
-                    <img src="https://i.pravatar.cc/150?img=5" alt="Asriya Robert" class="w-full h-full object-cover">
+            @forelse($testimonials as $index => $testimonial)
+            <div class="{{ $index % 2 == 1 ? 'bg-gradient-to-b from-accent-blue to-accent-blue-hover backdrop-blur-xl border border-white/20 rounded-2xl p-7 pt-6 relative shadow-2xl transform scale-100 md:scale-105 hover:md:scale-[1.08] transition-all duration-300' : 'bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-7 pt-6 relative shadow-card hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300' }} reveal reveal-delay-{{ ($index % 3) + 1 }}">
+                <div class="absolute top-5 right-6 text-white/20 text-2xl"><i class="fas fa-quote-right"></i></div>
+                <div class="w-14 h-14 rounded-full -mt-[52px] mx-auto mb-4 border-4 {{ $index % 2 == 1 ? 'border-accent-blue' : 'border-secondary-bg' }} relative bg-white overflow-hidden shadow-lg flex items-center justify-center">
+                    @if($testimonial->image_path)
+                        <img src="{{ Storage::url($testimonial->image_path) }}" alt="{{ $testimonial->name }}" class="w-full h-full object-cover">
+                    @else
+                        <span class="text-xl font-bold text-indigo-600">{{ substr($testimonial->name, 0, 1) }}</span>
+                    @endif
                 </div>
-                <p class="text-[13px] text-text-main opacity-80 leading-relaxed mb-4 italic">"Working with MEMS has been a
-                    game-changer for our organization. Their dedicated team understood our unique needs and brought us
-                    top-tier talent."</p>
+                <p class="text-[13px] {{ $index % 2 == 1 ? 'text-white/90' : 'text-text-main opacity-80' }} leading-relaxed mb-4 italic">"{{ $testimonial->message }}"</p>
                 <div class="flex justify-center gap-1 text-accent-yellow text-[11px] mb-3">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                        class="fas fa-star"></i><i class="fas fa-star"></i>
+                    @for($i=0; $i<$testimonial->rating; $i++) <i class="fas fa-star"></i> @endfor
+                    @for($i=0; $i<(5-$testimonial->rating); $i++) <i class="far fa-star {{ $index % 2 == 1 ? 'text-white/50' : 'text-text-main opacity-50' }}"></i> @endfor
                 </div>
-                <h4 class="text-text-main text-sm font-bold mb-0.5">Asriya Robert</h4>
-                <p class="text-[10px] text-accent-blue uppercase tracking-wider font-semibold">Job Seeker</p>
+                <h4 class="{{ $index % 2 == 1 ? 'text-white shadow-sm' : 'text-text-main' }} text-sm font-bold mb-0.5">{{ $testimonial->name }}</h4>
+                <p class="text-[10px] {{ $index % 2 == 1 ? 'text-white opacity-80' : 'text-accent-blue' }} uppercase tracking-wider font-semibold">{{ $testimonial->role }}</p>
             </div>
-
-            <div
-                class="bg-gradient-to-b from-accent-blue to-accent-blue-hover backdrop-blur-xl border border-white/20 rounded-2xl p-7 pt-6 relative shadow-2xl transform scale-100 md:scale-105 hover:md:scale-[1.08] transition-all duration-300 reveal reveal-delay-2">
-                <div class="absolute top-5 right-6 text-white/30 text-2xl"><i
-                        class="fas fa-quote-right"></i></div>
-                <div
-                    class="w-14 h-14 rounded-full -mt-[52px] mx-auto mb-4 border-4 border-accent-blue relative bg-white overflow-hidden shadow-lg">
-                    <img src="https://i.pravatar.cc/150?img=11" alt="Sreeraj Menon" class="w-full h-full object-cover">
-                </div>
-                <p class="text-[13px] text-white/90 leading-relaxed mb-4 italic">"The professionalism and efficiency
-                    exceeded our expectations. They navigated the hiring process seamlessly, presenting us with highly
-                    qualified candidates."</p>
-                <div class="flex justify-center gap-1 text-accent-yellow text-[11px] mb-3">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                        class="fas fa-star"></i><i class="far fa-star text-text-main opacity-50"></i>
-                </div>
-                <h4 class="text-text-main text-sm font-bold mb-0.5 shadow-sm">Sreeraj Menon</h4>
-                <p class="text-[10px] text-text-main opacity-80 uppercase tracking-wider font-bold">Employer</p>
+            @empty
+            <div class="col-span-full text-center py-10 opacity-60 text-white">
+                <p>No testimonials available.</p>
             </div>
-
-            <div
-                class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-7 pt-6 relative shadow-card hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 reveal reveal-delay-3">
-                <div class="absolute top-5 right-6 text-white/20 text-2xl"><i
-                        class="fas fa-quote-right"></i></div>
-                <div
-                    class="w-14 h-14 rounded-full -mt-[52px] mx-auto mb-4 border-4 border-secondary-bg relative bg-white overflow-hidden">
-                    <img src="https://i.pravatar.cc/150?img=9" alt="Asriya Robert" class="w-full h-full object-cover">
-                </div>
-                <p class="text-[13px] text-text-main opacity-80 leading-relaxed mb-4 italic">"Working with MEMS has been a
-                    game-changer for our organization. Their dedicated team understood our unique needs and brought us
-                    top-tier talent."</p>
-                <div class="flex justify-center gap-1 text-accent-yellow text-[11px] mb-3">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                        class="fas fa-star"></i><i class="fas fa-star"></i>
-                </div>
-                <h4 class="text-text-main text-sm font-bold mb-0.5">Asriya Robert</h4>
-                <p class="text-[10px] text-accent-blue uppercase tracking-wider font-semibold">Job Seeker</p>
-            </div>
+            @endforelse
         </div>
     </section>
 
     <!-- We Are Available On Section -->
     <section class="py-12 bg-secondary-bg overflow-hidden">
-        <div class="mb-8 text-left px-6 lg:px-[5%] reveal">
-            <h2 class="text-text-dark text-2xl font-bold">We are available on</h2>
+        <div class="mb-8 text-center px-6 lg:px-[5%] reveal">
+            <h2 class="text-white text-2xl font-bold">We are available on</h2>
         </div>
         <div class="swiper marquee-swiper reveal">
             <div class="swiper-wrapper items-center">
+                @forelse($clients as $client)
                 <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-[#38bdf8] text-lg flex items-center gap-0.5">Linked<i
-                                class="fab fa-linkedin"></i></span>
+                    <div class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
+                        <img src="{{ Storage::url($client->logo_path) }}" alt="{{ $client->name }}" class="max-h-12 max-w-[150px] object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300">
                     </div>
                 </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-lg tracking-tighter">indeed</span>
-                    </div>
+                @empty
+                <div class="swiper-slide !w-full flex justify-center text-center text-white py-4 opacity-60">
+                    <p>No client partners available.</p>
                 </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-orange-400 text-base flex items-center gap-1.5"><i
-                                class="fas fa-shield-alt text-yellow-500 text-sm"></i> Sulekha</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-green-400 text-base tracking-wide">'GLASSDOOR'</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group flex-col">
-                        <span class="font-bold text-purple-300 text-base mb-0.5">apna</span>
-                        <div class="w-10 h-0.5 flex rounded-full overflow-hidden">
-                            <div class="w-1/3 bg-[#00a884]"></div>
-                            <div class="w-1/3 bg-[#71b1ea]"></div>
-                            <div class="w-1/3 bg-[#ffc300]"></div>
-                        </div>
-                    </div>
-                </div>
-            
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-[#38bdf8] text-lg flex items-center gap-0.5">Linked<i
-                                class="fab fa-linkedin"></i></span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-lg tracking-tighter">indeed</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-orange-400 text-base flex items-center gap-1.5"><i
-                                class="fas fa-shield-alt text-yellow-500 text-sm"></i> Sulekha</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-green-400 text-base tracking-wide">'GLASSDOOR'</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group flex-col">
-                        <span class="font-bold text-purple-300 text-base mb-0.5">apna</span>
-                        <div class="w-10 h-0.5 flex rounded-full overflow-hidden">
-                            <div class="w-1/3 bg-[#00a884]"></div>
-                            <div class="w-1/3 bg-[#71b1ea]"></div>
-                            <div class="w-1/3 bg-[#ffc300]"></div>
-                        </div>
-                    </div>
-                </div>
-            
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-[#38bdf8] text-lg flex items-center gap-0.5">Linked<i
-                                class="fab fa-linkedin"></i></span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-lg tracking-tighter">indeed</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-orange-400 text-base flex items-center gap-1.5"><i
-                                class="fas fa-shield-alt text-yellow-500 text-sm"></i> Sulekha</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-green-400 text-base tracking-wide">'GLASSDOOR'</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group flex-col">
-                        <span class="font-bold text-purple-300 text-base mb-0.5">apna</span>
-                        <div class="w-10 h-0.5 flex rounded-full overflow-hidden">
-                            <div class="w-1/3 bg-[#00a884]"></div>
-                            <div class="w-1/3 bg-[#71b1ea]"></div>
-                            <div class="w-1/3 bg-[#ffc300]"></div>
-                        </div>
-                    </div>
-                </div>
-            
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-[#38bdf8] text-lg flex items-center gap-0.5">Linked<i
-                                class="fab fa-linkedin"></i></span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-lg tracking-tighter">indeed</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-orange-400 text-base flex items-center gap-1.5"><i
-                                class="fas fa-shield-alt text-yellow-500 text-sm"></i> Sulekha</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-green-400 text-base tracking-wide">'GLASSDOOR'</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/15 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group flex-col">
-                        <span class="font-bold text-purple-300 text-base mb-0.5">apna</span>
-                        <div class="w-10 h-0.5 flex rounded-full overflow-hidden">
-                            <div class="w-1/3 bg-[#00a884]"></div>
-                            <div class="w-1/3 bg-[#71b1ea]"></div>
-                            <div class="w-1/3 bg-[#ffc300]"></div>
-                        </div>
-                    </div>
-                </div>
+                @endforelse
             </div>
         </div>
     </section>
@@ -790,36 +521,107 @@
         </div>
     </section>
 
-    <!-- Get In Touch Section -->
-    <section class="py-10 px-6 lg:px-[5%] pb-16 bg-secondary-bg">
-        <div
-            class="bg-gradient-to-r from-primary-bg to-accent-blue/90 border border-white/10 rounded-3xl flex flex-col lg:flex-row items-center relative overflow-hidden p-8 lg:p-12 text-text-main shadow-2xl reveal">
+    <!-- Get In Touch Section (Contact Form) -->
+    <section class="py-10 px-6 lg:px-[5%] pb-16 bg-secondary-bg" id="contact-section">
+        <div class="bg-gradient-to-r from-primary-bg to-accent-blue/90 border border-white/10 rounded-3xl flex flex-col lg:flex-row items-center relative overflow-hidden p-8 lg:p-12 text-text-main shadow-2xl reveal">
             <div class="git-bg-pattern absolute inset-0 z-0"></div>
-            <div class="absolute text-xl text-white/15 z-10 top-6 right-[45%]"><i class="fas fa-wave-square"></i></div>
-            <div class="absolute text-lg text-white/15 z-10 bottom-8 left-[30%] tracking-[5px]"><i
-                    class="fas fa-ellipsis-h"></i><br><i class="fas fa-ellipsis-h"></i></div>
-            <div class="absolute text-lg text-white/15 z-10 top-4 right-4 tracking-[5px]"><i
-                    class="fas fa-ellipsis-v"></i><i class="fas fa-ellipsis-v"></i></div>
-
+            
             <div class="flex-1 z-20 pr-0 lg:pr-8 mb-8 lg:mb-0 text-center lg:text-left">
                 <h2 class="text-3xl font-bold mb-4">Get In Touch With Us</h2>
-                <p class="text-sm leading-relaxed mb-6 opacity-85">Let's Build Your Dream Team Together! Reach out to us
-                    for unparalleled recruitment solutions tailored to your business needs.</p>
-                <a href="#"
-                    class="bg-accent-yellow text-[#031b4e] px-6 py-2.5 rounded-full font-semibold text-sm inline-flex items-center gap-3 hover:-translate-y-1 hover:shadow-glow-yellow transition-all">
-                    Contact us <span
-                        class="bg-white text-[#031b4e] w-5 h-5 rounded-full flex items-center justify-center text-[9px]"><i
-                            class="fas fa-chevron-right"></i></span>
-                </a>
+                <p class="text-sm leading-relaxed mb-6 opacity-85">Have any queries or want to follow up? Fill out the form and our team will get back to you shortly.</p>
+                
+                <div id="form-messages" class="mb-4">
+                    @if(session('success'))
+                        <div class="bg-green-500/20 border border-green-500/50 text-white px-4 py-3 rounded text-sm text-left">
+                            <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+                        </div>
+                    @endif
+                    @if($errors->any())
+                        <div class="bg-red-500/20 border border-red-500/50 text-white px-4 py-3 rounded text-sm text-left">
+                            <ul class="list-disc pl-5">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+
+                <form id="ajaxContactForm" action="{{ route('contact.store') }}" method="POST" class="text-left space-y-4 max-w-md mx-auto lg:mx-0">
+                    @csrf
+                    <div>
+                        <input type="text" name="name" placeholder="Your Name" required class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-sm text-white placeholder-white/60 focus:outline-none focus:border-accent-yellow transition-colors">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="email" name="email" placeholder="Email Address" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-sm text-white placeholder-white/60 focus:outline-none focus:border-accent-yellow transition-colors">
+                        <input type="text" name="phone" placeholder="Phone Number" required class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-sm text-white placeholder-white/60 focus:outline-none focus:border-accent-yellow transition-colors">
+                    </div>
+                    <div>
+                        <textarea name="message" rows="3" placeholder="How can we help you?" required class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-sm text-white placeholder-white/60 focus:outline-none focus:border-accent-yellow transition-colors"></textarea>
+                    </div>
+                    <button type="submit" id="submitBtn" class="bg-accent-yellow text-[#031b4e] px-8 py-3 rounded-full font-bold text-sm hover:-translate-y-1 hover:shadow-glow-yellow transition-all w-full md:w-auto flex justify-center items-center gap-2">
+                        <span>Submit Query</span> <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
             </div>
 
-            <div class="flex-1 z-20 flex justify-center lg:justify-end relative">
+            <div class="flex-1 z-20 flex justify-center lg:justify-end relative hidden md:flex">
                 <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
                     alt="Contact Us"
-                    class="relative lg:absolute -bottom-12 right-0 max-h-[280px] rounded-2xl shadow-2xl object-cover">
+                    class="relative lg:absolute -bottom-12 right-0 max-h-[350px] rounded-2xl shadow-2xl object-cover">
             </div>
         </div>
     </section>
 
-    
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('ajaxContactForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let form = this;
+        let submitBtn = document.getElementById('submitBtn');
+        let originalBtnText = submitBtn.innerHTML;
+        let msgContainer = document.getElementById('form-messages');
+        let formData = new FormData(form);
+
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        submitBtn.disabled = true;
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+
+            if (data.success || data.message) {
+                let msg = data.message || 'Thank you! Your message has been sent.';
+                msgContainer.innerHTML = `<div class="bg-green-500/20 border border-green-500/50 text-white px-4 py-3 rounded text-sm text-left animate-fade-in"><i class="fas fa-check-circle mr-2"></i> ${msg}</div>`;
+                form.reset();
+                setTimeout(() => { msgContainer.innerHTML = ''; }, 5000);
+            } else if (data.errors) {
+                let errorsHtml = '<ul class="list-disc pl-5">';
+                for(let key in data.errors) {
+                    errorsHtml += `<li>${data.errors[key][0]}</li>`;
+                }
+                errorsHtml += '</ul>';
+                msgContainer.innerHTML = `<div class="bg-red-500/20 border border-red-500/50 text-white px-4 py-3 rounded text-sm text-left animate-fade-in">${errorsHtml}</div>`;
+            }
+        })
+        .catch(error => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            msgContainer.innerHTML = `<div class="bg-red-500/20 border border-red-500/50 text-white px-4 py-3 rounded text-sm text-left animate-fade-in"><i class="fas fa-exclamation-triangle mr-2"></i> Something went wrong. Please try again.</div>`;
+            console.error('Error:', error);
+        });
+    });
+</script>
+@endpush

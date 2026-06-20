@@ -188,4 +188,28 @@
         --theme-card-bg: #262626;
         --theme-card-border: rgba(255, 255, 255, 0.1);
     }
+
+    [data-theme="brand"] {
+        --theme-primary-bg: #ffffff;
+        --theme-secondary-bg: #f8fafc;
+        --theme-accent-blue: #00a8e8;
+        --theme-accent-blue-hover: #008ecc;
+        --theme-accent-yellow: #f26522;
+        --theme-text-dark: #1e293b;
+        --theme-text-main: #0f172a;
+        --theme-card-bg: #ffffff;
+        --theme-card-border: rgba(0, 168, 232, 0.2);
+    }
+
+    [data-theme="brand-dark"] {
+        --theme-primary-bg: #031b4e;
+        --theme-secondary-bg: #021235;
+        --theme-accent-blue: #00a8e8;
+        --theme-accent-blue-hover: #008ecc;
+        --theme-accent-yellow: #f26522;
+        --theme-text-dark: #e2e8f0;
+        --theme-text-main: #ffffff;
+        --theme-card-bg: #0a1e4a;
+        --theme-card-border: rgba(0, 168, 232, 0.2);
+    }
 }
