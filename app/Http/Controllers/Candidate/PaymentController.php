@@ -158,16 +158,18 @@ class PaymentController extends Controller
                 // Handle Renewal
                 $user->profile->update([
                     'used_applications' => 0, // Reset applications
-                    'payment_id' => $rData['data']['transactionId']
+                    'payment_id' => $rData['data']['transactionId'],
+                    'plan_started_at' => now()
                 ]);
-                return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You have 3 new application slots.');
+                return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You have new application slots.');
             } elseif (str_starts_with($transactionId, 'UPGRADE_')) {
                 // Handle Upgrade
                 $user->profile->update([
                     'plan_type' => 'premium',
                     'is_fee_paid' => true,
                     'paid_amount' => $user->profile->paid_amount + $amountPaid,
-                    'payment_id' => $rData['data']['transactionId']
+                    'payment_id' => $rData['data']['transactionId'],
+                    'plan_started_at' => now()
                 ]);
                 return redirect()->route('candidate.dashboard')->with('success', 'Plan Upgraded to Premium Successfully!');
             } else {
@@ -178,7 +180,8 @@ class PaymentController extends Controller
                         'initial_fee_paid' => true,
                         'paid_amount' => $user->profile->paid_amount + $amountPaid,
                         'payment_id' => $rData['data']['transactionId'],
-                        'registration_completed_at' => now()
+                        'registration_completed_at' => now(),
+                        'plan_started_at' => now()
                     ]);
                 } else {
                     $user->profile->update([
@@ -187,7 +190,8 @@ class PaymentController extends Controller
                         'is_fee_paid' => true,
                         'paid_amount' => $user->profile->paid_amount + $amountPaid,
                         'payment_id' => $rData['data']['transactionId'],
-                        'registration_completed_at' => now()
+                        'registration_completed_at' => now(),
+                        'plan_started_at' => now()
                     ]);
                 }
                 return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Your profile is now active and live.');

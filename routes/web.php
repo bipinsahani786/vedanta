@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/jobs', [\App\Http\Controllers\HomeController::class, 'jobs'])->name('jobs');
+Route::get('/jobs/{job}', [\App\Http\Controllers\JobController::class, 'show'])->name('jobs.show');
 
 Route::view('/about', 'about')->name('about');
 Route::view('/services', 'services')->name('services');
@@ -113,7 +114,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('locations', \App\Http\Controllers\Admin\LocationController::class);
 
     // Job Posts
-    Route::resource('jobs', \App\Http\Controllers\Admin\JobController::class)->except(['edit', 'update']);
+    Route::resource('jobs', \App\Http\Controllers\Admin\JobController::class);
     Route::post('jobs/{job}/approve', [\App\Http\Controllers\Admin\JobController::class, 'approve'])->name('jobs.approve');
     Route::post('jobs/{job}/reject', [\App\Http\Controllers\Admin\JobController::class, 'reject'])->name('jobs.reject');
 

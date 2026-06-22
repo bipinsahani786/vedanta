@@ -94,8 +94,8 @@ class JobController extends Controller
         if ($job->subject) {
             $matchingCandidates = \App\Models\User::where('role', 'candidate')
                 ->whereHas('profile', function($q) use ($job) {
-                    $q->where('subject', 'like', '%' . $job->subject->name . '%')
-                      ->orWhere('address', 'like', '%' . ($job->location->name ?? '') . '%');
+                    $q->where('subject_id', $job->subject_id)
+                      ->orWhere('preferred_location_id', $job->location_id);
                 })->get();
 
             foreach ($matchingCandidates as $candidate) {
@@ -189,6 +189,37 @@ class JobController extends Controller
         JobPost::create($validated);
 
         return redirect()->route('admin.jobs.index')->with('success', 'Job posted successfully.');
+    }
+
+    public function edit(JobPost $job)
+    {
+        $categories = \App\Models\Category::where('is_active', true)->get();
+        $subjects = \App\Models\Subject::where('is_active', true)->get();
+        $qualifications = \App\Models\Qualification::where('is_active', true)->get();
+        $locations = \App\Models\Location::where('is_active', true)->get();
+
+        return view('admin.jobs.edit', compact('job', 'categories', 'subjects', 'qualifications', 'locations'));
+    }
+
+    public function update(Request $request, JobPost $job)
+    {
+        $validated = $request->validate([
+            'title' => 'nullable|string|max:255',
+            'school_name' => 'required|string|max:255',
+            'contact_person' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:20',
+            'category_id' => 'required|exists:categories,id',
+            'subject_id' => 'required|exists:subjects,id',
+            'qualification_id' => 'required|exists:qualifications,id',
+            'location_id' => 'required|exists:locations,id',
+            'salary_range' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $job->update($validated);
+
+        return redirect()->route('admin.jobs.show', $job->id)->with('success', 'Job post updated successfully.');
     }
 
     public function destroy(JobPost $job)

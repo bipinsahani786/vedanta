@@ -87,6 +87,14 @@ class ApplicationController extends Controller
             return back()->with('error', 'You have already applied for this job.');
         }
 
+        // Check if candidate is already hired (Plan Ended) in the current plan cycle
+        if (JobApplication::where('candidate_id', $user->id)
+            ->where('status', 'hired')
+            ->where('created_at', '>=', $profile->plan_started_at ?? $profile->created_at)
+            ->exists()) {
+            return back()->with('error', 'Congratulations on being selected! Your current plan has successfully ended. You cannot apply for new jobs at this time.');
+        }
+
         // Limit Check
         if ($profile->plan_type !== 'premium') {
             if ($profile->used_applications >= $profile->total_allowed_applications) {

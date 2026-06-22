@@ -49,8 +49,8 @@
                                     {{ strtoupper(substr($app->jobPost->school_name, 0, 2)) }}
                                 </div>
                                 <div>
-                                    <div class="font-semibold text-text-main flex items-center gap-2">
-                                        {{ $app->jobPost->title ?? 'Teacher' }}
+                                    <div class="font-semibold text-text-main flex items-center gap-2 hover:text-accent-blue transition-colors">
+                                        <a href="{{ route('jobs.show', $app->jobPost->id) }}" target="_blank" @click.stop>{{ $app->jobPost->title ?? 'Teacher' }}</a>
                                         <i class="fas fa-chevron-down text-[10px] text-text-dark/30 transition-transform" :class="expandedId === {{ $app->id }} ? 'rotate-180 text-accent-blue' : ''"></i>
                                     </div>
                                     <div class="text-xs text-text-dark/40 mt-0.5">{{ $app->jobPost->school_name }} &bull; {{ $app->jobPost->location->city }}</div>

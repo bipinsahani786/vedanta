@@ -21,6 +21,15 @@ class JobController extends Controller
         return view('post-job', compact('categories', 'subjects', 'qualifications', 'locations'));
     }
 
+    public function show(JobPost $job)
+    {
+        if ($job->status !== 'approved') {
+            abort(404);
+        }
+        
+        return view('jobs.show', compact('job'));
+    }
+
     public function storeJobQuery(Request $request)
     {
         $request->validate([

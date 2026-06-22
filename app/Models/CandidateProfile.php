@@ -19,6 +19,7 @@ class CandidateProfile extends Model
         'is_fee_paid' => 'boolean',
         'registration_completed_at' => 'datetime',
         'signature_date_time' => 'datetime',
+        'plan_started_at' => 'datetime',
     ];
 
     public function user()

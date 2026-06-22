@@ -46,7 +46,9 @@
                         {{ strtoupper(substr($job->school_name, 0, 2)) }}
                     </div>
                     <div>
-                        <h3 class="font-bold text-text-main leading-tight text-sm">{{ $job->title ?? 'Teacher Required' }}</h3>
+                        <h3 class="font-bold text-text-main hover:text-accent-blue transition-colors leading-tight text-sm">
+                            <a href="{{ route('jobs.show', $job->id) }}" target="_blank">{{ $job->title ?? 'Teacher Required' }}</a>
+                        </h3>
                         <p class="text-xs text-text-dark/40 mt-0.5">{{ $job->school_name }}</p>
                     </div>
                 </div>

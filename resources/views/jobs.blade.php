@@ -57,7 +57,9 @@
                         <img src="https://ui-avatars.com/api/?name={{ urlencode($job->school_name) }}&background=random" class="rounded">
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-text-main group-hover:text-accent-blue transition-colors">{{ $job->title ?? 'Job Requirement' }}</h3>
+                        <h3 class="text-lg font-bold text-text-main group-hover:text-accent-blue transition-colors">
+                            <a href="{{ route('jobs.show', $job->id) }}">{{ $job->title ?? 'Job Requirement' }}</a>
+                        </h3>
                         <p class="text-sm text-text-main opacity-60">{{ $job->school_name }} • {{ $job->location->city }}, {{ $job->location->state }}</p>
                     </div>
                 </div>
@@ -83,7 +85,7 @@
                     <span><i class="fas fa-rupee-sign"></i> {{ $job->salary_range }}</span>
                     @endif
                 </div>
-                <a href="{{ route('apply') }}" class="text-accent-blue font-semibold text-sm hover:underline">Apply Now <i class="fas fa-arrow-right ml-1"></i></a>
+                <a href="{{ route('jobs.show', $job->id) }}" class="text-accent-blue font-semibold text-sm hover:underline">Apply Now <i class="fas fa-arrow-right ml-1"></i></a>
             </div>
         </div>
         @empty

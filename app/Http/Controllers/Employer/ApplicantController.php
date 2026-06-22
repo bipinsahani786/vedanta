@@ -13,7 +13,7 @@ class ApplicantController extends Controller
         // Only show applications that are shortlisted or hired for this employer's jobs
         $query = JobApplication::with(['candidate.profile', 'jobPost'])
             ->whereHas('jobPost', function ($q) {
-                $q->where('employer_id', auth()->id());
+                $q->where('user_id', auth()->id());
             })
             ->whereIn('status', ['shortlisted', 'hired']);
 
@@ -23,7 +23,7 @@ class ApplicantController extends Controller
 
         $applications = $query->latest()->paginate(15)->withQueryString();
         
-        $myJobs = \App\Models\JobPost::where('employer_id', auth()->id())->get();
+        $myJobs = \App\Models\JobPost::where('user_id', auth()->id())->get();
 
         return view('employer.applicants.index', compact('applications', 'myJobs'));
     }

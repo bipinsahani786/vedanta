@@ -53,9 +53,16 @@
                         </div>
                         <h3 class="text-3xl font-bold text-text-main">{{ $profile->used_applications }} <span class="text-sm text-text-dark/40 font-normal">/ {{ $profile->plan_type === 'premium' ? '∞' : $profile->total_allowed_applications }}</span></h3>
                         <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1">Applications Used</p>
-                        @if($profile->plan_type !== 'premium' && $profile->used_applications >= $profile->total_allowed_applications)
+                        @php
+                            $isHired = \App\Models\JobApplication::where('candidate_id', auth()->id())
+                                ->where('status', 'hired')
+                                ->where('created_at', '>=', $profile->plan_started_at ?? $profile->created_at)
+                                ->exists();
+                            $limitReached = $profile->plan_type !== 'premium' && $profile->used_applications >= $profile->total_allowed_applications;
+                        @endphp
+                        @if($limitReached || $isHired)
                             <div class="absolute inset-0 bg-red-500/10 rounded-2xl border border-red-500/30 flex items-center justify-center backdrop-blur-[2px] flex-col">
-                                <span class="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg mb-2">Limit Reached</span>
+                                <span class="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg mb-2">{{ $isHired ? 'Plan Completed' : 'Limit Reached' }}</span>
                                 <a href="{{ route('candidate.payment.show', ['type' => 'renewal']) }}" class="px-3 py-1 bg-white text-red-600 text-xs font-bold rounded shadow hover:bg-red-50 transition-colors">Renew Plan</a>
                             </div>
                         @endif

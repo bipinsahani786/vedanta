@@ -11,7 +11,10 @@
         <h2 class="text-xl font-bold text-gray-800">Review Job Post</h2>
     </div>
     
-    <div>
+    <div class="flex items-center space-x-3">
+        <a href="{{ route('admin.jobs.edit', $job->id) }}" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-semibold transition-colors border border-blue-200">
+            <i class="fas fa-edit mr-1"></i> Edit Job
+        </a>
         @if($job->status === 'pending')
             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
                 <i class="fas fa-clock mr-1.5 text-xs"></i> Pending Review
