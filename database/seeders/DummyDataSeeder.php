@@ -15,6 +15,7 @@ use App\Models\ContactLead;
 use App\Models\Service;
 use App\Models\Testimonial;
 use App\Models\ClientLogo;
+use App\Models\EmployerProfile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -88,6 +89,32 @@ class DummyDataSeeder extends Seeder
             $candidates[] = $user;
         }
 
+        // 5.5 Employers (Users + Profiles)
+        $employers = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $user = User::firstOrCreate(
+                ['email' => "employer$i@example.com"],
+                [
+                    'name' => "Employer $i",
+                    'phone' => '88776655' . str_pad($i, 2, '0', STR_PAD_LEFT),
+                    'password' => Hash::make('password'),
+                    'role' => 'employer',
+                ]
+            );
+
+            $profile = EmployerProfile::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'school_name' => "International School $i",
+                    'contact_person' => "Mr. Principal $i",
+                    'address' => "Block A, City Center, Sector $i",
+                    'about' => "We are a reputed educational institution focused on holistic development.",
+                ]
+            );
+
+            $employers[] = $user;
+        }
+
         // 6. Job Posts
         $jobs = [];
         for ($i = 1; $i <= 20; $i++) {
@@ -100,13 +127,14 @@ class DummyDataSeeder extends Seeder
             $subName = Subject::find($subId)->name;
             
             $status = ['pending', 'approved', 'rejected'][rand(0, 2)];
+            $employer = $employers[array_rand($employers)];
 
             $job = JobPost::create([
                 'title' => "Required $catName Teacher for $subName",
-                'school_name' => "International School $i",
-                'contact_person' => "Mr. Principal $i",
-                'email' => "school$i@example.com",
-                'phone' => '88997766' . str_pad($i, 2, '0', STR_PAD_LEFT),
+                'school_name' => $employer->employerProfile->school_name,
+                'contact_person' => $employer->employerProfile->contact_person,
+                'email' => $employer->email,
+                'phone' => $employer->phone,
                 'category_id' => $catId,
                 'subject_id' => $subId,
                 'qualification_id' => $qualId,
@@ -114,7 +142,7 @@ class DummyDataSeeder extends Seeder
                 'salary_range' => (rand(20, 40) * 1000) . " - " . (rand(40, 80) * 1000),
                 'description' => "We are looking for an experienced and passionate $catName teacher for $subName. The ideal candidate should have excellent communication skills and a deep understanding of the subject matter.",
                 'status' => $status,
-                'user_id' => User::where('role', 'admin')->first()->id ?? 1,
+                'user_id' => $employer->id,
             ]);
             
             $jobs[] = $job;
