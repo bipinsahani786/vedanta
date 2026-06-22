@@ -12,7 +12,7 @@ class ApplicationController extends Controller
     private function ensureRegistrationComplete()
     {
         $profile = auth()->user()->profile;
-        if (!$profile || !$profile->is_fee_paid) {
+        if (!$profile || (!$profile->initial_fee_paid && !$profile->is_fee_paid)) {
             return redirect()->route('candidate.dashboard')->with('error', 'Please complete your registration and fee payment to unlock job applications.');
         }
         return null;
@@ -87,12 +87,23 @@ class ApplicationController extends Controller
             return back()->with('error', 'You have already applied for this job.');
         }
 
+        // Limit Check
+        if ($profile->plan_type !== 'premium') {
+            if ($profile->used_applications >= $profile->total_allowed_applications) {
+                return back()->with('error', 'You have reached your maximum allowed applications for the Standard plan. Please upgrade to Premium or clear pending dues for unlimited access.');
+            }
+        }
+
         JobApplication::create([
             'job_post_id' => $job->id,
             'candidate_id' => $user->id,
             'status' => 'applied',
             'match_score' => $score
         ]);
+
+        if ($profile->plan_type !== 'premium') {
+            $profile->increment('used_applications');
+        }
 
         return redirect()->route('candidate.applications.index')->with('success', 'Application submitted successfully.');
     }

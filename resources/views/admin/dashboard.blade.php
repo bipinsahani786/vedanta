@@ -20,7 +20,7 @@
         <div class="flex items-start justify-between relative z-10">
             <div>
                 <p class="text-xs font-bold text-text-dark/50 uppercase tracking-widest mb-1">Candidates</p>
-                <h3 class="text-3xl font-extrabold text-text-main">{{ number_format(\App\Models\CandidateProfile::count() ?? 1245) }}</h3>
+                <h3 class="text-3xl font-extrabold text-text-main">{{ number_format($totalCandidates) }}</h3>
             </div>
             <div class="w-12 h-12 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-users"></i>
@@ -38,7 +38,7 @@
         <div class="flex items-start justify-between relative z-10">
             <div>
                 <p class="text-xs font-bold text-text-dark/50 uppercase tracking-widest mb-1">Active Jobs</p>
-                <h3 class="text-3xl font-extrabold text-text-main">{{ number_format(\App\Models\JobPost::where('status', 'approved')->count() ?? 84) }}</h3>
+                <h3 class="text-3xl font-extrabold text-text-main">{{ number_format($activeJobs) }}</h3>
             </div>
             <div class="w-12 h-12 rounded-xl bg-green-500/10 text-green-400 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-briefcase"></i>
@@ -56,7 +56,7 @@
         <div class="flex items-start justify-between relative z-10">
             <div>
                 <p class="text-xs font-bold text-text-dark/50 uppercase tracking-widest mb-1">Pending Jobs</p>
-                <h3 class="text-3xl font-extrabold text-text-main">{{ number_format(\App\Models\JobPost::where('status', 'pending')->count() ?? 12) }}</h3>
+                <h3 class="text-3xl font-extrabold text-text-main">{{ number_format($pendingJobs->count()) }}</h3>
             </div>
             <div class="w-12 h-12 rounded-xl bg-accent-yellow/10 text-accent-yellow flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-clock"></i>
@@ -72,15 +72,16 @@
         <div class="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/5 rounded-full blur-xl group-hover:bg-purple-500/10 transition-all"></div>
         <div class="flex items-start justify-between relative z-10">
             <div>
-                <p class="text-xs font-bold text-text-dark/50 uppercase tracking-widest mb-1">Paid Registrations</p>
-                <h3 class="text-3xl font-extrabold text-text-main">{{ number_format(\App\Models\CandidateProfile::where('is_fee_paid', true)->count() ?? 342) }}</h3>
+                <p class="text-xs font-bold text-text-dark/50 uppercase tracking-widest mb-1">Total Revenue</p>
+                <h3 class="text-3xl font-extrabold text-text-main">₹{{ number_format($totalCollections) }}</h3>
             </div>
             <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-file-invoice-dollar"></i>
             </div>
         </div>
-        <div class="mt-4 flex items-center text-xs text-text-dark/40">
-            Total active premium users
+        <div class="mt-4 flex items-center text-xs text-text-dark/40 justify-between w-full">
+            <span>Reg: ₹{{ number_format($registrationRevenue) }}</span>
+            <span>Services: ₹{{ number_format($serviceChargeRevenue) }}</span>
         </div>
     </div>
 </div>
@@ -143,6 +144,39 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    {{-- Revenue Details --}}
+    <div class="bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl lg:col-span-2 reveal reveal-delay-1">
+        <h3 class="font-bold text-text-main text-lg mb-5 flex items-center gap-2">
+            <i class="fas fa-chart-pie text-accent-blue"></i> Revenue Analytics
+        </h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="p-4 rounded-xl border border-card-border bg-secondary-bg/50">
+                <p class="text-xs font-bold text-text-dark/50 uppercase mb-1">Total Collected</p>
+                <h4 class="text-2xl font-bold text-text-main mb-1">₹{{ number_format($totalCollections) }}</h4>
+                <div class="w-full bg-card-border h-1.5 rounded-full overflow-hidden mt-2">
+                    <div class="bg-green-500 h-full w-[80%] rounded-full"></div>
+                </div>
+            </div>
+            
+            <div class="p-4 rounded-xl border border-card-border bg-secondary-bg/50">
+                <p class="text-xs font-bold text-text-dark/50 uppercase mb-1">Pending Collections</p>
+                <h4 class="text-2xl font-bold text-red-500 mb-1">₹{{ number_format($pendingCollections) }}</h4>
+                <div class="w-full bg-card-border h-1.5 rounded-full overflow-hidden mt-2">
+                    <div class="bg-red-500 h-full w-[30%] rounded-full"></div>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-xl border border-card-border bg-secondary-bg/50">
+                <p class="text-xs font-bold text-text-dark/50 uppercase mb-1">Placements</p>
+                <h4 class="text-2xl font-bold text-accent-blue mb-1">{{ number_format($placements) }}</h4>
+                <div class="w-full bg-card-border h-1.5 rounded-full overflow-hidden mt-2">
+                    <div class="bg-accent-blue h-full w-[60%] rounded-full"></div>
+                </div>
+            </div>
         </div>
     </div>
 

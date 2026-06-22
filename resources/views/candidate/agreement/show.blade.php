@@ -53,8 +53,48 @@
         </div>
 
         {{-- Signature Section --}}
-        <div class="p-6 md:p-8">
-            <form action="{{ route('candidate.agreement.sign') }}" method="POST" id="signature-form">
+        @if($profile->is_agreement_signed)
+            <div class="p-6 md:p-8 bg-green-500/5">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xl flex-shrink-0">
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-text-main mb-1">Agreement Digitally Signed</h3>
+                        <p class="text-sm text-text-dark/60 mb-6">You have accepted the terms and conditions.</p>
+                        
+                        <div class="bg-card-bg border border-card-border rounded-xl p-5 inline-block">
+                            <h4 class="text-xs font-semibold text-text-main/50 uppercase tracking-wider mb-3">Your Digital Signature</h4>
+                            
+                            @if($profile->signature_type === 'draw' || Str::startsWith($profile->signature_data, 'data:image'))
+                                <img src="{{ $profile->signature_data }}" alt="Digital Signature" class="h-20 bg-white rounded object-contain px-2 mb-3">
+                            @elseif($profile->signature_type === 'type')
+                                <div class="font-signature text-3xl text-text-main mb-3">{{ $profile->signature_data }}</div>
+                            @elseif($profile->signature_type === 'upload')
+                                <img src="{{ asset('storage/' . $profile->signature_data) }}" alt="Uploaded Signature" class="h-20 object-contain mb-3">
+                            @else
+                                <p class="text-lg font-medium text-text-main mb-3">{{ $profile->signature_data }}</p>
+                            @endif
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-text-dark/50 mt-4 pt-4 border-t border-card-border">
+                                <div>
+                                    <span class="block text-text-dark/30 mb-0.5">Signed On</span>
+                                    <span class="font-medium text-text-main/80">{{ $profile->signature_date_time ? \Carbon\Carbon::parse($profile->signature_date_time)->format('d M Y, h:i A') : $profile->updated_at->format('d M Y, h:i A') }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <a href="{{ route('candidate.agreement.download') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-accent-blue/10 text-accent-blue font-medium rounded-lg hover:bg-accent-blue/20 transition-colors text-sm">
+                                <i class="fas fa-file-pdf"></i> Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="p-6 md:p-8">
+                <form action="{{ route('candidate.agreement.sign') }}" method="POST" id="signature-form">
                 @csrf
                 <input type="hidden" name="signature" id="signature-data">
 
@@ -87,11 +127,12 @@
 
                 <div class="flex justify-end">
                     <button type="submit" id="submit-btn" class="px-8 py-3 bg-accent-blue text-white font-semibold rounded-xl hover:bg-accent-blue-hover hover:-translate-y-0.5 transition-all shadow-lg flex items-center gap-2">
-                        <i class="fas fa-file-signature"></i> Sign & Proceed to Payment
+                        <i class="fas fa-file-signature"></i> Sign Agreement
                     </button>
                 </div>
             </form>
         </div>
+        @endif
     </div>
 </div>
 

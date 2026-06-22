@@ -20,10 +20,7 @@ class AgreementController extends Controller
             return redirect()->route('candidate.profile.edit')->with('error', 'Please complete your profile first before signing the agreement.');
         }
 
-        // Redirect if already signed
-        if ($profile->is_agreement_signed) {
-            return redirect()->route('candidate.dashboard')->with('info', 'You have already signed the agreement.');
-        }
+        // If already signed, we will just show the signed state in the view.
 
         return view('candidate.agreement.show', compact('user', 'profile'));
     }
@@ -80,10 +77,42 @@ class AgreementController extends Controller
     {
         $profile = auth()->user()->profile;
 
-        if (!$profile->is_agreement_signed || !$profile->agreement_pdf_path) {
+        if (!$profile->is_agreement_signed) {
             return abort(404, 'Agreement not found.');
         }
 
-        return Storage::disk('public')->download($profile->agreement_pdf_path);
+        if (!$profile->agreement_pdf_path || !Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+            $user = auth()->user();
+            $date = $profile->signature_date_time ? \Carbon\Carbon::parse($profile->signature_date_time)->format('d M Y') : \Carbon\Carbon::now()->format('d M Y');
+            
+            $signatureBase64 = '';
+            if ($profile->signature_type === 'draw' || \Illuminate\Support\Str::startsWith($profile->signature_data, 'data:image')) {
+                $signatureBase64 = $profile->signature_data;
+            } elseif ($profile->signature_type === 'upload') {
+                $path = Storage::disk('public')->path($profile->signature_data);
+                if (file_exists($path)) {
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+                    $data = file_get_contents($path);
+                    $signatureBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                }
+            } else {
+                $signatureBase64 = $profile->signature_data;
+            }
+
+            $pdf = Pdf::loadView('pdf.candidate-agreement', [
+                'user' => $user,
+                'profile' => $profile,
+                'date' => $date,
+                'signature' => $signatureBase64,
+                'signature_type' => $profile->signature_type ?? 'draw'
+            ]);
+
+            $fileName = 'agreements/agreement_' . $user->id . '_' . time() . '.pdf';
+            Storage::disk('public')->put($fileName, $pdf->output());
+
+            $profile->update(['agreement_pdf_path' => $fileName]);
+        }
+
+        return Storage::disk('public')->download($profile->agreement_pdf_path, 'Candidate_Agreement_' . str_replace(' ', '_', $profile->user->name) . '.pdf');
     }
 }

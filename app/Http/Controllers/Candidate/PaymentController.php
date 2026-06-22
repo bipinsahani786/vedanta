@@ -17,37 +17,47 @@ class PaymentController extends Controller
     public function __construct()
     {
         // Using PhonePe Sandbox details for testing
-        $this->merchantId = env('PHONEPE_MERCHANT_ID', 'PGTESTPAYUAT');
-        $this->saltKey = env('PHONEPE_SALT_KEY', '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399');
+        $this->merchantId = env('PHONEPE_MERCHANT_ID', 'PGTESTPAYUAT86');
+        $this->saltKey = env('PHONEPE_SALT_KEY', '96434309-7796-489d-8924-ab56988a6076');
         $this->saltIndex = env('PHONEPE_SALT_INDEX', '1');
         $this->env = env('PHONEPE_ENV', 'sandbox');
     }
 
-    public function show()
+    public function show(Request $request)
     {
         $user = auth()->user();
         $profile = $user->profile;
+        $isRenewal = $request->query('type') === 'renewal';
 
         if (!$profile->is_profile_complete || !$profile->is_agreement_signed) {
             return redirect()->route('candidate.dashboard')->with('error', 'Please complete previous steps first.');
         }
 
-        if ($profile->is_fee_paid) {
+        if ($profile->is_fee_paid && !$isRenewal) {
             return redirect()->route('candidate.dashboard')->with('info', 'Your fee is already paid. Profile is active.');
         }
 
-        return view('candidate.payment.show', compact('user', 'profile'));
+        return view('candidate.payment.show', compact('user', 'profile', 'isRenewal'));
     }
 
     public function process(Request $request)
     {
         $request->validate([
-            'plan' => 'required|in:basic,premium'
+            'plan' => 'required|in:basic,premium,renewal,upgrade'
         ]);
 
         $user = auth()->user();
-        $amount = $request->plan === 'basic' ? 500 : 1500; // Mock amounts
-        $transactionId = 'TXN_' . $user->id . '_' . time();
+        $isRenewal = $request->plan === 'renewal';
+        $isUpgrade = $request->plan === 'upgrade';
+        
+        $amount = 500;
+        if ($request->plan === 'premium') $amount = 1000;
+        if ($isUpgrade) $amount = 500;
+        
+        $prefix = $isRenewal ? 'RENEW_' : ($isUpgrade ? 'UPGRADE_' : 'TXN_');
+        $transactionId = $prefix . $user->id . '_' . time();
+
+        $isProd = $this->env === 'production';
 
         $payload = [
             'merchantId' => $this->merchantId,
@@ -55,9 +65,9 @@ class PaymentController extends Controller
             'merchantUserId' => 'MUID_' . $user->id,
             'amount' => $amount * 100, // Amount in paise
             'redirectUrl' => route('candidate.payment.callback'),
-            'redirectMode' => 'POST',
-            'callbackUrl' => route('candidate.payment.callback'),
-            'mobileNumber' => $user->phone,
+            'redirectMode' => 'REDIRECT',
+            'callbackUrl' => $isProd ? route('candidate.payment.callback') : 'https://webhook.site/phonepe-dummy-callback',
+            'mobileNumber' => $user->phone ?? '9999999999',
             'paymentInstrument' => [
                 'type' => 'PAY_PAGE'
             ]
@@ -68,15 +78,21 @@ class PaymentController extends Controller
         $sha256 = hash('sha256', $string);
         $finalXHeader = $sha256 . '###' . $this->saltIndex;
 
-        $url = $this->env === 'production' 
+        $url = $isProd 
             ? 'https://api.phonepe.com/apis/hermes/pg/v1/pay'
             : 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay';
 
-        $response = Http::withHeaders([
+        $http = Http::withHeaders([
             'Content-Type' => 'application/json',
             'X-VERIFY' => $finalXHeader,
             'X-MERCHANT-ID' => $this->merchantId
-        ])->post($url, [
+        ]);
+
+        if (!$isProd) {
+            $http = $http->withoutVerifying();
+        }
+
+        $response = $http->post($url, [
             'request' => $encode
         ]);
 
@@ -102,28 +118,80 @@ class PaymentController extends Controller
         $sha256 = hash('sha256', $string);
         $finalXHeader = $sha256 . '###' . $this->saltIndex;
 
-        $url = $this->env === 'production' 
+        $isProd = $this->env === 'production';
+        $url = $isProd 
             ? "https://api.phonepe.com/apis/hermes/pg/v1/status/{$this->merchantId}/{$transactionId}"
             : "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/{$this->merchantId}/{$transactionId}";
 
-        $response = Http::withHeaders([
+        $http = Http::withHeaders([
             'Content-Type' => 'application/json',
             'X-VERIFY' => $finalXHeader,
             'X-MERCHANT-ID' => $this->merchantId
-        ])->get($url);
+        ]);
+
+        if (!$isProd) {
+            $http = $http->withoutVerifying();
+        }
+
+        $response = $http->get($url);
 
         $rData = $response->json();
 
+        $user = auth()->user();
+
+        if ($user) {
+            \App\Models\PaymentTransaction::create([
+                'candidate_id' => $user->id,
+                'amount' => isset($rData['data']['amount']) ? $rData['data']['amount'] / 100 : 0,
+                'transaction_id' => $transactionId,
+                'type' => 'registration_fee',
+                'status' => (isset($rData['success']) && $rData['success'] === true && $rData['data']['state'] === 'COMPLETED') ? 'success' : 'failed',
+                'gateway_response' => $rData
+            ]);
+        }
+
         if (isset($rData['success']) && $rData['success'] === true && $rData['data']['state'] === 'COMPLETED') {
             
-            $user = auth()->user();
-            $user->profile->update([
-                'is_fee_paid' => true,
-                'payment_id' => $rData['data']['transactionId'],
-                'registration_completed_at' => now()
-            ]);
+            $amountPaid = $rData['data']['amount'] / 100;
 
-            return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Your profile is now active and live.');
+            if (str_starts_with($transactionId, 'RENEW_')) {
+                // Handle Renewal
+                $user->profile->update([
+                    'used_applications' => 0, // Reset applications
+                    'payment_id' => $rData['data']['transactionId']
+                ]);
+                return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You have 3 new application slots.');
+            } elseif (str_starts_with($transactionId, 'UPGRADE_')) {
+                // Handle Upgrade
+                $user->profile->update([
+                    'plan_type' => 'premium',
+                    'is_fee_paid' => true,
+                    'paid_amount' => $user->profile->paid_amount + $amountPaid,
+                    'payment_id' => $rData['data']['transactionId']
+                ]);
+                return redirect()->route('candidate.dashboard')->with('success', 'Plan Upgraded to Premium Successfully!');
+            } else {
+                // Handle Initial Registration
+                if ($amountPaid == 500) {
+                    $user->profile->update([
+                        'plan_type' => 'standard',
+                        'initial_fee_paid' => true,
+                        'paid_amount' => $user->profile->paid_amount + $amountPaid,
+                        'payment_id' => $rData['data']['transactionId'],
+                        'registration_completed_at' => now()
+                    ]);
+                } else {
+                    $user->profile->update([
+                        'plan_type' => 'premium',
+                        'initial_fee_paid' => true,
+                        'is_fee_paid' => true,
+                        'paid_amount' => $user->profile->paid_amount + $amountPaid,
+                        'payment_id' => $rData['data']['transactionId'],
+                        'registration_completed_at' => now()
+                    ]);
+                }
+                return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Your profile is now active and live.');
+            }
         }
 
         return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or cancelled.');

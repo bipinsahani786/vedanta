@@ -6,19 +6,75 @@
 @section('content')
 
 {{-- Filter/Search Bar --}}
-<div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-    <div class="text-sm text-text-dark/50 font-medium">
-        Showing {{ $candidates->firstItem() ?? 0 }} to {{ $candidates->lastItem() ?? 0 }} of {{ $candidates->total() }} entries
+<div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-4">
+    <div class="flex justify-between items-center mb-4">
+        <div class="text-sm text-text-dark/50 font-medium">
+            Showing {{ $candidates->firstItem() ?? 0 }} to {{ $candidates->lastItem() ?? 0 }} of {{ $candidates->total() }} entries
+        </div>
+        <button type="button" onclick="document.getElementById('advanced-filters').classList.toggle('hidden')" class="text-sm font-semibold text-accent-blue flex items-center gap-2 hover:text-accent-blue-hover transition-colors">
+            <i class="fas fa-filter"></i> Advanced Filters
+        </button>
     </div>
-    <form action="{{ route('admin.crm.index') }}" method="GET" class="w-full sm:w-auto flex items-center relative">
-        <i class="fas fa-search absolute left-3 text-text-dark/40 text-sm"></i>
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, phone..." 
-               class="w-full sm:w-72 pl-9 pr-4 py-2 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
-        @if(request('search'))
-            <a href="{{ route('admin.crm.index') }}" class="absolute right-3 text-text-dark/40 hover:text-red-400 transition-colors">
-                <i class="fas fa-times"></i>
-            </a>
-        @endif
+
+    <form action="{{ route('admin.crm.index') }}" method="GET" class="space-y-4">
+        <div class="flex items-center relative">
+            <i class="fas fa-search absolute left-3 text-text-dark/40 text-sm"></i>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, phone..." 
+                   class="w-full pl-9 pr-4 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+            @if(request()->anyFilled(['search', 'subject_id', 'experience', 'qualification_id', 'location_id', 'gender', 'english_fluency', 'availability']))
+                <a href="{{ route('admin.crm.index') }}" class="absolute right-3 text-text-dark/40 hover:text-red-400 transition-colors text-sm font-bold flex items-center gap-1">
+                    <i class="fas fa-times"></i> Clear Filters
+                </a>
+            @endif
+        </div>
+
+        <div id="advanced-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 {{ request()->anyFilled(['subject_id', 'experience', 'qualification_id', 'location_id', 'gender', 'english_fluency', 'availability']) ? '' : 'hidden' }}">
+            <select name="subject_id" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                <option value="">All Subjects</option>
+                @foreach($subjects as $subject)
+                    <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
+                @endforeach
+            </select>
+
+            <select name="qualification_id" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                <option value="">All Qualifications</option>
+                @foreach($qualifications as $qualification)
+                    <option value="{{ $qualification->id }}" {{ request('qualification_id') == $qualification->id ? 'selected' : '' }}>{{ $qualification->name }}</option>
+                @endforeach
+            </select>
+
+            <select name="location_id" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                <option value="">All Locations</option>
+                @foreach($locations as $location)
+                    <option value="{{ $location->id }}" {{ request('location_id') == $location->id ? 'selected' : '' }}>{{ $location->city }}, {{ $location->state }}</option>
+                @endforeach
+            </select>
+
+            <select name="experience" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                <option value="">Min Experience</option>
+                <option value="1" {{ request('experience') == '1' ? 'selected' : '' }}>1+ Years</option>
+                <option value="3" {{ request('experience') == '3' ? 'selected' : '' }}>3+ Years</option>
+                <option value="5" {{ request('experience') == '5' ? 'selected' : '' }}>5+ Years</option>
+                <option value="10" {{ request('experience') == '10' ? 'selected' : '' }}>10+ Years</option>
+            </select>
+
+            <select name="gender" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                <option value="">All Genders</option>
+                <option value="Male" {{ request('gender') == 'Male' ? 'selected' : '' }}>Male</option>
+                <option value="Female" {{ request('gender') == 'Female' ? 'selected' : '' }}>Female</option>
+            </select>
+
+            <select name="english_fluency" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                <option value="">English Fluency</option>
+                <option value="beginner" {{ request('english_fluency') == 'beginner' ? 'selected' : '' }}>Beginner</option>
+                <option value="intermediate" {{ request('english_fluency') == 'intermediate' ? 'selected' : '' }}>Intermediate</option>
+                <option value="fluent" {{ request('english_fluency') == 'fluent' ? 'selected' : '' }}>Fluent</option>
+            </select>
+
+            <button type="submit" class="w-full bg-accent-blue text-white rounded-lg px-4 py-2 text-sm font-bold shadow hover:bg-accent-blue-hover transition-colors">
+                Apply Filters
+            </button>
+        </div>
     </form>
 </div>
 
@@ -65,6 +121,13 @@
                         <span><i class="fas fa-envelope text-[10px] w-3"></i> {{ $candidate->email }}</span>
                         <span><i class="fas fa-phone-alt text-[10px] w-3"></i> {{ $candidate->phone }}</span>
                     </div>
+                    @if($candidate->profile && $candidate->profile->plan_type === 'standard' && !$candidate->profile->is_fee_paid)
+                        <div class="mt-2">
+                            <span class="bg-red-500/10 text-red-500 px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold w-max" title="Standard Plan Placement Fee Pending">
+                                <i class="fas fa-exclamation-triangle"></i> ₹500 Due
+                            </span>
+                        </div>
+                    @endif
                 </td>
                 <td>
                     @if($candidate->profile && $candidate->profile->is_fee_paid)

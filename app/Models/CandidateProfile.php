@@ -18,10 +18,31 @@ class CandidateProfile extends Model
         'is_agreement_signed' => 'boolean',
         'is_fee_paid' => 'boolean',
         'registration_completed_at' => 'datetime',
+        'signature_date_time' => 'datetime',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
+    public function highestQualification()
+    {
+        return $this->belongsTo(Qualification::class, 'highest_qualification_id');
+    }
+
+    public function preferredLocation()
+    {
+        return $this->belongsTo(Location::class, 'preferred_location_id');
     }
 }

@@ -48,7 +48,35 @@ class JobController extends Controller
 
     public function show(JobPost $job)
     {
-        return view('admin.jobs.show', compact('job'));
+        // Module 16: AI Shortlisting Engine logic (matching candidate profiles)
+        $suggestedCandidates = User::where('role', 'candidate')
+            ->whereHas('profile', function ($q) use ($job) {
+                // We'll consider it a "match" if subject or location matches
+                $q->where('subject_id', $job->subject_id)
+                  ->orWhere('preferred_location_id', $job->location_id)
+                  ->orWhere('highest_qualification_id', $job->qualification_id);
+            })
+            ->with('profile')
+            ->get()
+            ->map(function ($candidate) use ($job) {
+                // Calculate match score
+                $score = 0;
+                $profile = $candidate->profile;
+                if ($profile) {
+                    if ($profile->subject_id === $job->subject_id) $score += 40;
+                    if ($profile->preferred_location_id === $job->location_id) $score += 30;
+                    if ($profile->highest_qualification_id === $job->qualification_id) $score += 20;
+                    // Adding experience match check loosely
+                    if ($profile->years_of_experience >= 1) $score += 10;
+                }
+                $candidate->match_score = $score;
+                return $candidate;
+            })
+            ->filter(fn($c) => $c->match_score >= 30) // Only show reasonable matches
+            ->sortByDesc('match_score')
+            ->take(10); // Show top 10 matches
+
+        return view('admin.jobs.show', compact('job', 'suggestedCandidates'));
     }
 
     public function approve(Request $request, JobPost $job)
@@ -60,6 +88,32 @@ class JobController extends Controller
         $job->update([
             'status' => 'approved'
         ]);
+
+        // Smart Job Matching: Notify Candidates with similar subject/location
+        $job->load(['subject', 'location']);
+        if ($job->subject) {
+            $matchingCandidates = \App\Models\User::where('role', 'candidate')
+                ->whereHas('profile', function($q) use ($job) {
+                    $q->where('subject', 'like', '%' . $job->subject->name . '%')
+                      ->orWhere('address', 'like', '%' . ($job->location->name ?? '') . '%');
+                })->get();
+
+            foreach ($matchingCandidates as $candidate) {
+                \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                    'id' => Str::uuid(),
+                    'type' => 'App\Notifications\JobMatched',
+                    'notifiable_type' => 'App\Models\User',
+                    'notifiable_id' => $candidate->id,
+                    'data' => json_encode([
+                        'title' => 'New Matching Job: ' . $job->title,
+                        'message' => 'A new job at ' . $job->school_name . ' matches your profile.',
+                        'job_id' => $job->id
+                    ]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
 
         // If the admin chose to generate an account and one doesn't exist
         if ($request->has('create_account') && is_null($job->user_id)) {

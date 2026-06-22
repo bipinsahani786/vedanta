@@ -15,7 +15,7 @@
             <a href="#" class="px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2 text-text-dark/50 hover:text-text-main">
                 <i class="fas fa-briefcase text-xs"></i> My Jobs
             </a>
-            <a href="#" class="px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2 text-text-dark/50 hover:text-text-main">
+            <a href="{{ route('employer.applicants.index') }}" class="px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2 text-text-dark/50 hover:text-text-main">
                 <i class="fas fa-users text-xs"></i> Candidates
             </a>
             <a href="#" class="px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2 text-text-dark/50 hover:text-text-main">

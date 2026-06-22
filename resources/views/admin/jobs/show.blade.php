@@ -157,6 +157,35 @@
         </div>
         @endif
 
+        <!-- Suggested Candidates (AI Match) -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
+                <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-magic text-blue-500 mr-2"></i> Suggested Candidates</h3>
+                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">AI Match</span>
+            </div>
+            
+            @if(isset($suggestedCandidates) && $suggestedCandidates->count() > 0)
+                <div class="space-y-4">
+                    @foreach($suggestedCandidates as $candidate)
+                        <div class="flex flex-col p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex justify-between items-start mb-1">
+                                <a href="{{ route('admin.crm.show', $candidate->id) }}" class="font-semibold text-gray-800 hover:text-blue-600 transition-colors text-sm">{{ $candidate->name }}</a>
+                                <span class="bg-green-100 text-green-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $candidate->match_score }}% Match</span>
+                            </div>
+                            <div class="text-xs text-gray-500 flex flex-col gap-0.5 mt-1">
+                                <span><i class="fas fa-book w-3"></i> {{ $candidate->profile->subject->name ?? 'N/A' }}</span>
+                                <span><i class="fas fa-map-marker-alt w-3"></i> {{ $candidate->profile->preferredLocation->city ?? 'N/A' }}</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-sm text-gray-500 italic text-center py-4 bg-gray-50 rounded-lg border border-gray-100">
+                    No highly matching candidates found for this job post yet.
+                </div>
+            @endif
+        </div>
+
     </div>
 </div>
 @endsection

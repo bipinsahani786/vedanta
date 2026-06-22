@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
+use Illuminate\Console\Command;
+
+#[Signature('invoices:calculate-late-fees')]
+#[Description('Calculate and apply daily late fees to overdue service charge invoices')]
+class CalculateLateFees extends Command
+{
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        $overdueInvoices = \App\Models\ServiceChargeInvoice::where('status', '!=', 'paid')
+            ->whereDate('due_date', '<', now()->toDateString())
+            ->get();
+
+        $count = 0;
+        foreach ($overdueInvoices as $invoice) {
+            $daysOverdue = now()->diffInDays(\Carbon\Carbon::parse($invoice->due_date));
+            if ($daysOverdue > 0) {
+                $newLateFee = $daysOverdue * 300; // 300 per day
+
+                if ($newLateFee > $invoice->late_fee) {
+                    $difference = $newLateFee - $invoice->late_fee;
+                    
+                    $invoice->update([
+                        'late_fee' => $newLateFee,
+                        'status' => 'overdue'
+                    ]);
+
+                    // Update candidate profile pending amount
+                    $candidate = \App\Models\User::find($invoice->candidate_id);
+                    if ($candidate && $candidate->profile) {
+                        $candidate->profile->increment('pending_amount', $difference);
+                    }
+                    $count++;
+                }
+            }
+        }
+
+        $this->info("Late fees calculated successfully. Updated $count invoices.");
+    }
+}

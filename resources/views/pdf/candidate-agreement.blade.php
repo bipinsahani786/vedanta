@@ -118,7 +118,13 @@
     </div>
 
     <div class="signature-section">
-        <img src="{{ $signature }}" class="signature-img" alt="Digital Signature">
+        @if(isset($signature_type) && $signature_type === 'type')
+            <div style="font-size: 28px; font-style: italic; font-family: 'Times New Roman', Times, serif; color: #000; margin-bottom: 10px; height: 50px;">
+                {{ $signature }}
+            </div>
+        @else
+            <img src="{{ $signature }}" class="signature-img" alt="Digital Signature">
+        @endif
         <div class="signature-box">
             {{ $user->name }}<br>
             <span style="font-size: 12px; color: #666;">(Digital Signature)</span>

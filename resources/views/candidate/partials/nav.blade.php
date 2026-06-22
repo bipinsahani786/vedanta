@@ -19,7 +19,13 @@
                    {{ request()->routeIs($item['routeIs'])
                        ? 'text-accent-blue after:absolute after:bottom-0 after:left-2 after:right-2 after:h-[2px] after:bg-accent-blue after:rounded-full'
                        : 'text-text-dark/50 hover:text-text-main' }}">
-                    <i class="fas {{ $item['icon'] }} text-xs"></i>
+                    
+                    @if($item['route'] === 'candidate.profile.edit' && auth()->user()->profile?->profile_photo_path)
+                        <img src="{{ asset('storage/' . auth()->user()->profile->profile_photo_path) }}" alt="Profile" class="w-5 h-5 rounded-full object-cover border border-accent-blue/30">
+                    @else
+                        <i class="fas {{ $item['icon'] }} text-xs"></i>
+                    @endif
+                    
                     {{ $item['label'] }}
                 </a>
             @endforeach

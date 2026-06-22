@@ -6,13 +6,24 @@
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     {{-- Page Header --}}
-    <div class="flex items-center gap-3 mb-8 reveal">
-        <div class="w-10 h-10 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-lg">
-            <i class="fas fa-user-circle"></i>
-        </div>
+    <div class="flex items-center gap-4 mb-8 reveal">
+        @if($profile->profile_photo_path)
+            <img src="{{ asset('storage/' . $profile->profile_photo_path) }}" alt="Profile Photo" class="w-16 h-16 rounded-full object-cover border-2 border-accent-blue shadow-lg">
+        @else
+            <div class="w-16 h-16 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center text-3xl shadow-inner">
+                <i class="fas fa-user"></i>
+            </div>
+        @endif
         <div>
-            <h1 class="text-2xl font-bold text-text-main">My Profile</h1>
-            <p class="text-sm text-text-dark/50 mt-0.5">Complete your details to get matched with the best opportunities.</p>
+            <h1 class="text-2xl font-bold text-text-main flex items-center gap-2">
+                My Profile
+                @if($profile->is_verified)
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/20 border border-blue-400/50 text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-full" title="Verified Profile">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </span>
+                @endif
+            </h1>
+            <p class="text-sm text-text-dark/50 mt-0.5">Manage your personal and professional details.</p>
         </div>
     </div>
 
@@ -49,6 +60,24 @@
                 <div class="flex items-center gap-3 mb-6">
                     <span class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xs font-bold">1</span>
                     <h3 class="text-lg font-bold text-text-main">Personal Information</h3>
+                </div>
+
+                <div class="mb-8 flex items-center gap-6">
+                    <div class="relative group">
+                        @if($profile->profile_photo_path)
+                            <img src="{{ asset('storage/' . $profile->profile_photo_path) }}" alt="Profile Photo" class="w-24 h-24 rounded-full object-cover border-4 border-secondary-bg shadow-xl">
+                        @else
+                            <div class="w-24 h-24 rounded-full bg-secondary-bg flex items-center justify-center text-4xl text-text-dark/30 border-4 border-secondary-bg shadow-inner">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Update Profile Photo</label>
+                        <input type="file" name="profile_photo" accept="image/jpeg,image/png,image/jpg,image/webp"
+                            class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue/10 file:text-accent-blue hover:file:bg-accent-blue/20">
+                        <p class="text-[11px] text-text-dark/40 mt-1.5"><i class="fas fa-info-circle mr-1"></i> JPG, PNG, WEBP. Max size: 2MB.</p>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -204,6 +233,50 @@
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-rupee-sign text-sm"></i></span>
                             <input type="text" name="expected_salary" required value="{{ old('expected_salary', $profile->expected_salary) }}" placeholder="e.g. 35,000 / month"
+                                class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current School/Organization <span class="text-text-dark/30 text-[10px] normal-case">(Optional)</span></label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-building text-sm"></i></span>
+                            <input type="text" name="current_school" value="{{ old('current_school', $profile->current_school) }}" placeholder="e.g. XYZ Public School"
+                                class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">English Fluency</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-language text-sm"></i></span>
+                            <select name="english_fluency" class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none">
+                                <option value="">Select Fluency</option>
+                                <option value="beginner" {{ old('english_fluency', $profile->english_fluency) == 'beginner' ? 'selected' : '' }}>Beginner</option>
+                                <option value="intermediate" {{ old('english_fluency', $profile->english_fluency) == 'intermediate' ? 'selected' : '' }}>Intermediate</option>
+                                <option value="fluent" {{ old('english_fluency', $profile->english_fluency) == 'fluent' ? 'selected' : '' }}>Fluent/Native</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Residential Preference</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-home text-sm"></i></span>
+                            <select name="residential_preference" class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none">
+                                <option value="">Select Preference</option>
+                                <option value="residential" {{ old('residential_preference', $profile->residential_preference) == 'residential' ? 'selected' : '' }}>Residential (Need Accommodation)</option>
+                                <option value="day" {{ old('residential_preference', $profile->residential_preference) == 'day' ? 'selected' : '' }}>Day Boarding (No Accommodation)</option>
+                                <option value="both" {{ old('residential_preference', $profile->residential_preference) == 'both' ? 'selected' : '' }}>Open to Both</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Availability to Join</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-clock text-sm"></i></span>
+                            <input type="text" name="availability_to_join" value="{{ old('availability_to_join', $profile->availability_to_join) }}" placeholder="e.g. Immediate, 1 Month"
                                 class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                         </div>
                     </div>

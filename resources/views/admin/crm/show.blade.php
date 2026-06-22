@@ -2,10 +2,18 @@
 
 @section('header')
 <div class="flex justify-between items-center">
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+    <h2 class="font-semibold text-xl text-gray-800 leading-tight flex items-center gap-2">
         CRM: {{ $candidate->name }}
+        @if($candidate->profile && $candidate->profile->is_verified)
+            <i class="fas fa-check-circle text-blue-500" title="Verified Candidate"></i>
+        @endif
     </h2>
-    <a href="{{ route('admin.crm.index') }}" class="text-sm text-gray-600 hover:underline">&larr; Back to CRM List</a>
+    <div class="flex items-center gap-4">
+        <a href="{{ route('admin.crm.candidate.magic-login', $candidate->id) }}" target="_blank" class="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded hover:bg-indigo-200 transition-colors">
+            <i class="fas fa-sign-in-alt mr-1"></i> Login as Candidate
+        </a>
+        <a href="{{ route('admin.crm.index') }}" class="text-sm text-gray-600 hover:underline">&larr; Back to List</a>
+    </div>
 </div>
 @endsection
 
@@ -40,6 +48,15 @@
                                 <a href="{{ Storage::url($candidate->profile->resume_path) }}" target="_blank" class="text-indigo-600 hover:underline text-xs font-bold"><i class="fas fa-file-pdf mr-1"></i> View Resume</a>
                             </div>
                         @endif
+
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            <form action="{{ route('admin.crm.candidate.verify', $candidate->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full px-4 py-2 {{ $candidate->profile->is_verified ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100' }} rounded text-sm font-bold transition-colors">
+                                    {{ $candidate->profile->is_verified ? 'Revoke Verification Badge' : 'Verify & Award Badge' }}
+                                </button>
+                            </form>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -63,6 +80,51 @@
                 @empty
                     <p class="text-sm text-gray-500">No applications found.</p>
                 @endforelse
+            </div>
+        </div>
+
+        <!-- Candidate Rating System -->
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Admin Ratings</h3>
+                    @if($rating)
+                        <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded"><i class="fas fa-star text-yellow-500 mr-1"></i> {{ number_format($rating->overall_rating, 1) }} Overall</span>
+                    @endif
+                </div>
+
+                <form action="{{ route('admin.crm.candidate.rate', $candidate->id) }}" method="POST" class="space-y-4">
+                    @csrf
+                    @php
+                        $params = [
+                            'communication' => 'Communication Skills',
+                            'subject_knowledge' => 'Subject Knowledge',
+                            'demo_performance' => 'Demo Performance',
+                            'english_fluency' => 'English Fluency',
+                            'discipline' => 'Professionalism & Discipline'
+                        ];
+                    @endphp
+
+                    @foreach($params as $key => $label)
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-medium text-gray-700">{{ $label }}</label>
+                        <select name="{{ $key }}" class="rounded-md border-gray-300 shadow-sm text-sm p-1 w-24">
+                            @for($i=1; $i<=5; $i++)
+                                <option value="{{ $i }}" {{ ($rating && $rating->$key == $i) ? 'selected' : ($i==3 ? 'selected' : '') }}>{{ $i }} Stars</option>
+                            @endfor
+                        </select>
+                    </div>
+                    @endforeach
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Remarks</label>
+                        <textarea name="remarks" rows="2" class="w-full rounded-md border-gray-300 shadow-sm text-sm">{{ $rating->remarks ?? '' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gray-800 text-white px-4 py-2 rounded text-sm font-bold hover:bg-gray-900 transition-colors">
+                        Save Ratings
+                    </button>
+                </form>
             </div>
         </div>
     </div>

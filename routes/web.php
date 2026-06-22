@@ -17,9 +17,19 @@ Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/media', 'media')->name('media');
 
+// Resume Builder (Public)
+Route::get('/resume-builder', [\App\Http\Controllers\ResumeBuilderController::class, 'index'])->name('resume.builder');
+Route::post('/resume-builder/download', [\App\Http\Controllers\ResumeBuilderController::class, 'download'])->name('resume.builder.download');
+
 // Authentication Routes
 Route::get('/login', [\App\Http\Controllers\AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('login.post');
+
+// OTP Login Routes
+Route::get('/login/otp', [\App\Http\Controllers\AuthController::class, 'showOtpForm'])->name('login.otp');
+Route::post('/login/otp/send', [\App\Http\Controllers\AuthController::class, 'sendOtp'])->name('login.otp.send');
+Route::post('/login/otp/verify', [\App\Http\Controllers\AuthController::class, 'verifyOtp'])->name('login.otp.verify');
+
 Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -47,9 +57,17 @@ Route::post('/register', [\App\Http\Controllers\CandidateAuthController::class, 
 
 // Candidate Routes (Protected)
 Route::middleware(['auth', 'verified'])->prefix('candidate')->name('candidate.')->group(function () {
+    // Registration Wizard
+    Route::get('/wizard', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'show'])->name('wizard');
+    Route::post('/wizard/step1', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'saveStep1'])->name('wizard.step1');
+    Route::post('/wizard/step2', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'saveStep2'])->name('wizard.step2');
+    Route::post('/wizard/payment', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'initiatePayment'])->name('wizard.payment');
+    Route::match(['get', 'post'], '/wizard/callback', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'callback'])->name('wizard.callback');
+
     Route::get('/dashboard', function () {
         if (auth()->user()->role !== 'candidate') return abort(403);
         $profile = auth()->user()->profile;
+        if (!$profile->initial_fee_paid && !$profile->is_fee_paid) return redirect()->route('candidate.wizard');
         return view('candidate.dashboard', compact('profile'));
     })->name('dashboard');
 
@@ -80,13 +98,13 @@ Route::middleware(['auth', 'verified'])->prefix('employer')->name('employer.')->
         if (auth()->user()->role !== 'employer') return abort(403);
         return view('employer.dashboard');
     })->name('dashboard');
+
+    Route::get('/applicants', [\App\Http\Controllers\Employer\ApplicantController::class, 'index'])->name('applicants.index');
 });
 
 // Admin Routes (Protected)
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     
     // Master Data
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
@@ -105,6 +123,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/crm/candidate/{id}/follow-up', [\App\Http\Controllers\Admin\CrmController::class, 'storeFollowUp'])->name('crm.followup.store');
     Route::post('/crm/candidate/{id}/invoice', [\App\Http\Controllers\Admin\CrmController::class, 'storeInvoice'])->name('crm.invoice.store');
     Route::put('/crm/invoice/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'updateInvoiceStatus'])->name('crm.invoice.update');
+    Route::post('/crm/candidate/{id}/toggle-verification', [\App\Http\Controllers\Admin\CrmController::class, 'toggleVerification'])->name('crm.candidate.verify');
+    Route::post('/crm/candidate/{id}/rate', [\App\Http\Controllers\Admin\CrmController::class, 'rateCandidate'])->name('crm.candidate.rate');
+    Route::get('/crm/candidate/{id}/magic-login', [\App\Http\Controllers\Admin\CrmController::class, 'magicLogin'])->name('crm.candidate.magic-login');
+
+    // Applications & Transactions
+    Route::get('/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
+    Route::post('/applications/{id}/status', [\App\Http\Controllers\Admin\ApplicationController::class, 'updateStatus'])->name('applications.status.update');
+    Route::get('/transactions', [\App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('transactions.index');
 
     // Contact Leads
     Route::get('/leads', [\App\Http\Controllers\Admin\ContactLeadController::class, 'index'])->name('leads.index');

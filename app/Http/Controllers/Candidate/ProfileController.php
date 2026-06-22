@@ -37,7 +37,12 @@ class ProfileController extends Controller
             'experience_years' => 'required|integer|min:0',
             'current_salary' => 'nullable|string',
             'expected_salary' => 'required|string',
+            'current_school' => 'nullable|string',
+            'english_fluency' => 'nullable|in:beginner,intermediate,fluent',
+            'residential_preference' => 'nullable|in:residential,day,both',
+            'availability_to_join' => 'nullable|string',
             'resume' => 'nullable|mimes:pdf,doc,docx|max:2048',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         $user = auth()->user();
@@ -46,6 +51,11 @@ class ProfileController extends Controller
         if ($request->hasFile('resume')) {
             $path = $request->file('resume')->store('resumes', 'public');
             $profile->resume_path = $path;
+        }
+
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+            $profile->profile_photo_path = $path;
         }
 
         $profile->update([
@@ -59,6 +69,10 @@ class ProfileController extends Controller
             'experience_years' => $request->experience_years,
             'current_salary' => $request->current_salary,
             'expected_salary' => $request->expected_salary,
+            'current_school' => $request->current_school,
+            'english_fluency' => $request->english_fluency,
+            'residential_preference' => $request->residential_preference,
+            'availability_to_join' => $request->availability_to_join,
             'is_profile_complete' => true,
         ]);
 

@@ -182,6 +182,8 @@
                 <li><a href="{{ route('jobs') }}"
                         class="{{ request()->routeIs('jobs') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('jobs') ? 'after:w-0' : '' }}">Jobs</a>
                 </li>
+                <li><a href="{{ route('resume.builder') }}"
+                        class="{{ request()->routeIs('resume.builder') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('resume.builder') ? 'after:w-0' : '' }}">Resume Builder <span class="bg-accent-yellow text-white text-[8px] px-1 py-0.5 rounded uppercase font-bold ml-1 relative -top-1">Free</span></a></li>
                 <li><a href="{{ route('hiring') }}"
                         class="{{ request()->routeIs('hiring') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('hiring') ? 'after:w-0' : '' }}">Hiring Process</a></li>
                 <li><a href="{{ route('contact') }}"
@@ -336,6 +338,7 @@
                 <li><a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">About us</a></li>
                 <li><a href="{{ route('services') }}" class="{{ request()->routeIs('services') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Our Services</a></li>
                 <li><a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Jobs</a></li>
+                <li><a href="{{ route('resume.builder') }}" class="{{ request()->routeIs('resume.builder') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Resume Builder <span class="bg-accent-yellow text-white text-[8px] px-1 py-0.5 rounded uppercase font-bold ml-1 relative -top-1">Free</span></a></li>
                 <li><a href="{{ route('hiring') }}" class="{{ request()->routeIs('hiring') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Hiring Process</a></li>
                 <li><a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Contact us</a></li>
             </ul>

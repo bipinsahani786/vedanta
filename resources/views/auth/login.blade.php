@@ -105,6 +105,13 @@
                     <i class="fas fa-sign-in-alt"></i>
                     Sign In
                 </button>
+                
+                <div class="mt-4 text-center">
+                    <a href="{{ route('login.otp') }}" class="w-full bg-secondary-bg text-text-main border border-card-border font-semibold py-3.5 rounded-xl hover:bg-card-bg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-yellow transition-all shadow-sm hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                        <i class="fas fa-mobile-alt text-accent-yellow"></i>
+                        Login with OTP
+                    </a>
+                </div>
             </form>
 
             <div class="mt-8 flex items-center gap-4">
