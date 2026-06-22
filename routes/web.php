@@ -57,7 +57,7 @@ Route::get('/register', [\App\Http\Controllers\CandidateAuthController::class, '
 Route::post('/register', [\App\Http\Controllers\CandidateAuthController::class, 'register'])->name('candidate.register.post');
 
 // Candidate Routes (Protected)
-Route::middleware(['auth', 'verified'])->prefix('candidate')->name('candidate.')->group(function () {
+Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name('candidate.')->group(function () {
     // Registration Wizard
     Route::get('/wizard', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'show'])->name('wizard');
     Route::post('/wizard/step1', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'saveStep1'])->name('wizard.step1');
@@ -66,7 +66,6 @@ Route::middleware(['auth', 'verified'])->prefix('candidate')->name('candidate.')
     Route::match(['get', 'post'], '/wizard/callback', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'callback'])->name('wizard.callback');
 
     Route::get('/dashboard', function () {
-        if (auth()->user()->role !== 'candidate') return abort(403);
         $profile = auth()->user()->profile;
         if (!$profile->initial_fee_paid && !$profile->is_fee_paid) return redirect()->route('candidate.wizard');
         return view('candidate.dashboard', compact('profile'));
@@ -94,11 +93,13 @@ Route::get('/employer/register', [\App\Http\Controllers\EmployerAuthController::
 Route::post('/employer/register', [\App\Http\Controllers\EmployerAuthController::class, 'register'])->name('employer.register.post');
 
 // Employer Routes (Protected)
-Route::middleware(['auth', 'verified'])->prefix('employer')->name('employer.')->group(function () {
-    Route::get('/dashboard', function () {
-        if (auth()->user()->role !== 'employer') return abort(403);
-        return view('employer.dashboard');
-    })->name('dashboard');
+Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('employer.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Employer\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('jobs', \App\Http\Controllers\Employer\JobController::class);
+    
+    Route::get('/profile', [\App\Http\Controllers\Employer\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile', [\App\Http\Controllers\Employer\ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/applicants', [\App\Http\Controllers\Employer\ApplicantController::class, 'index'])->name('applicants.index');
 });

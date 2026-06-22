@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'admin' => \App\Http\Middleware\IsAdmin::class,
+            'employer' => \App\Http\Middleware\IsEmployer::class,
+            'candidate' => \App\Http\Middleware\IsCandidate::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'candidate/payment/callback'
