@@ -56,21 +56,24 @@ Route::post('/email/verification-notification', function (Request $request) {
 Route::get('/register', [\App\Http\Controllers\CandidateAuthController::class, 'showRegistrationForm'])->name('candidate.register');
 Route::post('/register', [\App\Http\Controllers\CandidateAuthController::class, 'register'])->name('candidate.register.post');
 
-// Candidate Routes (Protected)
-Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name('candidate.')->group(function () {
+// Candidate Routes (Unverified but Auth Required)
+Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.')->group(function () {
     // Registration Wizard
     Route::get('/wizard', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'show'])->name('wizard');
     Route::post('/wizard/step1', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'saveStep1'])->name('wizard.step1');
     Route::post('/wizard/step2', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'saveStep2'])->name('wizard.step2');
+    Route::post('/wizard/step3', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'saveStep3'])->name('wizard.step3');
     Route::post('/wizard/payment', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'initiatePayment'])->name('wizard.payment');
     Route::match(['get', 'post'], '/wizard/callback', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'callback'])->name('wizard.callback');
 
     Route::get('/dashboard', function () {
         $profile = auth()->user()->profile;
-        if (!$profile->initial_fee_paid && !$profile->is_fee_paid) return redirect()->route('candidate.wizard');
         return view('candidate.dashboard', compact('profile'));
     })->name('dashboard');
+});
 
+// Candidate Routes (Protected & Verified)
+Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name('candidate.')->group(function () {
     Route::get('/profile', [\App\Http\Controllers\Candidate\ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [\App\Http\Controllers\Candidate\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/password', [\App\Http\Controllers\Candidate\ProfileController::class, 'updatePassword'])->name('password.update');

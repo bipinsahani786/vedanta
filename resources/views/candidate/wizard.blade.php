@@ -41,7 +41,7 @@
             <!-- Connecting Line -->
             <div class="relative w-full h-1 bg-card-border rounded-full -mt-[3.25rem] z-0 mx-auto" style="width: 66%;">
                 <div class="absolute top-0 left-0 h-full bg-accent-blue rounded-full transition-all duration-500 ease-out"
-                    :style="'width: ' + ((step - 1) / 2 * 100) + '%'"></div>
+                    :style="'width: ' + ((step - 1) / (steps.length - 1) * 100) + '%'"></div>
             </div>
         </div>
 
@@ -104,6 +104,28 @@
                                 <div x-show="profilePhotoPreview" class="mt-3">
                                     <img :src="profilePhotoPreview" class="h-20 w-20 object-cover rounded-full border-2 border-accent-blue shadow-lg">
                                 </div>
+                            </div>
+
+                            <!-- Resume Upload (Required) -->
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Resume / CV *</label>
+                                <input type="file" accept=".pdf,.doc,.docx" @change="handleResumeUpload" required
+                                    class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent-blue file:text-white hover:file:bg-accent-blue-hover cursor-pointer">
+                                <p class="text-xs text-text-dark/40 mt-1">Format: PDF, DOC, DOCX. Max size: 2MB.</p>
+                            </div>
+
+                            <!-- Salary Slip (Optional) -->
+                            <div class="md:col-span-1">
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Salary Slip (Optional)</label>
+                                <input type="file" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" @change="handleSalarySlipUpload"
+                                    class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent-blue file:text-white hover:file:bg-accent-blue-hover cursor-pointer">
+                            </div>
+
+                            <!-- Offer Letter (Optional) -->
+                            <div class="md:col-span-1">
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Offer Letter (Optional)</label>
+                                <input type="file" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" @change="handleOfferLetterUpload"
+                                    class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent-blue file:text-white hover:file:bg-accent-blue-hover cursor-pointer">
                             </div>
 
                             <!-- Address -->
@@ -220,7 +242,10 @@
                             </div>
                         </div>
 
-                        <div class="mt-8 flex justify-end">
+                        <div class="mt-8 flex justify-end gap-4">
+                            <button type="button" @click="window.location.href = '{{ route('candidate.dashboard') }}'" class="text-text-dark font-semibold hover:text-accent-blue px-4 py-3 transition-colors">
+                                Skip for now
+                            </button>
                             <button type="submit" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2">
                                 Next Step <i class="fas fa-arrow-right"></i>
                             </button>
@@ -228,10 +253,10 @@
                     </form>
                 </div>
 
-                <!-- STEP 2: Agreement & Signature -->
+                <!-- STEP 2: Agreement -->
                 <div x-show="step === 2" x-transition.opacity.duration.500ms style="display: none;">
                     <h2 class="text-2xl font-bold text-text-main mb-6 flex items-center gap-3">
-                        <i class="fas fa-file-signature text-accent-blue"></i> Agreement & Digital Signature
+                        <i class="fas fa-file-contract text-accent-blue"></i> Agreement
                     </h2>
 
                     <!-- Terms Box -->
@@ -253,48 +278,7 @@
                         <span class="text-sm font-semibold text-text-main select-none">I have read and agree to the Terms & Conditions of Vedanta Placement Agency.</span>
                     </div>
 
-                    <!-- Signature Options -->
-                    <div class="border border-card-border rounded-2xl overflow-hidden" x-show="agreed" x-transition>
-                        <div class="flex border-b border-card-border bg-secondary-bg">
-                            <button type="button" @click="sigType = 'draw'; initSignaturePad()" class="flex-1 py-3 text-sm font-semibold transition-colors" :class="sigType === 'draw' ? 'text-accent-blue bg-card-bg border-b-2 border-accent-blue' : 'text-text-dark/60 hover:bg-card-bg/50'">Draw</button>
-                            <button type="button" @click="sigType = 'type'" class="flex-1 py-3 text-sm font-semibold transition-colors" :class="sigType === 'type' ? 'text-accent-blue bg-card-bg border-b-2 border-accent-blue' : 'text-text-dark/60 hover:bg-card-bg/50'">Type Name</button>
-                            <button type="button" @click="sigType = 'upload'" class="flex-1 py-3 text-sm font-semibold transition-colors" :class="sigType === 'upload' ? 'text-accent-blue bg-card-bg border-b-2 border-accent-blue' : 'text-text-dark/60 hover:bg-card-bg/50'">Upload</button>
-                        </div>
-
-                        <div class="p-6 bg-card-bg">
-                            <!-- Draw Pad -->
-                            <div x-show="sigType === 'draw'">
-                                <div class="border-2 border-dashed border-card-border rounded-xl bg-white relative">
-                                    <canvas id="signature-pad" class="w-full h-48 rounded-xl cursor-crosshair touch-none"></canvas>
-                                    <button type="button" @click="clearSignature" class="absolute top-2 right-2 w-8 h-8 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500/20 transition-colors" title="Clear">
-                                        <i class="fas fa-eraser"></i>
-                                    </button>
-                                </div>
-                                <p class="text-xs text-text-dark/40 mt-2 text-center">Use your mouse or finger to sign above</p>
-                            </div>
-
-                            <!-- Type Name -->
-                            <div x-show="sigType === 'type'" style="display: none;">
-                                <input type="text" x-model="typedSignature" placeholder="Type your full legal name"
-                                    class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-4 text-xl text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all"
-                                    style="font-family: 'Playfair Display', cursive; font-style: italic;">
-                                <p class="text-xs text-text-dark/40 mt-2 text-center">This will be used as your digital signature</p>
-                            </div>
-
-                            <!-- Upload Image -->
-                            <div x-show="sigType === 'upload'" style="display: none;">
-                                <label class="w-full h-48 flex flex-col items-center justify-center border-2 border-dashed border-card-border rounded-xl bg-secondary-bg hover:bg-card-border/30 transition-colors cursor-pointer relative overflow-hidden">
-                                    <div class="flex flex-col items-center justify-center pt-5 pb-6" x-show="!uploadedImagePreview">
-                                        <i class="fas fa-cloud-upload-alt text-4xl text-accent-blue mb-3"></i>
-                                        <p class="mb-2 text-sm text-text-dark/60"><span class="font-semibold text-accent-blue">Click to upload</span> or drag and drop</p>
-                                        <p class="text-xs text-text-dark/40">PNG, JPG or JPEG (MAX. 2MB)</p>
-                                    </div>
-                                    <img x-show="uploadedImagePreview" :src="uploadedImagePreview" class="absolute inset-0 w-full h-full object-contain bg-white p-2" />
-                                    <input type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" @change="handleFileUpload" x-ref="sigFileInput" />
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Signature Options moved to step 3 -->
 
                     <div class="mt-8 flex justify-between">
                         <button type="button" @click="step = 1" class="px-6 py-3 rounded-xl font-semibold text-text-dark hover:bg-card-border transition-colors flex items-center gap-2">
@@ -306,8 +290,107 @@
                     </div>
                 </div>
 
-                <!-- STEP 3: Plan & Payment -->
-                <div x-show="step === 3" x-transition.opacity.duration.500ms style="display: none;">
+                <!-- STEP 3: Identity Verification -->
+                <div x-show="step === 3" x-transition.opacity.duration.500ms style="display: none;" x-init="$watch('step', value => { if(value === 3 && !latitude) getLocation(); })">
+                    <h2 class="text-2xl font-bold text-text-main mb-6 flex items-center gap-3">
+                        <i class="fas fa-user-check text-accent-blue"></i> Identity Verification
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <!-- Live Photo Section -->
+                        <div class="border border-card-border rounded-2xl p-6 bg-secondary-bg relative">
+                            <h3 class="font-bold text-text-main mb-4 flex items-center gap-2"><i class="fas fa-camera text-accent-blue"></i> Live Photo</h3>
+                            
+                            <div x-show="!livePhotoBase64" class="w-full aspect-video bg-card-bg rounded-xl overflow-hidden relative border border-card-border">
+                                <video id="cameraFeed" class="w-full h-full object-cover" autoplay playsinline></video>
+                                <div class="absolute inset-0 flex items-center justify-center bg-card-bg/80" x-show="!isCameraOn">
+                                    <button @click="startCamera" class="bg-accent-blue text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-accent-blue-hover transition-colors">Start Camera</button>
+                                </div>
+                            </div>
+
+                            <div x-show="livePhotoBase64" class="w-full aspect-video bg-card-bg rounded-xl overflow-hidden border border-card-border relative">
+                                <img :src="livePhotoBase64" class="w-full h-full object-cover" />
+                                <button @click="livePhotoBase64 = null; startCamera()" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-600 transition-colors"><i class="fas fa-redo"></i></button>
+                            </div>
+
+                            <div class="mt-4 flex justify-center" x-show="isCameraOn && !livePhotoBase64">
+                                <button @click="takePhoto" class="bg-green-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-green-600 transition-colors shadow-lg flex items-center gap-2"><i class="fas fa-camera"></i> Capture Photo</button>
+                            </div>
+                            <p x-show="cameraError" class="text-red-500 text-xs mt-2 text-center" x-text="cameraError"></p>
+                        </div>
+
+                        <!-- Location & Signature Section -->
+                        <div class="flex flex-col gap-6">
+                            <!-- Location -->
+                            <div class="border border-card-border rounded-2xl p-6 bg-secondary-bg">
+                                <h3 class="font-bold text-text-main mb-4 flex items-center gap-2"><i class="fas fa-map-marker-alt text-accent-blue"></i> Location</h3>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center" :class="latitude ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'">
+                                        <i class="fas" :class="latitude ? 'fa-check' : 'fa-times'"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-text-main" x-text="latitude ? 'Location Captured' : 'Location Required'"></p>
+                                        <p class="text-xs text-text-dark/60" x-text="latitude ? latitude.toFixed(4) + ', ' + longitude.toFixed(4) : 'Please allow location access'"></p>
+                                    </div>
+                                    <button x-show="!latitude" @click="getLocation" class="ml-auto bg-card-bg border border-card-border text-xs px-3 py-1.5 rounded-lg font-semibold hover:bg-card-border transition-colors">Retry</button>
+                                </div>
+                                <p x-show="locationError" class="text-red-500 text-xs mt-2" x-text="locationError"></p>
+                            </div>
+
+                            <!-- Signature Options -->
+                            <div class="border border-card-border rounded-2xl overflow-hidden flex-1 flex flex-col">
+                                <div class="flex border-b border-card-border bg-secondary-bg">
+                                    <button type="button" @click="sigType = 'draw'; initSignaturePad()" class="flex-1 py-3 text-sm font-semibold transition-colors" :class="sigType === 'draw' ? 'text-accent-blue bg-card-bg border-b-2 border-accent-blue' : 'text-text-dark/60 hover:bg-card-bg/50'">Draw</button>
+                                    <button type="button" @click="sigType = 'type'" class="flex-1 py-3 text-sm font-semibold transition-colors" :class="sigType === 'type' ? 'text-accent-blue bg-card-bg border-b-2 border-accent-blue' : 'text-text-dark/60 hover:bg-card-bg/50'">Type</button>
+                                    <button type="button" @click="sigType = 'upload'" class="flex-1 py-3 text-sm font-semibold transition-colors" :class="sigType === 'upload' ? 'text-accent-blue bg-card-bg border-b-2 border-accent-blue' : 'text-text-dark/60 hover:bg-card-bg/50'">Upload</button>
+                                </div>
+
+                                <div class="p-4 bg-card-bg flex-1">
+                                    <!-- Draw Pad -->
+                                    <div x-show="sigType === 'draw'" class="h-full flex flex-col">
+                                        <div class="border-2 border-dashed border-card-border rounded-xl bg-white relative flex-1">
+                                            <canvas id="signature-pad" class="w-full h-full min-h-[120px] rounded-xl cursor-crosshair touch-none"></canvas>
+                                            <button type="button" @click="clearSignature" class="absolute top-2 right-2 w-8 h-8 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500/20 transition-colors" title="Clear">
+                                                <i class="fas fa-eraser"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Type Name -->
+                                    <div x-show="sigType === 'type'" style="display: none;" class="h-full flex items-center">
+                                        <input type="text" x-model="typedSignature" placeholder="Type full name"
+                                            class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-4 text-xl text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all"
+                                            style="font-family: 'Playfair Display', cursive; font-style: italic;">
+                                    </div>
+
+                                    <!-- Upload Image -->
+                                    <div x-show="sigType === 'upload'" style="display: none;" class="h-full">
+                                        <label class="w-full h-full min-h-[120px] flex flex-col items-center justify-center border-2 border-dashed border-card-border rounded-xl bg-secondary-bg hover:bg-card-border/30 transition-colors cursor-pointer relative overflow-hidden">
+                                            <div class="flex flex-col items-center justify-center py-4" x-show="!uploadedImagePreview">
+                                                <i class="fas fa-upload text-2xl text-accent-blue mb-2"></i>
+                                                <p class="text-xs text-text-dark/60">Click to upload signature</p>
+                                            </div>
+                                            <img x-show="uploadedImagePreview" :src="uploadedImagePreview" class="absolute inset-0 w-full h-full object-contain bg-white p-2" />
+                                            <input type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" @change="handleFileUpload" x-ref="sigFileInput" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex justify-between">
+                        <button type="button" @click="step = 2" class="px-6 py-3 rounded-xl font-semibold text-text-dark hover:bg-card-border transition-colors flex items-center gap-2">
+                            <i class="fas fa-arrow-left text-sm"></i> Back
+                        </button>
+                        <button type="button" @click="submitStep3" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2">
+                            Verify Identity <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: Plan & Payment -->
+                <div x-show="step === 4" x-transition.opacity.duration.500ms style="display: none;">
                     <h2 class="text-2xl font-bold text-text-main mb-6 flex items-center gap-3">
                         <i class="fas fa-credit-card text-accent-blue"></i> Choose Registration Plan
                     </h2>
@@ -359,7 +442,7 @@
                     </div>
 
                     <div class="mt-8 flex justify-between items-center pt-6 border-t border-card-border">
-                        <button type="button" @click="step = 2" class="px-6 py-3 rounded-xl font-semibold text-text-dark hover:bg-card-border transition-colors flex items-center gap-2">
+                        <button type="button" @click="step = 3" class="px-6 py-3 rounded-xl font-semibold text-text-dark hover:bg-card-border transition-colors flex items-center gap-2">
                             <i class="fas fa-arrow-left text-sm"></i> Back
                         </button>
                         
@@ -384,7 +467,7 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('registrationWizard', () => ({
             step: 1,
-            steps: ['Profile', 'Agreement', 'Payment'],
+            steps: ['Profile', 'Agreement', 'Verification', 'Payment'],
             loading: false,
             loadingMessage: '',
             error: '',
@@ -409,14 +492,26 @@
 
             profilePhotoFile: null,
             profilePhotoPreview: null,
+
+            resumeFile: null,
+            salarySlipFile: null,
+            offerLetterFile: null,
             
-            // Signature Data
+            // Signature & Identity Data
             agreed: false,
             sigType: 'draw',
             signaturePad: null,
             typedSignature: '',
             uploadedImagePreview: null,
             uploadedFile: null,
+            
+            livePhotoBase64: null,
+            latitude: null,
+            longitude: null,
+            locationError: '',
+            cameraError: '',
+            stream: null,
+            isCameraOn: false,
 
             // Payment Data
             selectedPlan: 'standard',
@@ -424,25 +519,21 @@
             init() {
                 // Determine initial step based on profile status
                 const isProfileComplete = {{ $profile->is_profile_complete ? 'true' : 'false' }};
+                const isTermsAgreed = {{ $profile->is_terms_agreed ? 'true' : 'false' }};
                 const isAgreementSigned = {{ $profile->is_agreement_signed ? 'true' : 'false' }};
                 
-                if (isProfileComplete && !isAgreementSigned) this.step = 2;
-                if (isProfileComplete && isAgreementSigned) this.step = 3;
+                if (isProfileComplete && !isTermsAgreed) this.step = 2;
+                if (isProfileComplete && isTermsAgreed && !isAgreementSigned) this.step = 3;
+                if (isProfileComplete && isTermsAgreed && isAgreementSigned) this.step = 4;
 
                 this.$watch('step', value => {
-                    if (value === 2 && this.agreed && this.sigType === 'draw') {
-                        setTimeout(() => this.initSignaturePad(), 300);
-                    }
-                });
-
-                this.$watch('agreed', value => {
-                    if (value && this.sigType === 'draw') {
+                    if (value === 3 && this.sigType === 'draw') {
                         setTimeout(() => this.initSignaturePad(), 300);
                     }
                 });
 
                 this.$watch('sigType', value => {
-                    if (value === 'draw' && this.agreed) {
+                    if (value === 'draw' && this.step === 3) {
                         setTimeout(() => this.initSignaturePad(), 300);
                     }
                 });
@@ -463,6 +554,15 @@
                     }
                     if (this.profilePhotoFile) {
                         fd.append('profile_photo', this.profilePhotoFile);
+                    }
+                    if (this.resumeFile) {
+                        fd.append('resume', this.resumeFile);
+                    }
+                    if (this.salarySlipFile) {
+                        fd.append('salary_slip', this.salarySlipFile);
+                    }
+                    if (this.offerLetterFile) {
+                        fd.append('offer_letter', this.offerLetterFile);
                     }
 
                     const response = await fetch('{{ route("candidate.wizard.step1") }}', {
@@ -559,10 +659,67 @@
                 reader.readAsDataURL(file);
             },
 
+            handleResumeUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                this.resumeFile = file;
+            },
+
+            handleSalarySlipUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                this.salarySlipFile = file;
+            },
+
+            handleOfferLetterUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                this.offerLetterFile = file;
+            },
+
             async submitStep2() {
                 if (!this.agreed) return;
                 this.error = '';
+                this.loadingMessage = 'Saving Agreement...';
+                this.loading = true;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('_token', '{{ csrf_token() }}');
+                    formData.append('agreed', 1);
+
+                    const response = await fetch('{{ route("candidate.wizard.step2") }}', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        this.step = 3;
+                    } else {
+                        this.error = result.message || 'An error occurred while saving the agreement.';
+                    }
+                } catch (error) {
+                    this.error = 'Network error. Please try again.';
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async submitStep3() {
+                this.error = '';
                 
+                if (!this.livePhotoBase64) {
+                    this.error = 'Please capture a live photo before continuing.';
+                    return;
+                }
+
+                if (!this.latitude || !this.longitude) {
+                    this.error = 'Please share your location before continuing.';
+                    return;
+                }
+
                 let sigData = '';
 
                 if (this.sigType === 'draw') {
@@ -582,10 +739,10 @@
                         this.error = 'Please upload a signature image.';
                         return;
                     }
-                    sigData = this.uploadedImagePreview; // Sending base64 for simplicity, or we could use FormData
+                    sigData = this.uploadedImagePreview;
                 }
 
-                this.loadingMessage = 'Saving Agreement...';
+                this.loadingMessage = 'Verifying Identity...';
                 this.loading = true;
 
                 try {
@@ -595,30 +752,86 @@
                     
                     if (this.sigType === 'upload' && this.uploadedFile) {
                         formData.append('signature_file', this.uploadedFile);
-                        formData.append('signature_data', 'uploaded'); // placeholder
+                        formData.append('signature_data', 'uploaded');
                     } else {
                         formData.append('signature_data', sigData);
                     }
+                    
+                    formData.append('live_photo', this.livePhotoBase64);
+                    formData.append('latitude', this.latitude);
+                    formData.append('longitude', this.longitude);
 
-                    const response = await fetch('{{ route("candidate.wizard.step2") }}', {
+                    const response = await fetch('{{ route("candidate.wizard.step3") }}', {
                         method: 'POST',
-                        headers: {
-                            'Accept': 'application/json'
-                        },
                         body: formData
                     });
 
-                    const data = await response.json();
+                    const result = await response.json();
                     
-                    if (response.ok && data.success) {
-                        this.step = 3;
-                        window.scrollTo({top: 0, behavior: 'smooth'});
+                    if (response.ok) {
+                        this.step = 4;
                     } else {
-                        this.error = data.message || 'Failed to save signature.';
+                        this.error = result.message || 'An error occurred while verifying identity.';
                     }
-                } catch (e) {
-                    this.error = 'Something went wrong. Please try again.';
+                } catch (error) {
+                    this.error = 'Network error. Please try again.';
                 } finally {
+                    this.loading = false;
+                }
+            },
+
+            startCamera() {
+                this.cameraError = '';
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                        this.stream = stream;
+                        const video = document.getElementById('cameraFeed');
+                        video.srcObject = stream;
+                        video.play();
+                        this.isCameraOn = true;
+                    }).catch(err => {
+                        this.cameraError = "Unable to access camera. Please grant permission.";
+                    });
+                } else {
+                    this.cameraError = "Camera not supported in this browser.";
+                }
+            },
+            
+            takePhoto() {
+                const video = document.getElementById('cameraFeed');
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                this.livePhotoBase64 = canvas.toDataURL('image/jpeg');
+                this.stopCamera();
+            },
+            
+            stopCamera() {
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                }
+                this.isCameraOn = false;
+            },
+            
+            getLocation() {
+                this.locationError = '';
+                this.loadingMessage = 'Fetching location...';
+                this.loading = true;
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            this.latitude = position.coords.latitude;
+                            this.longitude = position.coords.longitude;
+                            this.loading = false;
+                        },
+                        (error) => {
+                            this.locationError = "Unable to fetch location. Please grant permission.";
+                            this.loading = false;
+                        }
+                    );
+                } else {
+                    this.locationError = "Geolocation is not supported by this browser.";
                     this.loading = false;
                 }
             },

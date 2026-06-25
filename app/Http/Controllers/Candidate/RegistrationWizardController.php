@@ -59,8 +59,10 @@ class RegistrationWizardController extends Controller
             'english_fluency' => 'nullable|in:beginner,intermediate,fluent',
             'residential_preference' => 'nullable|in:residential,day,both',
             'availability_to_join' => 'nullable|string',
-            'resume' => 'nullable|mimes:pdf,doc,docx|max:2048',
+            'resume' => 'required|mimes:pdf,doc,docx|max:2048',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'salary_slip' => 'nullable|mimes:pdf,doc,docx,jpg,png,jpeg|max:2048',
+            'offer_letter' => 'nullable|mimes:pdf,doc,docx,jpg,png,jpeg|max:2048',
         ]);
 
         $profile = auth()->user()->profile;
@@ -73,6 +75,16 @@ class RegistrationWizardController extends Controller
         if ($request->hasFile('profile_photo')) {
             $path = $request->file('profile_photo')->store('profile_photos', 'public');
             $profile->profile_photo_path = $path;
+        }
+
+        if ($request->hasFile('salary_slip')) {
+            $path = $request->file('salary_slip')->store('salary_slips', 'public');
+            $profile->salary_slip_path = $path;
+        }
+
+        if ($request->hasFile('offer_letter')) {
+            $path = $request->file('offer_letter')->store('offer_letters', 'public');
+            $profile->offer_letter_path = $path;
         }
 
         $profile->update([
@@ -99,8 +111,26 @@ class RegistrationWizardController extends Controller
     public function saveStep2(Request $request)
     {
         $request->validate([
+            'agreed' => 'required|boolean|accepted',
+        ]);
+
+        $profile = auth()->user()->profile;
+
+        $profile->update([
+            'is_terms_agreed' => true,
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function saveStep3(Request $request)
+    {
+        $request->validate([
             'signature_type' => 'required|in:draw,upload,type',
             'signature_data' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'live_photo' => 'required|string', // Base64 expected
         ]);
 
         $user = auth()->user();
@@ -113,6 +143,18 @@ class RegistrationWizardController extends Controller
             $signatureData = $path;
         }
 
+        $livePhotoPath = null;
+        if ($request->live_photo) {
+            $image_parts = explode(";base64,", $request->live_photo);
+            if (count($image_parts) == 2) {
+                $image_base64 = base64_decode($image_parts[1]);
+                $fileName = 'live_photo_' . $user->id . '_' . time() . '.jpg';
+                $filePath = 'live_photos/' . $fileName;
+                \Illuminate\Support\Facades\Storage::disk('public')->put($filePath, $image_base64);
+                $livePhotoPath = $filePath;
+            }
+        }
+
         $profile->update([
             'is_agreement_signed' => true,
             'signature_type' => $request->signature_type,
@@ -120,6 +162,9 @@ class RegistrationWizardController extends Controller
             'signature_date_time' => now(),
             'signature_device_info' => $request->header('User-Agent'),
             'signature_ip_address' => $request->ip(),
+            'live_photo_path' => $livePhotoPath,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
         ]);
 
         return response()->json(['success' => true]);
