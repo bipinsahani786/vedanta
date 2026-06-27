@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/jobs', [\App\Http\Controllers\HomeController::class, 'jobs'])->name('jobs');
 Route::get('/jobs/{job}', [\App\Http\Controllers\JobController::class, 'show'])->name('jobs.show');
+Route::get('/category/{id}/jobs', [\App\Http\Controllers\HomeController::class, 'categoryJobs'])->name('category.jobs');
 
 Route::view('/about', 'about')->name('about');
 Route::get('/services', [\App\Http\Controllers\HomeController::class, 'services'])->name('services');
@@ -17,6 +18,7 @@ Route::post('/post-job', [\App\Http\Controllers\JobController::class, 'storeJobQ
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/media', 'media')->name('media');
+
 
 // Resume Builder (Public)
 Route::get('/resume-builder', [\App\Http\Controllers\ResumeBuilderController::class, 'index'])->name('resume.builder');

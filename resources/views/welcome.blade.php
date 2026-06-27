@@ -343,14 +343,20 @@
         <div class="absolute inset-0 bg-[#0f172a]/90 backdrop-blur-sm z-0"></div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 relative z-10">
             @foreach($categories as $category)
-            <div
-                class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center text-text-main transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-accent-blue/50 cursor-pointer group reveal">
-                <i class="fas fa-folder-open text-3xl mb-4 block text-accent-blue group-hover:scale-110 transition-transform"></i>
-                <h3 class="text-sm font-semibold mb-4">{{ $category->name }}</h3>
-                <div class="bg-white/20 backdrop-blur-md text-text-main px-3 py-1.5 rounded-full text-[11px] font-semibold inline-block">
-                    {{ $category->jobs_count }} Active Jobs
-                </div>
-            </div>
+                <a href="{{ route('category.jobs', $category->id) }}"
+                    class="block bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 text-center text-text-main transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-accent-blue/50 cursor-pointer group reveal">
+
+                    <i class="fas fa-folder-open text-3xl mb-4 block text-accent-blue group-hover:scale-110 transition-transform"></i>
+
+                    <h3 class="text-sm font-semibold mb-4">
+                        {{ $category->name }}
+                    </h3>
+
+                    <div class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs inline-block">
+                        {{ $category->jobs_count }} Active Jobs
+                    </div>
+
+                </a>
             @endforeach
         </div>
     </section>
