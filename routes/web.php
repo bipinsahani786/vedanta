@@ -7,7 +7,7 @@ Route::get('/jobs', [\App\Http\Controllers\HomeController::class, 'jobs'])->name
 Route::get('/jobs/{job}', [\App\Http\Controllers\JobController::class, 'show'])->name('jobs.show');
 
 Route::view('/about', 'about')->name('about');
-Route::view('/services', 'services')->name('services');
+Route::get('/services', [\App\Http\Controllers\HomeController::class, 'services'])->name('services');
 Route::view('/hiring-process', 'hiring')->name('hiring');
 Route::view('/contact', 'contact')->name('contact');
 Route::post('/contact', [\App\Http\Controllers\HomeController::class, 'storeContact'])->name('contact.store');
@@ -142,6 +142,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/leads/{id}/status', [\App\Http\Controllers\Admin\ContactLeadController::class, 'updateStatus'])->name('leads.status.update');
 
     // Frontend Management
+    
     Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class)->except(['create', 'show', 'edit']);
     Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class)->except(['create', 'show', 'edit']);
     Route::resource('clients', \App\Http\Controllers\Admin\ClientLogoController::class)->except(['create', 'show', 'edit'])->parameters(['clients' => 'clientLogo']);

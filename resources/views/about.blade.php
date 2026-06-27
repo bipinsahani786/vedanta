@@ -30,6 +30,7 @@
     </div>
 </div>
 
+
 <!-- Team Section -->
 <div class="py-20 px-6 lg:px-[5%] bg-card-bg/30 border-t border-card-border">
     <div class="text-center mb-16 reveal">

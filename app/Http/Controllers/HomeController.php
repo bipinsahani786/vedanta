@@ -60,4 +60,11 @@ class HomeController extends Controller
 
         return back()->with('success', 'Thank you for your message. We will get back to you shortly.');
     }
+   
+
+        public function services()
+        {
+            $services = Service::where('is_active', true)->latest()->get();
+            return view('services', compact('services'));
+        }
 }

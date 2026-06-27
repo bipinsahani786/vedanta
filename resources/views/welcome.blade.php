@@ -322,11 +322,13 @@
                 <p class="text-[13px] text-text-main opacity-60 leading-relaxed mb-6 flex-grow">
                     {{ Str::limit($job->description, 100) }}
                 </p>
-                <a href="#"
+                <a  href="{{ route('jobs.show', $job->id) }}
                     class="text-accent-blue font-semibold text-[13px] inline-flex items-center gap-2 self-start group-hover:gap-3 transition-all">View
-                    Details <span
-                        class="bg-accent-yellow text-[#031b4e] w-5 h-5 rounded-full flex items-center justify-center text-[9px]"><i
-                            class="fas fa-chevron-right"></i></span></a>
+                    Details 
+                    <span class="bg-accent-yellow text-[#031b4e] w-5 h-5 rounded-full flex items-center justify-center text-[9px]">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                </a>
             </div>
             @empty
             <div class="col-span-full text-center py-10 opacity-60">
@@ -565,10 +567,10 @@
                 </form>
             </div>
 
-            <div class="flex-1 z-20 flex justify-center lg:justify-end relative hidden md:flex">
-                <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    alt="Contact Us"
-                    class="relative lg:absolute -bottom-12 right-0 max-h-[350px] rounded-2xl shadow-2xl object-cover">
+            <div class="flex-1 z-20 flex items-center justify-center mt-8 lg:mt-0">
+                <img src="images/pic.png" alt="Contact Us"
+                    class="w-full max-w-[250px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[500px] xl:max-w-[550px] h-auto object-contain"
+                >
             </div>
         </div>
     </section>
