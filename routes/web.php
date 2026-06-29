@@ -5,9 +5,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/jobs', [\App\Http\Controllers\HomeController::class, 'jobs'])->name('jobs');
 Route::get('/jobs/{job}', [\App\Http\Controllers\JobController::class, 'show'])->name('jobs.show');
+Route::get('/category/{id}/jobs', [\App\Http\Controllers\HomeController::class, 'categoryJobs'])->name('category.jobs');
 
 Route::view('/about', 'about')->name('about');
-Route::view('/services', 'services')->name('services');
+Route::get('/services', [\App\Http\Controllers\HomeController::class, 'services'])->name('services');
 Route::view('/hiring-process', 'hiring')->name('hiring');
 Route::view('/contact', 'contact')->name('contact');
 Route::post('/contact', [\App\Http\Controllers\HomeController::class, 'storeContact'])->name('contact.store');
@@ -17,6 +18,7 @@ Route::post('/post-job', [\App\Http\Controllers\JobController::class, 'storeJobQ
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/media', 'media')->name('media');
+
 
 // Resume Builder (Public)
 Route::get('/resume-builder', [\App\Http\Controllers\ResumeBuilderController::class, 'index'])->name('resume.builder');
@@ -142,6 +144,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/leads/{id}/status', [\App\Http\Controllers\Admin\ContactLeadController::class, 'updateStatus'])->name('leads.status.update');
 
     // Frontend Management
+    
     Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class)->except(['create', 'show', 'edit']);
     Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class)->except(['create', 'show', 'edit']);
     Route::resource('clients', \App\Http\Controllers\Admin\ClientLogoController::class)->except(['create', 'show', 'edit'])->parameters(['clients' => 'clientLogo']);

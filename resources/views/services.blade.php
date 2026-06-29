@@ -1,6 +1,44 @@
 @extends('layouts.app')
 @section('content')
 <x-page-header title="Our Premium Services" :breadcrumbs="['Home' => route('home'), 'Services' => null]" />
+
+        <!-- Services Section -->
+    <section class="py-16 px-6 lg:px-[5%] bg-primary-bg text-text-main text-center relative overflow-hidden">
+        <div
+            class="absolute top-5 right-[5%] opacity-[0.02] text-7xl md:text-[100px] font-extrabold uppercase pointer-events-none select-none tracking-wider">
+            VEDANTA</div>
+        <div class="mb-12 relative z-10 reveal">
+            <h4 class="text-accent-blue text-base font-medium mb-1.5 uppercase tracking-wider">Providing Everything You
+                Need</h4>
+            <h2 class="text-3xl lg:text-4xl font-bold text-text-main">Our Services</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+            @forelse($services as $index => $service)
+            <div class="relative bg-card-bg border border-card-border p-7 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-accent-blue/50 group overflow-hidden reveal reveal-delay-{{ ($index % 4) + 1 }}">
+                <div class="absolute -top-24 -right-24 w-48 h-48 bg-accent-blue opacity-5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 z-0"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-accent-blue text-white flex items-center justify-center text-xl mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 shadow-lg">
+                        <i class="{{ $service->icon }}"></i>
+                    </div>
+                    <h3 class="text-text-main font-bold text-lg mb-2">{{ $service->title }}</h3>
+                    <p class="text-text-main opacity-60 text-sm leading-relaxed mb-6">
+                        {{ $service->description }}
+                    </p>
+                    <a href="#" class="inline-flex items-center gap-2 text-accent-blue font-semibold text-sm group/link">
+                        Explore Service 
+                        <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/link:translate-x-1"></i>
+                    </a>
+                </div>
+            </div>
+            @empty
+            <div class="col-span-full text-center py-10 opacity-60">
+                <p>No services currently available.</p>
+            </div>
+            @endforelse
+        </div>
+    </section>
+
 <!-- Deep Dive 1 -->
 <div class="py-16 px-6 lg:px-[5%] border-t border-card-border">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">

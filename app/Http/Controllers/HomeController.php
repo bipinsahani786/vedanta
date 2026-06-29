@@ -29,6 +29,21 @@ class HomeController extends Controller
 
         return view('welcome', compact('recentJobs', 'categories', 'services', 'testimonials', 'clients'));
     }
+    public function categoryJobs($id)
+    {
+        $category = Category::findOrFail($id);
+        $jobs = JobPost::with([
+                'category',
+                'subject',
+                'location',
+                'qualification'
+            ])
+            ->where('category_id', $id)
+            ->where('status', 'approved')
+            ->latest()
+            ->get();
+        return view('category-jobs', compact('category', 'jobs'));
+    }
 
     public function jobs()
     {
@@ -60,4 +75,11 @@ class HomeController extends Controller
 
         return back()->with('success', 'Thank you for your message. We will get back to you shortly.');
     }
+   
+
+        public function services()
+        {
+            $services = Service::where('is_active', true)->latest()->get();
+            return view('services', compact('services'));
+        }
 }

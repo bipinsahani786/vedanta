@@ -475,7 +475,7 @@
                 <p class="text-[13px] text-slate-600 leading-relaxed mb-6 flex-grow">
                     {{ Str::limit($job->description, 100) }}
                 </p>
-                <a href="#"
+                <a  href="{{ route('jobs.show', $job->id) }}
                     class="text-accent-blue font-semibold text-[13px] inline-flex items-center gap-2 self-start group-hover:gap-3 transition-all">View
                     Details <span
                         class="bg-accent-yellow text-slate-900 w-5 h-5 rounded-full flex items-center justify-center text-[9px]"><i
