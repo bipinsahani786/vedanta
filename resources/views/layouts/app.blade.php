@@ -190,116 +190,6 @@
                         class="{{ request()->routeIs('contact') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact us</a></li>
             </ul>
             <div class="flex gap-3 items-center">
-                <!-- Theme Switcher -->
-                <div class="relative">
-                    <button id="themeSwitcherBtn" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-text-main opacity-80 hover:text-text-main hover:bg-white/10 transition-all cursor-pointer">
-                        <i class="fas fa-palette"></i>
-                    </button>
-                    <!-- Dropdown -->
-                    <div id="themeDropdown" class="absolute right-0 mt-3 w-80 bg-card-bg border border-card-border rounded-2xl shadow-2xl p-3 hidden opacity-0 transition-opacity duration-200 z-[110]">
-                        <h4 class="text-[11px] uppercase tracking-wider text-text-dark font-bold mb-2 px-2">Theme</h4>
-                        <div class="grid grid-cols-6 gap-2 mb-4 px-2">
-                            <button data-set-theme="brand" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Brand Light Theme">
-                                <div class="w-1/2 h-full bg-[#ffffff]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#00a8e8]"></div>
-                                    <div class="h-1/2 w-full bg-[#f26522]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="brand-dark" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Brand Dark Theme">
-                                <div class="w-1/2 h-full bg-[#031b4e]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#00a8e8]"></div>
-                                    <div class="h-1/2 w-full bg-[#f26522]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="dark" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-accent-blue cursor-pointer transition-transform hover:scale-110" title="Dark Theme">
-                                <div class="w-1/2 h-full bg-[#031b4e]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#129aef]"></div>
-                                    <div class="h-1/2 w-full bg-[#ffb800]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="light" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Light Theme">
-                                <div class="w-1/2 h-full bg-[#f8fafc]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#2563eb]"></div>
-                                    <div class="h-1/2 w-full bg-[#f59e0b]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="midnight" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Midnight Theme">
-                                <div class="w-1/2 h-full bg-[#0f172a]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#38bdf8]"></div>
-                                    <div class="h-1/2 w-full bg-[#fbbf24]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="forest" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Forest Theme">
-                                <div class="w-1/2 h-full bg-[#064e3b]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#10b981]"></div>
-                                    <div class="h-1/2 w-full bg-[#fcd34d]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="rose" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Rose Theme">
-                                <div class="w-1/2 h-full bg-[#4c0519]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#f43f5e]"></div>
-                                    <div class="h-1/2 w-full bg-[#fda4af]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="sunset" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Sunset Theme">
-                                <div class="w-1/2 h-full bg-[#fffbeb]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#ea580c]"></div>
-                                    <div class="h-1/2 w-full bg-[#e11d48]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="ocean" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Ocean Theme">
-                                <div class="w-1/2 h-full bg-[#ecfeff]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#0891b2]"></div>
-                                    <div class="h-1/2 w-full bg-[#0284c7]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="purple" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Purple Theme">
-                                <div class="w-1/2 h-full bg-[#2e1065]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#a855f7]"></div>
-                                    <div class="h-1/2 w-full bg-[#f472b6]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="coffee" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Coffee Theme">
-                                <div class="w-1/2 h-full bg-[#451a03]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#d97706]"></div>
-                                    <div class="h-1/2 w-full bg-[#fde047]"></div>
-                                </div>
-                            </button>
-                            <button data-set-theme="monochrome" class="w-8 h-8 rounded-full flex overflow-hidden border-2 border-transparent shadow-sm cursor-pointer transition-transform hover:scale-110" title="Monochrome Theme">
-                                <div class="w-1/2 h-full bg-[#171717]"></div>
-                                <div class="w-1/2 h-full flex flex-col">
-                                    <div class="h-1/2 w-full bg-[#a3a3a3]"></div>
-                                    <div class="h-1/2 w-full bg-[#ffffff]"></div>
-                                </div>
-                            </button>
-                        </div>
-                        <h4 class="text-[11px] uppercase tracking-wider text-text-dark font-bold mb-2 px-2">Font</h4>
-                        <div class="grid grid-cols-2 gap-1">
-                            <button data-set-font="outfit" class="text-left px-3 py-1.5 rounded-lg text-sm text-text-main bg-white/10 hover:bg-white/15 transition-colors font-outfit">Outfit</button>
-                            <button data-set-font="inter" class="text-left px-3 py-1.5 rounded-lg text-sm text-text-dark hover:bg-white/10 transition-colors" style="font-family: 'Inter', sans-serif;">Inter</button>
-                            <button data-set-font="roboto" class="text-left px-3 py-1.5 rounded-lg text-sm text-text-dark hover:bg-white/10 transition-colors" style="font-family: 'Roboto', sans-serif;">Roboto</button>
-                            <button data-set-font="playfair" class="text-left px-3 py-1.5 rounded-lg text-sm text-text-dark hover:bg-white/10 transition-colors" style="font-family: 'Playfair Display', serif;">Playfair Display</button>
-                            <button data-set-font="poppins" class="text-left px-3 py-1.5 rounded-lg text-sm text-text-dark hover:bg-white/10 transition-colors" style="font-family: 'Poppins', sans-serif;">Poppins</button>
-                            <button data-set-font="montserrat" class="text-left px-3 py-1.5 rounded-lg text-sm text-text-dark hover:bg-white/10 transition-colors" style="font-family: 'Montserrat', sans-serif;">Montserrat</button>
-                            <button data-set-font="lora" class="text-left px-3 py-1.5 rounded-lg text-sm text-text-dark hover:bg-white/10 transition-colors" style="font-family: 'Lora', serif;">Lora</button>
-                            <button data-set-font="oswald" class="text-left px-3 py-1.5 rounded-lg text-sm text-text-dark hover:bg-white/10 transition-colors" style="font-family: 'Oswald', sans-serif;">Oswald</button>
-                            <button data-set-font="nunito" class="text-left px-3 py-1.5 rounded-lg text-sm text-text-dark hover:bg-white/10 transition-colors" style="font-family: 'Nunito', sans-serif;">Nunito</button>
-                            <button data-set-font="fira" class="text-left px-3 py-1.5 rounded-lg text-sm text-text-dark hover:bg-white/10 transition-colors" style="font-family: 'Fira Code', monospace;">Fira Code</button>
-                        </div>
-                    </div>
-                </div>
-
                 @auth
                     <a href="{{ auth()->user()->role === 'candidate' ? route('candidate.dashboard') : (auth()->user()->role === 'employer' ? route('employer.dashboard') : route('admin.dashboard')) }}"
                         class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-white/10 text-text-main hover:bg-white/20 border border-white/15 flex items-center gap-2">
@@ -569,11 +459,11 @@
             const btnEmployer = document.getElementById('btn-employer');
 
             if (role === 'seeker') {
-                btnSeeker.className = "role-btn px-5 lg:px-8 py-3 rounded-xl text-sm font-semibold flex items-center gap-2.5 transition-all duration-300 border-none cursor-pointer bg-accent-blue text-white shadow-glow-blue";
-                btnEmployer.className = "role-btn px-5 lg:px-8 py-3 rounded-xl text-sm font-semibold text-text-main opacity-70 flex items-center gap-2.5 transition-all duration-300 border-none cursor-pointer bg-transparent hover:text-text-main hover:bg-white/10";
+                btnSeeker.className = "role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold flex items-center justify-center gap-2.5 transition-all duration-300 bg-gradient-to-r from-[#2196f3] to-[#00bcd4] text-white shadow-md";
+                btnEmployer.className = "role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold text-slate-800 flex items-center justify-center gap-2.5 transition-all duration-300 bg-transparent hover:bg-slate-50";
             } else {
-                btnEmployer.className = "role-btn px-5 lg:px-8 py-3 rounded-xl text-sm font-semibold flex items-center gap-2.5 transition-all duration-300 border-none cursor-pointer bg-accent-blue text-white shadow-glow-blue";
-                btnSeeker.className = "role-btn px-5 lg:px-8 py-3 rounded-xl text-sm font-semibold text-text-main opacity-70 flex items-center gap-2.5 transition-all duration-300 border-none cursor-pointer bg-transparent hover:text-text-main hover:bg-white/10";
+                btnEmployer.className = "role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold flex items-center justify-center gap-2.5 transition-all duration-300 bg-gradient-to-r from-[#2196f3] to-[#00bcd4] text-white shadow-md";
+                btnSeeker.className = "role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold text-slate-800 flex items-center justify-center gap-2.5 transition-all duration-300 bg-transparent hover:bg-slate-50";
             }
 
             const data = contentData[role];
@@ -591,14 +481,13 @@
             elementsToFade.forEach(el => el.classList.add('fade-out'));
             floatingCards.forEach(el => el.classList.add('float-fade-out'));
 
-            const ring1 = document.getElementById('ring-1');
-            const ring2 = document.getElementById('ring-2');
-            const currentRot1 = parseInt(ring1.dataset.rot || -15);
-            const currentRot2 = parseInt(ring2.dataset.rot || -15);
-            ring1.style.transform = `rotate(${currentRot1 + 180}deg)`;
-            ring2.style.transform = `rotate(${currentRot2 - 180}deg)`;
-            ring1.dataset.rot = currentRot1 + 180;
-            ring2.dataset.rot = currentRot2 - 180;
+            const svgRings = document.getElementById('hero-svg-rings');
+            if (svgRings) {
+                const currentRot = parseInt(svgRings.dataset.rot || 0);
+                const newRot = currentRot + 180;
+                svgRings.style.transform = `rotate(${newRot}deg)`;
+                svgRings.dataset.rot = newRot;
+            }
 
             setTimeout(() => {
                 document.getElementById('hero-title').innerHTML = data.title;
@@ -648,23 +537,25 @@
             const themeDropdown = document.getElementById('themeDropdown');
             const htmlEl = document.documentElement;
             
-            themeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if(themeDropdown.classList.contains('hidden')) {
-                    themeDropdown.classList.remove('hidden');
-                    setTimeout(() => themeDropdown.classList.remove('opacity-0'), 10);
-                } else {
-                    themeDropdown.classList.add('opacity-0');
-                    setTimeout(() => themeDropdown.classList.add('hidden'), 200);
-                }
-            });
+            if (themeBtn && themeDropdown) {
+                themeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if(themeDropdown.classList.contains('hidden')) {
+                        themeDropdown.classList.remove('hidden');
+                        setTimeout(() => themeDropdown.classList.remove('opacity-0'), 10);
+                    } else {
+                        themeDropdown.classList.add('opacity-0');
+                        setTimeout(() => themeDropdown.classList.add('hidden'), 200);
+                    }
+                });
 
-            document.addEventListener('click', (e) => {
-                if (!themeDropdown.contains(e.target) && !themeBtn.contains(e.target)) {
-                    themeDropdown.classList.add('opacity-0');
-                    setTimeout(() => themeDropdown.classList.add('hidden'), 200);
-                }
-            });
+                document.addEventListener('click', (e) => {
+                    if (!themeDropdown.contains(e.target) && !themeBtn.contains(e.target)) {
+                        themeDropdown.classList.add('opacity-0');
+                        setTimeout(() => themeDropdown.classList.add('hidden'), 200);
+                    }
+                });
+            }
 
             const themeButtons = document.querySelectorAll('[data-set-theme]');
             const applyTheme = (theme) => {
