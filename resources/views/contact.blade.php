@@ -60,13 +60,7 @@
                 </div>
             </a>
             
-            <!-- Map Placeholder -->
-            <div class="h-48 bg-[#f0f8ff] border border-blue-100 rounded-2xl overflow-hidden relative group shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_30px_rgba(18,154,239,0.15)] transition-all duration-300">
-                <div class="absolute inset-0 flex items-center justify-center text-[#129aef] opacity-0 font-bold z-10 group-hover:opacity-100 group-hover:bg-white/90 backdrop-blur-sm transition-all cursor-pointer">
-                    <i class="fas fa-map mr-2"></i> View on Google Maps
-                </div>
-                <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Map" class="w-full h-full object-cover opacity-60 mix-blend-multiply transition-all group-hover:scale-110 duration-700">
-            </div>
+
         </div>
     </div>
 </div>
