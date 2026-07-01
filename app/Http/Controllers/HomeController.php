@@ -45,14 +45,32 @@ class HomeController extends Controller
         return view('category-jobs', compact('category', 'jobs'));
     }
 
-    public function jobs()
+    public function jobs(\Illuminate\Http\Request $request)
     {
-        $jobs = JobPost::with(['category', 'subject', 'location', 'qualification'])
-            ->where('status', 'approved')
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+        $query = JobPost::with(['category', 'subject', 'location', 'qualification'])
+            ->where('status', 'approved');
+
+        if ($request->filled('state')) {
+            $query->whereHas('location', function($q) use ($request) {
+                $q->where('state', $request->state);
+            });
+        }
+
+        if ($request->filled('subject')) {
+            $query->where('subject_id', $request->subject);
+        }
+
+        if ($request->filled('class')) {
+            $query->where('category_id', $request->class);
+        }
+
+        $jobs = $query->orderBy('created_at', 'desc')->paginate(12);
+
+        $states = \App\Models\Location::whereNotNull('state')->where('state', '!=', '')->distinct()->orderBy('state')->pluck('state');
+        $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
+        $categories = \App\Models\Category::where('is_active', true)->orderBy('name')->get();
             
-        return view('jobs', compact('jobs'));
+        return view('jobs', compact('jobs', 'states', 'subjects', 'categories'));
     }
 
     public function storeContact(\Illuminate\Http\Request $request)

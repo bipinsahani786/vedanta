@@ -72,15 +72,15 @@
 
         <!-- Left Content -->
         <div class="flex-1 relative z-10 w-full lg:pr-12 flex flex-col items-start text-left mb-16 lg:mb-0 pt-10">
-            <h1 id="hero-title" class="text-4xl lg:text-[54px] font-extrabold leading-[1.1] mb-6 text-white tracking-tight drop-shadow-md relative z-10">
+            <h1 id="hero-title" class="text-4xl lg:text-[54px] font-extrabold leading-[1.1] mb-6 text-white tracking-tight drop-shadow-md relative z-10 transition-all duration-500 ease-in-out">
                 Get placed in top<br>schools across india
             </h1>
             
-            <p id="hero-subtitle" class="text-[15px] lg:text-[17px] font-light max-w-[480px] leading-relaxed mb-8 text-white/90 relative z-10">
+            <p id="hero-subtitle" class="text-[15px] lg:text-[17px] font-light max-w-[480px] leading-relaxed mb-8 text-white/90 relative z-10 transition-all duration-500 ease-in-out">
                 step into the right opportunity with trusted schools that value your talent
             </p>
 
-            <a href="#" class="bg-[#ffb800] text-slate-900 px-7 py-3 rounded-full font-bold text-[15px] inline-flex items-center gap-4 transition-transform hover:scale-105 shadow-[0_4px_15px_rgba(255,184,0,0.3)] mb-12 relative z-10">
+            <a href="{{ route('candidate.register') }}" id="hero-cta-btn" class="bg-[#ffb800] text-slate-900 px-7 py-3 rounded-full font-bold text-[15px] inline-flex items-center gap-4 transition-transform hover:scale-105 shadow-[0_4px_15px_rgba(255,184,0,0.3)] mb-12 relative z-10">
                 <span id="cta-text">Job Seeker</span> 
                 <span class="bg-white w-7 h-7 rounded-full flex items-center justify-center text-slate-900 text-sm shadow-sm">
                     <i class="fas fa-chevron-right"></i>
@@ -109,7 +109,7 @@
                 
                 <!-- SVG Arcs for perfect rounded caps and exact circle tracing -->
                 <div class="absolute z-0 pointer-events-none flex justify-center items-center">
-                    <svg id="hero-svg-rings" class="w-[480px] h-[480px] lg:w-[580px] lg:h-[580px] drop-shadow-xl transition-transform duration-[800ms] ease-in-out" viewBox="0 0 700 700">
+                    <svg id="hero-svg-rings" class="w-[480px] h-[480px] lg:w-[580px] lg:h-[580px] drop-shadow-xl transition-transform duration-500 ease-in-out" viewBox="0 0 700 700">
                         <!-- Yellow Arch (Top Right, slightly longer) -->
                         <circle cx="350" cy="350" r="290" fill="none" stroke="#ffb800" stroke-width="4" stroke-linecap="round" stroke-dasharray="450 2000" transform="rotate(-110 350 350)" />
                         
@@ -127,11 +127,11 @@
                 <!-- Main Image container -->
                 <div class="relative z-10 w-[300px] h-[300px] lg:w-[360px] lg:h-[360px] rounded-full overflow-hidden shadow-inner">
                     <!-- Using the same unspash image -->
-                    <img id="hero-img" src="https://images.unsplash.com/photo-1556157382-97eda2d62296?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Professional" class="w-full h-full object-cover relative z-10">
+                    <img id="hero-img" src="https://images.unsplash.com/photo-1556157382-97eda2d62296?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Professional" class="w-full h-full object-cover relative z-10 transition-all duration-500 ease-in-out">
                 </div>
 
                 <!-- Floating Card 1 (Top Left) -->
-                <div id="fc-1" class="absolute z-30 top-[5%] lg:top-[10%] -left-[10%] lg:-left-[15%] cursor-pointer group">
+                <div id="fc-1" class="absolute z-30 top-[5%] lg:top-[10%] -left-[10%] lg:-left-[15%] cursor-pointer group transition-all duration-500 ease-in-out">
                     <div class="bg-white rounded-[14px] p-5 shadow-2xl flex flex-col items-center min-w-[130px] animate-float group-hover:animate-none group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300">
                         <div id="fc-1-icon-wrap" class="bg-[#ffb800] w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl mb-3 shadow-md border border-[#ffb800]/50 transition-colors duration-300">
                             <i id="fc-1-icon" class="fas fa-briefcase"></i>
@@ -142,7 +142,7 @@
                 </div>
 
                 <!-- Floating Card 2 (Bottom Right) -->
-                <div id="fc-2" class="absolute z-30 bottom-[0%] lg:bottom-[5%] -right-[5%] lg:-right-[10%] cursor-pointer group">
+                <div id="fc-2" class="absolute z-30 bottom-[0%] lg:bottom-[5%] -right-[5%] lg:-right-[10%] cursor-pointer group transition-all duration-500 ease-in-out">
                     <div class="bg-white rounded-[14px] p-5 shadow-2xl flex flex-col items-center min-w-[130px] animate-float group-hover:animate-none group-hover:scale-105 group-hover:-rotate-3 transition-transform duration-300" style="animation-delay: 1.5s;">
                         <h4 id="fc-2-title" class="text-slate-800 font-extrabold text-[14px] mb-1">1+ Million</h4>
                         <p id="fc-2-desc" class="text-[10px] text-slate-500 font-bold mb-3">Trusted User</p>
@@ -159,39 +159,45 @@
         </div>
     </section>
     <!-- Welcome & Statistics Section -->
-    <section class="flex flex-col md:flex-row bg-[#1e293b]">
-        <div class="md:w-1/2 p-8 lg:px-20 lg:py-10 text-white flex flex-col justify-center">
-            <h4 class="text-[#129aef] font-semibold tracking-wider uppercase mb-2">Welcome</h4>
-            <h2 class="text-3xl lg:text-5xl font-bold leading-tight mb-2">Vedanta Placement<br>Agency</h2>
-        </div>
-        <div class="md:w-1/2 p-8 lg:px-16 lg:py-10 text-slate-300 text-sm leading-relaxed flex flex-col justify-center relative">
-            <p class="mb-4">Vedanta Placement Agency is an ISO-certified and government-registered education recruitment consultancy operating at a national level across India. We provide structured, compliance-driven, and outcome-focused hiring solutions to schools, colleges, and educational institutions.</p>
-            <p class="mb-6">With a strong operational presence and an extensive talent network across multiple states, we support institutions in building high-performing academic and administrative teams. Our recruitment methodology is aligned with national education standards, institutional governance requirements, and best practices followed by leading recruitment consultancies in India.</p>
-            <a href="#" class="text-[#ffb800] font-semibold text-sm flex items-center gap-2">Know More <i class="fas fa-chevron-right text-[10px] bg-[#ffb800] text-slate-900 rounded-full w-4 h-4 flex items-center justify-center"></i></a>
-            
-            <!-- Wavy line decoration -->
-            <svg class="absolute right-0 top-1/2 text-[#129aef] opacity-50 w-20 h-20" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 50 Q 12.5 30 25 50 T 50 50 T 75 50 T 100 50" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/>
-            </svg>
+    <section class="relative bg-cover bg-center bg-no-repeat bg-fixed py-16 px-6 lg:px-[8%]" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=100');">
+        <!-- Top Smooth Fade Transition -->
+        <div class="absolute top-0 left-0 w-full h-48 z-10 pointer-events-none" style="background: linear-gradient(to bottom, #040e2d 0%, rgba(4, 14, 45, 0) 100%);"></div>
+        
+        <!-- Glassmorphism Card -->
+        <div class="relative z-20 flex flex-col md:flex-row rounded-3xl overflow-hidden mt-8 border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.1)]" style="background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+            <div class="md:w-1/2 p-10 lg:p-16 flex flex-col justify-center">
+                <h4 class="text-[#129aef] font-semibold tracking-wider uppercase mb-3">Welcome</h4>
+                <h2 class="text-3xl lg:text-5xl font-bold leading-tight mb-2 text-slate-900">Vedanta Placement<br>Agency</h2>
+            </div>
+            <div class="md:w-1/2 p-10 lg:p-16 text-slate-900 text-sm leading-relaxed flex flex-col justify-center relative border-t md:border-t-0 md:border-l border-white/40">
+                <p class="mb-5 text-[15px] font-medium">Vedanta Placement Agency is an ISO-certified and government-registered education recruitment consultancy operating at a national level across India. We provide structured, compliance-driven, and outcome-focused hiring solutions to schools, colleges, and educational institutions.</p>
+                <p class="mb-8 text-[15px] font-medium">With a strong operational presence and an extensive talent network across multiple states, we support institutions in building high-performing academic and administrative teams. Our recruitment methodology is aligned with national education standards, institutional governance requirements, and best practices followed by leading recruitment consultancies in India.</p>
+                <a href="#" class="text-[#129aef] font-bold text-base flex items-center gap-2 hover:text-[#031b4e] transition-colors inline-block w-fit">Know More <i class="fas fa-chevron-right text-[10px] bg-[#129aef] text-white rounded-full w-5 h-5 flex items-center justify-center ml-1 inline-flex"></i></a>
+                
+                <!-- Wavy line decoration -->
+                <svg class="absolute right-0 top-1/2 text-[#129aef] opacity-30 w-32 h-32 -mr-8 pointer-events-none" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 50 Q 12.5 30 25 50 T 50 50 T 75 50 T 100 50" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/>
+                </svg>
+            </div>
         </div>
     </section>
 
     <section class="bg-gradient-to-r from-[#129aef] to-[#031b4e] py-12 px-6 lg:px-[5%] text-white">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/20">
             <div>
-                <h3 class="text-4xl lg:text-6xl font-bold mb-2">85<span class="text-[#ffb800]">+</span></h3>
+                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="85">0</span><span class="text-[#ffb800]">+</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Current Openings</p>
             </div>
             <div>
-                <h3 class="text-4xl lg:text-6xl font-bold mb-2">95<span class="text-[#ffb800]">%</span></h3>
+                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="95">0</span><span class="text-[#ffb800]">%</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Jobs Fulfillment Rate</p>
             </div>
             <div>
-                <h3 class="text-4xl lg:text-6xl font-bold mb-2 text-slate-200">75<span class="text-[#ffb800]">K</span></h3>
+                <h3 class="text-4xl lg:text-6xl font-bold mb-2 text-slate-200"><span class="stat-counter" data-count="75">0</span><span class="text-[#ffb800]">K</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Jobs Applied</p>
             </div>
             <div>
-                <h3 class="text-4xl lg:text-6xl font-bold mb-2">95<span class="text-[#ffb800]">%</span></h3>
+                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="95">0</span><span class="text-[#ffb800]">%</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Satisfied School</p>
             </div>
         </div>
@@ -202,14 +208,14 @@
         
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 relative z-10">
             @foreach($categories as $category)
-            <div
-                class="bg-[#129aef] border-none rounded-xl p-8 text-center text-white transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl cursor-pointer group reveal shadow-md flex flex-col items-center justify-center">
+            <a href="{{ route('category.jobs', $category->id) }}"
+                class="block bg-[#129aef] border-none rounded-xl p-8 text-center text-white transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl cursor-pointer group reveal shadow-md flex flex-col items-center justify-center no-underline">
                 <i class="fas fa-briefcase text-4xl mb-4 block text-white group-hover:scale-110 transition-transform"></i>
                 <h3 class="text-sm font-semibold mb-4">{{ $category->name }}</h3>
                 <div class="bg-white text-[#129aef] px-5 py-2 rounded-full text-xs font-bold inline-block shadow-sm mt-3">
                     {{ $category->jobs_count }} Active Jobs
                 </div>
-            </div>
+            </a>
             @endforeach
         </div>
     </section>
@@ -230,21 +236,26 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
             @forelse($services as $index => $service)
-            <div class="relative bg-white border border-slate-100 p-8 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl group overflow-hidden reveal text-slate-800 reveal-delay-{{ ($index % 4) + 1 }}">
-                <div class="absolute -top-24 -right-24 w-48 h-48 bg-accent-blue opacity-5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 z-0"></div>
-                <div class="relative z-10">
-                    <div class="w-12 h-12 rounded-xl bg-accent-blue text-slate-800_TEMP flex items-center justify-center text-xl mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 shadow-lg">
-                        <i class="{{ $service->icon }}"></i>
-                    </div>
-                    <h3 class="text-slate-800 font-bold text-xl mb-3">{{ $service->title }}</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6">
-                        {{ $service->description }}
-                    </p>
-                    <a href="#" class="inline-flex items-center gap-2 text-accent-blue font-semibold text-sm group/link">
-                        Explore Service 
-                        <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/link:translate-x-1"></i>
-                    </a>
+            <div class="relative bg-slate-50 border border-transparent p-10 rounded-3xl transition-all duration-300 hover:-translate-y-6 hover:scale-110 hover:shadow-[0_40px_80px_rgba(0,0,0,0.2)] hover:border-[#129aef]/30 hover:z-50 group flex flex-col items-center text-center reveal overflow-hidden z-10 reveal-delay-{{ ($index % 4) + 1 }}">
+                
+                <!-- Animated Background Blob -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-[#129aef] rounded-bl-full opacity-0 group-hover:opacity-10 transition-all duration-700 group-hover:scale-[2.5] origin-top-right z-0 pointer-events-none"></div>
+
+                <!-- Icon Box with Advanced Animation -->
+                <div class="relative z-10 w-24 h-24 rounded-3xl bg-[#129aef] text-white flex items-center justify-center text-4xl mb-6 transition-all duration-500 group-hover:-translate-y-4 group-hover:scale-110 group-hover:shadow-[0_20px_40px_rgba(18,154,239,0.5)] group-hover:rotate-12">
+                    <i class="{{ $service->icon }} transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110"></i>
                 </div>
+                
+                <!-- Title -->
+                <h3 class="relative z-10 text-slate-900 font-extrabold text-xl mb-6 transition-colors duration-300 group-hover:text-[#129aef]">{{ $service->title }}</h3>
+                
+                <!-- Read More Link with split animation -->
+                <a href="#" class="relative z-10 inline-flex items-center gap-3 text-[#129aef] font-semibold text-[15px] mt-auto overflow-visible">
+                    <span class="transition-transform duration-500 group-hover:-translate-x-1">Read More</span>
+                    <div class="bg-[#ffb800] text-slate-900 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 group-hover:translate-x-3 group-hover:bg-[#129aef] group-hover:text-white group-hover:shadow-lg group-hover:scale-110">
+                        <i class="fas fa-chevron-right text-[11px] transition-transform duration-500 group-hover:translate-x-0.5"></i>
+                    </div>
+                </a>
             </div>
             @empty
             <div class="col-span-full text-center py-10 opacity-60">
@@ -454,9 +465,9 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             @forelse($recentJobs as $job)
-            <div
-                class="bg-white border border-slate-200 rounded-2xl p-7 text-slate-800 transition-all duration-300 hover:-translate-y-1.5 shadow-lg hover:shadow-2xl flex flex-col group reveal">
-                <h3 class="text-xl font-bold mb-3 text-slate-900">{{ $job->title ?? 'Job Requirement' }}</h3>
+            <a href="{{ route('jobs.show', $job->id) }}"
+                class="block bg-white border border-slate-200 rounded-2xl p-7 text-slate-800 transition-all duration-300 hover:-translate-y-2 shadow-lg hover:shadow-[0_20px_40px_rgba(18,154,239,0.15)] hover:border-[#129aef]/30 flex flex-col group reveal cursor-pointer">
+                <h3 class="text-xl font-bold mb-3 text-slate-900 group-hover:text-[#129aef] transition-colors">{{ $job->title ?? 'Job Requirement' }}</h3>
                 <p class="text-xs text-slate-500 mb-4 flex items-center gap-3">
                     <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> {{ $job->location->city }}, {{ $job->location->state }}</span>
                     <span><i class="far fa-calendar-alt mr-0.5"></i> {{ $job->created_at->format('d M Y') }}</span>
@@ -475,17 +486,25 @@
                 <p class="text-[13px] text-slate-600 leading-relaxed mb-6 flex-grow">
                     {{ Str::limit($job->description, 100) }}
                 </p>
-                <a  href="{{ route('jobs.show', $job->id) }}
-                    class="text-accent-blue font-semibold text-[13px] inline-flex items-center gap-2 self-start group-hover:gap-3 transition-all">View
-                    Details <span
-                        class="bg-accent-yellow text-slate-900 w-5 h-5 rounded-full flex items-center justify-center text-[9px]"><i
-                            class="fas fa-chevron-right"></i></span></a>
-            </div>
+                <div class="text-accent-blue font-semibold text-[13px] inline-flex items-center gap-2 self-start group-hover:gap-3 transition-all mt-auto">
+                    View Details 
+                    <span class="bg-accent-yellow text-slate-900 w-5 h-5 rounded-full flex items-center justify-center text-[9px] transition-transform group-hover:scale-110">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                </div>
+            </a>
             @empty
             <div class="col-span-full text-center py-10 opacity-60">
                 <p>No recent job openings available at the moment.</p>
             </div>
             @endforelse
+        </div>
+
+        <div class="text-center mt-12 reveal">
+            <a href="{{ route('jobs') }}" class="inline-flex items-center justify-center gap-3 bg-[#129aef] text-white font-bold text-[15px] px-8 py-3.5 rounded-full hover:bg-[#031b4e] hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl group">
+                View All Jobs 
+                <i class="fas fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+            </a>
         </div>
     </section>
 
@@ -504,41 +523,172 @@
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 px-0 lg:px-4 relative z-10">
-            @forelse($testimonials as $index => $testimonial)
-            <div class="bg-white border border-slate-100 rounded-2xl p-8 pt-6 relative shadow-lg hover:-translate-y-2 hover:shadow-xl transition-all duration-300 reveal reveal-delay-{{ ($index % 3) + 1 }}">
-                <div class="absolute top-6 right-6 text-[#129aef]/20 text-3xl"><i class="fas fa-quote-right"></i></div>
-                <div class="w-14 h-14 rounded-full -mt-[56px] mx-auto mb-4 border-4 border-slate-50 relative bg-white overflow-hidden shadow-md flex items-center justify-center">
-                    @if($testimonial->image_path)
-                        <img src="{{ Storage::url($testimonial->image_path) }}" alt="{{ $testimonial->name }}" class="w-full h-full object-cover">
-                    @else
-                        <span class="text-xl font-bold text-indigo-600">{{ substr($testimonial->name, 0, 1) }}</span>
-                    @endif
+        @if(isset($testimonials) && count($testimonials) > 0)
+        <style>
+            @keyframes marqueeLeft {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+            }
+            @keyframes marqueeRight {
+                0% { transform: translateX(-50%); }
+                100% { transform: translateX(0); }
+            }
+            .animate-marquee-left {
+                animation: marqueeLeft 35s linear infinite;
+                display: flex;
+                width: max-content;
+            }
+            .animate-marquee-right {
+                animation: marqueeRight 35s linear infinite;
+                display: flex;
+                width: max-content;
+            }
+            .animate-marquee-left:hover, .animate-marquee-right:hover {
+                animation-play-state: paused;
+            }
+            .testimonial-card-w {
+                width: 380px;
+                flex-shrink: 0;
+                white-space: normal;
+            }
+            .fade-edges {
+                -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+                mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            }
+        </style>
+
+        <!-- Marquee Row 1 (Right to Left) -->
+        <div class="overflow-hidden w-full relative z-10 mt-16 mb-12 py-6 fade-edges reveal">
+            <div class="animate-marquee-left flex" style="padding-top: 50px;">
+                @for($i = 0; $i < 2; $i++)
+                <div class="flex gap-6 px-3">
+                    @foreach($testimonials as $testimonial)
+                    <div class="testimonial-card-w border border-blue-100 rounded-2xl p-8 pt-6 relative shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(18,154,239,0.15)] transition-all duration-300" style="background-color: #f0f8ff;">
+                        <div class="absolute top-6 right-6 text-[#129aef]/10 text-4xl"><i class="fas fa-quote-right"></i></div>
+                        <div class="w-16 h-16 rounded-full -mt-[60px] mx-auto mb-4 border-4 border-white relative overflow-hidden shadow-md flex items-center justify-center" style="background-color: #1e9af0;">
+                            @if($testimonial->image_path)
+                                <img src="{{ Storage::url($testimonial->image_path) }}" alt="{{ $testimonial->name }}" class="w-full h-full object-cover bg-white">
+                            @else
+                                <span class="text-xl font-bold text-white">{{ substr($testimonial->name, 0, 1) }}</span>
+                            @endif
+                        </div>
+                        <p class="text-[13px] text-slate-600 leading-relaxed mb-5 italic line-clamp-4 relative z-10">"{{ $testimonial->message }}"</p>
+                        <div class="flex justify-center gap-1 text-accent-yellow text-[12px] mb-3 relative z-10">
+                            @for($stars=0; $stars<$testimonial->rating; $stars++) <i class="fas fa-star"></i> @endfor
+                            @for($stars=0; $stars<(5-$testimonial->rating); $stars++) <i class="far fa-star text-slate-300"></i> @endfor
+                        </div>
+                        <h4 class="text-slate-800 text-base font-extrabold mb-0.5 text-center relative z-10">{{ $testimonial->name }}</h4>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold text-center relative z-10">{{ $testimonial->role }}</p>
+                    </div>
+                    @endforeach
                 </div>
-                <p class="text-[13px] text-slate-600 leading-relaxed mb-5 italic">"{{ $testimonial->message }}"</p>
-                <div class="flex justify-center gap-1 text-accent-yellow text-[11px] mb-3">
-                    @for($i=0; $i<$testimonial->rating; $i++) <i class="fas fa-star"></i> @endfor
-                    @for($i=0; $i<(5-$testimonial->rating); $i++) <i class="far fa-star text-slate-300"></i> @endfor
-                </div>
-                <h4 class="text-slate-800 text-base font-bold mb-0.5">{{ $testimonial->name }}</h4>
-                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">{{ $testimonial->role }}</p>
+                @endfor
             </div>
-            @empty
-            <div class="col-span-full text-center py-10 opacity-60 text-slate-800">
-                <p>No testimonials available.</p>
-            </div>
-            @endforelse
         </div>
+
+        <!-- Marquee Row 2 (Left to Right) -->
+        <div class="overflow-hidden w-full relative z-10 mb-16 py-6 fade-edges reveal reveal-delay-1">
+            <div class="animate-marquee-right flex" style="padding-top: 50px;">
+                @for($i = 0; $i < 2; $i++)
+                <div class="flex gap-6 px-3">
+                    @foreach($testimonials->reverse() as $testimonial)
+                    <div class="testimonial-card-w border border-blue-100 rounded-2xl p-8 pt-6 relative shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(18,154,239,0.15)] transition-all duration-300" style="background-color: #f0f8ff;">
+                        <div class="absolute top-6 right-6 text-[#129aef]/10 text-4xl"><i class="fas fa-quote-right"></i></div>
+                        <div class="w-16 h-16 rounded-full -mt-[60px] mx-auto mb-4 border-4 border-white relative overflow-hidden shadow-md flex items-center justify-center" style="background-color: #1e9af0;">
+                            @if($testimonial->image_path)
+                                <img src="{{ Storage::url($testimonial->image_path) }}" alt="{{ $testimonial->name }}" class="w-full h-full object-cover bg-white">
+                            @else
+                                <span class="text-xl font-bold text-white">{{ substr($testimonial->name, 0, 1) }}</span>
+                            @endif
+                        </div>
+                        <p class="text-[13px] text-slate-600 leading-relaxed mb-5 italic line-clamp-4 relative z-10">"{{ $testimonial->message }}"</p>
+                        <div class="flex justify-center gap-1 text-accent-yellow text-[12px] mb-3 relative z-10">
+                            @for($stars=0; $stars<$testimonial->rating; $stars++) <i class="fas fa-star"></i> @endfor
+                            @for($stars=0; $stars<(5-$testimonial->rating); $stars++) <i class="far fa-star text-slate-300"></i> @endfor
+                        </div>
+                        <h4 class="text-slate-800 text-base font-extrabold mb-0.5 text-center relative z-10">{{ $testimonial->name }}</h4>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold text-center relative z-10">{{ $testimonial->role }}</p>
+                    </div>
+                    @endforeach
+                </div>
+                @endfor
+            </div>
+        </div>
+        @else
+        <div class="text-center py-10 opacity-60 text-slate-800 relative z-10">
+            <p>No testimonials available.</p>
+        </div>
+        @endif
     </section>
 
-    <!-- Get In Touch Section (Contact Form) -->
-    <section class="py-16 px-6 lg:px-[5%] bg-slate-50" id="contact-section">
-        <div class="bg-gradient-to-r from-[#129aef] to-[#031b4e] border border-blue-400/20 rounded-3xl flex flex-col lg:flex-row items-center relative overflow-hidden p-10 lg:p-14 text-white shadow-2xl reveal">
-            <div class="git-bg-pattern absolute inset-0 z-0"></div>
+    <!-- Get In Touch Section (CTA Banner) -->
+    <section class="py-12 px-6 lg:px-[5%] bg-slate-50" id="contact-section">
+        <div class="flex flex-col lg:flex-row relative p-10 lg:p-14 text-white shadow-xl reveal group perspective-[1000px] min-h-[320px] overflow-hidden" style="background-color: #1e9af0; border-radius: 2.5rem;">
+            <!-- Woven Isometric Background Pattern -->
+            <div class="absolute inset-0 z-0 opacity-10 pointer-events-none mix-blend-overlay">
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <g id="cube-pattern" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- Cube Outlines -->
+                            <path d="M30,0 L60,17.32 L60,51.96 L30,69.28 L0,51.96 L0,17.32 Z" />
+                            <path d="M0,17.32 L30,34.64 L60,17.32 M30,34.64 L30,69.28" />
+                            <!-- Woven Stripes -->
+                            <path d="M10,11.54 L40,28.86 M20,5.77 L50,23.09" />
+                            <path d="M10,23.09 L10,57.73 M20,28.86 L20,63.5" />
+                            <path d="M40,28.86 L40,63.5 M50,23.09 L50,57.73" />
+                        </g>
+                        <pattern id="woven-cubes" width="60" height="103.923" patternUnits="userSpaceOnUse" patternTransform="scale(1.2)">
+                            <use href="#cube-pattern" x="0" y="0" />
+                            <use href="#cube-pattern" x="-30" y="51.9615" />
+                            <use href="#cube-pattern" x="30" y="51.9615" />
+                            <use href="#cube-pattern" x="-30" y="-51.9615" />
+                            <use href="#cube-pattern" x="30" y="-51.9615" />
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#woven-cubes)" />
+                </svg>
+            </div>
+
+            <!-- Decorative Elements -->
+            <div class="absolute top-12 opacity-80 hidden lg:block anim-float-h" style="left: 55%;">
+                <svg width="60" height="15" viewBox="0 0 60 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 7.5L10 2L18 7.5L26 2L34 7.5L42 2L50 7.5L58 2" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="absolute bottom-10 opacity-60 hidden lg:block anim-bg-waves" style="left: 55%; animation-duration: 8s;">
+                <div class="grid grid-cols-4 gap-3">
+                    @for($i=0; $i<12; $i++)
+                        <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                    @endfor
+                </div>
+            </div>
+            <div class="absolute top-1/2 right-[5%] opacity-40 hidden lg:block -translate-y-1/2 anim-float-h" style="animation-duration: 6s; animation-direction: reverse;">
+                <div class="grid grid-cols-3 gap-3">
+                    @for($i=0; $i<9; $i++)
+                        <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                    @endfor
+                </div>
+            </div>
+
+            <!-- Additional Decorative Patterns -->
+            <div class="absolute top-[20%] right-[30%] opacity-40 hidden lg:block anim-bg-waves" style="animation-duration: 12s;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round">
+                    <path d="M12 2v20M2 12h20"/>
+                </svg>
+            </div>
+            <div class="absolute bottom-[15%] left-[45%] opacity-30 hidden lg:block anim-float-h" style="animation-duration: 9s;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round">
+                    <path d="M12 2v20M2 12h20"/>
+                </svg>
+            </div>
+            <div class="absolute bottom-[20%] left-[8%] w-[40px] h-[40px] border-[3px] border-white/30 rounded-full z-0 hidden lg:block anim-bg-waves" style="animation-duration: 7s;"></div>
             
-            <div class="flex-1 z-20 pr-0 lg:pr-8 mb-8 lg:mb-0 text-center lg:text-left">
-                <h2 class="text-3xl font-bold mb-4">Get In Touch With Us</h2>
-                <p class="text-sm leading-relaxed mb-6 opacity-85">Have any queries or want to follow up? Fill out the form and our team will get back to you shortly.</p>
+            <div class="absolute -bottom-16 -right-16 w-80 h-80 border-[1px] border-white/20 rounded-full z-0 pointer-events-none hidden lg:block"></div>
+
+            <!-- Content -->
+            <div class="w-full lg:w-[55%] z-20 relative text-center lg:text-left my-auto mb-8 lg:mb-0">
+                <h2 class="text-3xl lg:text-4xl font-bold mb-3 tracking-wide">Get In Touch With Us</h2>
+                <p class="text-[14px] lg:text-sm leading-relaxed mb-6 opacity-90 max-w-xl mx-auto lg:mx-0 font-medium">Have any queries or want to follow up? Fill out the form and our team will get back to you shortly.</p>
                 
                 <div id="form-messages" class="mb-4">
                     @if(session('success'))
@@ -560,25 +710,26 @@
                 <form id="ajaxContactForm" action="{{ route('contact.store') }}" method="POST" class="text-left space-y-4 max-w-md mx-auto lg:mx-0">
                     @csrf
                     <div>
-                        <input type="text" name="name" placeholder="Your Name" required class="w-full bg-white/40 border border-slate-300/50 rounded-lg px-4 py-2.5 text-sm text-slate-800 placeholder-white/60 focus:outline-none focus:border-accent-yellow transition-colors">
+                        <input type="text" name="name" placeholder="Your Name" required class="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-400 transition-colors">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <input type="email" name="email" placeholder="Email Address" class="w-full bg-white/40 border border-slate-300/50 rounded-lg px-4 py-2.5 text-sm text-slate-800 placeholder-white/60 focus:outline-none focus:border-accent-yellow transition-colors">
-                        <input type="text" name="phone" placeholder="Phone Number" required class="w-full bg-white/40 border border-slate-300/50 rounded-lg px-4 py-2.5 text-sm text-slate-800 placeholder-white/60 focus:outline-none focus:border-accent-yellow transition-colors">
+                        <input type="email" name="email" placeholder="Email Address" class="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-400 transition-colors">
+                        <input type="text" name="phone" placeholder="Phone Number" required class="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-400 transition-colors">
                     </div>
                     <div>
-                        <textarea name="message" rows="3" placeholder="How can we help you?" required class="w-full bg-white/40 border border-slate-300/50 rounded-lg px-4 py-2.5 text-sm text-slate-800 placeholder-white/60 focus:outline-none focus:border-accent-yellow transition-colors"></textarea>
+                        <textarea name="message" rows="3" placeholder="How can we help you?" required class="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-400 transition-colors"></textarea>
                     </div>
-                    <button type="submit" id="submitBtn" class="bg-accent-yellow text-slate-900 px-8 py-3 rounded-full font-bold text-sm hover:-translate-y-1 hover:shadow-glow-yellow transition-all w-full md:w-auto flex justify-center items-center gap-2">
+                    <button type="submit" id="submitBtn" class="text-slate-900 px-8 py-3 rounded-full font-bold text-sm hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl w-full md:w-auto flex justify-center items-center gap-2" style="background-color: #ffcc00;">
                         <span>Submit Query</span> <i class="fas fa-paper-plane"></i>
                     </button>
                 </form>
             </div>
 
-            <div class="flex-1 z-20 flex justify-center lg:justify-end relative hidden md:flex">
-                <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    alt="Contact Us"
-                    class="relative lg:absolute -bottom-12 right-0 max-h-[350px] rounded-2xl shadow-2xl object-cover">
+            <!-- Absolute Image clipped to the box size -->
+            <div class="absolute bottom-0 -right-4 lg:-right-8 z-30 hidden md:block transition-transform duration-700 ease-out transform group-hover:scale-105 origin-bottom pointer-events-none">
+                <img src="{{ asset('images/pic.png') }}"
+                    alt="Contact Support"
+                    class="w-auto h-[400px] lg:h-[500px] object-contain object-bottom transition-all duration-700">
             </div>
         </div>
     </section>
@@ -612,62 +763,95 @@
                 Have</h2>
             <p class="text-slate-500 text-xs">Verified standards empowering educational careers worldwide.</p>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <style>
+            @media (min-width: 768px) {
+                .cert-step-1 { margin-top: 0px !important; }
+                .cert-step-2 { margin-top: 40px !important; }
+                .cert-step-3 { margin-top: 80px !important; }
+                .cert-step-4 { margin-top: 40px !important; }
+                .cert-step-5 { margin-top: 0px !important; }
+            }
+            .cert-card-hover {
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                border: 2px solid transparent;
+            }
+            .cert-card-hover:hover {
+                transform: translateY(-12px);
+                box-shadow: 0 20px 40px rgba(30, 154, 240, 0.15);
+                border-color: #1e9af0;
+            }
+            .cert-card-hover img {
+                transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            .cert-card-hover:hover img {
+                transform: scale(1.15);
+            }
+            .cert-card-hover .badge-verified {
+                transition: all 0.3s ease;
+            }
+            .cert-card-hover:hover .badge-verified {
+                background-color: #1e9af0;
+                color: white;
+            }
+        </style>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 lg:gap-6 items-start pb-20">
+            <!-- Card 1 -->
             <div
-                class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col items-center shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 reveal reveal-delay-1">
-                <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 mb-3">
-                    <i class="fas fa-certificate text-xl"></i>
+                class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-1 cert-step-1 cert-card-hover group">
+                <div class="h-16 mb-4 flex items-center justify-center">
+                    <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/msme.jpg" class="max-h-full max-w-full object-contain" alt="MSME">
                 </div>
                 <h3 class="font-bold text-sm mb-3 text-slate-800">MSME</h3>
                 <div
-                    class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1">
+                    class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 badge-verified">
                     <i class="fas fa-check-circle"></i> Verified
                 </div>
             </div>
+            <!-- Card 2 -->
             <div
-                class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col items-center shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 reveal reveal-delay-2">
-                <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-500 mb-3">
-                    <i class="fas fa-briefcase text-xl"></i>
+                class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-2 cert-step-2 cert-card-hover group">
+                <div class="h-16 mb-4 flex items-center justify-center">
+                    <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/NCS.jpg" class="max-h-full max-w-full object-contain" alt="NCS">
                 </div>
-                <h3 class="font-bold text-sm mb-3 text-text-dark">NCS</h3>
+                <h3 class="font-bold text-sm mb-3 text-slate-800">NCS</h3>
                 <div
-                    class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1">
+                    class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 badge-verified">
                     <i class="fas fa-check-circle"></i> Verified
                 </div>
             </div>
+            <!-- Card 3 -->
             <div
-                class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col items-center shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 reveal reveal-delay-3">
-                <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-700 mb-3">
-                    <i class="fas fa-globe text-xl"></i>
+                class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-3 cert-step-3 cert-card-hover group">
+                <div class="h-16 mb-4 flex items-center justify-center">
+                    <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/ISO-Logo-e1773586209102.png" class="max-h-full max-w-full object-contain" alt="ISO">
                 </div>
-                <h3 class="font-bold text-sm mb-3 text-text-dark">ISO</h3>
+                <h3 class="font-bold text-sm mb-3 text-slate-800">ISO</h3>
                 <div
-                    class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1">
+                    class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 badge-verified">
                     <i class="fas fa-check-circle"></i> Verified
                 </div>
             </div>
+            <!-- Card 4 -->
             <div
-                class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col items-center shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 reveal reveal-delay-4">
-                <div
-                    class="w-12 h-12 bg-blue-50 rounded-sm flex items-center justify-center text-blue-700 mb-3 font-bold text-base border border-blue-200">
-                    IEC
+                class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-4 cert-step-4 cert-card-hover group">
+                <div class="h-16 mb-4 flex items-center justify-center">
+                    <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/IEC.png" class="max-h-full max-w-full object-contain" alt="IEC">
                 </div>
-                <h3 class="font-bold text-sm mb-3 text-text-dark">IEC</h3>
+                <h3 class="font-bold text-sm mb-3 text-slate-800">IEC</h3>
                 <div
-                    class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1">
+                    class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 badge-verified">
                     <i class="fas fa-check-circle"></i> Verified
                 </div>
             </div>
+            <!-- Card 5 -->
             <div
-                class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col items-center shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 reveal reveal-delay-1">
-                <div class="mb-3 text-center leading-none text-sm">
-                    <span class="text-orange-500 font-bold">START</span><span
-                        class="text-blue-500 font-bold">UP</span><br>
-                    <span class="text-green-600 font-bold">INDIA</span>
+                class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-1 cert-step-5 cert-card-hover group">
+                <div class="h-16 mb-4 flex items-center justify-center">
+                    <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/standup-india.jpg" class="max-h-full max-w-full object-contain" alt="START UP INDIA">
                 </div>
-                <h3 class="font-bold text-sm mb-3 text-text-dark">START UP INDIA</h3>
+                <h3 class="font-bold text-sm mb-3 text-slate-800">START UP INDIA</h3>
                 <div
-                    class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1">
+                    class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 badge-verified">
                     <i class="fas fa-check-circle"></i> Verified
                 </div>
             </div>
@@ -722,6 +906,52 @@
             submitBtn.innerHTML = originalBtnText;
             msgContainer.innerHTML = `<div class="bg-red-500/20 border border-red-500/50 text-slate-800 px-4 py-3 rounded text-sm text-left animate-fade-in"><i class="fas fa-exclamation-triangle mr-2"></i> Something went wrong. Please try again.</div>`;
             console.error('Error:', error);
+        });
+    });
+
+    // Statistics Counter Animation
+    document.addEventListener('DOMContentLoaded', () => {
+        const counters = document.querySelectorAll('.stat-counter');
+        const speed = 40; 
+
+        const animateCounters = (entries, observer) => {
+            entries.forEach(entry => {
+                const counter = entry.target;
+                if (entry.isIntersecting) {
+                    if(counter.dataset.isAnimating === 'true') return;
+                    counter.dataset.isAnimating = 'true';
+                    counter.innerText = '0';
+                    
+                    const updateCount = () => {
+                        if(counter.dataset.isAnimating !== 'true') return;
+                        
+                        const target = +counter.getAttribute('data-count');
+                        const count = +counter.innerText;
+                        const inc = target / speed;
+
+                        if (count < target) {
+                            counter.innerText = Math.ceil(count + inc);
+                            counter.timeoutId = setTimeout(updateCount, 40);
+                        } else {
+                            counter.innerText = target;
+                            counter.dataset.isAnimating = 'false';
+                        }
+                    };
+                    updateCount();
+                } else {
+                    counter.dataset.isAnimating = 'false';
+                    if(counter.timeoutId) clearTimeout(counter.timeoutId);
+                    counter.innerText = '0';
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(animateCounters, {
+            threshold: 0.1
+        });
+
+        counters.forEach(counter => {
+            observer.observe(counter);
         });
     });
 </script>

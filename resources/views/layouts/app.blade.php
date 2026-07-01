@@ -4,15 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vedanta Placement Agency — The Gold Standard in Education Recruitment</title>
+    <title>@yield('title', 'Vedanta Placement Agency — The Gold Standard in Education Recruitment')</title>
     <meta name="description"
-        content="Vedanta Placement Agency connects educators and schools across India. Find top teaching jobs or hire expert educators with us.">
+        content="@yield('meta_description', 'Vedanta Placement Agency connects educators and schools across India. Find top teaching jobs or hire expert educators with us.')">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&family=Oswald:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v={{ time() }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -119,30 +120,17 @@
 
         /* Smooth header on scroll */
         .header-scrolled {
-            background-color: var(--theme-primary-bg) !important;
+            background-color: rgba(255, 255, 255, 0.95) !important;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
         }
     </style>
 </head>
 
 <body class="bg-secondary-bg text-text-dark">
 
-    <!-- Preloader -->
-    <div id="page-loader" class="fixed inset-0 z-[9999] bg-primary-bg flex flex-col items-center justify-center transition-opacity duration-700 ease-in-out">
-        <div class="relative flex flex-col items-center">
-            <!-- Logo -->
-            <img src="/images/logo.png" alt="Vedanta Placement Agency" class="h-20 md:h-24 w-auto object-contain mb-8 animate-pulse-soft">
-            
-            <!-- Modern Loader -->
-            <div class="flex items-center gap-2">
-                <div class="w-3 h-3 rounded-full bg-accent-blue animate-bounce" style="animation-delay: -0.3s"></div>
-                <div class="w-3 h-3 rounded-full bg-accent-yellow animate-bounce" style="animation-delay: -0.15s"></div>
-                <div class="w-3 h-3 rounded-full bg-accent-blue hover:bg-accent-blue-hover animate-bounce"></div>
-            </div>
-        </div>
-    </div>
+    <!-- Preloader removed per user request -->
 
     <!-- Top Contact Bar -->
     <div
@@ -164,54 +152,54 @@
         </div>
     </div>
 
-    <!-- Header (Sticky) -->
+    <!-- Header (Floating & White) -->
     <header id="main-header"
-        class="sticky top-0 bg-primary-bg px-6 py-4 lg:px-[5%] flex justify-between items-center z-[100] transition-all duration-500">
+        class="sticky top-4 mx-4 lg:mx-[5%] rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-slate-100 px-6 py-4 flex justify-between items-center z-[100] transition-all duration-500">
         <a href="#" class="flex items-center no-underline">
-            <img src="/images/logo.png" alt="Vedanta Placement Agency" class="h-12 w-auto object-contain">
+            <img src="/images/logo.png?v={{ time() }}" alt="Vedanta Placement Agency" class="h-12 w-auto object-contain">
         </a>
         <nav class="hidden lg:flex items-center">
             <ul class="flex gap-6 mr-8 list-none">
                 <li><a href="{{ route('home') }}"
-                        class="{{ request()->routeIs('home') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('home') ? 'after:w-0' : '' }}">Home</a>
+                        class="{{ request()->routeIs('home') ? 'text-accent-blue after:w-full' : 'text-slate-700 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('home') ? 'after:w-0' : '' }}">Home</a>
                 </li>
                 <li><a href="{{ route('about') }}"
-                        class="{{ request()->routeIs('about') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('about') ? 'after:w-0' : '' }}">About us</a></li>
+                        class="{{ request()->routeIs('about') ? 'text-accent-blue after:w-full' : 'text-slate-700 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('about') ? 'after:w-0' : '' }}">About us</a></li>
                 <li><a href="{{ route('services') }}"
-                        class="{{ request()->routeIs('services') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('services') ? 'after:w-0' : '' }}">Our Services</a></li>
+                        class="{{ request()->routeIs('services') ? 'text-accent-blue after:w-full' : 'text-slate-700 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('services') ? 'after:w-0' : '' }}">Our Services</a></li>
                 <li><a href="{{ route('jobs') }}"
-                        class="{{ request()->routeIs('jobs') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('jobs') ? 'after:w-0' : '' }}">Jobs</a>
+                        class="{{ request()->routeIs('jobs') ? 'text-accent-blue after:w-full' : 'text-slate-700 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('jobs') ? 'after:w-0' : '' }}">Jobs</a>
                 </li>
                 <li><a href="{{ route('resume.builder') }}"
-                        class="{{ request()->routeIs('resume.builder') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('resume.builder') ? 'after:w-0' : '' }}">Resume Builder <span class="bg-accent-yellow text-white text-[8px] px-1 py-0.5 rounded uppercase font-bold ml-1 relative -top-1">Free</span></a></li>
+                        class="{{ request()->routeIs('resume.builder') ? 'text-accent-blue after:w-full' : 'text-slate-700 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('resume.builder') ? 'after:w-0' : '' }}">Resume Builder <span class="bg-accent-yellow text-white text-[8px] px-1 py-0.5 rounded uppercase font-bold ml-1 relative -top-1">Free</span></a></li>
                 <li><a href="{{ route('hiring') }}"
-                        class="{{ request()->routeIs('hiring') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('hiring') ? 'after:w-0' : '' }}">Hiring Process</a></li>
+                        class="{{ request()->routeIs('hiring') ? 'text-accent-blue after:w-full' : 'text-slate-700 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('hiring') ? 'after:w-0' : '' }}">Hiring Process</a></li>
                 <li><a href="{{ route('contact') }}"
-                        class="{{ request()->routeIs('contact') ? 'text-accent-blue after:w-full' : 'text-text-main opacity-80 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact us</a></li>
+                        class="{{ request()->routeIs('contact') ? 'text-accent-blue after:w-full' : 'text-slate-700 hover:text-accent-blue hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact us</a></li>
             </ul>
             <div class="flex gap-3 items-center">
                 @auth
                     <a href="{{ auth()->user()->role === 'candidate' ? route('candidate.dashboard') : (auth()->user()->role === 'employer' ? route('employer.dashboard') : route('admin.dashboard')) }}"
-                        class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-white/10 text-text-main hover:bg-white/20 border border-white/15 flex items-center gap-2">
+                        class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 flex items-center gap-2">
                         <div class="w-6 h-6 rounded-full bg-accent-blue text-white flex items-center justify-center text-[10px] font-bold">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
                         Dashboard
                     </a>
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
-                        <button type="submit" class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all text-red-400 hover:bg-red-500/10 border border-red-500/20 flex items-center gap-1.5">
+                        <button type="submit" class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all text-red-500 hover:bg-red-50 border border-red-200 flex items-center gap-1.5">
                             <i class="fas fa-sign-out-alt text-xs"></i> Logout
                         </button>
                     </form>
                 @else
                     <a href="/login"
-                        class="px-5 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-white/10 text-text-main hover:bg-white/20 border border-white/15">Login</a>
+                        class="px-5 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200">Login</a>
                     <a href="/register"
                         class="px-5 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</a>
                 @endauth
             </div>
         </nav>
         <!-- Mobile Menu Button -->
-        <button id="mobileMenuBtn" class="lg:hidden text-text-main text-2xl focus:outline-none">
+        <button id="mobileMenuBtn" class="lg:hidden text-slate-800 text-2xl focus:outline-none">
             <i class="fas fa-bars"></i>
         </button>
     </header>
@@ -417,6 +405,7 @@
                 title: "Get placed in top<br>schools across...",
                 subtitle: "step into the right opportunity with trusted schools that value your talent",
                 ctaText: "Job Seeker",
+                ctaLink: "{{ route('candidate.register') }}",
                 imgUrl: "https://images.unsplash.com/photo-1556157382-97eda2d62296?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
                 fc1Title: "20K +",
                 fc1Desc: "Job Vacancy",
@@ -436,6 +425,7 @@
                 title: "Hire the best<br>educators globally...",
                 subtitle: "partner with us to find top-tier teaching professionals for your institution",
                 ctaText: "Employer",
+                ctaLink: "{{ route('employer.register') }}",
                 imgUrl: "https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
                 fc1Title: "500+",
                 fc1Desc: "Partner Schools",
@@ -493,6 +483,7 @@
                 document.getElementById('hero-title').innerHTML = data.title;
                 document.getElementById('hero-subtitle').innerHTML = data.subtitle;
                 document.getElementById('cta-text').innerText = data.ctaText;
+                document.getElementById('hero-cta-btn').href = data.ctaLink;
                 document.getElementById('hero-img').src = data.imgUrl;
 
                 document.getElementById('fc-1-title').innerText = data.fc1Title;
@@ -616,21 +607,7 @@
             applyFont(savedFont);
         });
     </script>
-    <script>
-        // Preloader Logic
-        window.addEventListener('load', () => {
-            const loader = document.getElementById('page-loader');
-            if (loader) {
-                // Short delay to ensure logo and loader are visible and look premium
-                setTimeout(() => {
-                    loader.classList.add('opacity-0');
-                    setTimeout(() => {
-                        loader.style.display = 'none';
-                    }, 700); // Matches CSS transition duration
-                }, 600); 
-            }
-        });
-    </script>
+
     @stack('scripts')
 </body>
 

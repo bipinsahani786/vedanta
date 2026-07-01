@@ -1,102 +1,138 @@
 @extends('layouts.app')
 @section('content')
 <x-page-header title="Find Your Dream Role" :breadcrumbs="['Home' => route('home'), 'Jobs' => null]" />
-<div class="py-12 px-6 lg:px-[5%] bg-card-bg/30 border-b border-card-border">
-    <div class="max-w-4xl mx-auto text-center reveal">
-        <!-- Search Bar -->
-        <div class="bg-primary-bg border border-card-border p-2 rounded-full flex items-center shadow-lg mx-auto mb-6 transition-all focus-within:border-accent-blue focus-within:shadow-[0_4px_20px_rgba(var(--theme-accent-blue-rgb),0.2)]">
-            <div class="px-4 text-text-main opacity-50"><i class="fas fa-search"></i></div>
-            <input type="text" placeholder="Job title, keywords, or school..." class="bg-transparent border-none outline-none text-text-main flex-grow text-sm py-2">
-            <div class="hidden md:flex border-l border-card-border px-4 text-text-main opacity-50 items-center gap-2">
-                <i class="fas fa-map-marker-alt"></i>
-                <input type="text" placeholder="Location" class="bg-transparent border-none outline-none text-text-main text-sm w-32">
-            </div>
-            <button class="bg-accent-blue text-white font-bold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity">Search</button>
-        </div>
-        <div class="flex flex-wrap justify-center gap-2 text-xs text-text-main opacity-70">
-            <span>Popular:</span>
-            <a href="#" class="hover:text-accent-blue transition-colors">Mathematics Teacher</a>,
-            <a href="#" class="hover:text-accent-blue transition-colors">Principal</a>,
-            <a href="#" class="hover:text-accent-blue transition-colors">Computer Science</a>
+<div class="py-12 px-6 lg:px-[5%] bg-slate-50/50 border-b border-slate-200 relative overflow-hidden">
+    <!-- Decorative Pattern -->
+    <div class="absolute inset-0 z-0 opacity-[0.04]" style="background-image: radial-gradient(#3b82f6 1.5px, transparent 1.5px); background-size: 24px 24px;"></div>
+
+    <div class="max-w-5xl mx-auto reveal relative z-10">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 relative overflow-hidden">
+            <!-- Subtle accent inside the box -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-accent-blue/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
+            
+            <h2 class="text-2xl font-bold text-slate-800 mb-8 relative z-10">Let Your Teaching Career Begin Here</h2>
+            
+            <form action="{{ route('jobs') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end">
+                <!-- State -->
+                <div class="flex-1 w-full">
+                    <label class="block text-sm font-medium text-slate-600 mb-2">State</label>
+                    <select name="state" class="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-accent-blue/30 focus:border-accent-blue appearance-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;">
+                        <option value="">Select State</option>
+                        @foreach($states as $st)
+                            <option value="{{ $st }}" {{ request('state') == $st ? 'selected' : '' }}>{{ $st }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <!-- Subject -->
+                <div class="flex-1 w-full">
+                    <label class="block text-sm font-medium text-slate-600 mb-2">Subject</label>
+                    <select name="subject" class="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-accent-blue/30 focus:border-accent-blue appearance-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;">
+                        <option value="">Select Subject</option>
+                        @foreach($subjects as $sub)
+                            <option value="{{ $sub->id }}" {{ request('subject') == $sub->id ? 'selected' : '' }}>{{ $sub->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <!-- Class -->
+                <div class="flex-1 w-full">
+                    <label class="block text-sm font-medium text-slate-600 mb-2">Class</label>
+                    <select name="class" class="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-accent-blue/30 focus:border-accent-blue appearance-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;">
+                        <option value="">Select Class</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}" {{ request('class') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <!-- Search Button -->
+                <div class="w-full md:w-auto">
+                    <button type="submit" class="w-full md:w-[150px] bg-white border border-slate-200 text-slate-800 font-bold px-6 py-3 rounded-lg hover:bg-slate-50 transition-colors h-[46px] shadow-sm">Search</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<div class="py-12 px-6 lg:px-[5%] flex flex-col lg:flex-row gap-8">
+<div class="py-12 px-6 lg:px-[5%] flex flex-col lg:flex-row gap-8 bg-white relative overflow-hidden">
+    <!-- Decorative Pattern -->
+    <div class="absolute inset-0 z-0 opacity-[0.02]" style="background-image: radial-gradient(#000000 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
+
     <!-- Filters -->
-    <div class="w-full lg:w-1/4">
-        <div class="bg-card-bg border border-card-border rounded-xl p-6 sticky top-28">
-            <h3 class="text-lg font-bold text-text-main mb-4">Filters</h3>
+    <div class="w-full lg:w-1/4 relative z-10">
+        <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 sticky top-28">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Filters</h3>
             <div class="mb-6">
-                <h4 class="text-sm font-semibold text-text-main mb-3">Job Type</h4>
+                <h4 class="text-sm font-semibold text-slate-800 mb-3">Job Type</h4>
                 <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-sm text-text-main opacity-80 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Full Time</label>
-                    <label class="flex items-center gap-2 text-sm text-text-main opacity-80 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Part Time</label>
-                    <label class="flex items-center gap-2 text-sm text-text-main opacity-80 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Contract</label>
+                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Full Time</label>
+                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Part Time</label>
+                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Contract</label>
                 </div>
             </div>
             <div class="mb-6">
-                <h4 class="text-sm font-semibold text-text-main mb-3">Category</h4>
+                <h4 class="text-sm font-semibold text-slate-800 mb-3">Category</h4>
                 <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-sm text-text-main opacity-80 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Teaching Staff</label>
-                    <label class="flex items-center gap-2 text-sm text-text-main opacity-80 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Administration</label>
-                    <label class="flex items-center gap-2 text-sm text-text-main opacity-80 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Support Staff</label>
+                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Teaching Staff</label>
+                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Administration</label>
+                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Support Staff</label>
                 </div>
             </div>
-            <button class="w-full border border-accent-blue text-accent-blue rounded-lg py-2 text-sm font-semibold hover:bg-accent-blue/10 transition-colors">Apply Filters</button>
+            <button class="w-full border-2 border-accent-blue text-accent-blue rounded-xl py-2.5 text-sm font-bold hover:bg-accent-blue hover:text-white transition-colors">Apply Filters</button>
         </div>
     </div>
 
     <!-- Job List -->
-    <div class="w-full lg:w-3/4 space-y-4">
+    <div class="w-full lg:w-3/4 space-y-4 relative z-10">
         @forelse($jobs as $job)
-        <div class="bg-card-bg border border-card-border rounded-xl p-6 hover:border-accent-blue/50 hover:shadow-lg transition-all group reveal">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 hover:border-accent-blue/50 hover:shadow-xl transition-all duration-300 group reveal">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 bg-white rounded-lg flex items-center justify-center p-2">
+                    <div class="w-14 h-14 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
                         <img src="https://ui-avatars.com/api/?name={{ urlencode($job->school_name) }}&background=random" class="rounded">
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-text-main group-hover:text-accent-blue transition-colors">
+                        <h3 class="text-lg font-bold text-slate-900 group-hover:text-accent-blue transition-colors">
                             <a href="{{ route('jobs.show', $job->id) }}">{{ $job->title ?? 'Job Requirement' }}</a>
                         </h3>
-                        <p class="text-sm text-text-main opacity-60">{{ $job->school_name }} • {{ $job->location->city }}, {{ $job->location->state }}</p>
+                        <p class="text-sm text-slate-500 font-medium">{{ $job->school_name }} • {{ $job->location->city ?? 'N/A' }}, {{ $job->location->state ?? 'N/A' }}</p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <span class="bg-accent-blue/10 text-accent-blue px-3 py-1 rounded-full text-xs font-bold">{{ $job->category->name }}</span>
-                    <p class="text-xs text-text-main opacity-50 mt-2">Posted {{ $job->created_at->diffForHumans() }}</p>
+                    <span class="bg-blue-50 text-accent-blue px-3 py-1.5 rounded-full text-xs font-bold">{{ $job->category->name ?? 'N/A' }}</span>
+                    <p class="text-xs text-slate-400 font-medium mt-2">Posted {{ $job->created_at->diffForHumans() }}</p>
                 </div>
             </div>
-            <p class="text-sm text-text-main opacity-70 leading-relaxed mb-4">
+            <p class="text-sm text-slate-600 leading-relaxed mb-6">
                 {{ Str::limit($job->description, 150) }}
             </p>
-            <div class="flex flex-wrap items-center gap-2 mb-4">
-                <span class="bg-card-bg border border-card-border px-2.5 py-1 rounded-lg text-[11px] font-semibold text-text-main opacity-80 flex items-center gap-1.5">
-                    <i class="fas fa-book text-accent-blue text-[9px]"></i> {{ $job->subject->name }}
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <span class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 flex items-center gap-2 group-hover:border-accent-blue/30 transition-colors">
+                    <i class="fas fa-book text-accent-blue"></i> {{ $job->subject->name ?? 'N/A' }}
                 </span>
-                <span class="bg-card-bg border border-card-border px-2.5 py-1 rounded-lg text-[11px] font-semibold text-text-main opacity-80 flex items-center gap-1.5">
-                    <i class="fas fa-graduation-cap text-accent-blue text-[9px]"></i> {{ $job->qualification->name }}
+                <span class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 flex items-center gap-2 group-hover:border-accent-blue/30 transition-colors">
+                    <i class="fas fa-graduation-cap text-accent-blue"></i> {{ $job->qualification->name ?? 'N/A' }}
                 </span>
             </div>
-            <div class="flex justify-between items-center border-t border-card-border pt-4">
-                <div class="flex gap-4 text-xs text-text-main opacity-60">
+            <div class="flex justify-between items-center border-t border-slate-100 pt-5">
+                <div class="flex gap-4 text-sm font-bold text-slate-700">
                     @if($job->salary_range)
-                    <span><i class="fas fa-rupee-sign"></i> {{ $job->salary_range }}</span>
+                    <span><i class="fas fa-rupee-sign text-slate-400"></i> {{ $job->salary_range }}</span>
                     @endif
                 </div>
-                <a href="{{ route('jobs.show', $job->id) }}" class="text-accent-blue font-semibold text-sm hover:underline">Apply Now <i class="fas fa-arrow-right ml-1"></i></a>
+                <a href="{{ route('jobs.show', $job->id) }}" class="text-accent-blue font-bold text-sm hover:underline flex items-center gap-2">Apply Now <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
         @empty
-        <div class="text-center py-12 border border-card-border rounded-xl">
-            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4"><i class="fas fa-briefcase"></i></div>
-            <h3 class="text-lg font-bold text-text-main mb-2">No Active Jobs</h3>
-            <p class="text-text-main opacity-60 text-sm">We currently don't have any job openings that match your criteria.</p>
+        <div class="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
+            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-slate-300 shadow-sm text-2xl mx-auto mb-4"><i class="fas fa-briefcase"></i></div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">No Active Jobs</h3>
+            <p class="text-slate-500 text-sm max-w-md mx-auto">We currently don't have any job openings that match your exact criteria. Please try adjusting your filters.</p>
         </div>
         @endforelse
 
-        <div class="mt-8">
+        <div class="mt-12">
             {{ $jobs->links() }}
         </div>
     </div>
