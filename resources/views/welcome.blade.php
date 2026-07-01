@@ -127,7 +127,7 @@
                 <!-- Main Image container -->
                 <div class="relative z-10 w-[300px] h-[300px] lg:w-[360px] lg:h-[360px] rounded-full overflow-hidden shadow-inner">
                     <!-- Using the same unspash image -->
-                    <img id="hero-img" src="https://images.unsplash.com/photo-1556157382-97eda2d62296?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Professional" class="w-full h-full object-cover relative z-10 transition-all duration-500 ease-in-out">
+                    <img id="hero-img" src="images/men.jpg" alt="Professional" class="w-full h-full object-cover relative z-10 transition-all duration-500 ease-in-out">
                 </div>
 
                 <!-- Floating Card 1 (Top Left) -->
