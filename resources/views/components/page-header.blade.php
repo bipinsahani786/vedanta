@@ -8,12 +8,12 @@
 
     <!-- Left Content -->
     <div class="relative z-10 w-full md:w-1/2 mb-6 md:mb-0 text-left">
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">{{ $title }}</h1>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-blue-900 mb-4">{{ $title }}</h1>
         
         <div class="flex items-center gap-2 text-sm font-semibold tracking-wider uppercase">
             @foreach($breadcrumbs as $label => $url)
                 @if(!$loop->last || $url)
-                    <a href="{{ $url }}" class="text-accent-blue hover:text-white transition-colors">{{ $label }}</a>
+                    <a href="{{ $url }}" class="text-accent-blue hover:text-blue-900 transition-colors">{{ $label }}</a>
                     <span class="text-white/50">/</span>
                 @else
                     <span class="text-white/80">{{ $label }}</span>
@@ -29,7 +29,7 @@
     </div>
     @else
     <div class="relative z-10 w-full md:w-1/2 flex justify-end">
-        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Placeholder" class="max-w-full h-auto max-h-[300px] object-cover rounded-2xl drop-shadow-2xl mix-blend-luminosity opacity-80">
+        <img src="images/pic2.png" alt="Placeholder" class="max-w-full h-auto max-h-[300px] object-cover rounded-2xl drop-shadow-2xl mix-blend-luminosity opacity-80">
     </div>
     @endif
 </div>

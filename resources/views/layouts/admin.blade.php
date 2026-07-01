@@ -16,7 +16,7 @@
             --theme-primary-bg: #f8fafc;
             --theme-secondary-bg: #f1f5f9;
             --theme-accent-blue: #3b82f6;
-            --theme-accent-blue-hover: #2563eb;
+            --theme-accent-blue-hover: #3f76edff;
             --theme-accent-yellow: #f59e0b;
             --theme-text-dark: #64748b; /* Slate 500 */
             --theme-text-main: #0f172a; /* Slate 900 */
@@ -31,7 +31,7 @@
         }
         
         .admin-sidebar { 
-            background: linear-gradient(180deg, #031b4e 0%, #0a286c 100%);
+            background: linear-gradient(180deg, #041346ff 0%, #2a62bbff 100%);
             border-right: 1px solid rgba(255,255,255,0.05);
         }
         .sidebar-link { 
@@ -58,6 +58,16 @@
         /* Smooth scrolling and transitions */
         html { scroll-behavior: smooth; }
         .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
         
         /* Table Styles */
         .admin-table th {
@@ -94,7 +104,7 @@
             </div>
             
             <!-- Navigation -->
-            <div class="flex-1 overflow-y-auto py-5 px-3 flex flex-col gap-1 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto py-5 px-3 flex flex-col gap-1 no-scrollbar">
                 <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }} px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-th-large w-5 text-center text-lg"></i> Dashboard
                 </a>
