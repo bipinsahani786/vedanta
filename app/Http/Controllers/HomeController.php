@@ -19,7 +19,7 @@ class HomeController extends Controller
             ->take(6)
             ->get();
             
-        $categories = Category::withCount(['jobs' => function ($query) {
+        $categories = Category::where('is_active', true)->withCount(['jobs' => function ($query) {
             $query->where('status', 'approved');
         }])->get();
 
@@ -32,6 +32,7 @@ class HomeController extends Controller
     public function categoryJobs($id)
     {
         $category = Category::findOrFail($id);
+        $subjects = $category->subjects()->where('is_active', true)->get();
         $jobs = JobPost::with([
                 'category',
                 'subject',
@@ -42,7 +43,7 @@ class HomeController extends Controller
             ->where('status', 'approved')
             ->latest()
             ->get();
-        return view('category-jobs', compact('category', 'jobs'));
+        return view('category-jobs', compact('category', 'subjects', 'jobs'));
     }
 
     public function jobs(\Illuminate\Http\Request $request)
@@ -100,4 +101,16 @@ class HomeController extends Controller
             $services = Service::where('is_active', true)->latest()->get();
             return view('services', compact('services'));
         }
+
+        public function getSubjects($categoryId)
+    {
+        $category = \App\Models\Category::findOrFail($categoryId);
+        return response()->json($category->subjects()->where('is_active', true)->orderBy('name')->get());
+    }
+
+    public function getSpecializations($subjectId)
+    {
+        $subject = \App\Models\Subject::findOrFail($subjectId);
+        return response()->json($subject->specializations()->where('is_active', true)->orderBy('name')->get());
+    }
 }

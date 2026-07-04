@@ -150,13 +150,25 @@
 
                             <!-- Subject -->
                             <div>
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Subject / Specialization *</label>
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Subject *</label>
                                 <select x-model="formData.subject_id" required
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                                     <option value="">Select Subject</option>
-                                    @foreach($subjects as $subject)
-                                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                                    @endforeach
+                                    <template x-for="subject in availableSubjects" :key="subject.id">
+                                        <option :value="subject.id" x-text="subject.name" :selected="formData.subject_id == subject.id"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <!-- Specialization -->
+                            <div x-show="availableSpecializations.length > 0">
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Specialization *</label>
+                                <select x-model="formData.specialization_id" :required="availableSpecializations.length > 0"
+                                    class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                                    <option value="">Select Specialization</option>
+                                    <template x-for="spec in availableSpecializations" :key="spec.id">
+                                        <option :value="spec.id" x-text="spec.name" :selected="formData.specialization_id == spec.id"></option>
+                                    </template>
                                 </select>
                             </div>
 
@@ -476,19 +488,24 @@
             formData: {
                 date_of_birth: '{{ $profile->date_of_birth ? $profile->date_of_birth->format("Y-m-d") : "" }}',
                 gender: '{{ $profile->gender }}',
-                address: '{{ addslashes($profile->address) }}',
                 category_id: '{{ $profile->category_id }}',
                 subject_id: '{{ $profile->subject_id }}',
+                specialization_id: '{{ $profile->specialization_id }}',
                 highest_qualification_id: '{{ $profile->highest_qualification_id }}',
-                experience_years: '{{ $profile->experience_years }}',
                 preferred_location_id: '{{ $profile->preferred_location_id }}',
+                experience_years: '{{ $profile->experience_years }}',
                 current_salary: '{{ $profile->current_salary }}',
                 expected_salary: '{{ $profile->expected_salary }}',
-                current_school: '{{ $profile->current_school }}',
+                address: '{{ addslashes($profile->address) }}',
+                marital_status: '{{ $profile->marital_status }}',
+                religion: '{{ $profile->religion }}',
                 english_fluency: '{{ $profile->english_fluency }}',
                 residential_preference: '{{ $profile->residential_preference }}',
                 availability_to_join: '{{ $profile->availability_to_join }}'
             },
+
+            availableSubjects: {!! json_encode($subjects) !!},
+            availableSpecializations: [],
 
             profilePhotoFile: null,
             profilePhotoPreview: null,
@@ -537,6 +554,59 @@
                         setTimeout(() => this.initSignaturePad(), 300);
                     }
                 });
+
+                this.$watch('formData.category_id', value => {
+                    if (value) {
+                        fetch(`/api/categories/${value}/subjects`)
+                            .then(response => response.json())
+                            .then(data => {
+                                this.availableSubjects = data;
+                                // Reset subject if current subject is not in new list
+                                if(!data.find(s => s.id == this.formData.subject_id)) {
+                                    this.formData.subject_id = '';
+                                }
+                            })
+                            .catch(error => console.error('Error fetching subjects:', error));
+                    } else {
+                        this.availableSubjects = [];
+                        this.formData.subject_id = '';
+                    }
+                });
+
+                this.$watch('formData.subject_id', value => {
+                    if (value) {
+                        fetch(`/api/subjects/${value}/specializations`)
+                            .then(response => response.json())
+                            .then(data => {
+                                this.availableSpecializations = data;
+                                if(!data.find(s => s.id == this.formData.specialization_id)) {
+                                    this.formData.specialization_id = '';
+                                }
+                            })
+                            .catch(error => console.error('Error fetching specializations:', error));
+                    } else {
+                        this.availableSpecializations = [];
+                        this.formData.specialization_id = '';
+                    }
+                });
+                
+                // Initialize subjects if category already selected
+                if(this.formData.category_id) {
+                    fetch(`/api/categories/${this.formData.category_id}/subjects`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.availableSubjects = data;
+                        });
+                }
+
+                // Initialize specializations if subject already selected
+                if(this.formData.subject_id) {
+                    fetch(`/api/subjects/${this.formData.subject_id}/specializations`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.availableSpecializations = data;
+                        });
+                }
             },
 
             async submitStep1() {

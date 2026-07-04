@@ -37,6 +37,11 @@ class CandidateProfile extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    public function specialization()
+    {
+        return $this->belongsTo(Specialization::class);
+    }
+
     public function highestQualification()
     {
         return $this->belongsTo(Qualification::class, 'highest_qualification_id');

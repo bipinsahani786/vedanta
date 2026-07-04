@@ -27,6 +27,11 @@ class JobPost extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    public function specialization()
+    {
+        return $this->belongsTo(Specialization::class);
+    }
+
     public function qualification()
     {
         return $this->belongsTo(Qualification::class);

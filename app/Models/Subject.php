@@ -10,4 +10,14 @@ class Subject extends Model
         'name',
         'is_active',
     ];
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_subject');
+    }
+
+    public function specializations()
+    {
+        return $this->hasMany(Specialization::class);
+    }
 }
