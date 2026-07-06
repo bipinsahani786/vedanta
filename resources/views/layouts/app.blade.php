@@ -444,7 +444,7 @@
                 `
             },
             employer: {
-                title: "Hire the best<br>educators globally...",
+                title: "Hire the Minds <br> That Shape Tomorrow",
                 subtitle: "partner with us to find top-tier teaching professionals for your institution",
                 ctaText: "Employer",
                 ctaLink: "{{ route('employer.register') }}",
