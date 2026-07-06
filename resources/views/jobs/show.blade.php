@@ -45,12 +45,12 @@
             <div class="p-6 text-center">
                 <div class="w-10 h-10 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center mx-auto mb-3 text-lg"><i class="fas fa-book"></i></div>
                 <h4 class="text-xs font-bold text-text-dark/50 uppercase tracking-wider mb-1">Subject</h4>
-                <p class="font-semibold text-text-main">{{ $job->subject->name }}</p>
+                <p class="font-semibold text-text-main">{{ $job->subject?->name ?? 'N/A' }}</p>
             </div>
             <div class="p-6 text-center">
                 <div class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center mx-auto mb-3 text-lg"><i class="fas fa-graduation-cap"></i></div>
                 <h4 class="text-xs font-bold text-text-dark/50 uppercase tracking-wider mb-1">Qualification</h4>
-                <p class="font-semibold text-text-main">{{ $job->qualification->name }}</p>
+                <p class="font-semibold text-text-main">{{ $job->qualification?->name ?? 'N/A' }}</p>
             </div>
             <div class="p-6 text-center">
                 <div class="w-10 h-10 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center mx-auto mb-3 text-lg"><i class="fas fa-rupee-sign"></i></div>
@@ -74,7 +74,7 @@
                 </div>
                 <div>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-accent-blue/10 text-accent-blue text-xs font-bold rounded-lg border border-accent-blue/20">
-                        <i class="fas fa-tag"></i> {{ $job->category->name }}
+                        <i class="fas fa-tag"></i> {{ $job->category?->name ?? 'N/A' }}
                     </span>
                 </div>
             </div>

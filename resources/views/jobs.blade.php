@@ -58,8 +58,9 @@
                 </div>
                 
                 <!-- Search Button -->
-                <div class="w-full md:w-auto">
-                    <button type="submit" class="w-full md:w-[150px] bg-white border border-slate-200 text-slate-800 font-bold px-6 py-3 rounded-lg hover:bg-slate-50 transition-colors h-[46px] shadow-sm">Search</button>
+                <div class="w-full md:w-auto flex gap-2">
+                    <a href="{{ route('jobs') }}" class="w-full md:w-auto bg-slate-200 text-slate-700 rounded-lg px-8 py-3 font-bold hover:bg-slate-300 transition-colors shadow-sm text-center">Clear</a>
+                    <button type="submit" class="w-full md:w-auto bg-white border border-slate-200 text-slate-800 rounded-lg px-8 py-3 font-bold hover:border-accent-blue hover:text-accent-blue transition-colors shadow-sm">Search</button>
                 </div>
             </form>
         </div>
@@ -92,7 +93,10 @@
                 </div>
             </div>
 
-            <button type="submit" class="w-full border-2 border-accent-blue text-accent-blue rounded-xl py-2.5 text-sm font-bold hover:bg-accent-blue hover:text-white transition-colors">Apply Filters</button>
+            <div class="space-y-3">
+                <button type="submit" class="w-full border-2 border-accent-blue text-accent-blue rounded-xl py-2.5 text-sm font-bold hover:bg-accent-blue hover:text-white transition-colors">Apply Filters</button>
+                <a href="{{ route('jobs') }}" class="block text-center w-full bg-slate-100 text-slate-600 rounded-xl py-2.5 text-sm font-bold hover:bg-slate-200 transition-colors">Clear Filters</a>
+            </div>
         </form>
     </div>
 
@@ -109,11 +113,11 @@
                         <h3 class="text-lg font-bold text-slate-900 group-hover:text-accent-blue transition-colors">
                             <a href="{{ route('jobs.show', $job->id) }}">{{ $job->title ?? 'Job Requirement' }}</a>
                         </h3>
-                        <p class="text-sm text-slate-500 font-medium">{{ $job->school_name }} • {{ $job->location->city ?? 'N/A' }}, {{ $job->location->state ?? 'N/A' }}</p>
+                        <p class="text-sm text-slate-500 font-medium">{{ $job->school_name }} • {{ $job->location?->city ?? 'N/A' }}, {{ $job->location?->state ?? 'N/A' }}</p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <span class="bg-blue-50 text-accent-blue px-3 py-1.5 rounded-full text-xs font-bold">{{ $job->category->name ?? 'N/A' }}</span>
+                    <span class="bg-blue-50 text-accent-blue px-3 py-1.5 rounded-full text-xs font-bold">{{ $job->category?->name ?? 'N/A' }}</span>
                     <p class="text-xs text-slate-400 font-medium mt-2">Posted {{ $job->created_at->diffForHumans() }}</p>
                 </div>
             </div>
@@ -122,10 +126,10 @@
             </p>
             <div class="flex flex-wrap items-center gap-3 mb-6">
                 <span class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 flex items-center gap-2 group-hover:border-accent-blue/30 transition-colors">
-                    <i class="fas fa-book text-accent-blue"></i> {{ $job->subject->name ?? 'N/A' }}
+                    <i class="fas fa-book text-accent-blue"></i> {{ $job->subject?->name ?? 'N/A' }}
                 </span>
                 <span class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 flex items-center gap-2 group-hover:border-accent-blue/30 transition-colors">
-                    <i class="fas fa-graduation-cap text-accent-blue"></i> {{ $job->qualification->name ?? 'N/A' }}
+                    <i class="fas fa-graduation-cap text-accent-blue"></i> {{ $job->qualification?->name ?? 'N/A' }}
                 </span>
             </div>
             <div class="flex justify-between items-center border-t border-slate-100 pt-5">

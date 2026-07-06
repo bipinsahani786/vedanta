@@ -548,18 +548,18 @@
                 class="block bg-white border border-slate-200 rounded-2xl p-7 text-slate-800 transition-all duration-300 hover:-translate-y-2 shadow-lg hover:shadow-[0_20px_40px_rgba(18,154,239,0.15)] hover:border-[#129aef]/30 flex flex-col group reveal cursor-pointer">
                 <h3 class="text-xl font-bold mb-3 text-slate-900 group-hover:text-[#129aef] transition-colors">{{ $job->title ?? 'Job Requirement' }}</h3>
                 <p class="text-xs text-slate-500 mb-4 flex items-center gap-3">
-                    <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> {{ $job->location->city }}, {{ $job->location->state }}</span>
+                    <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> {{ $job->location?->city ?? 'N/A' }}, {{ $job->location?->state ?? 'N/A' }}</span>
                     <span><i class="far fa-calendar-alt mr-0.5"></i> {{ $job->created_at->format('d M Y') }}</span>
                 </p>
                 <div class="flex flex-wrap gap-2 mb-4">
                     <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
-                        <i class="fas fa-folder-open text-[9px]"></i> {{ $job->category->name }}
+                        <i class="fas fa-folder-open text-[9px]"></i> {{ $job->category?->name ?? 'N/A' }}
                     </span>
                     <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
-                        <i class="fas fa-book text-[9px]"></i> {{ $job->subject->name }}
+                        <i class="fas fa-book text-[9px]"></i> {{ $job->subject?->name ?? 'N/A' }}
                     </span>
                     <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
-                        <i class="fas fa-graduation-cap text-[9px]"></i> {{ $job->qualification->name }}
+                        <i class="fas fa-graduation-cap text-[9px]"></i> {{ $job->qualification?->name ?? 'N/A' }}
                     </span>
                 </div>
                 <p class="text-[13px] text-slate-600 leading-relaxed mb-6 flex-grow">

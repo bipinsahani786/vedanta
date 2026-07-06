@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
             UpdateDigitalSupportImagesSeeder::class,
             UpdateResumeServiceSeeder::class,
             UpdateInterviewTrainingSeeder::class,
+            JobPostsSeeder::class,
         ]);
     }
 }
