@@ -14,6 +14,7 @@ Route::get('/api/subjects/{subject}/specializations', [HomeController::class, 'g
 
 Route::view('/about', 'about')->name('about');
 Route::get('/services', [\App\Http\Controllers\HomeController::class, 'services'])->name('services');
+Route::get('/services/{slug}', [\App\Http\Controllers\HomeController::class, 'serviceDetails'])->name('service.details');
 Route::view('/hiring-process', 'hiring')->name('hiring');
 Route::view('/contact', 'contact')->name('contact');
 Route::post('/contact', [\App\Http\Controllers\HomeController::class, 'storeContact'])->name('contact.store');

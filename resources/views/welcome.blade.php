@@ -166,13 +166,13 @@
         <!-- Glassmorphism Card -->
         <div class="relative z-20 flex flex-col md:flex-row rounded-3xl overflow-hidden mt-8 border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.1)]" style="background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
             <div class="md:w-1/2 p-10 lg:p-16 flex flex-col justify-center">
-                <h4 class="text-[#129aef] font-semibold tracking-wider uppercase mb-3">Welcome</h4>
+                <h4 class="text-[#ffb800] text-xl lg:text-2xl font-black tracking-wider uppercase mb-3">Welcome</h4>
                 <h2 class="text-3xl lg:text-5xl font-bold leading-tight mb-2 text-slate-900">Vedanta Placement<br>Agency</h2>
             </div>
             <div class="md:w-1/2 p-10 lg:p-16 text-slate-900 text-sm leading-relaxed flex flex-col justify-center relative border-t md:border-t-0 md:border-l border-white/40">
                 <p class="mb-5 text-[15px] font-medium">Vedanta Placement Agency is an ISO-certified and government-registered education recruitment consultancy operating at a national level across India. We provide structured, compliance-driven, and outcome-focused hiring solutions to schools, colleges, and educational institutions.</p>
                 <p class="mb-8 text-[15px] font-medium">With a strong operational presence and an extensive talent network across multiple states, we support institutions in building high-performing academic and administrative teams. Our recruitment methodology is aligned with national education standards, institutional governance requirements, and best practices followed by leading recruitment consultancies in India.</p>
-                <a href="#" class="text-[#129aef] font-bold text-base flex items-center gap-2 hover:text-[#031b4e] transition-colors inline-block w-fit">Know More <i class="fas fa-chevron-right text-[10px] bg-[#129aef] text-white rounded-full w-5 h-5 flex items-center justify-center ml-1 inline-flex"></i></a>
+                <a href="{{ route('about') }}" class="text-[#129aef] font-bold text-base inline-flex items-center gap-2 hover:text-[#031b4e] transition-colors w-fit">Know More <i class="fas fa-chevron-right text-[10px] bg-[#129aef] text-white rounded-full w-5 h-5 flex items-center justify-center ml-1"></i></a>
                 
                 <!-- Wavy line decoration -->
                 <svg class="absolute right-0 top-1/2 text-[#129aef] opacity-30 w-32 h-32 -mr-8 pointer-events-none" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -234,26 +234,26 @@
             <h2 class="text-4xl lg:text-5xl font-bold text-white">Our Services</h2>
         </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
             @forelse($services as $index => $service)
-            <div class="relative bg-slate-50 border border-transparent p-10 rounded-3xl transition-all duration-300 hover:-translate-y-6 hover:scale-110 hover:shadow-[0_40px_80px_rgba(0,0,0,0.2)] hover:border-[#129aef]/30 hover:z-50 group flex flex-col items-center text-center reveal overflow-hidden z-10 reveal-delay-{{ ($index % 4) + 1 }}">
+            <div class="relative bg-slate-50 border border-transparent p-8 rounded-3xl transition-all duration-300 hover:-translate-y-6 hover:scale-110 hover:shadow-[0_40px_80px_rgba(0,0,0,0.2)] hover:border-[#129aef]/30 hover:z-50 group flex flex-col items-center text-center reveal overflow-hidden z-10 reveal-delay-{{ ($index % 4) + 1 }}">
                 
                 <!-- Animated Background Blob -->
                 <div class="absolute top-0 right-0 w-32 h-32 bg-[#129aef] rounded-bl-full opacity-0 group-hover:opacity-10 transition-all duration-700 group-hover:scale-[2.5] origin-top-right z-0 pointer-events-none"></div>
 
                 <!-- Icon Box with Advanced Animation -->
-                <div class="relative z-10 w-24 h-24 rounded-3xl bg-[#129aef] text-white flex items-center justify-center text-4xl mb-6 transition-all duration-500 group-hover:-translate-y-4 group-hover:scale-110 group-hover:shadow-[0_20px_40px_rgba(18,154,239,0.5)] group-hover:rotate-12">
+                <div class="relative z-10 w-20 h-20 rounded-3xl bg-[#129aef] text-white flex items-center justify-center text-3xl mb-5 transition-all duration-500 group-hover:-translate-y-4 group-hover:scale-110 group-hover:shadow-[0_20px_40px_rgba(18,154,239,0.5)] group-hover:rotate-12">
                     <i class="{{ $service->icon }} transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110"></i>
                 </div>
                 
                 <!-- Title -->
-                <h3 class="relative z-10 text-slate-900 font-extrabold text-xl mb-6 transition-colors duration-300 group-hover:text-[#129aef]">{{ $service->title }}</h3>
+                <h3 class="relative z-10 text-slate-900 font-extrabold text-lg mb-5 transition-colors duration-300 group-hover:text-[#129aef]">{{ $service->title }}</h3>
                 
                 <!-- Read More Link with split animation -->
-                <a href="#" class="relative z-10 inline-flex items-center gap-3 text-[#129aef] font-semibold text-[15px] mt-auto overflow-visible">
+                <a href="{{ route('service.details', $service->slug) }}" class="relative z-10 inline-flex items-center gap-3 text-[#129aef] font-semibold text-[14px] mt-auto overflow-visible">
                     <span class="transition-transform duration-500 group-hover:-translate-x-1">Read More</span>
-                    <div class="bg-[#ffb800] text-slate-900 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 group-hover:translate-x-3 group-hover:bg-[#129aef] group-hover:text-white group-hover:shadow-lg group-hover:scale-110">
-                        <i class="fas fa-chevron-right text-[11px] transition-transform duration-500 group-hover:translate-x-0.5"></i>
+                    <div class="bg-[#ffb800] text-slate-900 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500 group-hover:translate-x-3 group-hover:bg-[#129aef] group-hover:text-white group-hover:shadow-lg group-hover:scale-110">
+                        <i class="fas fa-chevron-right text-[10px] transition-transform duration-500 group-hover:translate-x-0.5"></i>
                     </div>
                 </a>
             </div>
@@ -453,6 +453,85 @@
                 </div>
             </div>
         </div>
+        </div>
+    </section>
+
+    <!-- Available On Section -->
+    <section class="py-16 bg-white overflow-hidden border-b border-slate-100">
+        <div class="text-left lg:text-center reveal mb-10 px-6 lg:px-[5%]">
+            <h2 class="text-3xl font-bold text-slate-800">We are available on</h2>
+        </div>
+
+        <style>
+            @keyframes marqueeLeftAvailable {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+            }
+            .animate-marquee-available {
+                animation: marqueeLeftAvailable 25s linear infinite;
+                display: flex;
+                width: max-content;
+            }
+            .animate-marquee-available:hover {
+                animation-play-state: paused;
+            }
+            .available-card {
+                flex-shrink: 0;
+            }
+            .fade-edges-available {
+                -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+                mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            }
+        </style>
+
+        <div class="overflow-hidden w-full relative z-10 fade-edges-available reveal">
+            <div class="animate-marquee-available flex gap-6 px-3">
+                @for($i = 0; $i < 3; $i++)
+                <div class="flex gap-6">
+                    <!-- Card 1: Naukri -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="text-2xl tracking-tight font-sans"><span class="font-black" style="color: #031b4e;">naukri</span><span class="font-bold" style="color: #129aef;">.com</span></span>
+                    </div>
+                    <!-- Card 2: Job Hai -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <div class="font-black text-xl leading-tight text-center font-sans tracking-tight" style="color: #00c853;">JOB<span style="color: #16a34a;" class="text-lg ml-1">✓</span><br><span style="color: #1e293b;">hai</span></div>
+                    </div>
+                    <!-- Card 3: Justdial -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="text-2xl tracking-tighter font-black font-sans"><span style="color: #005fb8;">Just</span><span style="color: #ff5e00;">dial</span></span>
+                    </div>
+                    <!-- Card 4: LinkedIn -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="font-bold text-2xl flex items-center gap-1.5 font-sans tracking-tight" style="color: #0a66c2;">Linked<i class="fab fa-linkedin"></i></span>
+                    </div>
+                    <!-- Card 5: Indeed -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="font-black text-2xl tracking-tighter font-sans flex items-center gap-1" style="color: #2164f3;">indeed</span>
+                    </div>
+                    <!-- Card 6: Glassdoor -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="font-black text-xl tracking-tight font-sans" style="color: #0caa41;">glassdoor</span>
+                    </div>
+                    <!-- Card 7: foundit -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="font-black text-xl tracking-tight font-sans" style="color: #6c2da5;">foundit</span>
+                    </div>
+                    <!-- Card 8: Shine -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="text-xl tracking-tight font-sans"><span class="font-black" style="color: #154696;">Shine</span><span class="font-bold" style="color: #ff9800;">.com</span></span>
+                    </div>
+                    <!-- Card 9: Apna -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="font-black text-2xl tracking-tighter font-sans" style="color: #00a650;">apna</span>
+                    </div>
+                    <!-- Card 10: TeacherOn -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="text-2xl tracking-tighter font-black font-sans"><span style="color: #1e293b;">Teacher</span><span style="color: #f15a29;">On</span></span>
+                    </div>
+                </div>
+                @endfor
+            </div>
+        </div>
     </section>
 
     <!-- Latest Jobs Section -->
@@ -558,8 +637,8 @@
         </style>
 
         <!-- Marquee Row 1 (Right to Left) -->
-        <div class="overflow-hidden w-full relative z-10 mt-16 mb-12 py-6 fade-edges reveal">
-            <div class="animate-marquee-left flex" style="padding-top: 50px;">
+        <div class="overflow-hidden w-full relative z-10 mt-8 mb-4 fade-edges reveal">
+            <div class="animate-marquee-left flex" style="padding-top: 35px; padding-bottom: 10px;">
                 @for($i = 0; $i < 2; $i++)
                 <div class="flex gap-6 px-3">
                     @foreach($testimonials as $testimonial)
@@ -587,8 +666,8 @@
         </div>
 
         <!-- Marquee Row 2 (Left to Right) -->
-        <div class="overflow-hidden w-full relative z-10 mb-16 py-6 fade-edges reveal reveal-delay-1">
-            <div class="animate-marquee-right flex" style="padding-top: 50px;">
+        <div class="overflow-hidden w-full relative z-10 mb-8 fade-edges reveal reveal-delay-1">
+            <div class="animate-marquee-right flex" style="padding-top: 35px; padding-bottom: 10px;">
                 @for($i = 0; $i < 2; $i++)
                 <div class="flex gap-6 px-3">
                     @foreach($testimonials->reverse() as $testimonial)
@@ -734,27 +813,6 @@
         </div>
     </section>
 
-<!-- We Are Available On Section -->
-    <section class="py-12 bg-slate-100 overflow-hidden">
-        <div class="mb-10 text-center px-6 lg:px-[5%] reveal">
-            <h2 class="text-slate-800 text-2xl font-bold">We are available on</h2>
-        </div>
-        <div class="swiper marquee-swiper reveal">
-            <div class="swiper-wrapper items-center">
-                @forelse($clients as $client)
-                <div class="swiper-slide w-auto">
-                    <div class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <img src="{{ Storage::url($client->logo_path) }}" alt="{{ $client->name }}" class="max-h-12 max-w-[150px] object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300">
-                    </div>
-                </div>
-                @empty
-                <div class="swiper-slide !w-full flex justify-center text-center text-slate-800 py-4 opacity-60">
-                    <p>No client partners available.</p>
-                </div>
-                @endforelse
-            </div>
-        </div>
-    </section>
 
     <!-- Certifications We Have Section -->
     <section class="py-16 px-6 lg:px-[5%] bg-slate-50 text-center border-t border-slate-200">

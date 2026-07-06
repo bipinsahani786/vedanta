@@ -12,7 +12,10 @@
             
             <h2 class="text-2xl font-bold text-slate-800 mb-8 relative z-10">Let Your Teaching Career Begin Here</h2>
             
-            <form action="{{ route('jobs') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end">
+            <form action="{{ route('jobs') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end relative z-10">
+                @if(request('job_type'))
+                    <input type="hidden" name="job_type" value="{{ request('job_type') }}">
+                @endif
                 <!-- State -->
                 <div class="flex-1 w-full">
                     <label class="block text-sm font-medium text-slate-600 mb-2">State</label>
@@ -69,28 +72,28 @@
 
     <!-- Filters -->
     <div class="w-full lg:w-1/4 relative z-10">
-        <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 sticky top-28">
+        <form action="{{ route('jobs') }}" method="GET" class="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 sticky top-28">
+            @if(request('state'))
+                <input type="hidden" name="state" value="{{ request('state') }}">
+            @endif
+            @if(request('subject'))
+                <input type="hidden" name="subject" value="{{ request('subject') }}">
+            @endif
+            @if(request('class'))
+                <input type="hidden" name="class" value="{{ request('class') }}">
+            @endif
             <h3 class="text-lg font-bold text-slate-900 mb-4">Filters</h3>
             <div class="mb-6">
                 <h4 class="text-sm font-semibold text-slate-800 mb-3">Job Type</h4>
                 <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Full Time</label>
-                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Part Time</label>
-                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="checkbox" class="accent-accent-blue"> Contract</label>
+                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="radio" name="job_type" value="Full Time" class="accent-accent-blue" {{ request('job_type') == 'Full Time' ? 'checked' : '' }}> Full Time</label>
+                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="radio" name="job_type" value="Part Time" class="accent-accent-blue" {{ request('job_type') == 'Part Time' ? 'checked' : '' }}> Part Time</label>
+                    <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors"><input type="radio" name="job_type" value="Contract" class="accent-accent-blue" {{ request('job_type') == 'Contract' ? 'checked' : '' }}> Contract</label>
                 </div>
             </div>
-            <div class="mb-6">
-                <h4 class="text-sm font-semibold text-slate-800 mb-3">Category</h4>
-                <div class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                    @foreach($categories as $cat)
-                        <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-accent-blue transition-colors">
-                            <input type="checkbox" name="categories[]" value="{{ $cat->id }}" class="accent-accent-blue" {{ (is_array(request('categories')) && in_array($cat->id, request('categories'))) ? 'checked' : '' }}> {{ $cat->name }}
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-            <button class="w-full border-2 border-accent-blue text-accent-blue rounded-xl py-2.5 text-sm font-bold hover:bg-accent-blue hover:text-white transition-colors">Apply Filters</button>
-        </div>
+
+            <button type="submit" class="w-full border-2 border-accent-blue text-accent-blue rounded-xl py-2.5 text-sm font-bold hover:bg-accent-blue hover:text-white transition-colors">Apply Filters</button>
+        </form>
     </div>
 
     <!-- Job List -->

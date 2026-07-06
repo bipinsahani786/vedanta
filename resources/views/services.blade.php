@@ -18,11 +18,11 @@
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-blue to-blue-700 text-white flex items-center justify-center text-2xl mb-8 transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6 group-hover:shadow-[0_0_25px_rgba(37,99,235,0.4)] shadow-lg mx-auto">
                         <i class="{{ $service->icon }}"></i>
                     </div>
-                    <h3 class="text-slate-900 font-bold text-xl mb-3 group-hover:text-accent-blue transition-colors duration-300">{{ $service->title }}</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed mb-8">
+                    <h3 class="text-slate-900 font-bold text-lg mb-3 group-hover:text-accent-blue transition-colors duration-300">{{ $service->title }}</h3>
+                    <p class="text-slate-600 text-[13px] leading-relaxed mb-6">
                         {{ $service->description }}
                     </p>
-                    <a href="#" class="inline-flex items-center gap-2 text-accent-blue font-bold text-sm group/link hover:text-blue-700 transition-colors">
+                    <a href="{{ route('service.details', $service->slug) }}" class="inline-flex items-center gap-2 text-accent-blue font-bold text-sm group/link hover:text-blue-700 transition-colors">
                         Explore Service 
                         <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/link:translate-x-1"></i>
                     </a>

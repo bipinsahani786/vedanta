@@ -9,119 +9,154 @@
 <!-- Our Story / Who We Are (SEO Optimized) -->
 <div class="py-20 px-6 lg:px-[5%] bg-white">
     <div class="max-w-4xl mx-auto text-center reveal">
-        <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Empowering Education Through <span class="text-accent-blue">Expert Recruitment</span></h1>
-        <p class="text-lg text-slate-700 leading-relaxed mb-6">
-            Welcome to <strong>Vedanta Placement Agency</strong>, the most trusted name in <strong>education recruitment across India</strong>. 
-            With years of specialized experience, we serve as the vital bridge connecting passionate educators with premier educational institutions. 
-            Whether you are a school looking to hire top-tier teaching faculty or an educator seeking the perfect teaching job, our comprehensive 
-            placement services are tailored to meet your unique needs.
-        </p>
-        <p class="text-lg text-slate-700 leading-relaxed">
-            We specialize in providing end-to-end recruitment solutions for schools, colleges, and universities, ensuring that every classroom is led by an inspiring and qualified professional.
-        </p>
+        <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-8 leading-tight">Empowering Education Through <br/><span class="text-accent-blue">Expert Recruitment</span></h1>
+        <div class="text-lg text-slate-700 leading-relaxed space-y-6 text-justify md:text-center md:px-10">
+            <p>
+                Welcome to <strong>Vedanta Placement Agency</strong>, the most trusted name in <strong>education recruitment across India</strong>. 
+                With years of specialized experience, we serve as the vital bridge connecting passionate educators with premier educational institutions. 
+            </p>
+            <p>
+                Whether you are a school looking to hire top-tier teaching faculty or an educator seeking the perfect teaching job, our comprehensive 
+                placement services are tailored to meet your unique needs. We specialize in providing end-to-end recruitment solutions for schools, colleges, and universities, ensuring that every classroom is led by an inspiring and qualified professional.
+            </p>
+        </div>
     </div>
 </div>
 
 <!-- Why Choose Us Section -->
 <div class="py-20 px-6 lg:px-[5%] bg-slate-50 border-t border-slate-200">
     <div class="text-center mb-16 reveal">
-        <h4 class="text-accent-blue text-sm font-bold mb-2 uppercase tracking-wider">Why Choose Us</h4>
-        <h2 class="text-3xl font-bold text-slate-900">The Vedanta Advantage</h2>
-        <p class="mt-4 text-slate-600 max-w-2xl mx-auto">As a leading teacher placement agency, we offer unparalleled benefits to both schools and job seekers.</p>
+        <h2 class="text-accent-blue text-3xl md:text-4xl font-black mb-3 uppercase tracking-wider">Why Choose Us</h2>
+        <h3 class="text-2xl md:text-3xl font-bold text-slate-900">The Vedanta Advantage</h3>
+        <p class="mt-4 text-slate-600 text-lg max-w-2xl mx-auto">As a leading teacher placement agency, we offer unparalleled benefits to both schools and job seekers.</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow reveal reveal-delay-1">
-            <div class="w-14 h-14 bg-accent-blue/10 rounded-xl flex items-center justify-center text-accent-blue mb-6 text-2xl">
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow reveal reveal-delay-1 text-center md:text-left">
+            <div class="w-14 h-14 bg-accent-blue/10 rounded-xl flex items-center justify-center text-accent-blue mb-6 text-2xl mx-auto md:mx-0">
                 <i class="fas fa-network-wired"></i>
             </div>
             <h3 class="text-xl font-bold text-slate-900 mb-3">Extensive Network</h3>
-            <p class="text-slate-600">Access our vast database of verified schools and pre-screened educators across multiple boards including CBSE, ICSE, and IB.</p>
+            <p class="text-slate-600 leading-relaxed text-justify md:text-left">Access our vast database of verified schools and pre-screened educators across multiple boards including CBSE, ICSE, and IB.</p>
         </div>
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow reveal reveal-delay-2">
-            <div class="w-14 h-14 bg-accent-yellow/20 rounded-xl flex items-center justify-center text-[#ffcc00] mb-6 text-2xl">
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow reveal reveal-delay-2 text-center md:text-left">
+            <div class="w-14 h-14 bg-accent-yellow/20 rounded-xl flex items-center justify-center text-[#d99f00] mb-6 text-2xl mx-auto md:mx-0">
                 <i class="fas fa-check-double"></i>
             </div>
             <h3 class="text-xl font-bold text-slate-900 mb-3">Quality Assurance</h3>
-            <p class="text-slate-600">Our rigorous screening process ensures only the most qualified and dedicated professionals make it to your interview rounds.</p>
+            <p class="text-slate-600 leading-relaxed text-justify md:text-left">Our rigorous screening process ensures only the most qualified and dedicated professionals make it to your interview rounds.</p>
         </div>
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow reveal reveal-delay-3">
-            <div class="w-14 h-14 bg-green-500/10 rounded-xl flex items-center justify-center text-green-500 mb-6 text-2xl">
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow reveal reveal-delay-3 text-center md:text-left">
+            <div class="w-14 h-14 bg-green-500/10 rounded-xl flex items-center justify-center text-green-600 mb-6 text-2xl mx-auto md:mx-0">
                 <i class="fas fa-clock"></i>
             </div>
             <h3 class="text-xl font-bold text-slate-900 mb-3">Time & Cost Efficient</h3>
-            <p class="text-slate-600">We streamline the hiring process, saving educational institutions valuable time and resources while delivering exceptional talent.</p>
+            <p class="text-slate-600 leading-relaxed text-justify md:text-left">We streamline the hiring process, saving educational institutions valuable time and resources while delivering exceptional talent.</p>
         </div>
     </div>
 </div>
 
-<!-- Split Content -->
-<div class="py-20 px-6 lg:px-[5%]">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div class="relative rounded-2xl overflow-hidden shadow-2xl reveal reveal-delay-1">
-            <div class="absolute inset-0 bg-accent-blue/20 mix-blend-overlay z-10"></div>
-            <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Office" class="w-full h-full object-cover">
+<!-- Stats Banner -->
+<div class="py-12 px-6 lg:px-[5%] mt-10">
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm relative overflow-hidden p-8 md:p-12">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+        <!-- Optional faint logo in center -->
+        <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none text-slate-300">
+            <i class="fas fa-graduation-cap text-[15rem]"></i>
         </div>
-        <div class="reveal reveal-delay-2">
-            <h2 class="text-3xl font-bold text-text-main mb-6">Our Mission & Vision</h2>
-            <p class="text-text-main opacity-70 leading-relaxed mb-6">
-                At Vedanta Placement Agency, our mission is to simplify the hiring process in the education sector. We believe that every student deserves a great teacher, and every school deserves a dedicated faculty.
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
-                <div class="bg-card-bg border border-card-border p-6 rounded-xl">
-                    <div class="w-10 h-10 bg-accent-blue rounded-lg flex items-center justify-center text-white mb-4"><i class="fas fa-bullseye"></i></div>
-                    <h4 class="text-text-main font-bold mb-2">Our Mission</h4>
-                    <p class="text-sm text-text-main opacity-60">To provide seamless recruitment solutions that foster educational excellence.</p>
-                </div>
-                <div class="bg-card-bg border border-card-border p-6 rounded-xl">
-                    <div class="w-10 h-10 bg-accent-yellow rounded-lg flex items-center justify-center text-[#031b4e] mb-4"><i class="fas fa-eye"></i></div>
-                    <h4 class="text-text-main font-bold mb-2">Our Vision</h4>
-                    <p class="text-sm text-text-main opacity-60">To be the gold standard in education recruitment across the globe.</p>
-                </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center relative z-10">
+            <div>
+                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="85">0</span><span class="text-slate-900">+</span></div>
+                <div class="text-sm lg:text-sm font-bold tracking-wide uppercase text-slate-900">Current Openings</div>
+            </div>
+            <div>
+                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="95">0</span><span class="text-slate-900">%</span></div>
+                <div class="text-sm lg:text-sm font-bold tracking-wide uppercase text-slate-900">Jobs Fulfillment Rate</div>
+            </div>
+            <div>
+                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="75">0</span><span class="text-slate-900">K</span></div>
+                <div class="text-sm lg:text-sm font-bold tracking-wide uppercase text-slate-900">Jobs Applied</div>
+            </div>
+            <div>
+                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="95">0</span><span class="text-slate-900"> %</span></div>
+                <div class="text-sm lg:text-sm font-bold tracking-wide uppercase text-slate-900">Satisfied school</div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Mission, Vision, Commitment Section -->
+<div class="py-12 px-6 lg:px-[5%] mb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        
+        <!-- Left Column: Mission & Vision -->
+        <div class="space-y-8">
+            <!-- Our Mission Card -->
+            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm relative hover:shadow-md transition-shadow">
+                <div class="absolute top-0 right-0 bg-accent-blue text-white w-12 h-12 flex items-center justify-center rounded-bl-2xl text-xl">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-2xl font-black text-slate-900 mb-6">Our Mission</h3>
+                    <div class="h-48 w-full rounded-xl overflow-hidden mb-6">
+                        <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Mission" class="w-full h-full object-cover">
+                    </div>
+                    <div class="text-slate-600 text-sm leading-relaxed space-y-4 text-justify">
+                        <p>Our mission is to support schools and educational institutions by providing reliable recruitment and manpower solutions. Vedanta Placement Agency works to connect talented educators and skilled professionals with institutions that value quality education and professional growth.</p>
+                        <p>We focus on identifying candidates who not only have the right qualifications and experience but also share a genuine commitment to teaching and institutional development.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Our Vision Card -->
+            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm relative hover:shadow-md transition-shadow">
+                <div class="absolute top-0 right-0 bg-accent-blue text-white w-12 h-12 flex items-center justify-center rounded-bl-2xl text-xl">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-2xl font-black text-slate-900 mb-6">Our Vision</h3>
+                    <div class="h-48 w-full rounded-xl overflow-hidden mb-6">
+                        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Vision" class="w-full h-full object-cover">
+                    </div>
+                    <div class="text-slate-600 text-sm leading-relaxed space-y-4 text-justify">
+                        <p>Our vision is to become a trusted recruitment and institutional support partner for schools and organizations across India. We aim to build a strong network of educators, institutions, and professionals while contributing to the growth and quality of the education sector.</p>
+                        <p>Through professional recruitment practices and responsible staffing solutions, we strive to support institutions in building strong academic environments.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- Team Section -->
-<div class="py-20 px-6 lg:px-[5%] bg-card-bg/30 border-t border-card-border">
-    <div class="text-center mb-16 reveal">
-        <h4 class="text-accent-blue text-sm font-bold mb-2 uppercase tracking-wider">Meet The Team</h4>
-        <h2 class="text-3xl font-bold text-text-main">The Minds Behind Vedanta</h2>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        <!-- Team Member 1 -->
-        <div class="text-center group reveal reveal-delay-1">
-            <div class="relative w-40 h-40 mx-auto rounded-full overflow-hidden mb-6 border-4 border-card-border group-hover:border-accent-blue transition-colors duration-300">
-                <img src="https://i.pravatar.cc/300?img=11" alt="Team" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        <!-- Right Column: Our Commitment -->
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm relative hover:shadow-md transition-shadow h-full">
+            <div class="absolute top-0 right-0 bg-accent-blue text-white w-12 h-12 flex items-center justify-center rounded-bl-2xl text-xl">
+                <i class="fas fa-handshake"></i>
             </div>
-            <h3 class="text-lg font-bold text-text-main mb-1">Ramesh Kumar</h3>
-            <p class="text-xs text-accent-blue uppercase tracking-wider font-semibold mb-3">Founder & CEO</p>
-        </div>
-        <!-- Team Member 2 -->
-        <div class="text-center group reveal reveal-delay-2">
-            <div class="relative w-40 h-40 mx-auto rounded-full overflow-hidden mb-6 border-4 border-card-border group-hover:border-accent-blue transition-colors duration-300">
-                <img src="https://i.pravatar.cc/300?img=5" alt="Team" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+            <div class="p-8">
+                <h3 class="text-2xl font-black text-slate-900 mb-6">Our Commitment</h3>
+                <div class="h-64 w-full rounded-xl overflow-hidden mb-8">
+                    <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Commitment" class="w-full h-full object-cover">
+                </div>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-4 mb-8 text-justify">
+                    <p>At Vedanta Placement Agency, we are committed to providing dependable and professional recruitment services. We work closely with institutions to understand their requirements and deliver staffing solutions that support smooth operations and long-term growth.</p>
+                    <p>Our goal is to create strong and lasting partnerships with schools, organizations, and professionals through trust, transparency, and consistent service quality.</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-slate-900 font-bold text-lg mb-2">Honesty</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed text-justify">Honesty and transparency are at the core of our work. We maintain clear communication with institutions and candidates to ensure that every recruitment process is fair, ethical, and reliable.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-slate-900 font-bold text-lg mb-2">Knowledge</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed text-justify">Understanding the needs of modern educational institutions is essential for successful recruitment. We continuously improve our knowledge of the education sector to provide better staffing solutions and connect institutions with capable professionals.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-slate-900 font-bold text-lg mb-2">Performance</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed text-justify">We believe in delivering results through dedication and professional service. Our team works consistently to provide reliable recruitment support that helps institutions maintain strong academic and operational standards.</p>
+                    </div>
+                </div>
             </div>
-            <h3 class="text-lg font-bold text-text-main mb-1">Priya Sharma</h3>
-            <p class="text-xs text-accent-blue uppercase tracking-wider font-semibold mb-3">Head of Recruitment</p>
         </div>
-        <!-- Team Member 3 -->
-        <div class="text-center group reveal reveal-delay-3">
-            <div class="relative w-40 h-40 mx-auto rounded-full overflow-hidden mb-6 border-4 border-card-border group-hover:border-accent-blue transition-colors duration-300">
-                <img src="https://i.pravatar.cc/300?img=3" alt="Team" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-            </div>
-            <h3 class="text-lg font-bold text-text-main mb-1">Amit Singh</h3>
-            <p class="text-xs text-accent-blue uppercase tracking-wider font-semibold mb-3">Operations Manager</p>
-        </div>
-        <!-- Team Member 4 -->
-        <div class="text-center group reveal reveal-delay-4">
-            <div class="relative w-40 h-40 mx-auto rounded-full overflow-hidden mb-6 border-4 border-card-border group-hover:border-accent-blue transition-colors duration-300">
-                <img src="https://i.pravatar.cc/300?img=9" alt="Team" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-            </div>
-            <h3 class="text-lg font-bold text-text-main mb-1">Neha Gupta</h3>
-            <p class="text-xs text-accent-blue uppercase tracking-wider font-semibold mb-3">Client Relations</p>
-        </div>
+        
     </div>
 </div>
 
@@ -142,3 +177,53 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Statistics Counter Animation
+    document.addEventListener('DOMContentLoaded', () => {
+        const counters = document.querySelectorAll('.stat-counter');
+        const speed = 40; 
+
+        const animateCounters = (entries, observer) => {
+            entries.forEach(entry => {
+                const counter = entry.target;
+                if (entry.isIntersecting) {
+                    if(counter.dataset.isAnimating === 'true') return;
+                    counter.dataset.isAnimating = 'true';
+                    counter.innerText = '0';
+                    
+                    const updateCount = () => {
+                        if(counter.dataset.isAnimating !== 'true') return;
+                        
+                        const target = +counter.getAttribute('data-count');
+                        const count = +counter.innerText;
+                        const inc = target / speed;
+
+                        if (count < target) {
+                            counter.innerText = Math.ceil(count + inc);
+                            counter.timeoutId = setTimeout(updateCount, 40);
+                        } else {
+                            counter.innerText = target;
+                            counter.dataset.isAnimating = 'false';
+                        }
+                    };
+                    updateCount();
+                } else {
+                    counter.dataset.isAnimating = 'false';
+                    if(counter.timeoutId) clearTimeout(counter.timeoutId);
+                    counter.innerText = '0';
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(animateCounters, {
+            threshold: 0.1
+        });
+
+        counters.forEach(counter => {
+            observer.observe(counter);
+        });
+    });
+</script>
+@endpush

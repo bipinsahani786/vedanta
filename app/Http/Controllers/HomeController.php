@@ -46,6 +46,13 @@ class HomeController extends Controller
         return view('category-jobs', compact('category', 'subjects', 'jobs'));
     }
 
+    public function serviceDetails($slug)
+    {
+        $service = Service::where('slug', $slug)->firstOrFail();
+        return view('service-details', compact('service'));
+    }
+
+
     public function jobs(\Illuminate\Http\Request $request)
     {
         $query = JobPost::with(['category', 'subject', 'location', 'qualification'])
@@ -63,6 +70,14 @@ class HomeController extends Controller
 
         if ($request->filled('class')) {
             $query->where('category_id', $request->class);
+        }
+
+        if ($request->filled('categories') && is_array($request->categories)) {
+            $query->whereIn('category_id', $request->categories);
+        }
+
+        if ($request->filled('job_type')) {
+            $query->where('job_type', $request->job_type);
         }
 
         $jobs = $query->orderBy('created_at', 'desc')->paginate(12);
