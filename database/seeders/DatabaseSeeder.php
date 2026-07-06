@@ -29,6 +29,14 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminSeeder::class,
             DummyDataSeeder::class,
+            StateFixSeeder::class,
+            NewServicesSeeder::class,
+            UpdateServiceContentSeeder::class,
+            UpdateRecruitmentServiceSeeder::class,
+            UpdateDigitalSupportSeeder::class,
+            UpdateDigitalSupportImagesSeeder::class,
+            UpdateResumeServiceSeeder::class,
+            UpdateInterviewTrainingSeeder::class,
         ]);
     }
 }
