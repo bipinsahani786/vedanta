@@ -25,7 +25,7 @@
     <!-- Right Content (Image) -->
     @if($image)
     <div class="relative z-10 w-full md:w-1/2 flex justify-end">
-        <img src="{{ $image }}" alt="{{ $title }}" class="max-w-full h-auto max-h-[300px] object-contain drop-shadow-2xl">
+        <img src="{{ $image }}" alt="{{ $title }}" class="max-w-full h-auto max-h-[300px] object-contain drop-shadow-2xl" style="-webkit-mask-image: radial-gradient(circle, black 50%, transparent 100%); mask-image: radial-gradient(circle, black 50%, transparent 100%);">
     </div>
     @else
     <div class="relative z-10 w-full md:w-1/2 flex justify-end">

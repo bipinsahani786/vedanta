@@ -4,7 +4,7 @@
 @section('meta_description', 'Discover Vedanta Placement Agency, India\'s leading education recruitment experts. We connect top teaching talent with premier schools and institutions.')
 
 @section('content')
-<x-page-header title="About Us" :breadcrumbs="['Home' => route('home'), 'About Us' => null]" />
+<x-page-header title="About Us" image="{{ asset('images/about_us_hero.png') }}" :breadcrumbs="['Home' => route('home'), 'About Us' => null]" />
 
 <!-- Our Story / Who We Are (SEO Optimized) -->
 <div class="py-20 px-6 lg:px-[5%] bg-white">

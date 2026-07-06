@@ -147,6 +147,10 @@
         .header-scrolled .active-link {
             color: #129aef !important; 
         }
+        .header-scrolled .logo-img {
+            /* New logo has its own colors, no need to invert on scroll anymore */
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 
@@ -177,8 +181,8 @@
     <!-- Header (Floating & White) -->
     <header id="main-header"
         class="sticky top-4 mx-4 lg:mx-[5%] rounded-2xl bg-transparent border-transparent px-6 py-2 flex justify-between items-center z-[100] transition-all duration-500">
-        <a href="#" class="flex items-center no-underline">
-            <img src="/images/logo.png?v={{ time() }}" alt="Vedanta Placement Agency" class="h-14 w-auto object-contain">
+        <a href="#" class="flex items-center no-underline py-1">
+            <img src="/images/logo.png?v={{ time() }}" alt="Vedanta Placement Agency" class="logo-img h-10 md:h-12 w-auto object-contain transition-all duration-300">
         </a>
         <nav class="hidden lg:flex items-center">
             <ul class="flex gap-6 mr-8 list-none">
@@ -274,7 +278,7 @@
             <div>
                 <a href="#" class="flex items-center no-underline mb-5">
                     <img src="/images/logo.png" alt="Vedanta Placement Agency"
-                        class="h-14 w-auto object-contain">
+                        class="h-20 md:h-24 w-auto object-contain">
                 </a>
                 <p class="text-xs text-text-main opacity-50 leading-relaxed mb-5">
                     Connecting educators and schools across India since 2020. With hundreds of teacher placements, we
