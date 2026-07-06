@@ -32,11 +32,6 @@ class NewServicesSeeder extends Seeder
                 'title' => 'Interview Training',
                 'description' => 'Expert guidance to excel in educational interviews and placements.',
                 'icon' => 'fas fa-chalkboard-teacher',
-            ],
-            [
-                'title' => 'Catering Service',
-                'description' => 'High-quality catering services specifically designed for school events and cafeterias.',
-                'icon' => 'fas fa-utensils',
             ]
         ];
 
