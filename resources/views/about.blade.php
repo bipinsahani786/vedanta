@@ -6,19 +6,97 @@
 @section('content')
 <x-page-header title="About Us" image="{{ asset('images/about_us_hero.png') }}" :breadcrumbs="['Home' => route('home'), 'About Us' => null]" />
 
-<!-- Our Story / Who We Are (SEO Optimized) -->
-<div class="py-20 px-6 lg:px-[5%] bg-white">
-    <div class="max-w-4xl mx-auto text-center reveal">
-        <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-8 leading-tight">Empowering Education Through <br/><span class="text-accent-blue">Expert Recruitment</span></h1>
-        <div class="text-lg text-slate-700 leading-relaxed space-y-6 text-justify md:text-center md:px-10">
-            <p>
-                Welcome to <strong>Vedanta Placement Agency</strong>, the most trusted name in <strong>education recruitment across India</strong>. 
-                With years of specialized experience, we serve as the vital bridge connecting passionate educators with premier educational institutions. 
-            </p>
-            <p>
-                Whether you are a school looking to hire top-tier teaching faculty or an educator seeking the perfect teaching job, our comprehensive 
-                placement services are tailored to meet your unique needs. We specialize in providing end-to-end recruitment solutions for schools, colleges, and universities, ensuring that every classroom is led by an inspiring and qualified professional.
-            </p>
+<!-- Our Story / Who We Are (SEO Optimized Diagram Layout) -->
+<div class="py-24 px-6 lg:px-[5%] bg-white relative overflow-hidden">
+    <!-- Subtle Background Pattern -->
+    <div class="absolute inset-0 z-0 opacity-5" style="background-image: radial-gradient(#129aef 1px, transparent 1px); background-size: 32px 32px;"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-16 reveal">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#040e2d] leading-tight mb-4">Empowering Education Through <br/><span class="text-[#129aef]">Expert Recruitment</span></h1>
+            <div class="w-24 h-1 bg-gradient-to-r from-[#040e2d] to-[#129aef] mx-auto rounded-full"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-4 items-center relative reveal reveal-delay-1">
+            
+            <!-- Left Side Text (Who We Are & Mission) -->
+            <div class="space-y-6 lg:space-y-12 text-center lg:text-right lg:pr-8 relative">
+                
+                <!-- Card 1: Who We Are -->
+                <div class="bg-white p-8 rounded-2xl border border-blue-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] relative group hover:border-[#129aef]/50 hover:shadow-[0_10px_20px_rgba(18,154,239,0.1)] transition-all duration-300">
+                    <div class="hidden lg:block absolute top-1/2 -right-8 w-8 h-0.5 bg-blue-100 group-hover:bg-[#129aef] transition-colors"></div>
+                    <div class="hidden lg:block absolute top-1/2 -right-9 w-2 h-2 rounded-full bg-blue-100 group-hover:bg-[#129aef] -mt-[3px] transition-colors"></div>
+                    
+                    <div class="w-12 h-12 bg-[#f0f8ff] text-[#129aef] rounded-full flex items-center justify-center text-xl mb-4 mx-auto lg:ml-auto lg:mr-0 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-[#040e2d] mb-3">Who We Are</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Welcome to <strong>Vedanta Placement Agency</strong>, the most trusted name in <strong>education recruitment across India</strong>. 
+                        With years of specialized experience, we serve as the vital bridge connecting passionate educators with premier educational institutions.
+                    </p>
+                </div>
+
+                <!-- Card 2: Our Mission -->
+                <div class="bg-white p-8 rounded-2xl border border-blue-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] relative group hover:border-[#129aef]/50 hover:shadow-[0_10px_20px_rgba(18,154,239,0.1)] transition-all duration-300">
+                    <div class="hidden lg:block absolute top-1/2 -right-8 w-8 h-0.5 bg-blue-100 group-hover:bg-[#129aef] transition-colors"></div>
+                    <div class="hidden lg:block absolute top-1/2 -right-9 w-2 h-2 rounded-full bg-blue-100 group-hover:bg-[#129aef] -mt-[3px] transition-colors"></div>
+                    
+                    <div class="w-12 h-12 bg-[#f0f8ff] text-[#129aef] rounded-full flex items-center justify-center text-xl mb-4 mx-auto lg:ml-auto lg:mr-0 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-[#040e2d] mb-3">Our Mission</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Our mission is to support schools and educational institutions by providing reliable recruitment and manpower solutions. We work to connect talented educators and skilled professionals with institutions that value quality education and professional growth.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Center Logo Hub -->
+            <div class="flex justify-center items-center relative z-10 py-8 lg:py-0">
+                <div class="w-48 h-48 md:w-64 md:h-64 rounded-full bg-white shadow-[0_0_50px_rgba(18,154,239,0.15)] border-8 border-[#f0f8ff] flex items-center justify-center p-6 md:p-10 relative">
+                    <!-- Outer pulsating rings -->
+                    <div class="absolute inset-0 rounded-full border border-[#129aef]/40 animate-ping" style="animation-duration: 3s;"></div>
+                    <div class="absolute -inset-4 rounded-full border border-[#129aef]/20 animate-ping" style="animation-duration: 3s; animation-delay: 1s;"></div>
+                    
+                    <img src="{{ asset('images/logo.png') }}" alt="Vedanta Logo" class="w-full h-auto object-contain relative z-10">
+                </div>
+            </div>
+
+            <!-- Right Side Text (What We Do & Vision) -->
+            <div class="space-y-6 lg:space-y-12 text-center lg:text-left lg:pl-8 relative">
+                
+                <!-- Card 3: What We Do -->
+                <div class="bg-white p-8 rounded-2xl border border-blue-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] relative group hover:border-[#129aef]/50 hover:shadow-[0_10px_20px_rgba(18,154,239,0.1)] transition-all duration-300">
+                    <div class="hidden lg:block absolute top-1/2 -left-8 w-8 h-0.5 bg-blue-100 group-hover:bg-[#129aef] transition-colors"></div>
+                    <div class="hidden lg:block absolute top-1/2 -left-9 w-2 h-2 rounded-full bg-blue-100 group-hover:bg-[#129aef] -mt-[3px] transition-colors"></div>
+                    
+                    <div class="w-12 h-12 bg-[#f0f8ff] text-[#129aef] rounded-full flex items-center justify-center text-xl mb-4 mx-auto lg:mr-auto lg:ml-0 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-[#040e2d] mb-3">What We Do</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Whether you are a school looking to hire top-tier teaching faculty or an educator seeking the perfect teaching job, our comprehensive placement services are tailored to meet your unique needs. We provide end-to-end recruitment solutions.
+                    </p>
+                </div>
+
+                <!-- Card 4: Our Vision -->
+                <div class="bg-white p-8 rounded-2xl border border-blue-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] relative group hover:border-[#129aef]/50 hover:shadow-[0_10px_20px_rgba(18,154,239,0.1)] transition-all duration-300">
+                    <div class="hidden lg:block absolute top-1/2 -left-8 w-8 h-0.5 bg-blue-100 group-hover:bg-[#129aef] transition-colors"></div>
+                    <div class="hidden lg:block absolute top-1/2 -left-9 w-2 h-2 rounded-full bg-blue-100 group-hover:bg-[#129aef] -mt-[3px] transition-colors"></div>
+                    
+                    <div class="w-12 h-12 bg-[#f0f8ff] text-[#129aef] rounded-full flex items-center justify-center text-xl mb-4 mx-auto lg:mr-auto lg:ml-0 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-[#040e2d] mb-3">Our Vision</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Our vision is to become a trusted recruitment and institutional support partner for schools and organizations across India. We aim to build a strong network of educators and professionals while contributing to the growth of the education sector.
+                    </p>
+                </div>
+
+            </div>
+
         </div>
     </div>
 </div>
@@ -160,8 +238,18 @@
     </div>
 </div>
 
-<!-- CTA Section -->
-<div class="py-20 px-6 lg:px-[5%] bg-accent-blue relative overflow-hidden">
+<!-- CTA Section with Wave Shape -->
+<div class="relative overflow-hidden w-full">
+    <!-- Multi-layered Wave Curve Divider -->
+    <div class="w-full leading-none overflow-hidden transform rotate-180 -mb-1 relative z-10">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-16 md:h-24 lg:h-32 block">
+            <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="#129aef"></path>
+            <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" fill="#129aef"></path>
+            <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="#129aef"></path>
+        </svg>
+    </div>
+    
+    <div class="py-20 px-6 lg:px-[5%] bg-[#129aef] relative overflow-hidden">
     <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
     <div class="max-w-4xl mx-auto text-center relative z-10 reveal">
         <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Transform Your Educational Journey?</h2>

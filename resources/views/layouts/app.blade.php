@@ -158,50 +158,57 @@
 
     <!-- Preloader removed per user request -->
 
+    <!-- Global Marquee Bar (Moving text left-to-right) -->
+    <div class="block bg-gradient-to-r from-[#040e2d] via-[#129aef] to-[#040e2d] text-white text-[11px] md:text-sm py-1.5 md:py-2 px-2 md:px-6 font-semibold tracking-wide shadow-md z-[101] relative border-b border-white/20">
+        <marquee behavior="scroll" direction="left" scrollamount="6" class="flex items-center mt-0.5">
+            ✨ Welcome to Vedanta Placement Agency — India's Most Trusted Education Recruitment Partner! Connecting passionate educators with premier institutions across the nation. ✨
+        </marquee>
+    </div>
+
     <!-- Top Contact Bar -->
     <div
-        class="bg-secondary-bg text-text-main opacity-80 text-xs py-2 px-6 lg:px-[5%] hidden md:flex justify-between items-center border-b border-card-border">
+        class="bg-gradient-to-r from-[#040e2d] via-[#129aef] to-[#040e2d] text-white text-xs py-2 px-6 lg:px-[5%] hidden md:flex justify-between items-center border-b border-white/10 shadow-sm">
         <div class="flex items-center gap-6">
-            <span class="flex items-center gap-1.5"><i class="fas fa-envelope text-accent-blue text-[10px]"></i>
+            <span class="flex items-center gap-1.5"><i class="fas fa-envelope text-[#ffb800] text-[10px]"></i>
                 info@vedantaplacementagency.in</span>
-            <span class="flex items-center gap-1.5"><i class="fas fa-phone-alt text-accent-blue text-[10px]"></i>
+            <span class="flex items-center gap-1.5"><i class="fas fa-phone-alt text-[#ffb800] text-[10px]"></i>
                 +91-7070938975</span>
-            <span class="flex items-center gap-1.5"><i class="fas fa-map-marker-alt text-accent-blue text-[10px]"></i>
+            <span class="flex items-center gap-1.5"><i class="fas fa-map-marker-alt text-[#ffb800] text-[10px]"></i>
                 Patna, Bihar, India</span>
         </div>
         <div class="flex items-center gap-4">
-            <a href="#" class="hover:text-accent-blue transition-colors"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="hover:text-accent-blue transition-colors"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="hover:text-accent-blue transition-colors"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#" class="hover:text-accent-blue transition-colors"><i class="fab fa-youtube"></i></a>
-            <a href="#" class="hover:text-accent-blue transition-colors"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" class="text-white/80 hover:text-[#ffb800] transition-colors"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="text-white/80 hover:text-[#ffb800] transition-colors"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-white/80 hover:text-[#ffb800] transition-colors"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" class="text-white/80 hover:text-[#ffb800] transition-colors"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="text-white/80 hover:text-[#ffb800] transition-colors"><i class="fab fa-whatsapp"></i></a>
         </div>
     </div>
 
-    <!-- Header (Floating & White) -->
+    <!-- Header -->
     <header id="main-header"
-        class="sticky top-4 mx-4 lg:mx-[5%] rounded-2xl bg-transparent border-transparent px-6 py-2 flex justify-between items-center z-[100] transition-all duration-500">
+        class="sticky top-0 w-full bg-white/10 backdrop-blur-md border-b border-white/20 lg:bg-transparent lg:backdrop-blur-none lg:border-transparent px-6 lg:px-[5%] py-4 flex justify-between items-center z-[100] transition-all duration-500">
         <a href="#" class="flex items-center no-underline py-1">
             <img src="/images/logo.png?v={{ time() }}" alt="Vedanta Placement Agency" class="logo-img h-10 md:h-12 w-auto object-contain transition-all duration-300">
         </a>
         <nav class="hidden lg:flex items-center">
             <ul class="flex gap-6 mr-8 list-none">
                 <li><a href="{{ route('home') }}"
-                        class="{{ request()->routeIs('home') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('home') ? 'after:w-0' : '' }}">Home</a>
+                        class="{{ request()->routeIs('home') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('home') ? 'after:w-0' : '' }}">Home</a>
                 </li>
                 <li><a href="{{ route('about') }}"
-                        class="{{ request()->routeIs('about') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('about') ? 'after:w-0' : '' }}">About us</a></li>
+                        class="{{ request()->routeIs('about') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('about') ? 'after:w-0' : '' }}">About us</a></li>
                 <li><a href="{{ route('services') }}"
-                        class="{{ request()->routeIs('services') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('services') ? 'after:w-0' : '' }}">Our Services</a></li>
+                        class="{{ request()->routeIs('services') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('services') ? 'after:w-0' : '' }}">Our Services</a></li>
                 <li><a href="{{ route('jobs') }}"
-                        class="{{ request()->routeIs('jobs') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('jobs') ? 'after:w-0' : '' }}">Jobs</a>
+                        class="{{ request()->routeIs('jobs') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('jobs') ? 'after:w-0' : '' }}">Jobs</a>
                 </li>
                 <li><a href="{{ route('resume.builder') }}"
-                        class="{{ request()->routeIs('resume.builder') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('resume.builder') ? 'after:w-0' : '' }}">Resume Builder <span class="bg-accent-yellow text-white text-[8px] px-1 py-0.5 rounded uppercase font-bold ml-1 relative -top-1">Free</span></a></li>
+                        class="{{ request()->routeIs('resume.builder') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('resume.builder') ? 'after:w-0' : '' }}">Resume Builder <span class="bg-accent-yellow text-white text-[9px] px-1.5 py-0.5 rounded uppercase font-extrabold ml-1 relative -top-1">Free</span></a></li>
                 <li><a href="{{ route('hiring') }}"
-                        class="{{ request()->routeIs('hiring') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('hiring') ? 'after:w-0' : '' }}">Hiring Process</a></li>
+                        class="{{ request()->routeIs('hiring') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('hiring') ? 'after:w-0' : '' }}">Hiring Process</a></li>
                 <li><a href="{{ route('contact') }}"
-                        class="{{ request()->routeIs('contact') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-medium text-[13px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact us</a></li>
+                        class="{{ request()->routeIs('contact') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact us</a></li>
             </ul>
             <div class="flex gap-3 items-center">
                 @auth
@@ -218,14 +225,14 @@
                     </form>
                 @else
                     <a href="/login"
-                        class="px-5 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200">Login</a>
+                        class="px-5 py-2.5 rounded-xl font-bold text-[15px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200">Login</a>
                     <a href="/register"
-                        class="px-5 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</a>
+                        class="px-5 py-2.5 rounded-xl font-bold text-[15px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</a>
                 @endauth
             </div>
         </nav>
         <!-- Mobile Menu Button -->
-        <button id="mobileMenuBtn" class="lg:hidden text-slate-800 text-2xl focus:outline-none">
+        <button id="mobileMenuBtn" class="lg:hidden text-white text-2xl focus:outline-none">
             <i class="fas fa-bars"></i>
         </button>
     </header>
@@ -473,13 +480,22 @@
 
             const btnSeeker = document.getElementById('btn-seeker');
             const btnEmployer = document.getElementById('btn-employer');
+            const btnSeekerMob = document.getElementById('btn-seeker-mobile');
+            const btnEmployerMob = document.getElementById('btn-employer-mobile');
+
+            const activeClass = "role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold flex items-center justify-center gap-2.5 transition-all duration-300 bg-gradient-to-r from-[#2196f3] to-[#00bcd4] text-white shadow-md";
+            const inactiveClass = "role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold text-slate-800 flex items-center justify-center gap-2.5 transition-all duration-300 bg-transparent hover:bg-slate-50";
 
             if (role === 'seeker') {
-                btnSeeker.className = "role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold flex items-center justify-center gap-2.5 transition-all duration-300 bg-gradient-to-r from-[#2196f3] to-[#00bcd4] text-white shadow-md";
-                btnEmployer.className = "role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold text-slate-800 flex items-center justify-center gap-2.5 transition-all duration-300 bg-transparent hover:bg-slate-50";
+                if(btnSeeker) btnSeeker.className = activeClass;
+                if(btnEmployer) btnEmployer.className = inactiveClass;
+                if(btnSeekerMob) btnSeekerMob.className = activeClass;
+                if(btnEmployerMob) btnEmployerMob.className = inactiveClass;
             } else {
-                btnEmployer.className = "role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold flex items-center justify-center gap-2.5 transition-all duration-300 bg-gradient-to-r from-[#2196f3] to-[#00bcd4] text-white shadow-md";
-                btnSeeker.className = "role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold text-slate-800 flex items-center justify-center gap-2.5 transition-all duration-300 bg-transparent hover:bg-slate-50";
+                if(btnEmployer) btnEmployer.className = activeClass;
+                if(btnSeeker) btnSeeker.className = inactiveClass;
+                if(btnEmployerMob) btnEmployerMob.className = activeClass;
+                if(btnSeekerMob) btnSeekerMob.className = inactiveClass;
             }
 
             const data = contentData[role];

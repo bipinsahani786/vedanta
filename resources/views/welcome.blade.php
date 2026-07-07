@@ -1,8 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- Hero Section -->
-    <section class="bg-[#040e2d] relative min-h-[90vh] flex flex-col lg:flex-row items-center px-6 lg:px-[8%] py-20 lg:py-0 overflow-hidden font-sans">
+    <section class="bg-[#040e2d] relative min-h-[90vh] flex flex-col lg:flex-row items-center px-6 lg:px-[8%] pt-4 pb-16 lg:py-0 overflow-hidden font-sans">
         
         <style>
             @keyframes slowFloat {
@@ -71,23 +70,23 @@
         </div>
 
         <!-- Left Content -->
-        <div class="flex-1 relative z-10 w-full lg:pr-12 flex flex-col items-start text-left mb-16 lg:mb-0 pt-10">
+        <div class="flex-1 relative z-10 w-full lg:pr-12 flex flex-col items-start text-left mb-8 lg:mb-0 pt-4 lg:pt-10">
             <h1 id="hero-title" class="text-4xl lg:text-[54px] font-extrabold leading-[1.1] mb-6 text-white tracking-tight drop-shadow-md relative z-10 transition-all duration-500 ease-in-out">
                 Get placed in top<br>schools across india
             </h1>
             
-            <p id="hero-subtitle" class="text-[15px] lg:text-[17px] font-light max-w-[480px] leading-relaxed mb-8 text-white/90 relative z-10 transition-all duration-500 ease-in-out">
+            <p id="hero-subtitle" class="text-[15px] lg:text-[17px] font-light max-w-[480px] leading-relaxed mb-4 lg:mb-8 text-white/90 relative z-10 transition-all duration-500 ease-in-out">
                 step into the right opportunity with trusted schools that value your talent
             </p>
 
-            <a href="{{ route('candidate.register') }}" id="hero-cta-btn" class="bg-[#ffb800] text-slate-900 px-7 py-3 rounded-full font-bold text-[15px] inline-flex items-center gap-4 transition-transform hover:scale-105 shadow-[0_4px_15px_rgba(255,184,0,0.3)] mb-12 relative z-10">
+            <a href="{{ route('candidate.register') }}" id="hero-cta-btn" class="bg-[#ffb800] text-slate-900 px-7 py-3 rounded-full font-bold text-[15px] inline-flex items-center gap-4 transition-transform hover:scale-105 shadow-[0_4px_15px_rgba(255,184,0,0.3)] mb-6 lg:mb-12 relative z-10">
                 <span id="cta-text">Job Seeker</span> 
                 <span class="bg-white w-7 h-7 rounded-full flex items-center justify-center text-slate-900 text-sm shadow-sm">
                     <i class="fas fa-chevron-right"></i>
                 </span>
             </a>
 
-            <div class="w-full relative z-10">
+            <div class="hidden lg:block w-full relative z-10">
                 <h3 class="text-[22px] font-bold mb-3 text-white drop-shadow-sm">I am a</h3>
                 <div class="bg-white inline-flex rounded-xl p-1.5 shadow-xl w-full max-w-[400px]">
                     <button id="btn-seeker" onclick="toggleRole('seeker')" class="role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold flex items-center justify-center gap-2.5 transition-all duration-300 bg-gradient-to-r from-[#2196f3] to-[#00bcd4] text-white shadow-md">
@@ -101,7 +100,7 @@
         </div>
 
         <!-- Right Content (Image & Graphics) -->
-        <div class="flex-1 relative z-10 flex justify-center items-center min-h-[550px] lg:min-h-[650px] w-full lg:mt-0">
+        <div class="flex-1 relative z-10 flex justify-center items-center min-h-[400px] lg:min-h-[650px] w-full lg:mt-0">
             
             <div class="relative w-[340px] h-[340px] lg:w-[400px] lg:h-[400px] flex justify-center items-center">
                 <!-- Large White Background Circle -->
@@ -155,6 +154,19 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Toggle Button -->
+        <div class="block lg:hidden w-full relative z-10 mt-8 mb-4">
+            <h3 class="text-[22px] font-bold mb-3 text-white drop-shadow-sm">I am a</h3>
+            <div class="bg-white inline-flex rounded-xl p-1.5 shadow-xl w-full max-w-[400px]">
+                <button id="btn-seeker-mobile" onclick="toggleRole('seeker')" class="role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold flex items-center justify-center gap-2.5 transition-all duration-300 bg-gradient-to-r from-[#2196f3] to-[#00bcd4] text-white shadow-md">
+                    <i class="fas fa-user-tie text-[17px]"></i> Job Seeker
+                </button>
+                <button id="btn-employer-mobile" onclick="toggleRole('employer')" class="role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold text-slate-800 flex items-center justify-center gap-2.5 transition-all duration-300 bg-transparent hover:bg-slate-50">
+                    <i class="fas fa-building text-[17px]"></i> Employer
+                </button>
             </div>
         </div>
     </section>
