@@ -159,7 +159,7 @@
     <!-- Preloader removed per user request -->
 
     <!-- Global Marquee Bar (Moving text left-to-right) -->
-    <div class="block bg-gradient-to-r from-[#040e2d] via-[#129aef] to-[#040e2d] text-white text-[11px] md:text-sm py-1.5 md:py-2 px-2 md:px-6 font-semibold tracking-wide shadow-md z-[101] relative border-b border-white/20">
+    <div class="sticky top-0 w-full block bg-gradient-to-r from-[#040e2d] via-[#129aef] to-[#040e2d] text-white text-[11px] md:text-sm py-1.5 md:py-2 px-2 md:px-6 font-semibold tracking-wide shadow-md z-[105] border-b border-white/20">
         <marquee behavior="scroll" direction="left" scrollamount="6" class="flex items-center mt-0.5">
             ✨ Welcome to Vedanta Placement Agency — India's Most Trusted Education Recruitment Partner! Connecting passionate educators with premier institutions across the nation. ✨
         </marquee>
@@ -187,7 +187,7 @@
 
     <!-- Header -->
     <header id="main-header"
-        class="sticky top-0 w-full bg-white/10 backdrop-blur-md border-b border-white/20 lg:bg-transparent lg:backdrop-blur-none lg:border-transparent px-6 lg:px-[5%] py-4 flex justify-between items-center z-[100] transition-all duration-500">
+        class="sticky top-10 md:top-12 w-[96%] lg:w-[90%] max-w-7xl mx-auto bg-[#040e2d]/80 backdrop-blur-md border border-white/20 rounded-full px-6 lg:px-8 py-3 flex justify-between items-center z-[100] transition-all duration-500 shadow-xl mt-2 lg:mt-4">
         <a href="#" class="flex items-center no-underline py-1">
             <img src="/images/logo.png?v={{ time() }}" alt="Vedanta Placement Agency" class="logo-img h-10 md:h-12 w-auto object-contain transition-all duration-300">
         </a>
@@ -339,7 +339,7 @@
                                 class="fab fa-youtube text-sm w-4 text-center"></i> Youtube</a></li>
                     <li><a href="#" class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
                                 class="fab fa-whatsapp text-sm w-4 text-center"></i> Whatsapp</a></li>
-                    <li><a href="#" class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
+                    <li><a href="https://www.linkedin.com/company/vedanta-placement-agency-india/" target="_blank" class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
                                 class="fab fa-linkedin text-sm w-4 text-center"></i> Linkedin</a></li>
                 </ul>
             </div>
