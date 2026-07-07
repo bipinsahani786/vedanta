@@ -43,7 +43,7 @@ class JobPostsSeeder extends Seeder
             $numJobs = rand(3, 6);
             for ($i = 0; $i < $numJobs; $i++) {
                 JobPost::create([
-                    'user_id' => $admin->id ?? 1,
+                    'user_id' => $admin?->id ?? 1,
                     'school_name' => $faker->company . ' ' . $faker->randomElement(['International School', 'Public School', 'Academy', 'Global School']),
                     'contact_person' => $faker->name,
                     'email' => $faker->companyEmail,
