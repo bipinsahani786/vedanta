@@ -11,6 +11,10 @@ class JobApplication extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'interview_date' => 'datetime',
+    ];
+
     public function jobPost()
     {
         return $this->belongsTo(JobPost::class, 'job_post_id');

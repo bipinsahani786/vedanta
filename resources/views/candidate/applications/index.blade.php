@@ -94,10 +94,10 @@
                                     {{ $app->jobPost->school_name }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    @if(in_array($app->status, ['shortlisted', 'hired', 'rejected']))
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-500/10 text-green-400 border border-green-500/20">
-                                            <i class="fas fa-check mr-1 text-[9px]"></i> Scheduled
-                                        </span>
+                                    @if($app->interview_date)
+                                        <button @click.stop="$dispatch('open-schedule-modal', { date: '{{ $app->interview_date->format('l, F j, Y \a\t g:i A') }}', link: '{{ $app->interview_link ?? '' }}' })" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 transition-colors">
+                                            <i class="fas fa-calendar-alt mr-1 text-[9px]"></i> View Schedule
+                                        </button>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-card-border/50 text-text-dark/40">
                                             <i class="fas fa-clock mr-1 text-[9px]"></i> Pending
@@ -207,7 +207,27 @@
                                                 <p class="text-sm text-text-main relative z-10 leading-relaxed">{{ $app->remarks }}
                                                 </p>
                                             </div>
-                                        @elseif($app->status === 'shortlisted')
+                                        @endif
+                                        
+                                        @if($app->interview_date)
+                                            <div class="mt-4 p-4 bg-accent-yellow/5 border border-accent-yellow/20 rounded-xl">
+                                                <h5 class="text-xs font-bold text-accent-yellow uppercase tracking-wider mb-2 flex items-center gap-2">
+                                                    <i class="fas fa-calendar-check"></i> Interview Scheduled
+                                                </h5>
+                                                <div class="text-sm text-text-main flex flex-col gap-1">
+                                                    <p><strong>Date & Time:</strong> {{ $app->interview_date->format('l, F j, Y \a\t g:i A') }}</p>
+                                                    @if($app->interview_link)
+                                                        <p><strong>Link / Location:</strong> 
+                                                            @if(filter_var($app->interview_link, FILTER_VALIDATE_URL))
+                                                                <a href="{{ $app->interview_link }}" target="_blank" class="text-accent-blue hover:underline">{{ $app->interview_link }}</a>
+                                                            @else
+                                                                {{ $app->interview_link }}
+                                                            @endif
+                                                        </p>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @elseif($app->status === 'shortlisted' && !$app->remarks)
                                             <div class="mt-6 p-4 bg-accent-yellow/5 border border-accent-yellow/20 rounded-xl">
                                                 <p class="text-sm text-text-main flex items-center gap-2">
                                                     <i class="fas fa-info-circle text-accent-yellow"></i>
@@ -246,4 +266,43 @@
             @endif
         </div>
     </div>
+
+    <!-- Schedule Modal -->
+    <div x-data="{ open: false, schedule: {} }" 
+         @open-schedule-modal.window="open = true; schedule = $event.detail"
+         x-show="open" 
+         style="display: none;" 
+         class="fixed inset-0 z-50 flex items-center justify-center bg-[#031b4e]/80 backdrop-blur-sm p-4">
+        
+        <div @click.outside="open = false" class="bg-card-bg border border-card-border rounded-2xl w-full max-w-md shadow-2xl overflow-hidden p-6 relative"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-90"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-90">
+            <button @click="open = false" class="absolute top-4 right-4 text-text-dark/50 hover:text-red-400">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 class="text-lg font-bold text-text-main mb-6 flex items-center gap-2">
+                <i class="fas fa-calendar-check text-accent-yellow text-xl"></i> Interview Schedule
+            </h3>
+            <div class="space-y-4 text-sm text-text-main">
+                <div class="p-3 bg-secondary-bg/50 border border-card-border rounded-xl">
+                    <p class="text-xs text-text-dark/50 mb-1 font-bold uppercase tracking-widest">Date & Time</p>
+                    <p class="font-semibold text-accent-yellow" x-text="schedule.date"></p>
+                </div>
+                <template x-if="schedule.link">
+                    <div class="p-3 bg-secondary-bg/50 border border-card-border rounded-xl">
+                        <p class="text-xs text-text-dark/50 mb-1 font-bold uppercase tracking-widest">Link / Location</p>
+                        <a :href="schedule.link" target="_blank" class="text-accent-blue font-semibold hover:underline break-all" x-text="schedule.link"></a>
+                    </div>
+                </template>
+            </div>
+            <div class="mt-8 flex justify-end">
+                <button @click="open = false" class="px-5 py-2.5 bg-secondary-bg hover:bg-card-border text-text-main text-sm font-bold rounded-xl border border-card-border transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
 @endsection

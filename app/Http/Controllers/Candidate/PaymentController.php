@@ -33,10 +33,7 @@ class PaymentController extends Controller
             return redirect()->route('candidate.dashboard')->with('error', 'Please complete previous steps first.');
         }
 
-        if ($profile->is_fee_paid && !$isRenewal) {
-            return redirect()->route('candidate.dashboard')->with('info', 'Your fee is already paid. Profile is active.');
-        }
-
+        // Removed the check that blocked paid users from viewing their plans
         return view('candidate.payment.show', compact('user', 'profile', 'isRenewal'));
     }
 
@@ -56,6 +53,17 @@ class PaymentController extends Controller
         
         $prefix = $isRenewal ? 'RENEW_' : ($isUpgrade ? 'UPGRADE_' : 'TXN_');
         $transactionId = $prefix . $user->id . '_' . time();
+
+        // --- LOCAL BYPASS ---
+        if (env('APP_ENV') === 'local') {
+            return redirect()->route('candidate.payment.callback', [
+                'transactionId' => 'BYPASS_' . time(),
+                'bypass' => true,
+                'amount' => $amount,
+                'plan' => $request->plan
+            ]);
+        }
+        // --------------------
 
         $isProd = $this->env === 'production';
 
@@ -113,6 +121,20 @@ class PaymentController extends Controller
         $transactionId = $request->transactionId ?? session('last_txn_id');
         $merchantId = $request->merchantId;
 
+        // --- LOCAL BYPASS ---
+        if ($request->bypass && env('APP_ENV') === 'local') {
+            $rData = [
+                'success' => true,
+                'data' => [
+                    'state' => 'COMPLETED',
+                    'amount' => $request->amount * 100,
+                    'transactionId' => $transactionId
+                ]
+            ];
+            goto handle_success; // Skip the HTTP call
+        }
+        // --------------------
+
         // Verify status with PhonePe
         $string = "/pg/v1/status/{$this->merchantId}/{$transactionId}" . $this->saltKey;
         $sha256 = hash('sha256', $string);
@@ -137,6 +159,7 @@ class PaymentController extends Controller
 
         $rData = $response->json();
 
+        handle_success:
         $user = auth()->user();
 
         if ($user) {
@@ -199,5 +222,25 @@ class PaymentController extends Controller
         }
 
         return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or cancelled.');
+    }
+
+    public function invoice($id)
+    {
+        $transaction = \App\Models\PaymentTransaction::where('candidate_id', auth()->id())
+            ->where('id', $id)
+            ->firstOrFail();
+
+        if ($transaction->status !== 'success' && $transaction->status !== 'COMPLETED') {
+            return redirect()->back()->with('error', 'Invoice is only available for successful payments.');
+        }
+
+        $user = auth()->user();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('candidate.payment.invoice', [
+            'transaction' => $transaction,
+            'user' => $user
+        ]);
+
+        return $pdf->download('Invoice-' . $transaction->transaction_id . '.pdf');
     }
 }

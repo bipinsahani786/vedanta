@@ -57,6 +57,25 @@
                                 </button>
                             </form>
                         </div>
+
+                        <!-- Manual Agreement Upload -->
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Agreement Details</h4>
+                            @if($candidate->profile->is_agreement_signed && $candidate->profile->agreement_pdf_path)
+                                <div class="mb-3">
+                                    <a href="{{ Storage::url($candidate->profile->agreement_pdf_path) }}" target="_blank" class="text-green-600 hover:underline text-xs font-bold"><i class="fas fa-file-contract mr-1"></i> View Signed Agreement</a>
+                                </div>
+                            @else
+                                <p class="text-xs text-yellow-600 mb-3"><i class="fas fa-exclamation-triangle"></i> Not signed digitally yet.</p>
+                            @endif
+
+                            <form action="{{ route('admin.crm.candidate.upload-agreement', $candidate->id) }}" method="POST" enctype="multipart/form-data" class="bg-gray-50 p-3 rounded border border-gray-200">
+                                @csrf
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Manually Upload Agreement (PDF)</label>
+                                <input type="file" name="agreement_pdf" accept="application/pdf" required class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 mb-2">
+                                <button type="submit" class="w-full px-2 py-1.5 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700 transition-colors">Upload & Send to Candidate</button>
+                            </form>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -287,6 +306,35 @@
                     @endforelse
                 </div>
 
+            </div>
+        </div>
+
+        <!-- History Timeline -->
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-bold text-gray-900 mb-6">Audit Trail / History</h3>
+                
+                <div class="relative border-l-2 border-gray-200 ml-4 space-y-8">
+                    @forelse($history as $event)
+                        <div class="relative pl-6">
+                            <!-- Timeline Dot -->
+                            <div class="absolute -left-3.5 top-0 w-7 h-7 rounded-full {{ $event['color'] }} text-white flex items-center justify-center text-xs shadow-md border-2 border-white">
+                                <i class="{{ $event['icon'] }}"></i>
+                            </div>
+                            
+                            <!-- Content -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <h4 class="font-bold text-gray-800 text-sm">{{ $event['title'] }}</h4>
+                                    <span class="text-xs text-gray-500 font-medium">{{ \Carbon\Carbon::parse($event['date'])->format('M d, Y h:i A') }}</span>
+                                </div>
+                                <p class="text-sm text-gray-600 leading-relaxed">{{ $event['description'] }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="pl-6 text-sm text-gray-500 italic">No history found for this candidate.</div>
+                    @endforelse
+                </div>
             </div>
         </div>
 

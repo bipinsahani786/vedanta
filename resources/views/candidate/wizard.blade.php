@@ -272,14 +272,74 @@
                     </h2>
 
                     <!-- Terms Box -->
-                    <div class="bg-secondary-bg border border-card-border rounded-xl p-6 mb-6 h-48 overflow-y-auto text-sm text-text-dark/80 custom-scrollbar">
-                        <h4 class="font-bold text-text-main mb-2">Terms & Conditions</h4>
-                        <p class="mb-2">1. I confirm that all information provided in my profile is true and correct to the best of my knowledge.</p>
-                        <p class="mb-2">2. I understand that Vedanta Placement Agency acts as a facilitator between candidates and educational institutions.</p>
-                        <p class="mb-2">3. The registration fee is non-refundable as per the company's refund policy.</p>
-                        <p class="mb-2">4. I agree to pay the stipulated service charge upon successful placement through the agency.</p>
-                        <p class="mb-2">5. My registration is valid for a maximum of 3 interview/job opportunities or upon successful selection, whichever comes first.</p>
-                        <p>By signing below, I acknowledge and accept these terms.</p>
+                    <div class="bg-secondary-bg border border-card-border rounded-xl p-6 mb-6 h-64 overflow-y-auto text-sm text-text-dark/80 custom-scrollbar">
+                        <h4 class="font-bold text-text-main mb-4 text-center">Vedanta Placement Agency – Candidate Overview / Terms & Conditions</h4>
+                        
+                        <p class="mb-4">This document sets forth the official Terms & Conditions, policies, responsibilities, and professional expectations applicable to all candidates registering with Vedanta Placement Agency.</p>
+                        <p class="mb-4">By registering with the Agency and proceeding further, the candidate acknowledges and enters into a legal and professional agreement governed by these Terms & Conditions.</p>
+                        
+                        <h5 class="font-bold text-text-main mb-2">Purpose of This Document</h5>
+                        <p class="mb-4">The objective of this document is to ensure clarity, transparency, and mutual understanding between the candidate and Vedanta Placement Agency throughout the recruitment and placement process.</p>
+
+                        <h5 class="font-bold text-text-main mb-2">TERMS & CONDITIONS (SUMMARY)</h5>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            <li><strong>Registration:</strong> A non-refundable registration fee of ₹1,000 is payable. Registration remains valid for 3 job applications.</li>
+                            <li><strong>Eligibility:</strong> Candidates must meet eligibility criteria as prescribed by the hiring institution. Documents: Submission of genuine and verifiable documents is mandatory. Any misrepresentation may result in cancellation without refund.</li>
+                            <li><strong>Interviews & Demos:</strong> Attendance as scheduled is compulsory. Non-attendance may lead to removal from opportunities.</li>
+                            <li><strong>Selection & Joining:</strong> Final selection rests solely with the hiring institution. Candidates must honor joining commitments once selected.</li>
+                            <li><strong>Service Charges:</strong> The candidate agrees to pay the applicable service charge within 12 hours of receiving the first month's salary: Teaching Staff – 50% of one month's gross salary | Management/Non-Teaching Staff – 66.67% of one month's gross salary (20 days' salary).</li>
+                            <li><strong>Refund Policy:</strong> Registration fees are strictly non-refundable under any circumstances.</li>
+                            <li><strong>Payment Default:</strong> Delay or failure in payment may attract penalties, service suspension, or legal action.</li>
+                            <li><strong>Job Commitment:</strong> A minimum service period of 90 working days is required unless otherwise agreed in writing.</li>
+                            <li>These terms shall be deemed legally binding and enforceable, subject to the jurisdiction of Patna, Bihar.</li>
+                        </ul>
+
+                        <h5 class="font-bold text-text-main mb-2">PAYMENT, CONFIDENTIALITY & LEGAL COMPLIANCE</h5>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            <li>The candidate agrees to remit the applicable service charge within twelve (12) hours of receipt of the first salary.</li>
+                            <li>Failure to make payment within the stipulated period shall attract a late penalty of ₹300 per day until the outstanding amount is cleared in full.</li>
+                            <li>Non-payment beyond seven (7) days shall be treated as a material breach of contract under the Indian Contract Act, 1872, and may result in recovery proceedings, blacklisting, and suspension or termination of all placement services.</li>
+                            <li>The candidate shall maintain strict confidentiality and shall not misuse, disclose, or share any employer, school, or Agency information. Any such violation may attract action under applicable laws, including the Information Technology Act, 2000, wherever applicable.</li>
+                            <li>These terms shall be deemed legally binding and enforceable, subject to the exclusive jurisdiction of Patna, Bihar.</li>
+                        </ul>
+
+                        <h5 class="font-bold text-text-main mb-2">Candidates must:</h5>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            <li>Follow the school’s internal guidelines and rules be punctual and cooperative and maintain decorum and professionalism at all times.</li>
+                            <li>Candidates must not share or misuse School contact information, Job leads and agency reference letters or documents.</li>
+                            <li>Approaching a school directly or through any third party after receiving the lead from the Agency will result in Immediate blacklisting and legal action under data breach or professional misconduct.</li>
+                        </ul>
+
+                        <h5 class="font-bold text-text-main mb-2">Registration fee is strictly non-refundable under any condition:</h5>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            <li>Rejection by school.</li>
+                            <li>Voluntary withdrawal by candidate.</li>
+                            <li>Change of mind.</li>
+                            <li>The service charge is also non-refundable once the candidate has received their salary and the due period for payment has begun.</li>
+                            <li>Refunds will not be entertained for dissatisfaction with salary, location, or working conditions post joining.</li>
+                        </ul>
+
+                        <h5 class="font-bold text-text-main mb-2">BEHAVIORAL CODE OF CONDUCT</h5>
+                        <p class="mb-2"><strong>Candidates must always:</strong></p>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            <li>Be respectful and honest in communication.</li>
+                            <li>Maintain professional appearance and behavior.</li>
+                            <li>Refrain from abusive language or harassment.</li>
+                            <li>Avoid any disputes with the employer during tenure.</li>
+                            <li>Complaints from employers regarding attitude, communication, or ethics will be taken seriously and may result in blacklisting.</li>
+                        </ul>
+
+                        <h5 class="font-bold text-text-main mb-2">COMMUNICATION GUIDELINES</h5>
+                        <p class="mb-2">All communication from the Agency will be done via: WhatsApp (only through registered numbers), Email (vedantaplacementagency@gmail.com), Direct phone calls.</p>
+                        <p class="mb-2"><strong>Candidates must:</strong></p>
+                        <ul class="list-disc pl-5 mb-4 space-y-2">
+                            <li>Respond within 24–48 hours to all official communications</li>
+                            <li>Keep their registered mobile number and email active</li>
+                            <li>Inform the Agency of any number/email changes.</li>
+                            <li>Failure to communicate may result in cancellation of interview or job opportunity.</li>
+                        </ul>
+                        
+                        <p class="mt-6 font-semibold">By clicking Accept & Continue, I acknowledge and accept all these terms and conditions.</p>
                     </div>
 
                     <div class="mb-6 flex items-center gap-3 bg-accent-blue/5 p-4 rounded-xl border border-accent-blue/20 cursor-pointer" @click="agreed = !agreed">

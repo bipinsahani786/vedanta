@@ -102,8 +102,133 @@ class CrmController extends Controller
         $followUps = CrmFollowUp::where('candidate_id', $id)->with('admin')->orderBy('created_at', 'desc')->get();
         $invoices = ServiceChargeInvoice::where('candidate_id', $id)->with('jobApplication.jobPost')->orderBy('created_at', 'desc')->get();
         $rating = CandidateRating::where('candidate_id', $id)->first();
+        $payments = \App\Models\PaymentTransaction::where('candidate_id', $id)->where('status', 'success')->get();
 
-        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'rating'));
+        $history = collect();
+
+        // 1. Profile Creation
+        $history->push([
+            'date' => $candidate->created_at,
+            'type' => 'profile_created',
+            'title' => 'Profile Created',
+            'description' => 'Candidate registered on the platform.',
+            'icon' => 'fas fa-user-plus',
+            'color' => 'bg-blue-500'
+        ]);
+
+        // 2. Payments
+        foreach ($payments as $payment) {
+            $history->push([
+                'date' => $payment->created_at,
+                'type' => 'payment',
+                'title' => 'Payment Received',
+                'description' => 'Payment of ₹' . number_format($payment->amount, 2) . ' was successful.',
+                'icon' => 'fas fa-rupee-sign',
+                'color' => 'bg-green-500'
+            ]);
+        }
+
+        // 3. Job Applications
+        foreach ($candidate->applications as $app) {
+            $history->push([
+                'date' => $app->created_at,
+                'type' => 'job_applied',
+                'title' => 'Applied for Job',
+                'description' => 'Applied for ' . ($app->jobPost->title ?? 'a job') . ' at ' . ($app->jobPost->school_name ?? 'a school') . '.',
+                'icon' => 'fas fa-briefcase',
+                'color' => 'bg-indigo-500'
+            ]);
+            
+            if ($app->status === 'hired') {
+                 $history->push([
+                    'date' => $app->updated_at,
+                    'type' => 'job_hired',
+                    'title' => 'Hired',
+                    'description' => 'Candidate was hired for ' . ($app->jobPost->title ?? 'a job') . '.',
+                    'icon' => 'fas fa-check-circle',
+                    'color' => 'bg-emerald-500'
+                ]);
+            } elseif ($app->status === 'waitlisted') {
+                $history->push([
+                    'date' => $app->updated_at,
+                    'type' => 'job_waitlisted',
+                    'title' => 'Waitlisted',
+                    'description' => 'Candidate was waitlisted for ' . ($app->jobPost->title ?? 'a job') . '.',
+                    'icon' => 'fas fa-hourglass-half',
+                    'color' => 'bg-amber-500'
+                ]);
+            }
+        }
+
+        // 4. Follow-ups
+        foreach ($followUps as $fu) {
+            $history->push([
+                'date' => $fu->created_at,
+                'type' => 'follow_up',
+                'title' => 'Follow-up Added',
+                'description' => 'Notes: ' . $fu->notes,
+                'icon' => 'fas fa-phone-alt',
+                'color' => 'bg-yellow-500'
+            ]);
+        }
+
+        // 5. Invoices
+        foreach ($invoices as $invoice) {
+            $history->push([
+                'date' => $invoice->created_at,
+                'type' => 'invoice_generated',
+                'title' => 'Invoice Generated',
+                'description' => 'Invoice for ₹' . number_format($invoice->amount, 2) . ' generated.',
+                'icon' => 'fas fa-file-invoice-dollar',
+                'color' => 'bg-purple-500'
+            ]);
+            if ($invoice->status === 'paid' && $invoice->payment_date) {
+                $history->push([
+                    'date' => $invoice->payment_date,
+                    'type' => 'invoice_paid',
+                    'title' => 'Invoice Paid',
+                    'description' => 'Service charge invoice for ₹' . number_format($invoice->amount, 2) . ' was paid.',
+                    'icon' => 'fas fa-check-double',
+                    'color' => 'bg-green-600'
+                ]);
+            }
+        }
+
+        $history = $history->sortByDesc('date')->values();
+
+        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'rating', 'history'));
+    }
+
+    public function uploadAgreement(Request $request, $id)
+    {
+        $request->validate([
+            'agreement_pdf' => 'required|file|mimes:pdf|max:10240', // max 10MB
+        ]);
+
+        $candidate = User::findOrFail($id);
+        $profile = $candidate->profile;
+
+        if (!$profile) {
+            return back()->with('error', 'Candidate profile not found.');
+        }
+
+        if ($request->hasFile('agreement_pdf')) {
+            $file = $request->file('agreement_pdf');
+            $fileName = 'agreements/admin_uploaded_' . $candidate->id . '_' . time() . '.pdf';
+            
+            // Store the file in public disk
+            \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, file_get_contents($file));
+
+            // Update profile
+            $profile->update([
+                'is_agreement_signed' => true,
+                'agreement_pdf_path' => $fileName,
+            ]);
+
+            return back()->with('success', 'Agreement PDF uploaded successfully. The candidate can now view and download it.');
+        }
+
+        return back()->with('error', 'Failed to upload agreement.');
     }
 
     public function storeFollowUp(Request $request, $id)

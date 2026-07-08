@@ -80,7 +80,7 @@
                     {{ $app->created_at->format('M d, Y') }}
                 </td>
                 <td class="text-right">
-                    <button type="button" onclick="openStatusModal({{ $app->id }}, '{{ $app->status }}', '{{ addslashes($app->remarks ?? '') }}')" class="px-3 py-1.5 rounded-lg bg-secondary-bg text-text-main border border-card-border hover:border-accent-blue hover:text-accent-blue text-xs font-semibold transition-colors">
+                    <button type="button" onclick="openStatusModal({{ $app->id }}, '{{ $app->status }}', '{{ addslashes($app->remarks ?? '') }}', '{{ $app->interview_date ? $app->interview_date->format('Y-m-d\TH:i') : '' }}', '{{ addslashes($app->interview_link ?? '') }}')" class="px-3 py-1.5 rounded-lg bg-secondary-bg text-text-main border border-card-border hover:border-accent-blue hover:text-accent-blue text-xs font-semibold transition-colors">
                         Update Status
                     </button>
                 </td>
@@ -118,7 +118,7 @@
                 <div class="p-6 space-y-4">
                     <div>
                         <label class="block text-sm font-semibold text-text-main mb-2">Status</label>
-                        <select name="status" id="modal_status" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                        <select name="status" id="modal_status" onchange="toggleScheduleFields()" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent-blue focus:outline-none">
                             <option value="applied">New (Applied)</option>
                             <option value="shortlisted">Forwarded to School</option>
                             <option value="hired">Selected (Hired)</option>
@@ -126,6 +126,21 @@
                         </select>
                         <p class="text-xs text-text-dark/50 mt-2"><i class="fas fa-info-circle text-accent-blue"></i> Note: Marking as "Forwarded to School" will automatically email the candidate.</p>
                     </div>
+
+                    <div id="scheduleFields" class="hidden space-y-4 p-4 border border-accent-blue/30 bg-accent-blue/5 rounded-xl">
+                        <h4 class="font-bold text-sm text-accent-blue flex items-center gap-2">
+                            <i class="fas fa-calendar-alt"></i> Interview Schedule (Optional)
+                        </h4>
+                        <div>
+                            <label class="block text-xs font-semibold text-text-main mb-1">Date & Time</label>
+                            <input type="datetime-local" name="interview_date" id="modal_interview_date" class="w-full bg-secondary-bg border border-card-border rounded-xl px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-text-main mb-1">Meeting Link / Location</label>
+                            <input type="text" name="interview_link" id="modal_interview_link" placeholder="e.g. Google Meet link or Address" class="w-full bg-secondary-bg border border-card-border rounded-xl px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-semibold text-text-main mb-2">School Remarks (Optional)</label>
                         <textarea name="remarks" id="modal_remarks" rows="3" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent-blue focus:outline-none placeholder-text-dark/30" placeholder="e.g. Needs to improve communication skills, or Selected for a salary of 20k"></textarea>
@@ -141,11 +156,24 @@
 </div>
 
 <script>
-    function openStatusModal(id, currentStatus, currentRemarks) {
+    function openStatusModal(id, currentStatus, currentRemarks, interviewDate, interviewLink) {
         document.getElementById('statusModal').classList.remove('hidden');
         document.getElementById('modal_status').value = currentStatus;
         document.getElementById('modal_remarks').value = currentRemarks;
+        document.getElementById('modal_interview_date').value = interviewDate;
+        document.getElementById('modal_interview_link').value = interviewLink;
         document.getElementById('statusForm').action = `/admin/applications/${id}/status`;
+        toggleScheduleFields();
+    }
+
+    function toggleScheduleFields() {
+        const status = document.getElementById('modal_status').value;
+        const scheduleFields = document.getElementById('scheduleFields');
+        if (status === 'shortlisted') {
+            scheduleFields.classList.remove('hidden');
+        } else {
+            scheduleFields.classList.add('hidden');
+        }
     }
 
     function closeStatusModal() {

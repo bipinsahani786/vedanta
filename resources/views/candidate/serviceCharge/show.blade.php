@@ -17,10 +17,12 @@
                 </div>
             </div>
             @if(isset($invoice) && $invoice->status !== 'paid')
-                <a href="#"
-                    class="px-5 py-2.5 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 hover:-translate-y-0.5 transition-all shadow-lg flex items-center gap-2">
-                    <i class="fas fa-credit-card text-xs"></i> Pay Now
-                </a>
+                <form action="{{ route('candidate.serviceCharge.pay') }}" method="POST" class="inline m-0 p-0">
+                    @csrf
+                    <button type="submit" class="px-5 py-2.5 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 hover:-translate-y-0.5 transition-all shadow-lg flex items-center gap-2">
+                        <i class="fas fa-credit-card text-xs"></i> Pay Now
+                    </button>
+                </form>
             @endif
         </div>
 
@@ -85,6 +87,7 @@
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-text-dark/40">Transaction ID</th>
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-text-dark/40">Amount</th>
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-text-dark/40">Status</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-text-dark/40 text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody class="text-sm divide-y divide-card-border">
@@ -104,6 +107,11 @@
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-500/10 text-green-400 border border-green-500/20">
                                             <i class="fas fa-check-circle mr-1 text-[9px]"></i> Successful
                                         </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <a href="{{ route('candidate.payment.invoice', $payment->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue hover:bg-accent-blue hover:text-white transition-all shadow-sm" title="Download Invoice">
+                                            <i class="fas fa-download text-xs"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach

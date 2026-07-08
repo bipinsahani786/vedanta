@@ -15,13 +15,13 @@
 {{-- Stats Grid --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Candidates Stat -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.crm.index') }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Total Candidates</p>
-                <h3 class="text-3xl font-bold text-gray-900">{{ number_format($totalCandidates) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ number_format($totalCandidates) }}</h3>
             </div>
-            <div class="w-12 h-12 rounded-full bg-blue-50 text-[#00a8e8] flex items-center justify-center text-xl shrink-0">
+            <div class="w-12 h-12 rounded-full bg-blue-50 text-[#00a8e8] flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-users"></i>
             </div>
         </div>
@@ -29,16 +29,16 @@
             <span class="text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md"><i class="fas fa-arrow-up text-[10px]"></i> 12%</span>
             <span class="text-gray-400 ml-2">vs last month</span>
         </div>
-    </div>
+    </a>
 
     <!-- Active Jobs Stat -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.jobs.index', ['status' => 'active']) }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-emerald-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Active Jobs</p>
-                <h3 class="text-3xl font-bold text-gray-900">{{ number_format($activeJobs) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">{{ number_format($activeJobs) }}</h3>
             </div>
-            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-briefcase"></i>
             </div>
         </div>
@@ -46,32 +46,32 @@
             <span class="text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md"><i class="fas fa-arrow-up text-[10px]"></i> 5%</span>
             <span class="text-gray-400 ml-2">vs last month</span>
         </div>
-    </div>
+    </a>
 
     <!-- Pending Queries Stat -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.jobs.index', ['status' => 'pending']) }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-amber-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pending Jobs</p>
-                <h3 class="text-3xl font-bold text-gray-900">{{ number_format($pendingJobs->count()) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-amber-600 transition-colors">{{ number_format($pendingJobs->count()) }}</h3>
             </div>
-            <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0">
+            <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-clock"></i>
             </div>
         </div>
         <div class="mt-4 flex items-center text-xs">
             <span class="text-rose-600 font-medium flex items-center gap-1 bg-rose-50 px-2 py-0.5 rounded-md">Requires Action</span>
         </div>
-    </div>
+    </a>
 
     <!-- Revenue Stat -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.transactions.index') }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-purple-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Total Revenue</p>
-                <h3 class="text-3xl font-bold text-gray-900">₹{{ number_format($totalCollections) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">₹{{ number_format($totalCollections) }}</h3>
             </div>
-            <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">
+            <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-file-invoice-dollar"></i>
             </div>
         </div>
@@ -79,7 +79,7 @@
             <span>Reg: ₹{{ number_format($registrationRevenue) }}</span>
             <span>Services: ₹{{ number_format($serviceChargeRevenue) }}</span>
         </div>
-    </div>
+    </a>
 </div>
 
 {{-- Main Content Grid --}}

@@ -53,8 +53,9 @@
 
                     {{-- Quick Stats & Application Limit --}}
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 reveal reveal-delay-1">
-                        <div
-                            class="bg-card-bg rounded-2xl border border-card-border p-6 flex flex-col items-center justify-center text-center hover:border-accent-blue/30 transition-all shadow-sm relative">
+                        {{-- Card 1: Applications Used --}}
+                        <div onclick="window.location='{{ route('candidate.applications.index') }}'"
+                            class="bg-card-bg rounded-2xl border border-card-border p-6 flex flex-col items-center justify-center text-center hover:border-accent-blue/30 transition-all shadow-sm relative cursor-pointer hover:bg-secondary-bg/30">
                             <div
                                 class="w-12 h-12 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xl mb-3">
                                 <i class="fas fa-paper-plane"></i>
@@ -73,8 +74,8 @@
                 $limitReached = $profile->plan_type !== 'premium' && $profile->used_applications >= $profile->total_allowed_applications;
             @endphp
                             @if($limitReached || $isHired)
-                                <div
-                                    class="absolute inset-0 bg-red-500/10 rounded-2xl border border-red-500/30 flex items-center justify-center backdrop-blur-[2px] flex-col">
+                                <div onclick="event.stopPropagation()"
+                                    class="absolute inset-0 bg-red-500/10 rounded-2xl border border-red-500/30 flex items-center justify-center backdrop-blur-[2px] flex-col z-10 cursor-default">
                                     <span
                                         class="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg mb-2">{{ $isHired ? 'Plan Completed' : 'Limit Reached' }}</span>
                                     <a href="{{ route('candidate.payment.show', ['type' => 'renewal']) }}"
@@ -83,26 +84,30 @@
                                 </div>
                             @endif
                         </div>
-                        <div
-                            class="bg-card-bg rounded-2xl border border-card-border p-6 flex flex-col items-center justify-center text-center hover:border-green-500/30 transition-all shadow-sm">
+                        
+                        {{-- Card 2: Shortlisted --}}
+                        <a href="{{ route('candidate.applications.index') }}"
+                            class="bg-card-bg rounded-2xl border border-card-border p-6 flex flex-col items-center justify-center text-center hover:border-green-500/30 hover:bg-secondary-bg/30 transition-all shadow-sm cursor-pointer block">
                             <div
-                                class="w-12 h-12 rounded-xl bg-green-500/10 text-green-400 flex items-center justify-center text-xl mb-3">
+                                class="w-12 h-12 rounded-xl bg-green-500/10 text-green-400 flex items-center justify-center text-xl mb-3 mx-auto">
                                 <i class="fas fa-check-double"></i>
                             </div>
                             <h3 class="text-3xl font-bold text-text-main">
                                 {{ auth()->user()->applications()->where('status', 'shortlisted')->count() }}</h3>
                             <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1">Shortlisted</p>
-                        </div>
-                        <div
-                            class="bg-card-bg rounded-2xl border border-card-border p-6 flex flex-col items-center justify-center text-center hover:border-accent-yellow/30 transition-all shadow-sm">
+                        </a>
+                        
+                        {{-- Card 3: Available Jobs --}}
+                        <a href="{{ route('candidate.applications.available') }}"
+                            class="bg-card-bg rounded-2xl border border-card-border p-6 flex flex-col items-center justify-center text-center hover:border-accent-yellow/30 hover:bg-secondary-bg/30 transition-all shadow-sm cursor-pointer block">
                             <div
-                                class="w-12 h-12 rounded-xl bg-accent-yellow/10 text-accent-yellow flex items-center justify-center text-xl mb-3">
+                                class="w-12 h-12 rounded-xl bg-accent-yellow/10 text-accent-yellow flex items-center justify-center text-xl mb-3 mx-auto">
                                 <i class="fas fa-briefcase"></i>
                             </div>
                             <h3 class="text-3xl font-bold text-text-main">
                                 {{ \App\Models\JobPost::where('status', 'approved')->count() }}</h3>
                             <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1">Available Jobs</p>
-                        </div>
+                        </a>
                     </div>
 
                     {{-- Financial & Pending Charges --}}
