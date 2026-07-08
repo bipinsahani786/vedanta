@@ -97,6 +97,10 @@ Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name(
     Route::get('/applications', [\App\Http\Controllers\Candidate\ApplicationController::class, 'index'])->name('applications.index');
     Route::get('/applications/available', [\App\Http\Controllers\Candidate\ApplicationController::class, 'available'])->name('applications.available');
     Route::post('/applications/{job}/apply', [\App\Http\Controllers\Candidate\ApplicationController::class, 'apply'])->name('applications.apply');
+
+    Route::get('/registration', [\App\Http\Controllers\Candidate\RegistrationController::class, 'show'])->name('registration.show');
+    Route::view('/service-charge', 'candidate.serviceCharge.show')->name('serviceCharge.show');
+    Route::view('/additional-feature', 'candidate.aditionalFeature.show')->name('aditionalFeature.show');
 });
 
 // Employer Auth Routes
