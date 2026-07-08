@@ -314,7 +314,7 @@
                             <h3 class="font-bold text-text-main mb-4 flex items-center gap-2"><i class="fas fa-camera text-accent-blue"></i> Live Photo</h3>
                             
                             <div x-show="!livePhotoBase64" class="w-full aspect-video bg-card-bg rounded-xl overflow-hidden relative border border-card-border">
-                                <video id="cameraFeed" class="w-full h-full object-cover" autoplay playsinline></video>
+                                <video id="cameraFeed" class="w-full h-full object-cover" autoplay playsinline muted></video>
                                 <div class="absolute inset-0 flex items-center justify-center bg-card-bg/80" x-show="!isCameraOn">
                                     <button @click="startCamera" class="bg-accent-blue text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-accent-blue-hover transition-colors">Start Camera</button>
                                 </div>

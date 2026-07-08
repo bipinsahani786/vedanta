@@ -470,7 +470,7 @@
 
     <!-- Available On Section -->
     <section class="py-16 bg-white overflow-hidden border-b border-slate-100">
-        <div class="text-left lg:text-center reveal mb-10 px-6 lg:px-[5%]">
+        <div class="text-center reveal mb-10 px-6 lg:px-[5%]">
             <h2 class="text-3xl font-bold text-slate-800">We are available on</h2>
         </div>
 
@@ -480,7 +480,7 @@
                 100% { transform: translateX(-50%); }
             }
             .animate-marquee-available {
-                animation: marqueeLeftAvailable 25s linear infinite;
+                animation: marqueeLeftAvailable 25s linear infinite reverse;
                 display: flex;
                 width: max-content;
             }

@@ -65,7 +65,7 @@
                 <i class="fas fa-info-circle text-blue-600"></i> Job Description & Requirements
             </h3>
             <div class="prose prose-sm max-w-none text-slate-700 leading-relaxed space-y-4">
-                {!! nl2br(e($job->description ?? 'No detailed description provided for this job role.')) !!}
+                {!! $job->description ?? 'No detailed description provided for this job role.' !!}
             </div>
 
             <div class="mt-10 pt-6 border-t border-gray-100 flex justify-between items-center">
