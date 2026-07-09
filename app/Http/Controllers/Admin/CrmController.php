@@ -38,7 +38,7 @@ class CrmController extends Controller
 
         if ($experience = $request->input('experience')) {
             $query->whereHas('profile', function($q) use ($experience) {
-                $q->where('years_of_experience', '>=', $experience);
+                $q->where('experience_years', '>=', $experience);
             });
         }
 
@@ -72,6 +72,13 @@ class CrmController extends Controller
             });
         }
 
+        if ($salary = $request->input('salary')) {
+            $query->whereHas('profile', function($q) use ($salary) {
+                $q->where('expected_salary', 'like', "%{$salary}%")
+                  ->orWhere('current_salary', 'like', "%{$salary}%");
+            });
+        }
+
         // Sorting
         $sortField = $request->input('sort_by', 'created_at');
         $sortDirection = $request->input('order', 'desc');
@@ -83,7 +90,7 @@ class CrmController extends Controller
             $query->latest();
         }
 
-        $candidates = $query->paginate(15)->withQueryString();
+        $candidates = $query->with('rating')->paginate(15)->withQueryString();
 
         // Pass master data for filters
         $subjects = \App\Models\Subject::all();
@@ -146,7 +153,7 @@ class CrmController extends Controller
 
         // Notify Candidate
         \Illuminate\Support\Facades\DB::table('notifications')->insert([
-            'id' => \Illuminate\Support\Str::uuid(),
+            'id' => \Illuminate\Support\Str::uuid()->toString(),
             'type' => 'App\Notifications\ServiceChargeInvoiceGenerated',
             'notifiable_type' => 'App\Models\User',
             'notifiable_id' => $id,

@@ -20,4 +20,9 @@ class JobApplication extends Model
     {
         return $this->belongsTo(User::class, 'candidate_id');
     }
+
+    public function invoice()
+    {
+        return $this->hasOne(ServiceChargeInvoice::class, 'job_application_id');
+    }
 }

@@ -70,10 +70,22 @@
                     <div class="mb-4 pb-4 border-b border-gray-100 last:border-0 last:mb-0 last:pb-0">
                         <div class="font-semibold text-gray-800">{{ $app->jobPost->title }}</div>
                         <div class="text-xs text-gray-500 mb-1">{{ $app->jobPost->school_name }}</div>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-xs font-bold px-2 py-1 rounded bg-gray-100 text-gray-700">Status: {{ ucfirst($app->status) }}</span>
+                            <div class="flex justify-between items-center mt-2">
+                                <form action="{{ route('admin.applications.status.update', $app->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <select name="status" onchange="this.form.submit()" class="text-xs font-bold px-2 py-1 rounded bg-gray-100 text-gray-700 border-none focus:ring-0 cursor-pointer">
+                                        <option value="applied" {{ $app->status === 'applied' ? 'selected' : '' }}>Applied</option>
+                                        <option value="shortlisted" {{ $app->status === 'shortlisted' ? 'selected' : '' }}>Shortlisted</option>
+                                        <option value="hired" {{ $app->status === 'hired' ? 'selected' : '' }}>Hired</option>
+                                        <option value="rejected" {{ $app->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                    </select>
+                                </form>
                             @if($app->status === 'hired')
-                                <button type="button" onclick="document.getElementById('job_application_id').value = {{ $app->id }};" class="text-xs text-indigo-600 hover:underline font-bold">Generate Invoice</button>
+                                @if(!$app->invoice)
+                                    <button type="button" onclick="prepareInvoice({{ $app->id }})" class="text-xs text-indigo-600 hover:underline font-bold">Generate Invoice</button>
+                                @else
+                                    <span class="text-xs text-green-600 font-bold"><i class="fas fa-check"></i> Invoiced</span>
+                                @endif
                             @endif
                         </div>
                     </div>
@@ -207,12 +219,25 @@
                     <h4 class="font-bold text-sm text-gray-800 mb-3">Generate New Invoice</h4>
                     <form action="{{ route('admin.crm.invoice.store', $candidate->id) }}" method="POST" class="flex flex-wrap gap-4 items-end">
                         @csrf
+                        
+                        @if($errors->any())
+                            <div class="w-full bg-red-100 text-red-700 p-2 rounded text-xs mb-2">
+                                <ul>
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <div class="w-full md:w-auto flex-1">
                             <label class="block text-xs font-medium text-gray-700 mb-1">Select Hired Job Application</label>
                             <select name="job_application_id" id="job_application_id" class="w-full rounded-md border-gray-300 shadow-sm text-sm" required>
                                 <option value="">-- Select Application --</option>
                                 @foreach($candidate->applications->where('status', 'hired') as $app)
-                                    <option value="{{ $app->id }}">{{ $app->jobPost->title }} ({{ $app->jobPost->school_name }})</option>
+                                    @if(!$app->invoice)
+                                        <option value="{{ $app->id }}">{{ $app->jobPost->title }} ({{ $app->jobPost->school_name }})</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -293,3 +318,28 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function prepareInvoice(appId) {
+        const select = document.getElementById('job_application_id');
+        if(select) {
+            select.value = appId;
+            select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Highlight the form momentarily
+            const formContainer = select.closest('.bg-gray-50');
+            if(formContainer) {
+                formContainer.classList.add('ring-2', 'ring-indigo-500', 'transition-all', 'duration-500');
+                setTimeout(() => formContainer.classList.remove('ring-2', 'ring-indigo-500'), 1500);
+            }
+
+            // Focus on amount
+            const amountInput = document.querySelector('input[name="amount"]');
+            if(amountInput) {
+                amountInput.focus();
+            }
+        }
+    }
+</script>
+@endpush

@@ -109,6 +109,7 @@
                         @endif
                     </a>
                 </th>
+                <th>Admin Rating</th>
                 <th class="text-right">Actions</th>
             </tr>
         </thead>
@@ -158,6 +159,19 @@
                     {{ $candidate->created_at->format('M d, Y') }}
                 </td>
                 <td>
+                    @if($candidate->rating)
+                        <div class="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity" onclick="openRatingModal({{ $candidate->id }}, {{ $candidate->rating->communication }}, {{ $candidate->rating->subject_knowledge }}, {{ $candidate->rating->demo_performance }}, {{ $candidate->rating->english_fluency }}, {{ $candidate->rating->discipline }}, '{{ addslashes($candidate->rating->remarks ?? '') }}')">
+                            <span class="bg-yellow-500/10 text-yellow-500 text-xs font-bold px-2 py-1 rounded border border-yellow-500/20">
+                                <i class="fas fa-star text-yellow-500 mr-1"></i> {{ number_format($candidate->rating->overall_rating, 1) }}
+                            </span>
+                        </div>
+                    @else
+                        <button type="button" onclick="openRatingModal({{ $candidate->id }}, 3, 3, 3, 3, 3, '')" class="text-[10px] uppercase font-bold text-text-dark/50 hover:text-accent-blue transition-colors px-2 py-1 border border-dashed border-card-border rounded">
+                            <i class="far fa-star"></i> Rate
+                        </button>
+                    @endif
+                </td>
+                <td>
                     <div class="flex items-center justify-end gap-2">
                         <a href="{{ route('admin.crm.show', $candidate->id) }}" class="px-3 py-1.5 rounded-lg bg-accent-blue/10 text-accent-blue hover:bg-accent-blue hover:text-white text-xs font-semibold transition-colors flex items-center gap-1">
                             Manage CRM <i class="fas fa-arrow-right text-[10px]"></i>
@@ -167,7 +181,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="py-16 text-center">
+                <td colspan="6" class="py-16 text-center">
                     <div class="w-16 h-16 bg-secondary-bg rounded-2xl flex items-center justify-center text-text-dark/20 text-3xl mx-auto mb-4 border border-card-border">
                         <i class="fas fa-users-slash"></i>
                     </div>
@@ -187,4 +201,76 @@
 </div>
 @endif
 
+{{-- Rating Modal --}}
+<div id="ratingModal" class="fixed inset-0 z-[105] hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('ratingModal').classList.add('hidden')"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-card-bg rounded-2xl shadow-2xl overflow-hidden animate-[fadeIn_0.3s_ease-out]">
+        <div class="p-6 border-b border-card-border flex justify-between items-center">
+            <h3 class="text-xl font-bold text-text-main">Admin Rating</h3>
+            <button type="button" onclick="document.getElementById('ratingModal').classList.add('hidden')" class="text-text-dark hover:text-red-500 transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <form id="ratingForm" action="" method="POST" class="p-6 space-y-4">
+            @csrf
+            @php
+                $params = [
+                    'communication' => 'Communication Skills',
+                    'subject_knowledge' => 'Subject Knowledge',
+                    'demo_performance' => 'Demo Performance',
+                    'english_fluency' => 'English Fluency',
+                    'discipline' => 'Professionalism & Discipline'
+                ];
+            @endphp
+
+            @foreach($params as $key => $label)
+            <div class="flex items-center justify-between">
+                <label class="text-sm font-medium text-text-main">{{ $label }}</label>
+                <select name="{{ $key }}" id="rating_{{ $key }}" class="rounded-lg bg-secondary-bg border-card-border text-text-main focus:border-accent-blue focus:ring-0 text-sm p-1.5 w-24">
+                    @for($i=1; $i<=5; $i++)
+                        <option value="{{ $i }}">{{ $i }} Stars</option>
+                    @endfor
+                </select>
+            </div>
+            @endforeach
+
+            <div class="pt-2">
+                <label class="block text-xs font-semibold text-text-dark mb-1">Remarks</label>
+                <textarea name="remarks" id="rating_remarks" rows="2" class="w-full rounded-lg bg-secondary-bg border-card-border text-text-main focus:border-accent-blue focus:ring-0 text-sm placeholder-text-dark/40"></textarea>
+            </div>
+
+            <div class="pt-4 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('ratingModal').classList.add('hidden')" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-text-main bg-secondary-bg hover:bg-card-border transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-accent-blue hover:bg-accent-blue-hover transition-colors shadow-glow-blue">
+                    Save Ratings
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection
+
+@push('scripts')
+<script>
+    function openRatingModal(candidateId, comm, subj, demo, eng, disc, rem) {
+        // Update form action
+        const form = document.getElementById('ratingForm');
+        form.action = `/admin/crm/candidate/${candidateId}/rate`;
+
+        // Populate selects
+        document.getElementById('rating_communication').value = comm;
+        document.getElementById('rating_subject_knowledge').value = subj;
+        document.getElementById('rating_demo_performance').value = demo;
+        document.getElementById('rating_english_fluency').value = eng;
+        document.getElementById('rating_discipline').value = disc;
+        document.getElementById('rating_remarks').value = rem;
+
+        // Show modal
+        document.getElementById('ratingModal').classList.remove('hidden');
+    }
+</script>
+@endpush
