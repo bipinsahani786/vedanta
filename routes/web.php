@@ -24,6 +24,24 @@ Route::post('/post-job', [\App\Http\Controllers\JobController::class, 'storeJobQ
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/media', 'media')->name('media');
+Route::get("/refund", function () {
+    return view('refund');
+})->name("refund");
+Route::get("/pricing", function () {
+    return view('pricing');
+})->name("pricing");
+Route::get('/cookie', function () {
+    return view('cookie');
+})->name("cookie");
+Route::get('/disclaimer', function () {
+    return view('disclaimer');
+})->name('disclaimer');
+Route::get('/employer', function () {
+    return view('employer');
+})->name('employer');
+Route::get('/candidate', function () {
+    return view('candidate');
+})->name('candidate');  
 
 
 // Resume Builder (Public)
@@ -51,7 +69,8 @@ Route::get('/email/verify', function () {
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
-    if (auth()->user()->role === 'employer') return redirect('/employer/dashboard');
+    if (auth()->user()->role === 'employer')
+        return redirect('/employer/dashboard');
     return redirect('/candidate/dashboard');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
@@ -112,7 +131,7 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
     Route::get('/dashboard', [\App\Http\Controllers\Employer\DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('jobs', \App\Http\Controllers\Employer\JobController::class);
-    
+
     Route::get('/profile', [\App\Http\Controllers\Employer\ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [\App\Http\Controllers\Employer\ProfileController::class, 'update'])->name('profile.update');
 
@@ -122,7 +141,7 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
 // Admin Routes (Protected)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Master Data
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
     Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
@@ -154,7 +173,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/leads/{id}/status', [\App\Http\Controllers\Admin\ContactLeadController::class, 'updateStatus'])->name('leads.status.update');
 
     // Frontend Management
-    
+
     Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class)->except(['create', 'show', 'edit']);
     Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class)->except(['create', 'show', 'edit']);
     Route::resource('clients', \App\Http\Controllers\Admin\ClientLogoController::class)->except(['create', 'show', 'edit'])->parameters(['clients' => 'clientLogo']);
