@@ -171,10 +171,10 @@ class JobController extends Controller
     {
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
-            'school_name' => 'required|string|max:255',
-            'contact_person' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'school_name' => 'nullable|string|max:255',
+            'contact_person' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
             'qualification_id' => 'required|exists:qualifications,id',
@@ -205,10 +205,10 @@ class JobController extends Controller
     {
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
-            'school_name' => 'required|string|max:255',
-            'contact_person' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'school_name' => 'nullable|string|max:255',
+            'contact_person' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
             'qualification_id' => 'required|exists:qualifications,id',

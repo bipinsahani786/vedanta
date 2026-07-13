@@ -24,29 +24,29 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- School Name -->
                 <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">School/Institution Name *</label>
-                    <input type="text" name="school_name" value="{{ old('school_name') }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Delhi Public School">
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">School/Institution Name</label>
+                    <input type="text" name="school_name" value="{{ old('school_name') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Delhi Public School">
                     @error('school_name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Contact Person -->
                 <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Contact Person *</label>
-                    <input type="text" name="contact_person" value="{{ old('contact_person') }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Mr. Sharma">
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Contact Person</label>
+                    <input type="text" name="contact_person" value="{{ old('contact_person') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Mr. Sharma">
                     @error('contact_person') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Email -->
                 <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Email Address *</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. hr@school.com">
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Email Address</label>
+                    <input type="email" name="email" value="{{ old('email') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. hr@school.com">
                     @error('email') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Phone -->
                 <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Phone Number *</label>
-                    <input type="text" name="phone" value="{{ old('phone') }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 9876543210">
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Phone Number</label>
+                    <input type="text" name="phone" value="{{ old('phone') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 9876543210">
                     @error('phone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>

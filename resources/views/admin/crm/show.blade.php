@@ -48,6 +48,30 @@
                                 <a href="{{ Storage::url($candidate->profile->resume_path) }}" target="_blank" class="text-indigo-600 hover:underline text-xs font-bold"><i class="fas fa-file-pdf mr-1"></i> View Resume</a>
                             </div>
                         @endif
+                        
+                        @if($candidate->profile->salary_slip_path)
+                            <div class="mt-2">
+                                <a href="{{ Storage::url($candidate->profile->salary_slip_path) }}" target="_blank" class="text-indigo-600 hover:underline text-xs font-bold"><i class="fas fa-file-invoice-dollar mr-1"></i> View Salary Slip</a>
+                            </div>
+                        @endif
+
+                        @if($candidate->profile->offer_letter_path)
+                            <div class="mt-2">
+                                <a href="{{ Storage::url($candidate->profile->offer_letter_path) }}" target="_blank" class="text-indigo-600 hover:underline text-xs font-bold"><i class="fas fa-file-contract mr-1"></i> View Offer Letter</a>
+                            </div>
+                        @endif
+
+                        @if($candidate->profile->passport_photo_path)
+                            <div class="mt-2">
+                                <a href="{{ Storage::url($candidate->profile->passport_photo_path) }}" target="_blank" class="text-indigo-600 hover:underline text-xs font-bold"><i class="fas fa-id-badge mr-1"></i> View Passport Photo</a>
+                            </div>
+                        @endif
+
+                        @if($candidate->profile->live_photo_path)
+                            <div class="mt-2">
+                                <a href="{{ Storage::url($candidate->profile->live_photo_path) }}" target="_blank" class="text-indigo-600 hover:underline text-xs font-bold"><i class="fas fa-camera mr-1"></i> View Live Photo</a>
+                            </div>
+                        @endif
 
                         <div class="mt-4 pt-4 border-t border-gray-100">
                             <form action="{{ route('admin.crm.candidate.verify', $candidate->id) }}" method="POST">

@@ -53,16 +53,16 @@
                     <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Required Criteria</div>
                     <div class="flex flex-wrap gap-2">
                         <span class="inline-flex items-center px-2.5 py-1 rounded bg-blue-50 text-blue-700 text-sm border border-blue-100">
-                            <i class="fas fa-folder-open mr-1.5 text-blue-400"></i> {{ $job->category->name }}
+                            <i class="fas fa-folder-open mr-1.5 text-blue-400"></i> {{ $job->category?->name ?? 'N/A' }}
                         </span>
                         <span class="inline-flex items-center px-2.5 py-1 rounded bg-purple-50 text-purple-700 text-sm border border-purple-100">
-                            <i class="fas fa-book mr-1.5 text-purple-400"></i> {{ $job->subject->name }}
+                            <i class="fas fa-book mr-1.5 text-purple-400"></i> {{ $job->subject?->name ?? 'N/A' }}
                         </span>
                         <span class="inline-flex items-center px-2.5 py-1 rounded bg-orange-50 text-orange-700 text-sm border border-orange-100">
-                            <i class="fas fa-graduation-cap mr-1.5 text-orange-400"></i> {{ $job->qualification->name }}
+                            <i class="fas fa-graduation-cap mr-1.5 text-orange-400"></i> {{ $job->qualification?->name ?? 'N/A' }}
                         </span>
                         <span class="inline-flex items-center px-2.5 py-1 rounded bg-green-50 text-green-700 text-sm border border-green-100">
-                            <i class="fas fa-map-marker-alt mr-1.5 text-green-400"></i> {{ $job->location->city }}, {{ $job->location->state }}
+                            <i class="fas fa-map-marker-alt mr-1.5 text-green-400"></i> {{ $job->location?->city ?? 'N/A' }}, {{ $job->location?->state ?? 'N/A' }}
                         </span>
                     </div>
                 </div>
@@ -176,8 +176,8 @@
                                 <span class="bg-green-100 text-green-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $candidate->match_score }}% Match</span>
                             </div>
                             <div class="text-xs text-gray-500 flex flex-col gap-0.5 mt-1">
-                                <span><i class="fas fa-book w-3"></i> {{ $candidate->profile->subject->name ?? 'N/A' }}</span>
-                                <span><i class="fas fa-map-marker-alt w-3"></i> {{ $candidate->profile->preferredLocation->city ?? 'N/A' }}</span>
+                                <span><i class="fas fa-book w-3"></i> {{ $candidate->profile?->subject?->name ?? 'N/A' }}</span>
+                                <span><i class="fas fa-map-marker-alt w-3"></i> {{ $candidate->profile?->preferredLocation?->city ?? 'N/A' }}</span>
                             </div>
                         </div>
                     @endforeach
