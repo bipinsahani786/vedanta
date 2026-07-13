@@ -18,7 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'candidate' => \App\Http\Middleware\IsCandidate::class,
         ]);
         $middleware->validateCsrfTokens(except: [
-            'candidate/payment/callback'
+            'candidate/payment/callback',
+            'candidate/wizard/callback',
+            'candidate/service-charge/callback'
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
