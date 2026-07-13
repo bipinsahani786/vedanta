@@ -43,6 +43,7 @@ class ServiceController extends Controller
 
         Service::create([
             'title' => $request->title,
+            'slug' => \Illuminate\Support\Str::slug($request->title),
             'description' => $request->description,
             'icon' => $request->icon,
             'is_active' => $request->has('is_active')
@@ -61,6 +62,7 @@ class ServiceController extends Controller
 
         $service->update([
             'title' => $request->title,
+            'slug' => \Illuminate\Support\Str::slug($request->title),
             'description' => $request->description,
             'icon' => $request->icon,
             'is_active' => $request->has('is_active')
