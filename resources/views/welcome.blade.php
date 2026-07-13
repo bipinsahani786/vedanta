@@ -71,11 +71,11 @@
 
         <!-- Left Content -->
         <div class="flex-1 relative z-10 w-full lg:pr-12 flex flex-col items-start text-left mb-8 lg:mb-0 pt-4 lg:pt-10">
-            <h1 id="hero-title" class="text-4xl lg:text-[54px] font-extrabold leading-[1.1] mb-6 text-white tracking-tight drop-shadow-md relative z-10 transition-all duration-500 ease-in-out">
+            <h1 id="hero-title" class="text-4xl lg:text-[54px] font-extrabold leading-[1.1] mb-6 text-white tracking-tight drop-shadow-md relative z-10 transition-all duration-[10ms] ease-in-out">
                 Get placed in top<br>schools across india
             </h1>
             
-            <p id="hero-subtitle" class="text-[15px] lg:text-[17px] font-light max-w-[480px] leading-relaxed mb-4 lg:mb-8 text-white/90 relative z-10 transition-all duration-500 ease-in-out">
+            <p id="hero-subtitle" class="text-[15px] lg:text-[17px] font-light max-w-[480px] leading-relaxed mb-4 lg:mb-8 text-white/90 relative z-10 transition-all duration-[10ms] ease-in-out">
                 step into the right opportunity with trusted schools that value your talent
             </p>
 
@@ -108,7 +108,7 @@
                 
                 <!-- SVG Arcs for perfect rounded caps and exact circle tracing -->
                 <div class="absolute z-0 pointer-events-none flex justify-center items-center">
-                    <svg id="hero-svg-rings" class="w-[480px] h-[480px] lg:w-[580px] lg:h-[580px] drop-shadow-xl transition-transform duration-500 ease-in-out" viewBox="0 0 700 700">
+                    <svg id="hero-svg-rings" class="w-[480px] h-[480px] lg:w-[580px] lg:h-[580px] drop-shadow-xl transition-transform duration-[10ms] ease-in-out" viewBox="0 0 700 700">
                         <!-- Yellow Arch (Top Right, slightly longer) -->
                         <circle cx="350" cy="350" r="290" fill="none" stroke="#ffb800" stroke-width="4" stroke-linecap="round" stroke-dasharray="450 2000" transform="rotate(-110 350 350)" />
                         
@@ -126,11 +126,11 @@
                 <!-- Main Image container -->
                 <div class="relative z-10 w-[300px] h-[300px] lg:w-[360px] lg:h-[360px] rounded-full overflow-hidden shadow-inner">
                     <!-- Using the same unspash image -->
-                    <img id="hero-img" src="images/men.jpg" alt="Professional" class="w-full h-full object-cover relative z-10 transition-all duration-500 ease-in-out">
+                    <img id="hero-img" src="images/men.jpg" alt="Professional" class="w-full h-full object-cover relative z-10 transition-all duration-[10ms] ease-in-out">
                 </div>
 
                 <!-- Floating Card 1 (Top Left) -->
-                <div id="fc-1" class="absolute z-30 top-[5%] lg:top-[10%] -left-[10%] lg:-left-[15%] cursor-pointer group transition-all duration-500 ease-in-out">
+                <div id="fc-1" class="absolute z-30 top-[5%] lg:top-[10%] -left-[10%] lg:-left-[15%] cursor-pointer group transition-all duration-[10ms] ease-in-out">
                     <div class="bg-white rounded-[14px] p-5 shadow-2xl flex flex-col items-center min-w-[130px] animate-float group-hover:animate-none group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300">
                         <div id="fc-1-icon-wrap" class="bg-[#ffb800] w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl mb-3 shadow-md border border-[#ffb800]/50 transition-colors duration-300">
                             <i id="fc-1-icon" class="fas fa-briefcase"></i>
@@ -141,7 +141,7 @@
                 </div>
 
                 <!-- Floating Card 2 (Bottom Right) -->
-                <div id="fc-2" class="absolute z-30 bottom-[0%] lg:bottom-[5%] -right-[5%] lg:-right-[10%] cursor-pointer group transition-all duration-500 ease-in-out">
+                <div id="fc-2" class="absolute z-30 bottom-[0%] lg:bottom-[5%] -right-[5%] lg:-right-[10%] cursor-pointer group transition-all duration-[10ms] ease-in-out">
                     <div class="bg-white rounded-[14px] p-5 shadow-2xl flex flex-col items-center min-w-[130px] animate-float group-hover:animate-none group-hover:scale-105 group-hover:-rotate-3 transition-transform duration-300" style="animation-delay: 1.5s;">
                         <h4 id="fc-2-title" class="text-slate-800 font-extrabold text-[14px] mb-1">1+ Million</h4>
                         <p id="fc-2-desc" class="text-[10px] text-slate-500 font-bold mb-3">Trusted User</p>
@@ -480,7 +480,7 @@
                 100% { transform: translateX(-50%); }
             }
             .animate-marquee-available {
-                animation: marqueeLeftAvailable 25s linear infinite reverse;
+                animation: marqueeLeftAvailable 30s linear infinite reverse;
                 display: flex;
                 width: max-content;
             }

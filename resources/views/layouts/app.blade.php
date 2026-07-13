@@ -457,7 +457,7 @@
                     loop: true,
                     slidesPerView: 'auto',
                     spaceBetween: 24,
-                    speed: 3000,
+                    speed: 2000,
                     autoplay: {
                         delay: 0,
                         disableOnInteraction: false,
@@ -604,7 +604,7 @@
 
                 elementsToFade.forEach(el => el.classList.remove('fade-out'));
                 floatingCards.forEach(el => el.classList.remove('float-fade-out'));
-            }, 500);
+            }, 10);
         }
     </script>
     <script>
