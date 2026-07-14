@@ -30,6 +30,34 @@
                 {{-- Personal Details --}}
                 <div class="bg-card-bg border border-card-border rounded-2xl p-6 mb-6 shadow-sm">
                     <h2 class="text-xl font-bold text-text-main mb-4 border-b border-card-border pb-2"><i class="fas fa-user text-accent-blue mr-2"></i> Personal Details</h2>
+                    
+                    <!-- Photo Upload Section -->
+                    <div class="flex items-center gap-4 p-4 border border-card-border rounded-xl bg-primary-bg/50 mb-4">
+                        <div class="relative w-16 h-16 rounded-xl border border-card-border bg-white overflow-hidden flex items-center justify-center flex-shrink-0 shadow-inner">
+                            <template x-if="resume.personal.photo">
+                                <img :src="resume.personal.photo" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!resume.personal.photo">
+                                <i class="fas fa-user-circle text-4xl text-text-dark/20"></i>
+                            </template>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-semibold text-text-dark/70 mb-1">Profile Photo</label>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <input type="file" @change="uploadPhoto($event)" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden" id="photoUploadInput">
+                                <label for="photoUploadInput" class="px-3 py-1.5 bg-accent-blue text-white rounded-lg text-xs font-bold cursor-pointer hover:opacity-90 transition-opacity shadow-sm">
+                                    <i class="fas fa-upload mr-1"></i> Choose Image
+                                </label>
+                                <template x-if="resume.personal.photo">
+                                    <button type="button" @click="removePhoto()" class="px-3 py-1.5 bg-red-500/10 text-red-500 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors">
+                                        <i class="fas fa-trash mr-1"></i> Remove
+                                    </button>
+                                </template>
+                            </div>
+                            <p class="text-[10px] text-text-dark/40 mt-1">Recommended: Square format, Max size 2MB.</p>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="col-span-2">
                             <label class="block text-xs font-semibold text-text-dark/70 mb-1">Full Name</label>
@@ -154,13 +182,21 @@
                 <div class="bg-white mx-auto min-h-[1122px] w-full max-w-[794px] p-10 sm:p-12 shadow-sm border border-gray-200">
                     
                     {{-- Header --}}
-                    <div class="text-center mb-8 border-b-2 border-gray-800 pb-6">
-                        <h1 class="text-4xl font-bold text-gray-900 mb-2" style="font-family: Arial, Helvetica, sans-serif" x-text="resume.personal.name || 'Your Name'"></h1>
-                        <h2 class="text-xl text-gray-600 mb-4" x-text="resume.personal.title || 'Professional Title'"></h2>
-                        <div class="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-gray-600">
-                            <span x-show="resume.personal.email"><i class="fas fa-envelope mr-1"></i> <span x-text="resume.personal.email"></span></span>
-                            <span x-show="resume.personal.phone"><i class="fas fa-phone mr-1"></i> <span x-text="resume.personal.phone"></span></span>
-                            <span x-show="resume.personal.location"><i class="fas fa-map-marker-alt mr-1"></i> <span x-text="resume.personal.location"></span></span>
+                    <div class="flex items-center gap-6 mb-8 border-b-2 border-gray-800 pb-6" :class="resume.personal.photo ? 'flex-row text-left' : 'flex-col text-center'">
+                        <template x-if="resume.personal.photo">
+                            <div class="relative group flex-shrink-0">
+                                <img :src="resume.personal.photo" class="w-24 h-24 rounded-xl object-cover border border-gray-300 shadow-md">
+                                <button type="button" @click="removePhoto()" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-md"><i class="fas fa-times"></i></button>
+                            </div>
+                        </template>
+                        <div class="flex-1">
+                            <h1 class="text-4xl font-bold text-gray-900 mb-2" style="font-family: Arial, Helvetica, sans-serif" x-text="resume.personal.name || 'Your Name'"></h1>
+                            <h2 class="text-xl text-gray-600 mb-4" x-text="resume.personal.title || 'Professional Title'"></h2>
+                            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600" :class="resume.personal.photo ? 'justify-start' : 'justify-center'">
+                                <span x-show="resume.personal.email"><i class="fas fa-envelope mr-1"></i> <span x-text="resume.personal.email"></span></span>
+                                <span x-show="resume.personal.phone"><i class="fas fa-phone mr-1"></i> <span x-text="resume.personal.phone"></span></span>
+                                <span x-show="resume.personal.location"><i class="fas fa-map-marker-alt mr-1"></i> <span x-text="resume.personal.location"></span></span>
+                            </div>
                         </div>
                     </div>
 
@@ -237,6 +273,7 @@
                 email: '{{ auth()->check() ? auth()->user()->email : '' }}',
                 phone: '',
                 location: '{{ auth()->check() && auth()->user()->profile ? auth()->user()->profile->address : '' }}',
+                photo: '',
             },
             summary: 'Dedicated and experienced educator with a proven track record of creating engaging lesson plans and fostering a positive learning environment. Passionate about student development and innovative teaching methodologies.',
             experience: [
@@ -272,6 +309,29 @@
         return {
             newSkill: '',
             resume: defaultResume,
+
+            uploadPhoto(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('Image size must be less than 2MB');
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        this.resume.personal.photo = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+
+            removePhoto() {
+                this.resume.personal.photo = '';
+                const fileInput = document.getElementById('photoUploadInput');
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+            },
 
             addExperience() {
                 this.resume.experience.unshift({ title: '', company: '', startDate: '', endDate: '', description: '' });
