@@ -928,6 +928,8 @@
         </div>
     </section>
 
+    @include('partials.job-registration-popup')
+
     @endsection
 
 @push('scripts')

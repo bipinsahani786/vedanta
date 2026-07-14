@@ -127,8 +127,8 @@
             <table class="min-w-full border border-gray-300">
                 <thead>
                     <tr class="bg-gray-100">
-                        <th class="border px-4 py-2 text-left">First Month Gross Salary</th>
-                        <th class="border px-4 py-2 text-left">Service Charge</th>
+                        <th class="border px-4 py-2 text-blue-900 ">First Month Gross Salary</th>
+                        <th class="border px-4 py-2 text-blue-900">Service Charge</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -173,8 +173,8 @@
             <table class="min-w-full border border-gray-300">
                 <thead>
                     <tr class="bg-gray-100">
-                        <th class="border px-4 py-2 text-left">First Month Gross Salary</th>
-                        <th class="border px-4 py-2 text-left">Service Charge</th>
+                        <th class="border px-4 py-2 text-blue-900">First Month Gross Salary</th>
+                        <th class="border px-4 py-2 text-blue-900">Service Charge</th>
                     </tr>
                 </thead>
                 <tbody>

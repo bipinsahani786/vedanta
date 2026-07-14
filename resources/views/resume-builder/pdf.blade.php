@@ -93,24 +93,53 @@
 </head>
 <body>
 
-    <div class="header">
-        <h1>{{ $data['personal']['name'] ?? 'Your Name' }}</h1>
-        @if(!empty($data['personal']['title']))
-            <h2>{{ $data['personal']['title'] }}</h2>
-        @endif
-        
-        <div class="contact-info">
-            @if(!empty($data['personal']['email']))
-                <span>Email: {{ $data['personal']['email'] }}</span>
-            @endif
-            @if(!empty($data['personal']['phone']))
-                <span>Phone: {{ $data['personal']['phone'] }}</span>
-            @endif
-            @if(!empty($data['personal']['location']))
-                <span>Location: {{ $data['personal']['location'] }}</span>
-            @endif
+    @if(!empty($data['personal']['photo']))
+        <div class="header" style="text-align: left; padding-bottom: 15px;">
+            <table style="width: 100%; border-collapse: collapse; border: none; margin: 0; padding: 0;">
+                <tr>
+                    <td style="width: 100px; vertical-align: middle; border: none; padding: 0 20px 0 0;">
+                        <img src="{{ $data['personal']['photo'] }}" style="width: 100px; height: 100px; border-radius: 8px; display: block; object-fit: cover;">
+                    </td>
+                    <td style="vertical-align: middle; border: none; padding: 0; text-align: left;">
+                        <h1 style="font-family: Arial, Helvetica, sans-serif; font-size: 32px; margin: 0 0 5px 0; color: #111;">{{ $data['personal']['name'] ?? 'Your Name' }}</h1>
+                        @if(!empty($data['personal']['title']))
+                            <h2 style="font-size: 18px; color: #555; margin: 0 0 10px 0; font-weight: normal;">{{ $data['personal']['title'] }}</h2>
+                        @endif
+                        <div class="contact-info" style="font-size: 13px; color: #555;">
+                            @if(!empty($data['personal']['email']))
+                                <span style="margin-right: 15px;">Email: {{ $data['personal']['email'] }}</span>
+                            @endif
+                            @if(!empty($data['personal']['phone']))
+                                <span style="margin-right: 15px;">Phone: {{ $data['personal']['phone'] }}</span>
+                            @endif
+                            @if(!empty($data['personal']['location']))
+                                <span>Location: {{ $data['personal']['location'] }}</span>
+                            @endif
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
-    </div>
+    @else
+        <div class="header">
+            <h1>{{ $data['personal']['name'] ?? 'Your Name' }}</h1>
+            @if(!empty($data['personal']['title']))
+                <h2>{{ $data['personal']['title'] }}</h2>
+            @endif
+            
+            <div class="contact-info">
+                @if(!empty($data['personal']['email']))
+                    <span>Email: {{ $data['personal']['email'] }}</span>
+                @endif
+                @if(!empty($data['personal']['phone']))
+                    <span>Phone: {{ $data['personal']['phone'] }}</span>
+                @endif
+                @if(!empty($data['personal']['location']))
+                    <span>Location: {{ $data['personal']['location'] }}</span>
+                @endif
+            </div>
+        </div>
+    @endif
 
     @if(!empty($data['summary']))
     <div class="section summary">
