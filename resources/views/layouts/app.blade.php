@@ -251,7 +251,8 @@
                         class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 flex items-center gap-2">
                         <div
                             class="w-6 h-6 rounded-full bg-accent-blue text-white flex items-center justify-center text-[10px] font-bold">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        </div>
                         Dashboard
                     </a>
                     <form action="{{ route('logout') }}" method="POST" class="inline">
@@ -382,25 +383,38 @@
                     <a href="{{ route('contact') }}" class="hover:text-accent-blue transition-colors">Contact us</a>
                     <a href="{{ route('terms') }}" class="hover:text-accent-blue transition-colors">Terms &
                         Conditions</a>
+                    <a href="{{ route('refund') }}" class="hover:text-accent-blue transition-colors">Refund,
+                        Cancellation & Payment Policy</a>
+                    <a href="{{ route('pricing')}}" class="hover:text-accent-blue transition-colors"> Pricing & Service
+                        Charges Policy</a>
+                    <a href="{{ route('cookie') }}" class="hover:text-accent-blue transition-colors">Cookie Policy</a>
+                    <a href="{{ route('disclaimer') }}" class="hover:text-accent-blue transition-colors">Disclaimer</a>
                     <a href="{{ route('services') }}" class="hover:text-accent-blue transition-colors">Services</a>
                     <a href="{{ route('privacy') }}" class="hover:text-accent-blue transition-colors">Privacy Policy</a>
                     <a href="{{ route('jobs') }}" class="hover:text-accent-blue transition-colors">Jobs</a>
                     <a href="{{ route('media') }}" class="hover:text-accent-blue transition-colors">Media</a>
+                    <a href="{{ route('employer') }}" class="hover:text-accent-blue transition-colors">Employer</a>
+                    <a href="{{ route('candidate') }}" class="hover:text-accent-blue transition-colors">Candidate</a>
                 </div>
             </div>
 
             <div>
                 <h4 class="text-sm font-bold mb-5 tracking-wider uppercase">Social</h4>
                 <ul class="space-y-2.5 text-xs text-gray-400">
-                    <li><a href="#" class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
+                    <li><a href="https://www.instagram.com/vedantaplacementagency?igsh=MWUwczFoYzQ2eGUydQ=="
+                            target="'blank"
+                            class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
                                 class="fab fa-instagram text-sm w-4 text-center"></i> Instagram</a></li>
-                    <li><a href="#" class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
+                    <li><a href="https://www.facebook.com/share/1Dmruc9Esx/" target="blank"
+                            class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
                                 class="fab fa-facebook text-sm w-4 text-center"></i> Facebook</a></li>
-                    <li><a href="#" class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
+                    <li><a href="https://youtube.com/@vedantaplacementagency?si=UZ0VPukRGknF4EhQ" target="blank"
+                            class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
                                 class="fab fa-youtube text-sm w-4 text-center"></i> Youtube</a></li>
-                    <li><a href="#" class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
+                    <li><a href="https://www.whatsapp.com/"
+                            class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
                                 class="fab fa-whatsapp text-sm w-4 text-center"></i> Whatsapp</a></li>
-                    <li><a href="https://www.linkedin.com/company/vedanta-placement-agency-india/" target="_blank"
+                    <li><a href="https://www.linkedin.com/company/vedanta-placement-agency-india/" target='blank'
                             class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
                                 class="fab fa-linkedin text-sm w-4 text-center"></i> Linkedin</a></li>
                 </ul>
@@ -409,8 +423,8 @@
             <div>
                 <h4 class="text-sm font-bold mb-5 tracking-wider uppercase">Get In Touch</h4>
                 <div class="text-xs text-gray-400 space-y-4">
-                    <p class="leading-relaxed flex gap-2"><i class="fas fa-map-marker-alt text-accent-blue mt-0.5"></i>
-                        Agam Kuan, Sardar Patel Colony,<br>Patna, Bihar- 800007, India</p>
+                    <p class="leading-relaxed flex gap-2"><i class="fas fa-map-marker-alt text-accent-b lue mt-0.5"></i>
+                        Career Point Building, 2nd floor,<br>Patna, 800001, Bihar</p>
                     <div class="flex gap-2">
                         <i class="fas fa-envelope text-accent-blue mt-0.5"></i>
                         <a href="mailto:info@vedantaplacementagency.in"
