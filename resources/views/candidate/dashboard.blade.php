@@ -403,10 +403,19 @@
                         <h3 class="font-bold text-text-main mb-1.5 text-lg">Make Payment</h3>
                         <p class="text-sm text-text-dark/50 mb-6 leading-relaxed">Choose your plan and complete the registration
                             fee payment</p>
+                        @php
+                            $pendingTransaction = auth()->user()->transactions()->where('status', 'pending')->first();
+                        @endphp
                         @if($profile->initial_fee_paid)
                             <span
                                 class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-bold bg-green-500/10 text-green-400 border border-green-500/20 flex items-center justify-center gap-2">
                                 <i class="fas fa-check-circle"></i> Initial Payment Received
+                            </span>
+                        @elseif($pendingTransaction)
+                            <span
+                                class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-semibold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center justify-center gap-2"
+                                title="Awaiting Administrator verification for UPI/Cash payment">
+                                <i class="fas fa-clock"></i> Payment Approval Pending
                             </span>
                         @elseif($profile->is_agreement_signed)
                             <a href="{{ route('candidate.payment.show') }}"

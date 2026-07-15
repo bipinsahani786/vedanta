@@ -128,4 +128,13 @@ class HomeController extends Controller
         $subject = \App\Models\Subject::findOrFail($subjectId);
         return response()->json($subject->specializations()->where('is_active', true)->orderBy('name')->get());
     }
+
+    public function getCities($state)
+    {
+        $cities = \App\Models\Location::where('state', $state)
+            ->where('is_active', true)
+            ->orderBy('city')
+            ->get(['id', 'city']);
+        return response()->json($cities);
+    }
 }

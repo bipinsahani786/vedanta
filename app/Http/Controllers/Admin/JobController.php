@@ -26,8 +26,11 @@ class JobController extends Controller
         }
 
         // Status Filter
-        if ($status = $request->input('status')) {
-            $query->where('status', $status);
+        $status = $request->input('status');
+        if ($status === 'pending') {
+            $query->whereIn('status', ['pending', 'rejected']);
+        } else {
+            $query->where('status', 'approved');
         }
 
         // Sorting
@@ -170,7 +173,7 @@ class JobController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
+            'title' => 'required|string|max:255',
             'school_name' => 'required|string|max:255',
             'contact_person' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -204,7 +207,7 @@ class JobController extends Controller
     public function update(Request $request, JobPost $job)
     {
         $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
+            'title' => 'required|string|max:255',
             'school_name' => 'required|string|max:255',
             'contact_person' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -215,6 +218,7 @@ class JobController extends Controller
             'location_id' => 'required|exists:locations,id',
             'salary_range' => 'nullable|string|max:255',
             'description' => 'nullable|string',
+            'status' => 'required|in:pending,approved,rejected',
         ]);
 
         $job->update($validated);

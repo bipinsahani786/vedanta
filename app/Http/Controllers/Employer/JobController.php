@@ -38,30 +38,33 @@ class JobController extends Controller
             'contact_person' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:15',
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'subject_id' => 'required|exists:subjects,id',
-            'qualification_id' => 'required|exists:qualifications,id',
-            'location_id' => 'required|exists:locations,id',
-            'salary_range' => 'nullable|string|max:255',
+            'requirements' => 'required|array|min:1',
+            'requirements.*.title' => 'required|string|max:255',
+            'requirements.*.description' => 'required|string',
+            'requirements.*.category_id' => 'required|exists:categories,id',
+            'requirements.*.subject_id' => 'required|exists:subjects,id',
+            'requirements.*.qualification_id' => 'required|exists:qualifications,id',
+            'requirements.*.location_id' => 'required|exists:locations,id',
+            'requirements.*.salary_range' => 'nullable|string|max:255',
         ]);
 
-        JobPost::create([
-            'user_id' => auth()->id(),
-            'school_name' => $request->school_name,
-            'contact_person' => $request->contact_person,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'title' => $request->title,
-            'description' => $request->description,
-            'category_id' => $request->category_id,
-            'subject_id' => $request->subject_id,
-            'qualification_id' => $request->qualification_id,
-            'location_id' => $request->location_id,
-            'salary_range' => $request->salary_range,
-            'status' => 'pending',
-        ]);
+        foreach ($request->requirements as $req) {
+            JobPost::create([
+                'user_id' => auth()->id(),
+                'school_name' => $request->school_name,
+                'contact_person' => $request->contact_person,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'title' => $req['title'],
+                'description' => $req['description'],
+                'category_id' => $req['category_id'],
+                'subject_id' => $req['subject_id'],
+                'qualification_id' => $req['qualification_id'],
+                'location_id' => $req['location_id'],
+                'salary_range' => $req['salary_range'] ?? null,
+                'status' => 'pending',
+            ]);
+        }
 
         return redirect()->route('employer.jobs.index')->with('success', 'Job posted successfully. It will be live after admin approval.');
     }

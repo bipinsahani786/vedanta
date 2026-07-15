@@ -32,4 +32,43 @@ class TransactionController extends Controller
 
         return view('admin.transactions.index', compact('transactions'));
     }
+
+    public function approve($id)
+    {
+        $transaction = PaymentTransaction::findOrFail($id);
+
+        if ($transaction->status !== 'pending') {
+            return back()->with('error', 'Only pending transactions can be approved.');
+        }
+
+        $transaction->update([
+            'status' => 'success'
+        ]);
+
+        $user = $transaction->candidate;
+        if ($user) {
+            $profile = $user->profile;
+            $amountPaid = $transaction->amount;
+            
+            if ($profile->plan_type === 'standard' && $amountPaid == 500) {
+                $profile->update([
+                    'initial_fee_paid' => true,
+                    'paid_amount' => $profile->paid_amount + $amountPaid,
+                    'payment_id' => $transaction->transaction_id,
+                    'registration_completed_at' => now(),
+                ]);
+            } else {
+                $profile->update([
+                    'initial_fee_paid' => true,
+                    'is_fee_paid' => true,
+                    'paid_amount' => $profile->paid_amount + $amountPaid,
+                    'pending_amount' => 0,
+                    'payment_id' => $transaction->transaction_id,
+                    'registration_completed_at' => now()
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Offline payment approved and candidate profile activated successfully.');
+    }
 }

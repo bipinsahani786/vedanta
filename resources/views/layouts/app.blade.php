@@ -175,6 +175,13 @@
 
 <body class="bg-secondary-bg text-text-dark">
 
+    @if(session()->has('admin_id'))
+        <div class="bg-accent-yellow text-[#031b4e] font-bold text-center py-2 text-xs flex items-center justify-center gap-2 relative z-[200]">
+            <span><i class="fas fa-user-shield"></i> You are viewing as Candidate.</span>
+            <a href="{{ route('admin.crm.switch-back') }}" class="underline hover:text-opacity-80 transition-colors">Return to Admin Portal</a>
+        </div>
+    @endif
+
     <!-- Preloader removed per user request -->
 
     <!-- Global Marquee Bar (Moving text left-to-right) -->
@@ -212,12 +219,15 @@
     <!-- Header -->
     <header id="main-header"
         class="sticky top-10 md:top-12 w-[96%] lg:w-[90%] max-w-7xl mx-auto bg-[#040e2d]/80 backdrop-blur-md border border-white/20 rounded-full px-6 lg:px-8 py-3 flex justify-between items-center z-[100] transition-all duration-500 shadow-xl mt-2 lg:mt-4">
-        <a href="#" class="flex items-center no-underline py-1">
+        <!-- Logo -->
+        <a href="#" class="flex items-center no-underline py-1 lg:w-1/4 flex-shrink-0">
             <img src="/images/logo.png?v={{ time() }}" alt="Vedanta Placement Agency"
                 class="logo-img h-10 md:h-12 w-auto object-contain transition-all duration-300">
         </a>
-        <nav class="hidden lg:flex items-center">
-            <ul class="flex gap-6 mr-8 list-none">
+        
+        <!-- Navigation Menu (Centered) -->
+        <nav class="hidden lg:flex flex-grow justify-center items-center">
+            <ul class="flex gap-6 list-none m-0 p-0">
                 <li><a href="{{ route('home') }}"
                         class="{{ request()->routeIs('home') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('home') ? 'after:w-0' : '' }}">Home</a>
                 </li>
@@ -242,7 +252,11 @@
                         class="{{ request()->routeIs('contact') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact
                         us</a></li>
             </ul>
-            <div class="flex gap-3 items-center">
+        </nav>
+        
+        <!-- Auth Buttons (Right) -->
+        <div class="flex items-center justify-end lg:w-1/4 gap-3">
+            <div class="hidden lg:flex gap-3 items-center">
                 @auth
                     <a href="{{ auth()->user()->role === 'candidate' ? route('candidate.dashboard') : (auth()->user()->role === 'employer' ? route('employer.dashboard') : route('admin.dashboard')) }}"
                         class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 flex items-center gap-2">
@@ -266,11 +280,12 @@
                         class="px-5 py-2.5 rounded-xl font-bold text-[15px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</a>
                 @endauth
             </div>
-        </nav>
-        <!-- Mobile Menu Button -->
-        <button id="mobileMenuBtn" class="lg:hidden text-white text-2xl focus:outline-none">
-            <i class="fas fa-bars"></i>
-        </button>
+            
+            <!-- Mobile Menu Button -->
+            <button id="mobileMenuBtn" class="lg:hidden text-white text-2xl focus:outline-none">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
     </header>
 
     <!-- Mobile Menu Overlay -->

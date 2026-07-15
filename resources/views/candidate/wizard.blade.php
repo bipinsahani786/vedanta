@@ -191,15 +191,30 @@
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                             </div>
 
+                            <!-- State Preference -->
+                            <div>
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Preferred State *</label>
+                                <select x-model="selectedState" required
+                                    class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                                    <option value="">Select State</option>
+                                    @php
+                                        $states = $locations->whereNotNull('state')->where('state', '!=', '')->pluck('state')->unique()->sort();
+                                    @endphp
+                                    @foreach($states as $state)
+                                        <option value="{{ $state }}">{{ $state }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <!-- Location Preference -->
                             <div>
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Preferred Location *</label>
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Preferred City *</label>
                                 <select x-model="formData.preferred_location_id" required
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
-                                    <option value="">Select Location</option>
-                                    @foreach($locations as $location)
-                                        <option value="{{ $location->id }}">{{ $location->city }}, {{ $location->state }}</option>
-                                    @endforeach
+                                    <option value="">Select City</option>
+                                    <template x-for="city in availableCities" :key="city.id">
+                                        <option :value="city.id" x-text="city.city" :selected="formData.preferred_location_id == city.id"></option>
+                                    </template>
                                 </select>
                             </div>
 
@@ -309,26 +324,22 @@
                     </h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <!-- Live Photo Section -->
-                        <div class="border border-card-border rounded-2xl p-6 bg-secondary-bg relative">
-                            <h3 class="font-bold text-text-main mb-4 flex items-center gap-2"><i class="fas fa-camera text-accent-blue"></i> Live Photo</h3>
-                            
-                            <div x-show="!livePhotoBase64" class="w-full aspect-video bg-card-bg rounded-xl overflow-hidden relative border border-card-border">
-                                <video id="cameraFeed" class="w-full h-full object-cover" autoplay playsinline></video>
-                                <div class="absolute inset-0 flex items-center justify-center bg-card-bg/80" x-show="!isCameraOn">
-                                    <button @click="startCamera" class="bg-accent-blue text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-accent-blue-hover transition-colors">Start Camera</button>
-                                </div>
+                        <!-- Photo Upload Section -->
+                        <div class="border border-card-border rounded-2xl p-6 bg-secondary-bg relative flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-text-main mb-4 flex items-center gap-2"><i class="fas fa-image text-accent-blue"></i> Candidate Photo *</h3>
+                                <p class="text-xs text-text-dark/50 mb-4">Please upload a formal passport-sized photo.</p>
+                                
+                                <label class="w-full aspect-video flex flex-col items-center justify-center border-2 border-dashed border-card-border rounded-xl bg-card-bg hover:bg-card-border/30 transition-colors cursor-pointer relative overflow-hidden">
+                                    <div class="flex flex-col items-center justify-center py-4" x-show="!livePhotoBase64">
+                                        <i class="fas fa-cloud-upload-alt text-3xl text-accent-blue mb-2"></i>
+                                        <p class="text-sm font-semibold text-text-main">Click to upload photo</p>
+                                        <p class="text-xs text-text-dark/40 mt-1">Format: JPG, JPEG, PNG. Max: 2MB.</p>
+                                    </div>
+                                    <img x-show="livePhotoBase64" :src="livePhotoBase64" class="absolute inset-0 w-full h-full object-cover" />
+                                    <input type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" @change="handleLivePhotoUpload" />
+                                </label>
                             </div>
-
-                            <div x-show="livePhotoBase64" class="w-full aspect-video bg-card-bg rounded-xl overflow-hidden border border-card-border relative">
-                                <img :src="livePhotoBase64" class="w-full h-full object-cover" />
-                                <button @click="livePhotoBase64 = null; startCamera()" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-600 transition-colors"><i class="fas fa-redo"></i></button>
-                            </div>
-
-                            <div class="mt-4 flex justify-center" x-show="isCameraOn && !livePhotoBase64">
-                                <button @click="takePhoto" class="bg-green-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-green-600 transition-colors shadow-lg flex items-center gap-2"><i class="fas fa-camera"></i> Capture Photo</button>
-                            </div>
-                            <p x-show="cameraError" class="text-red-500 text-xs mt-2 text-center" x-text="cameraError"></p>
                         </div>
 
                         <!-- Location & Signature Section -->
@@ -453,6 +464,68 @@
                         </div>
                     </div>
 
+                    <!-- Payment Methods -->
+                    <div class="mt-8 mb-8 border-t border-card-border pt-6">
+                        <h3 class="text-xs font-bold text-text-main/70 uppercase tracking-wider mb-4">Select Payment Method</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Online (PhonePe) -->
+                            <div class="border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 relative flex items-center gap-3"
+                                :class="paymentMethod === 'online' ? 'border-accent-blue bg-accent-blue/5' : 'border-card-border hover:border-accent-blue/30 bg-secondary-bg/50'"
+                                @click="paymentMethod = 'online'">
+                                <div class="w-8 h-8 rounded-lg bg-[#5f259f]/10 text-[#5f259f] flex items-center justify-center text-sm"><i class="fas fa-mobile-alt"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-text-main text-sm">Online</h4>
+                                    <p class="text-[10px] text-text-dark/50">PhonePe / UPI / Card</p>
+                                </div>
+                            </div>
+
+                            <!-- UPI QR (Offline) -->
+                            <div class="border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 relative flex items-center gap-3"
+                                :class="paymentMethod === 'upi' ? 'border-accent-blue bg-accent-blue/5' : 'border-card-border hover:border-accent-blue/30 bg-secondary-bg/50'"
+                                @click="paymentMethod = 'upi'">
+                                <div class="w-8 h-8 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center text-sm"><i class="fas fa-qrcode"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-text-main text-sm">UPI Transfer</h4>
+                                    <p class="text-[10px] text-text-dark/50">Scan QR Code</p>
+                                </div>
+                            </div>
+
+                            <!-- Cash (Offline) -->
+                            <div class="border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 relative flex items-center gap-3"
+                                :class="paymentMethod === 'cash' ? 'border-accent-blue bg-accent-blue/5' : 'border-card-border hover:border-accent-blue/30 bg-secondary-bg/50'"
+                                @click="paymentMethod = 'cash'">
+                                <div class="w-8 h-8 rounded-lg bg-accent-yellow/10 text-accent-yellow flex items-center justify-center text-sm"><i class="fas fa-money-bill-wave"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-text-main text-sm">Cash Payment</h4>
+                                    <p class="text-[10px] text-text-dark/50">Pay Offline at Center</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UPI QR details -->
+                    <div x-show="paymentMethod === 'upi'" class="mb-8 p-6 bg-secondary-bg border border-card-border rounded-2xl flex flex-col md:flex-row items-center gap-6 animate-[fadeIn_0.3s_ease-out]">
+                        <div class="bg-white p-3 rounded-xl shadow-lg border border-card-border">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=vedanta@ybl%26pn=Vedanta%20Placement%20Agency%26am=500%26cu=INR" class="w-32 h-32 object-contain" />
+                        </div>
+                        <div class="flex-1 space-y-2 text-sm text-text-dark/80">
+                            <p class="font-bold text-text-main text-base">Scan & Pay to Vedanta</p>
+                            <p>1. Open any UPI App (GPay, PhonePe, Paytm, etc.).</p>
+                            <p>2. Scan the QR code or send payment to UPI ID: <strong class="text-accent-yellow">vedanta@ybl</strong></p>
+                            <p>3. Pay the exact amount (<strong class="text-accent-blue" x-text="selectedPlan === 'premium' ? '₹1000' : '₹500'"></strong>).</p>
+                            <p>4. After paying, click the "Submit UPI Request" button below.</p>
+                        </div>
+                    </div>
+
+                    <!-- Cash details -->
+                    <div x-show="paymentMethod === 'cash'" class="mb-8 p-6 bg-secondary-bg border border-card-border rounded-2xl flex items-center gap-4 animate-[fadeIn_0.3s_ease-out]">
+                        <div class="w-12 h-12 rounded-2xl bg-accent-yellow/15 text-accent-yellow flex items-center justify-center text-xl"><i class="fas fa-info-circle"></i></div>
+                        <div class="text-sm text-text-dark/80">
+                            <p class="font-bold text-text-main text-base">Pay in Cash Offline</p>
+                            <p class="mt-1">Please visit the Vedanta Placement Agency office during business hours to pay in cash. Once paid, the administrator will instantly activate your profile.</p>
+                        </div>
+                    </div>
+
                     <div class="mt-8 flex justify-between items-center pt-6 border-t border-card-border">
                         <button type="button" @click="step = 3" class="px-6 py-3 rounded-xl font-semibold text-text-dark hover:bg-card-border transition-colors flex items-center gap-2">
                             <i class="fas fa-arrow-left text-sm"></i> Back
@@ -463,8 +536,17 @@
                                 <p class="text-xs text-text-dark/50 uppercase tracking-wider font-semibold">Total to Pay</p>
                                 <p class="text-xl font-bold text-text-main" x-text="selectedPlan === 'premium' ? '₹1000' : '₹500'"></p>
                             </div>
-                            <button type="button" @click="submitPayment" class="bg-[#5f259f] text-white px-8 py-3.5 rounded-xl font-semibold shadow-lg hover:brightness-110 transition-all hover:-translate-y-0.5 flex items-center gap-2">
-                                Pay via PhonePe <i class="fas fa-lock text-xs opacity-70"></i>
+                            <!-- Dynamic Pay Button -->
+                            <button type="button" @click="submitPayment" 
+                                class="px-8 py-3.5 rounded-xl font-semibold shadow-lg transition-all hover:-translate-y-0.5 flex items-center gap-2"
+                                :class="[
+                                    paymentMethod === 'online' ? 'bg-[#5f259f] text-white hover:brightness-110' : '',
+                                    paymentMethod === 'upi' ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-600/20' : '',
+                                    paymentMethod === 'cash' ? 'bg-accent-yellow text-[#031b4e] hover:shadow-glow-yellow' : ''
+                                ]">
+                                <span x-show="paymentMethod === 'online'">Pay via PhonePe <i class="fas fa-lock text-xs opacity-70"></i></span>
+                                <span x-show="paymentMethod === 'upi'">Submit UPI Request <i class="fas fa-arrow-right text-xs opacity-70"></i></span>
+                                <span x-show="paymentMethod === 'cash'">Submit Cash Request <i class="fas fa-arrow-right text-xs opacity-70"></i></span>
                             </button>
                         </div>
                     </div>
@@ -485,6 +567,8 @@
             error: '',
             
             // Profile Data
+            selectedState: '{{ $profile->preferredLocation->state ?? "" }}',
+            availableCities: [],
             formData: {
                 date_of_birth: '{{ $profile->date_of_birth ? $profile->date_of_birth->format("Y-m-d") : "" }}',
                 gender: '{{ $profile->gender }}',
@@ -532,6 +616,7 @@
 
             // Payment Data
             selectedPlan: 'standard',
+            paymentMethod: 'online',
 
             init() {
                 // Determine initial step based on profile status
@@ -605,6 +690,31 @@
                         .then(response => response.json())
                         .then(data => {
                             this.availableSpecializations = data;
+                        });
+                }
+
+                this.$watch('selectedState', value => {
+                    if (value) {
+                        fetch(`/api/states/${encodeURIComponent(value)}/cities`)
+                            .then(response => response.json())
+                            .then(data => {
+                                this.availableCities = data;
+                                if(!data.find(c => c.id == this.formData.preferred_location_id)) {
+                                    this.formData.preferred_location_id = '';
+                                }
+                            })
+                            .catch(error => console.error('Error fetching cities:', error));
+                    } else {
+                        this.availableCities = [];
+                        this.formData.preferred_location_id = '';
+                    }
+                });
+
+                if (this.selectedState) {
+                    fetch(`/api/states/${encodeURIComponent(this.selectedState)}/cities`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.availableCities = data;
                         });
                 }
             },
@@ -729,6 +839,22 @@
                 reader.readAsDataURL(file);
             },
 
+            handleLivePhotoUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if (file.size > 2 * 1024 * 1024) {
+                    this.error = "Photo size must be less than 2MB";
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.livePhotoBase64 = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            },
+
             handleResumeUpload(e) {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -781,7 +907,7 @@
                 this.error = '';
                 
                 if (!this.livePhotoBase64) {
-                    this.error = 'Please capture a live photo before continuing.';
+                    this.error = 'Please upload a photo before continuing.';
                     return;
                 }
 
@@ -908,7 +1034,7 @@
 
             async submitPayment() {
                 this.error = '';
-                this.loadingMessage = 'Initiating Secure Payment...';
+                this.loadingMessage = this.paymentMethod === 'online' ? 'Initiating Secure Payment...' : 'Submitting payment request...';
                 this.loading = true;
 
                 try {
@@ -919,13 +1045,23 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({ plan_type: this.selectedPlan })
+                        body: JSON.stringify({ 
+                            plan_type: this.selectedPlan,
+                            payment_method: this.paymentMethod
+                        })
                     });
 
                     const data = await response.json();
                     
-                    if (response.ok && data.success && data.redirect_url) {
-                        window.location.href = data.redirect_url;
+                    if (response.ok && data.success) {
+                        if (data.is_offline) {
+                            window.location.href = '{{ route("candidate.dashboard") }}';
+                        } else if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            this.error = 'Payment response mismatch.';
+                            this.loading = false;
+                        }
                     } else {
                         this.error = data.message || 'Failed to connect to payment gateway.';
                         this.loading = false;

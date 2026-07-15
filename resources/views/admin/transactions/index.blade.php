@@ -48,6 +48,7 @@
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Date</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-card-border">
@@ -91,10 +92,22 @@
                 <td class="text-text-dark/60 text-sm">
                     {{ $txn->created_at->format('d M, Y h:i A') }}
                 </td>
+                <td>
+                    @if($txn->status === 'pending')
+                        <form action="{{ route('admin.transactions.approve', $txn->id) }}" method="POST" class="inline" onsubmit="return confirm('Approve this offline payment?');">
+                            @csrf
+                            <button type="submit" class="text-xs font-bold text-accent-blue hover:text-accent-blue-hover hover:underline transition-colors flex items-center gap-1">
+                                <i class="fas fa-check-circle"></i> Approve
+                            </button>
+                        </form>
+                    @else
+                        <span class="text-xs text-text-dark/40 font-semibold">-</span>
+                    @endif
+                </td>
             </tr>
             @empty
             <tr>
-                <td colspan="6" class="py-16 text-center">
+                <td colspan="7" class="py-16 text-center">
                     <p class="text-text-main font-bold text-lg mb-1">No transactions found</p>
                     <p class="text-text-dark/40 text-sm">Try adjusting your filters.</p>
                 </td>

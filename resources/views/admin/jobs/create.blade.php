@@ -21,43 +21,24 @@
         <form action="{{ route('admin.jobs.store') }}" method="POST" class="p-8">
             @csrf
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <!-- School Name -->
-                <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">School/Institution Name *</label>
-                    <input type="text" name="school_name" value="{{ old('school_name') }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Delhi Public School">
-                    @error('school_name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-
-                <!-- Contact Person -->
-                <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Contact Person *</label>
-                    <input type="text" name="contact_person" value="{{ old('contact_person') }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Mr. Sharma">
-                    @error('contact_person') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-
-                <!-- Email -->
-                <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Email Address *</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. hr@school.com">
-                    @error('email') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-
-                <!-- Phone -->
-                <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Phone Number *</label>
-                    <input type="text" name="phone" value="{{ old('phone') }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 9876543210">
-                    @error('phone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-            </div>
-
-            <div class="h-px w-full bg-card-border my-8"></div>
+            <!-- Hidden institutional fields with default values -->
+            <input type="hidden" name="school_name" value="Vedanta Placement Agency">
+            <input type="hidden" name="contact_person" value="Super Admin">
+            <input type="hidden" name="email" value="admin@vedanta.com">
+            <input type="hidden" name="phone" value="9876543210">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Title -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Job Title *</label>
+                    <input type="text" name="title" value="{{ old('title') }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Computer Teacher">
+                    @error('title') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <!-- Category -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Job Category *</label>
-                    <select name="category_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                    <select id="category_id" name="category_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                         <option value="">Select Category</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
@@ -69,11 +50,8 @@
                 <!-- Subject -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Subject *</label>
-                    <select name="subject_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                    <select id="subject_id" name="subject_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                         <option value="">Select Subject</option>
-                        @foreach($subjects as $subject)
-                            <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
-                        @endforeach
                     </select>
                     @error('subject_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
@@ -90,14 +68,25 @@
                     @error('qualification_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- Location -->
+                <!-- State -->
                 <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Location *</label>
-                    <select name="location_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
-                        <option value="">Select Location</option>
-                        @foreach($locations as $location)
-                            <option value="{{ $location->id }}" {{ old('location_id') == $location->id ? 'selected' : '' }}>{{ $location->city }}</option>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">State *</label>
+                    <select id="state_select" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                        <option value="">Select State</option>
+                        @php
+                            $states = $locations->whereNotNull('state')->where('state', '!=', '')->pluck('state')->unique()->sort();
+                        @endphp
+                        @foreach($states as $state)
+                            <option value="{{ $state }}" {{ old('state_select') == $state ? 'selected' : '' }}>{{ $state }}</option>
                         @endforeach
+                    </select>
+                </div>
+
+                <!-- City -->
+                <div>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">City *</label>
+                    <select id="location_id" name="location_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                        <option value="">Select City</option>
                     </select>
                     @error('location_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
@@ -138,3 +127,83 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('category_id');
+    const subjectSelect = document.getElementById('subject_id');
+    const stateSelect = document.getElementById('state_select');
+    const citySelect = document.getElementById('location_id');
+    
+    const initialSubjectId = "{{ old('subject_id') }}";
+    const initialCityId = "{{ old('location_id') }}";
+    
+    function loadSubjects(categoryId, selectedSubjectId = null) {
+        subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+        if (categoryId) {
+            fetch(`/api/categories/${categoryId}/subjects`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(subject => {
+                        const option = document.createElement('option');
+                        option.value = subject.id;
+                        option.textContent = subject.name;
+                        if (selectedSubjectId && subject.id == selectedSubjectId) {
+                            option.selected = true;
+                        }
+                        subjectSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching subjects:', error));
+        }
+    }
+    
+    function loadCities(stateName, selectedCityId = null) {
+        citySelect.innerHTML = '<option value="">Select City</option>';
+        if (stateName) {
+            fetch(`/api/states/${encodeURIComponent(stateName)}/cities`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(loc => {
+                        const option = document.createElement('option');
+                        option.value = loc.id;
+                        option.textContent = loc.city;
+                        if (selectedCityId && loc.id == selectedCityId) {
+                            option.selected = true;
+                        }
+                        citySelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching cities:', error));
+        }
+    }
+    
+    if (categorySelect && subjectSelect) {
+        const initialCategoryId = categorySelect.value;
+        if (initialCategoryId) {
+            loadSubjects(initialCategoryId, initialSubjectId);
+        } else {
+            subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+        }
+        
+        categorySelect.addEventListener('change', function() {
+            loadSubjects(this.value);
+        });
+    }
+    
+    if (stateSelect && citySelect) {
+        const initialState = stateSelect.value;
+        if (initialState) {
+            loadCities(initialState, initialCityId);
+        } else {
+            citySelect.innerHTML = '<option value="">Select City</option>';
+        }
+        
+        stateSelect.addEventListener('change', function() {
+            loadCities(this.value);
+        });
+    }
+});
+</script>
+@endpush

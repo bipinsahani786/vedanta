@@ -11,6 +11,7 @@ Route::get('/category/{id}/jobs', [\App\Http\Controllers\HomeController::class, 
 // Dynamic Subjects and Specializations
 Route::get('/api/categories/{category}/subjects', [HomeController::class, 'getSubjects'])->name('api.category.subjects');
 Route::get('/api/subjects/{subject}/specializations', [HomeController::class, 'getSpecializations'])->name('api.subject.specializations');
+Route::get('/api/states/{state}/cities', [HomeController::class, 'getCities'])->name('api.state.cities');
 
 Route::view('/about', 'about')->name('about');
 Route::get('/services', [\App\Http\Controllers\HomeController::class, 'services'])->name('services');
@@ -82,6 +83,8 @@ Route::post('/email/verification-notification', function (Request $request) {
 // Candidate Auth Routes
 Route::get('/register', [\App\Http\Controllers\CandidateAuthController::class, 'showRegistrationForm'])->name('candidate.register');
 Route::post('/register', [\App\Http\Controllers\CandidateAuthController::class, 'register'])->name('candidate.register.post');
+
+Route::get('/admin/switch-back', [\App\Http\Controllers\Admin\CrmController::class, 'switchBack'])->name('admin.crm.switch-back')->middleware('auth');
 
 // Candidate Routes (Unverified but Auth Required)
 Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.')->group(function () {
@@ -155,6 +158,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // CRM & Invoices
     Route::get('/crm', [\App\Http\Controllers\Admin\CrmController::class, 'index'])->name('crm.index');
+    Route::get('/crm/candidate/create', [\App\Http\Controllers\Admin\CrmController::class, 'create'])->name('crm.create');
+    Route::post('/crm/candidate/store', [\App\Http\Controllers\Admin\CrmController::class, 'store'])->name('crm.store');
     Route::get('/crm/candidate/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'show'])->name('crm.show');
     Route::post('/crm/candidate/{id}/follow-up', [\App\Http\Controllers\Admin\CrmController::class, 'storeFollowUp'])->name('crm.followup.store');
     Route::post('/crm/candidate/{id}/invoice', [\App\Http\Controllers\Admin\CrmController::class, 'storeInvoice'])->name('crm.invoice.store');
@@ -167,6 +172,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
     Route::post('/applications/{id}/status', [\App\Http\Controllers\Admin\ApplicationController::class, 'updateStatus'])->name('applications.status.update');
     Route::get('/transactions', [\App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('transactions.index');
+    Route::post('/transactions/{id}/approve', [\App\Http\Controllers\Admin\TransactionController::class, 'approve'])->name('transactions.approve');
 
     // Contact Leads
     Route::get('/leads', [\App\Http\Controllers\Admin\ContactLeadController::class, 'index'])->name('leads.index');

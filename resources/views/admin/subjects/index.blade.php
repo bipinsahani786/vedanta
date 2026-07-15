@@ -56,6 +56,7 @@
                         @endif
                     </a>
                 </th>
+                <th>Category</th>
                 <th>
                     <a href="{{ route($route, array_merge(request()->query(), ['sort_by' => 'is_active', 'order' => $order])) }}" class="flex items-center gap-2 hover:text-accent-blue transition-colors">
                         Status
@@ -84,6 +85,9 @@
             <tr>
                 <td class="font-medium text-text-dark/50">#{{ $subject->id }}</td>
                 <td class="font-semibold text-text-main">{{ $subject->name }}</td>
+                <td class="text-text-dark/60 font-medium">
+                    {{ $subject->categories->pluck('name')->implode(', ') ?: 'N/A' }}
+                </td>
                 <td>
                     @if($subject->is_active)
                         <span class="bg-green-500/10 text-green-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-green-500/20 uppercase tracking-wider">Active</span>
@@ -109,7 +113,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="py-12 text-center">
+                <td colspan="6" class="py-12 text-center">
                     <div class="w-16 h-16 bg-secondary-bg rounded-2xl flex items-center justify-center text-text-dark/20 text-2xl mx-auto mb-4 border border-card-border">
                         <i class="fas fa-search"></i>
                     </div>

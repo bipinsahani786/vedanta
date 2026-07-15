@@ -237,10 +237,51 @@ class CrmController extends Controller
     {
         $candidate = User::where('role', 'candidate')->findOrFail($id);
         
-        // Store admin id in session so they can switch back if needed (optional)
         session(['admin_id' => auth()->id()]);
         
         Auth::login($candidate);
-        return redirect()->route('candidate.dashboard');
+        return redirect()->route('candidate.wizard');
+    }
+
+    public function create()
+    {
+        return view('admin.crm.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'required|string|max:15|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'role' => 'candidate',
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'email_verified_at' => now(),
+        ]);
+
+        $user->profile()->create([]);
+
+        $adminId = auth()->id();
+        Auth::login($user);
+        session(['admin_id' => $adminId]);
+
+        return redirect()->route('candidate.wizard')->with('success', 'Candidate registered. Please complete their profile details below.');
+    }
+
+    public function switchBack()
+    {
+        if (session()->has('admin_id')) {
+            $adminId = session()->pull('admin_id');
+            Auth::loginUsingId($adminId);
+            return redirect()->route('admin.crm.index')->with('success', 'Returned to Admin Portal.');
+        }
+        return redirect('/');
     }
 }

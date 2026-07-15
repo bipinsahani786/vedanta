@@ -173,7 +173,8 @@ class RegistrationWizardController extends Controller
     public function initiatePayment(Request $request)
     {
         $request->validate([
-            'plan_type' => 'required|in:standard,premium'
+            'plan_type' => 'required|in:standard,premium',
+            'payment_method' => 'required|in:online,upi,cash'
         ]);
 
         $user = auth()->user();
@@ -185,6 +186,26 @@ class RegistrationWizardController extends Controller
 
         $amount = $request->plan_type === 'standard' ? 500 : 1000;
         $transactionId = 'TXN_' . $user->id . '_' . time();
+
+        if ($request->payment_method !== 'online') {
+            \App\Models\PaymentTransaction::create([
+                'candidate_id' => $user->id,
+                'amount' => $amount,
+                'transaction_id' => $transactionId,
+                'type' => 'registration_fee',
+                'status' => 'pending',
+                'gateway_response' => [
+                    'payment_method' => $request->payment_method,
+                    'notes' => 'Manual offline request submitted by candidate.'
+                ]
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'is_offline' => true,
+                'message' => 'Payment request submitted successfully. It will be activated after admin verification.'
+            ]);
+        }
 
         $isProd = $this->env === 'production';
 

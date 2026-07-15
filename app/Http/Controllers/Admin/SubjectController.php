@@ -10,11 +10,14 @@ class SubjectController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Subject::query();
+        $query = Subject::with('categories');
 
         // Search
         if ($search = $request->input('search')) {
-            $query->where('name', 'like', "%{$search}%");
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('categories', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
         }
 
         // Sorting
@@ -35,31 +38,50 @@ class SubjectController extends Controller
 
     public function create()
     {
-        return view('admin.subjects.create');
+        $categories = \App\Models\Category::where('is_active', true)->orderBy('name')->get();
+        return view('admin.subjects.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:subjects,name',
+            'category_id' => 'required|exists:categories,id',
+            'name' => 'required|string|max:255',
         ]);
 
-        Subject::create([
-            'name' => $request->name,
-            'is_active' => $request->has('is_active'),
-        ]);
+        // Check if this subject name is already associated with this category
+        $subject = Subject::where('name', $request->name)->first();
+        if ($subject && $subject->categories()->where('categories.id', $request->category_id)->exists()) {
+            return back()->withErrors(['name' => 'This subject is already associated with the selected category.'])->withInput();
+        }
+
+        if (!$subject) {
+            $subject = Subject::create([
+                'name' => $request->name,
+                'is_active' => $request->has('is_active'),
+            ]);
+        } else {
+            // If the subject exists but was deactivated, activate it if requested
+            if ($request->has('is_active') && !$subject->is_active) {
+                $subject->update(['is_active' => true]);
+            }
+        }
+
+        $subject->categories()->syncWithoutDetaching([$request->category_id]);
 
         return redirect()->route('admin.subjects.index')->with('success', 'Subject created successfully.');
     }
 
     public function edit(Subject $subject)
     {
-        return view('admin.subjects.edit', compact('subject'));
+        $categories = \App\Models\Category::where('is_active', true)->orderBy('name')->get();
+        return view('admin.subjects.edit', compact('subject', 'categories'));
     }
 
     public function update(Request $request, Subject $subject)
     {
         $request->validate([
+            'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255|unique:subjects,name,' . $subject->id,
         ]);
 
@@ -67,6 +89,8 @@ class SubjectController extends Controller
             'name' => $request->name,
             'is_active' => $request->has('is_active'),
         ]);
+
+        $subject->categories()->sync([$request->category_id]);
 
         return redirect()->route('admin.subjects.index')->with('success', 'Subject updated successfully.');
     }
