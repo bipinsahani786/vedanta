@@ -186,13 +186,26 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Preferred Location <span class="text-red-400">*</span></label>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Preferred State <span class="text-red-400">*</span></label>
                         <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-map-pin text-sm"></i></span>
-                            <select name="preferred_location_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none">
-                                <option value="">Select Location</option>
-                                @foreach($locations as $location)
-                                    <option value="{{ $location->id }}" {{ old('preferred_location_id', $profile->preferred_location_id) == $location->id ? 'selected' : '' }}>{{ $location->city }}, {{ $location->state }}</option>
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-map text-sm"></i></span>
+                            <select name="preferred_state_id" id="preferred_state_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none">
+                                <option value="">Select State</option>
+                                @foreach($states as $state)
+                                    <option value="{{ $state->id }}" {{ old('preferred_state_id', $profile->preferred_state_id) == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Preferred City <span class="text-red-400">*</span></label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-city text-sm"></i></span>
+                            <select name="preferred_city_id" id="preferred_city_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none">
+                                <option value="">Select City</option>
+                                @foreach($cities as $city)
+                                    <option value="{{ $city->id }}" {{ old('preferred_city_id', $profile->preferred_city_id) == $city->id ? 'selected' : '' }}>{{ $city->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -350,3 +363,30 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('preferred_state_id').addEventListener('change', function() {
+        let stateId = this.value;
+        let citySelect = document.getElementById('preferred_city_id');
+        citySelect.innerHTML = '<option value="">Loading...</option>';
+        
+        if(stateId) {
+            fetch(`/api/states/${stateId}/cities`)
+                .then(response => response.json())
+                .then(data => {
+                    citySelect.innerHTML = '<option value="">Select City</option>';
+                    data.forEach(city => {
+                        citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching cities:', error);
+                    citySelect.innerHTML = '<option value="">Select City</option>';
+                });
+        } else {
+            citySelect.innerHTML = '<option value="">Select City</option>';
+        }
+    });
+</script>
+@endpush

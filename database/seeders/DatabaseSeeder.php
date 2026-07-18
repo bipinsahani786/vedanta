@@ -28,8 +28,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             AdminSeeder::class,
+            StateCitySeeder::class,
             DummyDataSeeder::class,
-            StateFixSeeder::class,
             NewServicesSeeder::class,
             UpdateServiceContentSeeder::class,
             UpdateRecruitmentServiceSeeder::class,

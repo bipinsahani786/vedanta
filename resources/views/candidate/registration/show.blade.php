@@ -17,10 +17,7 @@
                 </div>
             </div>
             @if(auth()->user()->profile && auth()->user()->profile->pending_amount > 0)
-                <a href="{{ route('candidate.payment.show') }}"
-                    class="px-5 py-2.5 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 hover:-translate-y-0.5 transition-all shadow-lg flex items-center gap-2">
-                    <i class="fas fa-credit-card text-xs"></i> Pay Pending Dues
-                </a>
+                {{-- Button removed as payment is requested by Admin upon job placement --}}
             @endif
         </div>
 
@@ -70,6 +67,11 @@
                         <div class="text-2xl font-bold {{ ($profile->pending_amount ?? 0) > 0 ? 'text-red-400' : 'text-accent-blue' }}">
                             ₹{{ number_format($profile->pending_amount ?? 0, 2) }}
                         </div>
+                        @if(($profile->pending_amount ?? 0) > 0)
+                            <p class="text-xs text-text-dark/60 mt-2 leading-relaxed bg-accent-blue/5 border border-accent-blue/10 p-2 rounded-lg">
+                                <i class="fas fa-info-circle text-accent-blue mr-1"></i> This is the Final Registration fee, which will be requested by Admin upon successful job placement.
+                            </p>
+                        @endif
                     </div>
                 </div>
 

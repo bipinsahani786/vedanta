@@ -5,8 +5,50 @@
 
 <div class="py-12 px-6 lg:px-[5%] bg-slate-50 min-h-screen">
     <div class="max-w-4xl mx-auto bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden reveal">
+        <!-- Flash Messages -->
+        @if(session('error'))
+            <div class="m-6 p-5 mb-2 bg-red-50 border-l-4 border-red-500 rounded-r-xl shadow-sm flex items-center justify-between" style="animation: slideDown 0.4s ease-out forwards;">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-red-800 font-bold">Action Failed</h4>
+                        <span class="text-sm text-red-700 font-medium">{{ session('error') }}</span>
+                    </div>
+                </div>
+                <button type="button" class="text-red-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-100 transition-colors" onclick="this.parentElement.remove();">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        @endif
+
+        @if(session('success'))
+            <div class="m-6 p-5 mb-2 bg-green-50 border-l-4 border-green-500 rounded-r-xl shadow-sm flex items-center justify-between" style="animation: slideDown 0.4s ease-out forwards;">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-check-circle text-green-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-green-800 font-bold">Success</h4>
+                        <span class="text-sm text-green-700 font-medium">{{ session('success') }}</span>
+                    </div>
+                </div>
+                <button type="button" class="text-green-400 hover:text-green-600 p-2 rounded-lg hover:bg-green-100 transition-colors" onclick="this.parentElement.remove();">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        @endif
+        
+        <style>
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        </style>
+
         <!-- Job Header -->
-        <div class="p-8 border-b border-gray-100">
+        <div class="p-8 border-b border-gray-100 mt-2">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div class="flex items-center gap-5">
                     <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center p-2 shadow-sm border border-gray-100">
@@ -17,7 +59,7 @@
                         <p class="text-slate-600 flex items-center gap-2 text-sm font-medium">
                             <i class="fas fa-building text-blue-600"></i> {{ $job->school_name }}
                             <span class="mx-1 text-gray-300">•</span>
-                            <i class="fas fa-map-marker-alt text-blue-600"></i> {{ $job->location->city }}, {{ $job->location->state }}
+                            <i class="fas fa-map-marker-alt text-blue-600"></i> {{ $job->city?->name ?? 'N/A' }}, {{ $job->state?->name ?? 'N/A' }}
                         </p>
                     </div>
                 </div>

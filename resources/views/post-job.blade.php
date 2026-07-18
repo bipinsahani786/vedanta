@@ -113,12 +113,18 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-theme-text-light mb-2 uppercase">Location <span class="text-red-500">*</span></label>
-                                <select name="location_id" required class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
-                                    <option value="">Select Location</option>
-                                    @foreach($locations as $location)
-                                        <option value="{{ $location->id }}" {{ old('location_id') == $location->id ? 'selected' : '' }}>{{ $location->city }}, {{ $location->state }}</option>
+                                <label class="block text-xs font-bold text-theme-text-light mb-2 uppercase">State <span class="text-red-500">*</span></label>
+                                <select name="state_id" id="state_id" required class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
+                                    <option value="">Select State</option>
+                                    @foreach($states as $state)
+                                        <option value="{{ $state->id }}" {{ old('state_id') == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
                                     @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-theme-text-light mb-2 uppercase">City <span class="text-red-500">*</span></label>
+                                <select name="city_id" id="city_id" required class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
+                                    <option value="">Select City</option>
                                 </select>
                             </div>
                             <div class="md:col-span-2">

@@ -52,35 +52,43 @@
                 <div class="lg:col-span-2 space-y-8">
 
                     {{-- Quick Stats & Application Limit --}}
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 reveal reveal-delay-1">
-                        {{-- Card 1: Applications Used --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 reveal reveal-delay-1">
                         <div onclick="window.location='{{ route('candidate.applications.index') }}'"
                             class="bg-card-bg rounded-2xl border border-card-border p-6 flex flex-col items-center justify-center text-center hover:border-accent-blue/30 transition-all shadow-sm relative cursor-pointer hover:bg-secondary-bg/30">
-                            <div
-                                class="w-12 h-12 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xl mb-3">
+                            <div class="w-12 h-12 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xl mb-3">
                                 <i class="fas fa-paper-plane"></i>
                             </div>
-                            <h3 class="text-3xl font-bold text-text-main">{{ $profile->used_applications }} <span
+                            @php
+                                $actualUsedApplications = $profile->used_applications;
+                            @endphp
+                            <h3 class="text-3xl font-bold text-text-main">{{ $actualUsedApplications }} <span
                                     class="text-sm text-text-dark/40 font-normal">/
-                                    {{ $profile->plan_type === 'premium' ? '∞' : $profile->total_allowed_applications }}</span>
+                                    {{ $profile->total_allowed_applications }}</span>
                             </h3>
                             <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1">Applications Used
                             </p>
             @php
                 $isHired = \App\Models\JobApplication::where('candidate_id', auth()->id())
                     ->where('status', 'hired')
-                    ->where('created_at', '>=', $profile->plan_started_at ?? $profile->created_at)
                     ->exists();
-                $limitReached = $profile->plan_type !== 'premium' && $profile->used_applications >= $profile->total_allowed_applications;
+                $limitReached = $actualUsedApplications >= $profile->total_allowed_applications;
+                $hasActiveApplications = \App\Models\JobApplication::where('candidate_id', auth()->id())
+                    ->whereIn('status', ['applied', 'shortlisted'])
+                    ->exists();
+                $isExpired = $limitReached && !$hasActiveApplications && !$isHired;
             @endphp
-                            @if($limitReached || $isHired)
+                            @if($isHired || $isExpired || $limitReached)
                                 <div onclick="event.stopPropagation()"
-                                    class="absolute inset-0 bg-red-500/10 rounded-2xl border border-red-500/30 flex items-center justify-center backdrop-blur-[2px] flex-col z-10 cursor-default">
+                                    class="absolute inset-0 bg-black/50 rounded-2xl border border-card-border flex items-center justify-center backdrop-blur-sm flex-col z-10 cursor-default">
                                     <span
-                                        class="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg mb-2">{{ $isHired ? 'Plan Completed' : 'Limit Reached' }}</span>
-                                    <a href="{{ route('candidate.payment.show', ['type' => 'renewal']) }}"
-                                        class="px-3 py-1 bg-white text-red-600 text-xs font-bold rounded shadow hover:bg-red-50 transition-colors">Renew
-                                        Plan</a>
+                                        class="{{ $isHired ? 'bg-green-500' : ($isExpired ? 'bg-red-500' : 'bg-accent-yellow text-slate-900') }} text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg mb-2">
+                                        {{ $isHired ? 'Plan Completed' : ($isExpired ? 'Plan Expired' : 'Applications In Progress') }}
+                                    </span>
+                                    @if($isExpired)
+                                        <a href="{{ route('candidate.payment.show', ['type' => 'renewal']) }}"
+                                            class="px-3 py-1 bg-white text-red-600 text-xs font-bold rounded shadow hover:bg-red-50 transition-colors">Renew
+                                            Plan</a>
+                                    @endif
                                 </div>
                             @endif
                         </div>
@@ -96,34 +104,21 @@
                                 {{ auth()->user()->applications()->where('status', 'shortlisted')->count() }}</h3>
                             <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1">Shortlisted</p>
                         </a>
-                        
-                        {{-- Card 3: Available Jobs --}}
-                        <a href="{{ route('candidate.applications.available') }}"
-                            class="bg-card-bg rounded-2xl border border-card-border p-6 flex flex-col items-center justify-center text-center hover:border-accent-yellow/30 hover:bg-secondary-bg/30 transition-all shadow-sm cursor-pointer block">
-                            <div
-                                class="w-12 h-12 rounded-xl bg-accent-yellow/10 text-accent-yellow flex items-center justify-center text-xl mb-3 mx-auto">
-                                <i class="fas fa-briefcase"></i>
-                            </div>
-                            <h3 class="text-3xl font-bold text-text-main">
-                                {{ \App\Models\JobPost::where('status', 'approved')->count() }}</h3>
-                            <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1">Available Jobs</p>
-                        </a>
                     </div>
 
                     {{-- Financial & Pending Charges --}}
                     @if($profile->pending_amount > 0)
-                        <div
-                            class="bg-red-50 border border-red-200 rounded-2xl p-6 flex items-center justify-between shadow-sm reveal reveal-delay-2">
+                        <div class="bg-blue-50/50 border border-blue-200/50 rounded-2xl p-6 flex items-center justify-between shadow-sm reveal reveal-delay-2">
                             <div>
-                                <h3 class="text-lg font-bold text-red-700 flex items-center gap-2"><i
-                                        class="fas fa-exclamation-triangle"></i> Pending Amount Due</h3>
-                                <p class="text-sm text-red-600/80 mt-1">You have a pending balance of
-                                    ₹{{ number_format($profile->pending_amount, 2) }}. Please clear this to avoid service
-                                    interruption.</p>
+                                <h3 class="text-lg font-bold text-blue-800 flex items-center gap-2">
+                                    <i class="fas fa-info-circle"></i> Pending Final Registration Fee
+                                </h3>
+                                <p class="text-sm text-blue-700/80 mt-1">
+                                    You have a pending balance of <strong>₹{{ number_format($profile->pending_amount, 0) }}</strong> for your Standard Plan.
+                                    <br>
+                                    <span class="text-xs opacity-90 block mt-1"><i class="fas fa-clock mr-1"></i> This amount will be requested by the Admin upon successful job placement / final registration.</span>
+                                </p>
                             </div>
-                            <a href="#"
-                                class="px-6 py-3 bg-red-600 text-white font-bold rounded-xl shadow-md hover:bg-red-700 transition-colors shrink-0">Pay
-                                ₹{{ number_format($profile->pending_amount, 0) }}</a>
                         </div>
                     @endif
 
@@ -180,8 +175,13 @@
                                         class="fas fa-star {{ $profile->plan_type === 'premium' ? 'text-accent-yellow' : 'text-text-dark/40' }}"></i>
                                     Current Plan
                                 </h3>
-                                <span
-                                    class="px-3 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold uppercase tracking-wider rounded-lg">Active</span>
+                                @if($isHired)
+                                    <span class="px-3 py-1 bg-accent-blue/10 text-accent-blue text-[10px] font-bold uppercase tracking-wider rounded-lg border border-accent-blue/20">Completed</span>
+                                @elseif($isExpired)
+                                    <span class="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-red-500/20">Expired</span>
+                                @else
+                                    <span class="px-3 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-green-500/20">Active</span>
+                                @endif
                             </div>
                             <div class="mt-4">
                                 <span
@@ -220,7 +220,28 @@
                                 @endif
                             </ul>
 
-                            @if($profile->plan_type !== 'premium')
+                            @if($isHired)
+                                <div class="pt-4 border-t border-card-border text-center">
+                                    <span class="inline-block px-4 py-2 bg-green-500/10 text-green-400 font-bold text-xs rounded-lg border border-green-500/20">
+                                        <i class="fas fa-trophy mr-1"></i> Congratulations! You are placed.
+                                    </span>
+                                </div>
+                            @elseif($isExpired)
+                                <div class="pt-4 border-t border-card-border">
+                                    <p class="text-xs text-text-dark/60 mb-3 text-center">Your plan has expired. Renew to get more applications.</p>
+                                    <a href="{{ route('candidate.payment.show', ['type' => 'renewal']) }}"
+                                        class="block w-full py-3 bg-red-50 text-red-600 font-bold text-sm text-center rounded-xl hover:bg-red-100 transition-all border border-red-200">
+                                        <i class="fas fa-sync-alt mr-1"></i> Renew Plan
+                                    </a>
+                                </div>
+                            @elseif($limitReached && $hasActiveApplications)
+                                <div class="pt-4 border-t border-card-border text-center">
+                                    <p class="text-xs text-text-dark/60 mb-3 text-center">You've reached your application limit, but your applications are currently in progress. Please wait for the results.</p>
+                                    <span class="inline-block px-4 py-2 bg-accent-yellow/10 text-accent-yellow font-bold text-xs rounded-lg border border-accent-yellow/20">
+                                        <i class="fas fa-spinner fa-spin mr-1"></i> Applications Under Review
+                                    </span>
+                                </div>
+                            @elseif($profile->plan_type !== 'premium')
                                 <div class="pt-4 border-t border-card-border">
                                     <p class="text-xs text-text-dark/60 mb-3 text-center">Get more opportunities and faster
                                         placements with Premium.</p>
@@ -405,9 +426,8 @@
                             class="w-16 h-16 rounded-2xl {{ $profile->is_fee_paid ? 'bg-green-500/10 text-green-400' : ($profile->is_agreement_signed ? 'bg-accent-yellow/10 text-accent-yellow' : 'bg-card-border/50 text-text-dark/20') }} flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
                             <i class="fas {{ $profile->is_fee_paid ? 'fa-check-circle' : 'fa-credit-card' }}"></i>
                         </div>
-                        <h3 class="font-bold text-text-main mb-1.5 text-lg">Make Payment</h3>
-                        <p class="text-sm text-text-dark/50 mb-6 leading-relaxed">Choose your plan and complete the registration
-                            fee payment</p>
+                        <h3 class="font-bold text-text-main mb-1.5 text-lg">Initial Registration Fee</h3>
+                        <p class="text-sm text-text-dark/50 mb-4 leading-relaxed">Please pay the initial <strong class="text-accent-yellow">₹500</strong> registration fee to activate your profile and start applying for jobs.</p>
                         @if($profile->initial_fee_paid)
                             <span
                                 class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-bold bg-green-500/10 text-green-400 border border-green-500/20 flex items-center justify-center gap-2">

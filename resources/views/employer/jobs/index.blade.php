@@ -14,6 +14,20 @@
         </a>
     </div>
 
+    @if(session('success'))
+        <div class="mb-8 bg-green-500/10 border border-green-500/30 p-4 rounded-xl flex items-center gap-3 reveal">
+            <i class="fas fa-check-circle text-green-400"></i>
+            <span class="text-sm text-green-400 font-medium">{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-8 bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex items-center gap-3 reveal">
+            <i class="fas fa-exclamation-circle text-red-400"></i>
+            <span class="text-sm text-red-400 font-medium">{{ session('error') }}</span>
+        </div>
+    @endif
+
     <div class="bg-card-bg rounded-2xl border border-card-border overflow-hidden shadow-xl">
         <table class="w-full text-left border-collapse">
             <thead>
@@ -30,7 +44,7 @@
                 <tr class="hover:bg-secondary-bg/30 transition-colors group">
                     <td class="py-4 px-6">
                         <div class="font-bold text-text-main">{{ $job->title }}</div>
-                        <div class="text-xs text-text-dark/60 mt-0.5"><i class="fas fa-map-marker-alt text-accent-yellow/70 mr-1"></i> {{ $job->location->city ?? 'N/A' }}</div>
+                        <div class="text-xs text-text-dark/60 mt-0.5"><i class="fas fa-map-marker-alt text-accent-yellow/70 mr-1"></i> {{ $job->city?->name ?? 'N/A' }}</div>
                     </td>
                     <td class="py-4 px-6">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/5 text-text-main border border-white/10">

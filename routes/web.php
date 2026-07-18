@@ -11,6 +11,9 @@ Route::get('/category/{id}/jobs', [\App\Http\Controllers\HomeController::class, 
 // Dynamic Subjects and Specializations
 Route::get('/api/categories/{category}/subjects', [HomeController::class, 'getSubjects'])->name('api.category.subjects');
 Route::get('/api/subjects/{subject}/specializations', [HomeController::class, 'getSpecializations'])->name('api.subject.specializations');
+Route::get('/api/states/{state}/cities', function (\App\Models\State $state) {
+    return $state->cities()->where('is_active', true)->get();
+})->name('api.state.cities');
 
 Route::view('/about', 'about')->name('about');
 Route::get('/services', [\App\Http\Controllers\HomeController::class, 'services'])->name('services');
@@ -149,7 +152,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
     Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
     Route::resource('qualifications', \App\Http\Controllers\Admin\QualificationController::class);
-    Route::resource('locations', \App\Http\Controllers\Admin\LocationController::class);
+    Route::resource('states', \App\Http\Controllers\Admin\StateController::class);
+    Route::resource('cities', \App\Http\Controllers\Admin\CityController::class);
 
     // Job Posts
     Route::resource('jobs', \App\Http\Controllers\Admin\JobController::class);

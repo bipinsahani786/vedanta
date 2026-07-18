@@ -48,9 +48,15 @@ class CrmController extends Controller
             });
         }
 
-        if ($locationId = $request->input('location_id')) {
-            $query->whereHas('profile', function($q) use ($locationId) {
-                $q->where('preferred_location_id', $locationId);
+        if ($stateId = $request->input('state_id')) {
+            $query->whereHas('profile', function($q) use ($stateId) {
+                $q->where('preferred_state_id', $stateId);
+            });
+        }
+
+        if ($cityId = $request->input('city_id')) {
+            $query->whereHas('profile', function($q) use ($cityId) {
+                $q->where('preferred_city_id', $cityId);
             });
         }
 
@@ -95,9 +101,10 @@ class CrmController extends Controller
         // Pass master data for filters
         $subjects = \App\Models\Subject::all();
         $qualifications = \App\Models\Qualification::all();
-        $locations = \App\Models\Location::all();
+        $states = \App\Models\State::all();
+        $cities = \App\Models\City::all();
 
-        return view('admin.crm.index', compact('candidates', 'sortField', 'sortDirection', 'subjects', 'qualifications', 'locations'));
+        return view('admin.crm.index', compact('candidates', 'sortField', 'sortDirection', 'subjects', 'qualifications', 'states', 'cities'));
     }
 
     public function show($id)

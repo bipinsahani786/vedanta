@@ -86,10 +86,10 @@
                 <h3 class="text-lg font-bold text-slate-900 mb-1 group-hover:text-accent-blue transition-colors line-clamp-1">
                     <a href="{{ route('jobs.show', $job->id) }}">{{ $job->title ?? 'Job Requirement' }}</a>
                 </h3>
-                <p class="text-sm text-slate-500 font-medium mb-3 line-clamp-1">{{ $job->school_name }} • {{ $job->location?->city ?? 'N/A' }}, {{ $job->location?->state ?? 'N/A' }}</p>
+                <p class="text-sm text-slate-500 font-medium mb-3 line-clamp-1">{{ $job->school_name }} • {{ $job->city?->name ?? 'N/A' }}, {{ $job->state?->name ?? 'N/A' }}</p>
                 
                 <p class="text-sm text-slate-600 leading-relaxed mb-5 line-clamp-3">
-                    {{ Str::limit($job->description, 100) }}
+                    {{ Str::limit(strip_tags($job->description), 100) }}
                 </p>
                 
                 <div class="flex flex-wrap items-center gap-2 mb-6">

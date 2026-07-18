@@ -90,16 +90,25 @@
                     @error('qualification_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- Location -->
+                <!-- State -->
                 <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Location *</label>
-                    <select name="location_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
-                        <option value="">Select Location</option>
-                        @foreach($locations as $location)
-                            <option value="{{ $location->id }}" {{ old('location_id') == $location->id ? 'selected' : '' }}>{{ $location->city }}</option>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">State *</label>
+                    <select name="state_id" id="state_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                        <option value="">Select State</option>
+                        @foreach($states as $state)
+                            <option value="{{ $state->id }}" {{ old('state_id') == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
                         @endforeach
                     </select>
-                    @error('location_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    @error('state_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <!-- City -->
+                <div>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">City *</label>
+                    <select name="city_id" id="city_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                        <option value="">Select City</option>
+                    </select>
+                    @error('city_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Salary Range -->
@@ -137,4 +146,31 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.getElementById('state_id').addEventListener('change', function() {
+        let stateId = this.value;
+        let citySelect = document.getElementById('city_id');
+        citySelect.innerHTML = '<option value="">Loading...</option>';
+        
+        if(stateId) {
+            fetch(`/api/states/${stateId}/cities`)
+                .then(response => response.json())
+                .then(data => {
+                    citySelect.innerHTML = '<option value="">Select City</option>';
+                    data.forEach(city => {
+                        citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching cities:', error);
+                    citySelect.innerHTML = '<option value="">Select City</option>';
+                });
+        } else {
+            citySelect.innerHTML = '<option value="">Select City</option>';
+        }
+    });
+</script>
+@endpush
 @endsection

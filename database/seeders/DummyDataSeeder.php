@@ -6,7 +6,8 @@ use Illuminate\Database\Seeder;
 use App\Models\Category;
 use App\Models\Subject;
 use App\Models\Qualification;
-use App\Models\Location;
+use App\Models\State;
+use App\Models\City;
 use App\Models\User;
 use App\Models\CandidateProfile;
 use App\Models\JobPost;
@@ -189,16 +190,11 @@ class DummyDataSeeder extends Seeder
             Qualification::firstOrCreate(['name' => $qual], ['is_active' => true]);
         }
 
-        // 4. Locations
-        $locations = ['Delhi NCR', 'Gurgaon', 'Noida', 'Faridabad', 'Ghaziabad', 'Mumbai', 'Pune', 'Bangalore', 'Hyderabad', 'Chennai', 'Jaipur', 'Lucknow'];
-        foreach ($locations as $loc) {
-            Location::firstOrCreate(['city' => $loc, 'state' => 'State'], ['is_active' => true]);
-        }
-
         $categoryIds = Category::pluck('id')->toArray();
         $subjectIds = Subject::pluck('id')->toArray();
         $qualificationIds = Qualification::pluck('id')->toArray();
-        $locationIds = Location::pluck('id')->toArray();
+        $stateIds = State::pluck('id')->toArray();
+        $cityIds = City::pluck('id')->toArray();
 
         // 5. Candidates (Users + Profiles)
         $candidates = [];
@@ -221,7 +217,8 @@ class DummyDataSeeder extends Seeder
                     'category_id' => $categoryIds[array_rand($categoryIds)],
                     'subject_id' => $subjectIds[array_rand($subjectIds)],
                     'highest_qualification_id' => $qualificationIds[array_rand($qualificationIds)],
-                    'preferred_location_id' => $locationIds[array_rand($locationIds)],
+                    'preferred_state_id' => !empty($stateIds) ? $stateIds[array_rand($stateIds)] : null,
+                    'preferred_city_id' => !empty($cityIds) ? $cityIds[array_rand($cityIds)] : null,
                     'experience_years' => rand(0, 15),
                     'current_salary' => rand(20000, 80000),
                     'expected_salary' => rand(30000, 100000),
@@ -267,7 +264,8 @@ class DummyDataSeeder extends Seeder
         for ($i = 1; $i <= 20; $i++) {
             $catId = $categoryIds[array_rand($categoryIds)];
             $subId = $subjectIds[array_rand($subjectIds)];
-            $locId = $locationIds[array_rand($locationIds)];
+            $stateId = !empty($stateIds) ? $stateIds[array_rand($stateIds)] : null;
+            $cityId = !empty($cityIds) ? $cityIds[array_rand($cityIds)] : null;
             $qualId = $qualificationIds[array_rand($qualificationIds)];
             
             $catName = Category::find($catId)->name;
@@ -285,7 +283,8 @@ class DummyDataSeeder extends Seeder
                 'category_id' => $catId,
                 'subject_id' => $subId,
                 'qualification_id' => $qualId,
-                'location_id' => $locId,
+                'state_id' => $stateId,
+                'city_id' => $cityId,
                 'salary_range' => (rand(20, 40) * 1000) . " - " . (rand(40, 80) * 1000),
                 'description' => "We are looking for an experienced and passionate $catName teacher for $subName. The ideal candidate should have excellent communication skills and a deep understanding of the subject matter.",
                 'status' => $status,

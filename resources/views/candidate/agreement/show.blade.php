@@ -126,38 +126,58 @@
                         <h3 class="text-xl font-bold text-text-main mb-1">Agreement Digitally Signed</h3>
                         <p class="text-sm text-text-dark/60 mb-6">You have accepted the terms and conditions.</p>
                         
-                        <div class="bg-card-bg border border-card-border rounded-xl p-5 inline-block">
-                            <h4 class="text-xs font-semibold text-text-main/50 uppercase tracking-wider mb-3">
-                                {{ $profile->signature_data ? 'Your Digital Signature' : 'Agreement Status' }}
-                            </h4>
-                            
-                            @if($profile->signature_data)
-                                @if($profile->signature_type === 'draw' || Str::startsWith($profile->signature_data, 'data:image'))
-                                    <img src="{{ $profile->signature_data }}" alt="Digital Signature" class="h-20 bg-white rounded object-contain px-2 mb-3">
-                                @elseif($profile->signature_type === 'type')
-                                    <div class="font-signature text-3xl text-text-main mb-3">{{ $profile->signature_data }}</div>
-                                @elseif($profile->signature_type === 'upload')
-                                    <img src="{{ asset('storage/' . $profile->signature_data) }}" alt="Uploaded Signature" class="h-20 object-contain mb-3">
-                                @else
-                                    <p class="text-lg font-medium text-text-main mb-3">{{ $profile->signature_data }}</p>
-                                @endif
+                        <div class="flex flex-col sm:flex-row gap-6 mb-6">
+                            {{-- Digital Signature --}}
+                            <div class="bg-card-bg border border-card-border rounded-xl p-5 flex-1">
+                                <h4 class="text-xs font-semibold text-text-main/50 uppercase tracking-wider mb-3">
+                                    {{ $profile->signature_data ? 'Your Digital Signature' : 'Agreement Status' }}
+                                </h4>
                                 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-text-dark/50 mt-4 pt-4 border-t border-card-border">
-                                    <div>
+                                @if($profile->signature_data)
+                                    @if($profile->signature_type === 'draw' || Str::startsWith($profile->signature_data, 'data:image'))
+                                        <img src="{{ $profile->signature_data }}" alt="Digital Signature" class="h-20 bg-white rounded object-contain px-2 mb-3">
+                                    @elseif($profile->signature_type === 'type')
+                                        <div class="font-signature text-3xl text-text-main mb-3">{{ $profile->signature_data }}</div>
+                                    @elseif($profile->signature_type === 'upload')
+                                        <img src="{{ asset('storage/' . $profile->signature_data) }}" alt="Uploaded Signature" class="h-20 object-contain mb-3">
+                                    @else
+                                        <p class="text-lg font-medium text-text-main mb-3">{{ $profile->signature_data }}</p>
+                                    @endif
+                                    
+                                    <div class="text-xs text-text-dark/50 mt-4 pt-4 border-t border-card-border">
                                         <span class="block text-text-dark/30 mb-0.5">Signed On</span>
                                         <span class="font-medium text-text-main/80">{{ $profile->signature_date_time ? \Carbon\Carbon::parse($profile->signature_date_time)->format('d M Y, h:i A') : $profile->updated_at->format('d M Y, h:i A') }}</span>
                                     </div>
-                                </div>
-                            @else
-                                <p class="text-sm font-medium text-text-main mb-3">
-                                    <i class="fas fa-file-pdf text-accent-blue mr-1"></i> Agreement manually uploaded by Admin.
-                                </p>
-                                <div class="grid grid-cols-1 gap-4 text-xs text-text-dark/50 mt-4 pt-4 border-t border-card-border">
-                                    <div>
+                                @else
+                                    <p class="text-sm font-medium text-text-main mb-3">
+                                        <i class="fas fa-file-pdf text-accent-blue mr-1"></i> Agreement manually uploaded by Admin.
+                                    </p>
+                                    <div class="text-xs text-text-dark/50 mt-4 pt-4 border-t border-card-border">
                                         <span class="block text-text-dark/30 mb-0.5">Uploaded On</span>
                                         <span class="font-medium text-text-main/80">{{ $profile->updated_at->format('d M Y, h:i A') }}</span>
                                     </div>
+                                @endif
+                            </div>
+
+                            {{-- Live Photo --}}
+                            @if($profile->live_photo_path)
+                            <div class="bg-card-bg border border-card-border rounded-xl p-5 flex-1">
+                                <h4 class="text-xs font-semibold text-text-main/50 uppercase tracking-wider mb-3">
+                                    Identity Verification Photo
+                                </h4>
+                                <img src="{{ asset('storage/' . $profile->live_photo_path) }}" alt="Live Photo" class="h-20 w-auto rounded-lg object-cover mb-3 border border-card-border">
+                                
+                                <div class="text-xs text-text-dark/50 mt-4 pt-4 border-t border-card-border">
+                                    <span class="block text-text-dark/30 mb-0.5">Location Captured</span>
+                                    <span class="font-medium text-text-main/80">
+                                        @if($profile->latitude && $profile->longitude)
+                                            {{ number_format($profile->latitude, 4) }}, {{ number_format($profile->longitude, 4) }}
+                                        @else
+                                            Not Available
+                                        @endif
+                                    </span>
                                 </div>
+                            </div>
                             @endif
                         </div>
 

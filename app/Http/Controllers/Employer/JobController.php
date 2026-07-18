@@ -9,7 +9,8 @@ use App\Models\JobPost;
 use App\Models\Category;
 use App\Models\Subject;
 use App\Models\Qualification;
-use App\Models\Location;
+use App\Models\State;
+use App\Models\City;
 
 class JobController extends Controller
 {
@@ -24,44 +25,49 @@ class JobController extends Controller
         $categories = Category::where('is_active', true)->get();
         $subjects = Subject::where('is_active', true)->get();
         $qualifications = Qualification::where('is_active', true)->get();
-        $locations = Location::where('is_active', true)->get();
+        $states = State::where('is_active', true)->get();
         
         $profile = auth()->user()->employerProfile;
 
-        return view('employer.jobs.create', compact('categories', 'subjects', 'qualifications', 'locations', 'profile'));
+        return view('employer.jobs.create', compact('categories', 'subjects', 'qualifications', 'states', 'profile'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'school_name' => 'required|string|max:255',
-            'contact_person' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:15',
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'subject_id' => 'required|exists:subjects,id',
-            'qualification_id' => 'required|exists:qualifications,id',
-            'location_id' => 'required|exists:locations,id',
-            'salary_range' => 'nullable|string|max:255',
+            'school_name' => 'nullable|string|max:255',
+            'contact_person' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:15',
+            'jobs' => 'required|array|min:1',
+            'jobs.*.title' => 'required|string|max:255',
+            'jobs.*.description' => 'required|string',
+            'jobs.*.category_id' => 'required|exists:categories,id',
+            'jobs.*.subject_id' => 'required|exists:subjects,id',
+            'jobs.*.qualification_id' => 'required|exists:qualifications,id',
+            'jobs.*.state_id' => 'required|exists:states,id',
+            'jobs.*.city_id' => 'required|exists:cities,id',
+            'jobs.*.salary_range' => 'nullable|string|max:255',
         ]);
 
-        JobPost::create([
-            'user_id' => auth()->id(),
-            'school_name' => $request->school_name,
-            'contact_person' => $request->contact_person,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'title' => $request->title,
-            'description' => $request->description,
-            'category_id' => $request->category_id,
-            'subject_id' => $request->subject_id,
-            'qualification_id' => $request->qualification_id,
-            'location_id' => $request->location_id,
-            'salary_range' => $request->salary_range,
-            'status' => 'pending',
-        ]);
+        foreach ($request->jobs as $jobData) {
+            JobPost::create([
+                'user_id' => auth()->id(),
+                'school_name' => $request->school_name,
+                'contact_person' => $request->contact_person,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'title' => $jobData['title'],
+                'description' => $jobData['description'],
+                'category_id' => $jobData['category_id'],
+                'subject_id' => $jobData['subject_id'],
+                'qualification_id' => $jobData['qualification_id'],
+                'state_id' => $jobData['state_id'],
+                'city_id' => $jobData['city_id'],
+                'salary_range' => $jobData['salary_range'] ?? null,
+                'status' => 'pending',
+            ]);
+        }
 
         return redirect()->route('employer.jobs.index')->with('success', 'Job posted successfully. It will be live after admin approval.');
     }
@@ -83,9 +89,10 @@ class JobController extends Controller
         $categories = Category::where('is_active', true)->get();
         $subjects = Subject::where('is_active', true)->get();
         $qualifications = Qualification::where('is_active', true)->get();
-        $locations = Location::where('is_active', true)->get();
+        $states = State::where('is_active', true)->get();
+        $cities = City::where('state_id', $job->state_id)->where('is_active', true)->get();
 
-        return view('employer.jobs.edit', compact('job', 'categories', 'subjects', 'qualifications', 'locations'));
+        return view('employer.jobs.edit', compact('job', 'categories', 'subjects', 'qualifications', 'states', 'cities'));
     }
 
     public function update(Request $request, $id)
@@ -102,12 +109,13 @@ class JobController extends Controller
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
             'qualification_id' => 'required|exists:qualifications,id',
-            'location_id' => 'required|exists:locations,id',
+            'state_id' => 'required|exists:states,id',
+            'city_id' => 'required|exists:cities,id',
             'salary_range' => 'nullable|string|max:255',
         ]);
 
         $job->update($request->only([
-            'title', 'description', 'category_id', 'subject_id', 'qualification_id', 'location_id', 'salary_range'
+            'title', 'description', 'category_id', 'subject_id', 'qualification_id', 'state_id', 'city_id', 'salary_range'
         ]));
 
         return redirect()->route('employer.jobs.index')->with('success', 'Job updated successfully.');

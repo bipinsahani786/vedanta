@@ -38,12 +38,7 @@
                         <tr class="border-b border-card-border">
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-text-dark/40">
                                 Institution & Role</th>
-                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-text-dark/40">Total
-                                Allowed Applications</th>
-                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-text-dark/40">Used
-                                Applications</th>
-                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-text-dark/40">
-                                Remaining Applications </th>
+
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-text-dark/40">Applied
                                 Schools </th>
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-text-dark/40">
@@ -55,9 +50,9 @@
                     <tbody class="text-sm divide-y divide-card-border" x-data="{ expandedId: null }">
                         @php
                             $profile = auth()->user()->profile;
-                            $totalAllowed = $profile->plan_type === 'premium' ? '∞' : $profile->total_allowed_applications;
+                            $totalAllowed = $profile->total_allowed_applications;
                             $used = $profile->used_applications;
-                            $remaining = $profile->plan_type === 'premium' ? '∞' : max(0, $profile->total_allowed_applications - $profile->used_applications);
+                            $remaining = max(0, $profile->total_allowed_applications - $profile->used_applications);
                         @endphp
                         @forelse($applications as $app)
                             <tr class="hover:bg-secondary-bg/30 transition-colors cursor-pointer group"
@@ -77,19 +72,11 @@
                                                     :class="expandedId === {{ $app->id }} ? 'rotate-180 text-accent-blue' : ''"></i>
                                             </div>
                                             <div class="text-xs text-text-dark/40 mt-0.5">{{ $app->jobPost->school_name }}
-                                                &bull; {{ $app->jobPost->location->city }}</div>
+                                                &bull; {{ $app->jobPost->city?->name ?? 'N/A' }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-center font-bold text-text-main">
-                                    {{ $totalAllowed }}
-                                </td>
-                                <td class="px-6 py-4 text-center font-bold text-accent-blue">
-                                    {{ $used }}
-                                </td>
-                                <td class="px-6 py-4 text-center font-bold text-green-400">
-                                    {{ $remaining }}
-                                </td>
+
                                 <td class="px-6 py-4 text-text-main text-sm font-medium">
                                     {{ $app->jobPost->school_name }}
                                 </td>
@@ -124,7 +111,7 @@
                             {{-- Expanded Tracking Details --}}
                             <tr x-show="expandedId === {{ $app->id }}" class="bg-secondary-bg/20" x-transition.opacity
                                 style="display: none;">
-                                <td colspan="7" class="px-6 py-6 border-b-2 border-accent-blue/30">
+                                <td colspan="4" class="px-6 py-6 border-b-2 border-accent-blue/30">
                                     <div class="p-5 border border-card-border rounded-2xl bg-card-bg shadow-inner">
                                         <h4 class="font-bold text-text-main mb-6 flex items-center gap-2">
                                             <i class="fas fa-route text-accent-blue"></i> Application Tracker

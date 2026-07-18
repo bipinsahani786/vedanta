@@ -383,10 +383,10 @@
                     <a href="{{ route('contact') }}" class="hover:text-accent-blue transition-colors">Contact us</a>
                     <a href="{{ route('terms') }}" class="hover:text-accent-blue transition-colors">Terms &
                         Conditions</a>
-                    <a href="{{ route('refund') }}" class="hover:text-accent-blue transition-colors">Refund,
-                        Cancellation & Payment Policy</a>
-                    <a href="{{ route('pricing')}}" class="hover:text-accent-blue transition-colors"> Pricing & Service
-                        Charges Policy</a>
+                    {{-- <a href="{{ route('refund') }}" class="hover:text-accent-blue transition-colors">Refund,
+                        Cancellation & Payment Policy</a> --}}
+                    {{-- <a href="{{ route('pricing')}}" class="hover:text-accent-blue transition-colors"> Pricing & Service
+                        Charges Policy</a> --}}
                     <a href="{{ route('cookie') }}" class="hover:text-accent-blue transition-colors">Cookie Policy</a>
                     <a href="{{ route('disclaimer') }}" class="hover:text-accent-blue transition-colors">Disclaimer</a>
                     <a href="{{ route('services') }}" class="hover:text-accent-blue transition-colors">Services</a>

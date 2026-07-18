@@ -284,185 +284,19 @@
         </div>
         <div class="swiper marquee-swiper reveal">
             <div class="swiper-wrapper items-center">
+                @forelse($clients as $client)
                 <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-red-400 text-sm text-center leading-tight">BIRLA<br>OPEN MINDS</span>
+                    <div class="bg-white border border-slate-200 px-6 py-3 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[180px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group overflow-hidden">
+                        <img src="{{ Storage::url($client->logo_path) }}" alt="{{ $client->name }}" class="max-h-12 max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300">
                     </div>
                 </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
-                            <i class="fas fa-graduation-cap text-red-600 text-xs"></i> D. GOENKA
-                        </span>
-                    </div>
+                @empty
+                <div class="w-full text-center text-slate-500 py-4 italic">
+                    Our trusted clients will appear here.
                 </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-xs leading-tight text-center">Mount Litera<br>Zee
-                            School</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="bg-slate-100 text-slate-800 rounded-full w-9 h-9 flex justify-center items-center font-bold text-lg">
-                            PW</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="border-2 border-accent-yellow rounded-full w-10 h-10 flex justify-center items-center font-extrabold text-primary-bg text-[11px]">
-                            ALLEN</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-indigo-300 text-base tracking-tight">VMC <span
-                                class="text-xs font-normal">Classes</span></span>
-                    </div>
-                </div>
-            
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-red-400 text-sm text-center leading-tight">BIRLA<br>OPEN MINDS</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
-                            <i class="fas fa-graduation-cap text-red-600 text-xs"></i> D. GOENKA
-                        </span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-xs leading-tight text-center">Mount Litera<br>Zee
-                            School</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="bg-slate-100 text-slate-800 rounded-full w-9 h-9 flex justify-center items-center font-bold text-lg">
-                            PW</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="border-2 border-accent-yellow rounded-full w-10 h-10 flex justify-center items-center font-extrabold text-primary-bg text-[11px]">
-                            ALLEN</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-indigo-300 text-base tracking-tight">VMC <span
-                                class="text-xs font-normal">Classes</span></span>
-                    </div>
-                </div>
-            
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-red-400 text-sm text-center leading-tight">BIRLA<br>OPEN MINDS</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
-                            <i class="fas fa-graduation-cap text-red-600 text-xs"></i> D. GOENKA
-                        </span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-xs leading-tight text-center">Mount Litera<br>Zee
-                            School</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="bg-slate-100 text-slate-800 rounded-full w-9 h-9 flex justify-center items-center font-bold text-lg">
-                            PW</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="border-2 border-accent-yellow rounded-full w-10 h-10 flex justify-center items-center font-extrabold text-primary-bg text-[11px]">
-                            ALLEN</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-indigo-300 text-base tracking-tight">VMC <span
-                                class="text-xs font-normal">Classes</span></span>
-                    </div>
-                </div>
-            
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-red-400 text-sm text-center leading-tight">BIRLA<br>OPEN MINDS</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
-                            <i class="fas fa-graduation-cap text-red-600 text-xs"></i> D. GOENKA
-                        </span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-xs leading-tight text-center">Mount Litera<br>Zee
-                            School</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="bg-slate-100 text-slate-800 rounded-full w-9 h-9 flex justify-center items-center font-bold text-lg">
-                            PW</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="border-2 border-accent-yellow rounded-full w-10 h-10 flex justify-center items-center font-extrabold text-primary-bg text-[11px]">
-                            ALLEN</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-indigo-300 text-base tracking-tight">VMC <span
-                                class="text-xs font-normal">Classes</span></span>
-                    </div>
-                </div>
+                @endforelse
+            </div>
+
             </div>
         </div>
         </div>
@@ -560,7 +394,7 @@
                 class="block bg-white border border-slate-200 rounded-2xl p-7 text-slate-800 transition-all duration-300 hover:-translate-y-2 shadow-lg hover:shadow-[0_20px_40px_rgba(18,154,239,0.15)] hover:border-[#129aef]/30 flex flex-col group reveal cursor-pointer">
                 <h3 class="text-xl font-bold mb-3 text-slate-900 group-hover:text-[#129aef] transition-colors">{{ $job->title ?? 'Job Requirement' }}</h3>
                 <p class="text-xs text-slate-500 mb-4 flex items-center gap-3">
-                    <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> {{ $job->location?->city ?? 'N/A' }}, {{ $job->location?->state ?? 'N/A' }}</span>
+                    <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> {{ $job->city?->name ?? 'N/A' }}, {{ $job->state?->name ?? 'N/A' }}</span>
                     <span><i class="far fa-calendar-alt mr-0.5"></i> {{ $job->created_at->format('d M Y') }}</span>
                 </p>
                 <div class="flex flex-wrap gap-2 mb-4">
@@ -575,7 +409,7 @@
                     </span>
                 </div>
                 <p class="text-[13px] text-slate-600 leading-relaxed mb-6 flex-grow">
-                    {{ Str::limit($job->description, 100) }}
+                    {{ Str::limit(strip_tags($job->description), 100) }}
                 </p>
                 <div class="text-accent-blue font-semibold text-[13px] inline-flex items-center gap-2 self-start group-hover:gap-3 transition-all mt-auto">
                     View Details 
@@ -915,7 +749,7 @@
             </div>
             <!-- Card 5 -->
             <div
-                class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-1 cert-step-5 cert-card-hover group">
+                class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-1 cert-step-5 cert-card-hover group col-span-2 md:col-span-1 w-[calc(50%-0.5rem)] md:w-full mx-auto">
                 <div class="h-16 mb-4 flex items-center justify-center">
                     <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/standup-india.jpg" class="max-h-full max-w-full object-contain" alt="START UP INDIA">
                 </div>

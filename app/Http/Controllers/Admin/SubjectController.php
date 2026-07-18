@@ -4,17 +4,24 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Subject;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class SubjectController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Subject::query();
+        $query = Subject::with('categories');
 
         // Search
         if ($search = $request->input('search')) {
             $query->where('name', 'like', "%{$search}%");
+        }
+
+        if ($categoryId = $request->input('category_id')) {
+            $query->whereHas('categories', function($q) use ($categoryId) {
+                $q->where('categories.id', $categoryId);
+            });
         }
 
         // Sorting
@@ -29,44 +36,49 @@ class SubjectController extends Controller
         }
 
         $subjects = $query->paginate(10)->withQueryString();
+        $categories = Category::orderBy('name')->get();
         
-        return view('admin.subjects.index', compact('subjects', 'sortField', 'sortDirection'));
-    }
-
-    public function create()
-    {
-        return view('admin.subjects.create');
+        return view('admin.subjects.index', compact('subjects', 'categories', 'sortField', 'sortDirection'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:subjects,name',
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id'
         ]);
 
-        Subject::create([
+        $subject = Subject::create([
             'name' => $request->name,
             'is_active' => $request->has('is_active'),
         ]);
 
-        return redirect()->route('admin.subjects.index')->with('success', 'Subject created successfully.');
-    }
+        if ($request->has('categories')) {
+            $subject->categories()->sync($request->categories);
+        }
 
-    public function edit(Subject $subject)
-    {
-        return view('admin.subjects.edit', compact('subject'));
+        return redirect()->route('admin.subjects.index')->with('success', 'Subject created successfully.');
     }
 
     public function update(Request $request, Subject $subject)
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:subjects,name,' . $subject->id,
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id'
         ]);
 
         $subject->update([
             'name' => $request->name,
             'is_active' => $request->has('is_active'),
         ]);
+
+        if ($request->has('categories')) {
+            $subject->categories()->sync($request->categories);
+        } else {
+            $subject->categories()->sync([]);
+        }
 
         return redirect()->route('admin.subjects.index')->with('success', 'Subject updated successfully.');
     }

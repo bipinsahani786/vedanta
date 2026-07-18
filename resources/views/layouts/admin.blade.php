@@ -12,6 +12,9 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <style>
         :root {
             /* Override Tailwind Theme Variables for Admin Light Mode */
@@ -148,9 +151,13 @@
                     class="sidebar-link {{ request()->routeIs('admin.qualifications.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-graduation-cap w-5 text-center"></i> Qualifications
                 </a>
-                <a href="{{ route('admin.locations.index') }}"
-                    class="sidebar-link {{ request()->routeIs('admin.locations.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
-                    <i class="fas fa-map-marker-alt w-5 text-center"></i> Locations
+                <a href="{{ route('admin.states.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.states.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-map-marked-alt w-5 text-center"></i> States
+                </a>
+                <a href="{{ route('admin.cities.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.cities.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-city w-5 text-center"></i> Cities
                 </a>
 
                 <div class="text-[10px] uppercase font-bold tracking-widest text-white/30 mt-6 mb-2 px-4">Recruitment
@@ -265,10 +272,11 @@
             </header>
 
             <!-- Main Scrollable Area -->
-            <main class="flex-1 overflow-y-auto p-4 sm:p-8">
-
-                {{-- Breadcrumb/Title Area --}}
-                <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <main class="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col relative bg-secondary-bg/30">
+                
+                <div class="flex-1">
+                    {{-- Breadcrumb/Title Area --}}
+                    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
                         <h1 class="text-2xl sm:text-3xl font-bold text-text-main tracking-tight">
                             @yield('title', 'Dashboard')</h1>
@@ -302,12 +310,38 @@
 
                 {{-- Content Injection --}}
                 @yield('content')
+                </div>
 
-                {{-- Footer --}}
-                <footer
-                    class="mt-12 pt-6 border-t border-card-border flex items-center justify-between text-xs text-text-dark/40 font-medium">
-                    <p>&copy; {{ date('Y') }} Vedanta Placement Agency.</p>
-                    <p>Admin Portal v2.0</p>
+                {{-- Enhanced Footer --}}
+                <footer class="mt-auto pt-6 pb-2">
+                    <div class="bg-card-bg rounded-2xl border border-card-border p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm relative overflow-hidden">
+                        <!-- Decorative background element -->
+                        <div class="absolute -right-10 -top-10 w-32 h-32 bg-accent-blue/5 rounded-full blur-2xl pointer-events-none"></div>
+                        
+                        <div class="flex flex-col md:flex-row items-center gap-4 text-center md:text-left z-10">
+                            <div class="w-10 h-10 rounded-xl bg-accent-blue/10 flex items-center justify-center text-accent-blue shadow-inner border border-accent-blue/20">
+                                <i class="fas fa-shield-alt text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-text-main font-bold text-sm tracking-tight">&copy; {{ date('Y') }} Vedanta Placement Agency.</p>
+                                <p class="text-text-dark/60 text-xs font-medium mt-0.5">All rights reserved. Designed with <i class="fas fa-heart text-red-500 mx-0.5"></i> for excellence.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-6 z-10">
+                            <div class="text-right hidden sm:block">
+                                <p class="text-[10px] font-bold text-text-dark/50 uppercase tracking-widest mb-0.5">System Status</p>
+                                <div class="flex items-center gap-1.5 justify-end">
+                                    <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)] animate-pulse"></span>
+                                    <span class="text-xs font-semibold text-text-main">All Systems Operational</span>
+                                </div>
+                            </div>
+                            <div class="h-8 w-px bg-card-border hidden sm:block"></div>
+                            <div class="bg-secondary-bg border border-card-border px-3 py-1.5 rounded-lg">
+                                <span class="text-xs font-bold text-accent-blue tracking-wider">Admin Portal <span class="text-text-dark/60">v2.0</span></span>
+                            </div>
+                        </div>
+                    </div>
                 </footer>
             </main>
         </div>
@@ -327,7 +361,7 @@
             @php
                 $searchSubjects = \App\Models\Subject::orderBy('name')->get();
                 $searchQuals = \App\Models\Qualification::orderBy('name')->get();
-                $searchLocs = \App\Models\Location::orderBy('city')->get();
+                $searchStates = \App\Models\State::orderBy('name')->get();
             @endphp
             
             <form action="{{ route('admin.crm.index') }}" method="GET" class="p-6">
@@ -352,13 +386,20 @@
                         </select>
                     </div>
 
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-semibold text-text-dark mb-1">Location</label>
-                        <select name="location_id" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
-                            <option value="">Any Location</option>
-                            @foreach($searchLocs as $loc)
-                                <option value="{{ $loc->id }}">{{ $loc->city }}, {{ $loc->state }}</option>
+                    <div>
+                        <label class="block text-xs font-semibold text-text-dark mb-1">State</label>
+                        <select name="state_id" id="global_search_state_id" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                            <option value="">Any State</option>
+                            @foreach($searchStates as $state)
+                                <option value="{{ $state->id }}">{{ $state->name }}</option>
                             @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-text-dark mb-1">City</label>
+                        <select name="city_id" id="global_search_city_id" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                            <option value="">Any City</option>
                         </select>
                     </div>
                     
@@ -424,6 +465,34 @@
     </div>
 
     @stack('scripts')
+    
+    <script>
+        const globalStateSelect = document.getElementById('global_search_state_id');
+        if (globalStateSelect) {
+            globalStateSelect.addEventListener('change', function() {
+                let stateId = this.value;
+                let citySelect = document.getElementById('global_search_city_id');
+                citySelect.innerHTML = '<option value="">Loading...</option>';
+                
+                if(stateId) {
+                    fetch(`/api/states/${stateId}/cities`)
+                        .then(response => response.json())
+                        .then(data => {
+                            citySelect.innerHTML = '<option value="">Any City</option>';
+                            data.forEach(city => {
+                                citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching cities:', error);
+                            citySelect.innerHTML = '<option value="">Any City</option>';
+                        });
+                } else {
+                    citySelect.innerHTML = '<option value="">Any City</option>';
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

@@ -1,10 +1,10 @@
 @extends('layouts.admin')
 
-@section('title', 'Manage Qualifications')
+@section('title', 'Manage States')
 
 @section('actions')
     <button x-data @click="$dispatch('open-modal', { isEdit: false, formData: { id: '', name: '', is_active: 1 } })" class="px-4 py-2 bg-accent-blue text-white rounded-xl text-sm font-semibold hover:bg-accent-blue-hover transition-all shadow-lg flex items-center gap-2">
-        <i class="fas fa-plus"></i> Add Qualification
+        <i class="fas fa-plus"></i> Add State
     </button>
 @endsection
 
@@ -15,11 +15,11 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <div class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
         <div class="w-12 h-12 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xl">
-            <i class="fas fa-graduation-cap"></i>
+            <i class="fas fa-map-marked-alt"></i>
         </div>
         <div>
-            <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Total Qualifications</p>
-            <p class="text-2xl font-bold text-text-main">{{ \App\Models\Qualification::count() }}</p>
+            <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Total States</p>
+            <p class="text-2xl font-bold text-text-main">{{ \App\Models\State::count() }}</p>
         </div>
     </div>
     
@@ -29,7 +29,7 @@
         </div>
         <div>
             <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Active</p>
-            <p class="text-2xl font-bold text-text-main">{{ \App\Models\Qualification::where('is_active', true)->count() }}</p>
+            <p class="text-2xl font-bold text-text-main">{{ \App\Models\State::where('is_active', true)->count() }}</p>
         </div>
     </div>
 
@@ -39,7 +39,7 @@
         </div>
         <div>
             <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Inactive</p>
-            <p class="text-2xl font-bold text-text-main">{{ \App\Models\Qualification::where('is_active', false)->count() }}</p>
+            <p class="text-2xl font-bold text-text-main">{{ \App\Models\State::where('is_active', false)->count() }}</p>
         </div>
     </div>
 </div>
@@ -51,17 +51,17 @@
             <i class="fas fa-list"></i>
         </div>
         <div>
-            <h3 class="font-bold text-text-main">Qualification List</h3>
-            <p class="text-xs text-text-dark/50 font-medium">Showing {{ $qualifications->firstItem() ?? 0 }} to {{ $qualifications->lastItem() ?? 0 }} of {{ $qualifications->total() }} entries</p>
+            <h3 class="font-bold text-text-main">State List</h3>
+            <p class="text-xs text-text-dark/50 font-medium">Showing {{ $states->firstItem() ?? 0 }} to {{ $states->lastItem() ?? 0 }} of {{ $states->total() }} entries</p>
         </div>
     </div>
     
-    <form action="{{ route('admin.qualifications.index') }}" method="GET" class="w-full sm:w-auto flex items-center relative group">
+    <form action="{{ route('admin.states.index') }}" method="GET" class="w-full sm:w-auto flex items-center relative group">
         <i class="fas fa-search absolute left-4 text-text-dark/40 text-sm group-focus-within:text-accent-blue transition-colors"></i>
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search qualifications..." 
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search states..." 
                class="w-full sm:w-80 pl-11 pr-4 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-all shadow-inner">
         @if(request('search'))
-            <a href="{{ route('admin.qualifications.index') }}" class="absolute right-4 text-text-dark/40 hover:text-red-400 transition-colors">
+            <a href="{{ route('admin.states.index') }}" class="absolute right-4 text-text-dark/40 hover:text-red-400 transition-colors">
                 <i class="fas fa-times"></i>
             </a>
         @endif
@@ -74,7 +74,7 @@
         <thead>
             <tr>
                 @php
-                    $route = 'admin.qualifications.index';
+                    $route = 'admin.states.index';
                     $order = request('order') === 'asc' ? 'desc' : 'asc';
                 @endphp
                 <th class="w-16">
@@ -121,24 +121,24 @@
             </tr>
         </thead>
         <tbody class="divide-y divide-card-border">
-            @forelse($qualifications as $qualification)
+            @forelse($states as $state)
             <tr>
-                <td class="font-medium text-text-dark/50">#{{ $qualification->id }}</td>
-                <td class="font-semibold text-text-main">{{ $qualification->name }}</td>
+                <td class="font-medium text-text-dark/50">#{{ $state->id }}</td>
+                <td class="font-semibold text-text-main">{{ $state->name }}</td>
                 <td>
-                    @if($qualification->is_active)
+                    @if($state->is_active)
                         <span class="bg-green-500/10 text-green-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-green-500/20 uppercase tracking-wider">Active</span>
                     @else
                         <span class="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-red-500/20 uppercase tracking-wider">Inactive</span>
                     @endif
                 </td>
-                <td class="text-text-dark/60">{{ $qualification->created_at->format('M d, Y') }}</td>
+                <td class="text-text-dark/60">{{ $state->created_at->format('M d, Y') }}</td>
                 <td>
                     <div class="flex items-center justify-end gap-2">
-                        <button @click="$dispatch('open-modal', { isEdit: true, formData: { id: '{{ $qualification->id }}', name: '{{ addslashes($qualification->name) }}', is_active: {{ $qualification->is_active ? 1 : 0 }} } })" class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center hover:bg-accent-blue hover:text-white transition-colors tooltip" title="Edit">
+                        <button @click="$dispatch('open-modal', { isEdit: true, formData: { id: '{{ $state->id }}', name: '{{ addslashes($state->name) }}', is_active: {{ $state->is_active ? 1 : 0 }} } })" class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center hover:bg-accent-blue hover:text-white transition-colors tooltip" title="Edit">
                             <i class="fas fa-edit text-xs"></i>
                         </button>
-                        <form action="{{ route('admin.qualifications.destroy', $qualification) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this qualification?');">
+                        <form action="{{ route('admin.states.destroy', $state) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this state?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors tooltip" title="Delete">
@@ -150,12 +150,12 @@
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="py-12 text-center">
+                <td colspan="6" class="py-12 text-center">
                     <div class="w-16 h-16 bg-secondary-bg rounded-2xl flex items-center justify-center text-text-dark/20 text-2xl mx-auto mb-4 border border-card-border">
                         <i class="fas fa-search"></i>
                     </div>
-                    <p class="text-text-main font-semibold mb-1">No qualifications found</p>
-                    <p class="text-text-dark/40 text-sm">Try adjusting your search criteria or add a new qualification.</p>
+                    <p class="text-text-main font-semibold mb-1">No states found</p>
+                    <p class="text-text-dark/40 text-sm">Try adjusting your search criteria or add a new state.</p>
                 </td>
             </tr>
             @endforelse
@@ -164,7 +164,7 @@
 </div>
 
 <div class="mt-4">
-    {{ $qualifications->links() }}
+    {{ $states->links() }}
 </div>
 
 <!-- Modal -->
@@ -176,20 +176,20 @@
         <!-- Modal Content -->
         <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative inline-block w-full max-w-md p-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl sm:my-8 text-slate-800">
             <div class="flex items-center justify-between mb-5">
-                <h3 class="text-lg font-bold" x-text="isEdit ? 'Edit Qualification' : 'Add Qualification'"></h3>
+                <h3 class="text-lg font-bold" x-text="isEdit ? 'Edit State' : 'Add State'"></h3>
                 <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 focus:outline-none">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            <form :action="isEdit ? '{{ url('admin/qualifications') }}/' + formData.id : '{{ route('admin.qualifications.store') }}'" method="POST">
+            <form :action="isEdit ? '{{ url('admin/states') }}/' + formData.id : '{{ route('admin.states.store') }}'" method="POST">
                 @csrf
                 <template x-if="isEdit">
                     @method('PUT')
                 </template>
 
                 <div class="mb-5">
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Qualification Name <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">State Name <span class="text-red-500">*</span></label>
                     <input type="text" name="name" x-model="formData.name" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-accent-blue focus:ring focus:ring-accent-blue/20 px-4 py-2 border transition-colors">
                 </div>
 
@@ -200,7 +200,7 @@
 
                 <div class="flex justify-end gap-3 mt-6">
                     <button type="button" @click="showModal = false" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-accent-blue rounded-lg hover:bg-accent-blue-hover transition-colors shadow-lg" x-text="isEdit ? 'Update Qualification' : 'Save Qualification'"></button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-accent-blue rounded-lg hover:bg-accent-blue-hover transition-colors shadow-lg" x-text="isEdit ? 'Update State' : 'Save State'"></button>
                 </div>
             </form>
         </div>

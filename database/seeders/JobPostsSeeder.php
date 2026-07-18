@@ -6,7 +6,8 @@ use Illuminate\Database\Seeder;
 use App\Models\JobPost;
 use App\Models\Category;
 use App\Models\Subject;
-use App\Models\Location;
+use App\Models\State;
+use App\Models\City;
 use App\Models\User;
 use Faker\Factory as Faker;
 
@@ -20,7 +21,8 @@ class JobPostsSeeder extends Seeder
         
         $categories = Category::where('is_active', true)->get();
         $subjects = Subject::where('is_active', true)->get();
-        $locations = Location::all();
+        $states = State::where('is_active', true)->get();
+        $cities = City::where('is_active', true)->get();
         $admin = User::first();
 
         $jobTypes = ['Full Time', 'Part Time', 'Contract'];
@@ -52,7 +54,8 @@ class JobPostsSeeder extends Seeder
                     'description' => '<p>' . implode('</p><p>', $faker->paragraphs(2)) . '</p><ul><li>Strong communication skills</li><li>Minimum 3 years experience</li><li>Passionate about teaching</li></ul>',
                     'category_id' => $category->id,
                     'subject_id' => $subjects->isNotEmpty() ? $subjects->random()->id : null,
-                    'location_id' => $locations->isNotEmpty() ? $locations->random()->id : null,
+                    'state_id' => $states->isNotEmpty() ? $states->random()->id : null,
+                    'city_id' => $cities->isNotEmpty() ? $cities->random()->id : null,
                     'salary_range' => '₹' . rand(20, 45) . ',000 - ₹' . rand(50, 85) . ',000 per month',
                     'status' => 'approved',
                     'job_type' => $faker->randomElement($jobTypes),

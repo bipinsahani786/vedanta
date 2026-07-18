@@ -20,7 +20,8 @@ return new class extends Migration
             $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->foreignId('subject_id')->nullable()->constrained('subjects')->nullOnDelete();
             $table->foreignId('highest_qualification_id')->nullable()->constrained('qualifications')->nullOnDelete();
-            $table->foreignId('preferred_location_id')->nullable()->constrained('locations')->nullOnDelete();
+            $table->foreignId('preferred_state_id')->nullable()->constrained('states')->nullOnDelete();
+            $table->foreignId('preferred_city_id')->nullable()->constrained('cities')->nullOnDelete();
             $table->integer('experience_years')->default(0);
             $table->string('current_salary')->nullable();
             $table->string('expected_salary')->nullable();

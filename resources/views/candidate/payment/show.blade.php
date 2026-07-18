@@ -50,10 +50,53 @@
             </div>
         </div>
     </div>
+    @elseif($profile->plan_type === 'premium' && ($profile->initial_fee_paid || $profile->is_fee_paid))
+    {{-- Already on Premium — Best plan message --}}
+    <div class="max-w-md mx-auto mb-10">
+        <div class="bg-card-bg rounded-2xl border-2 border-accent-yellow/40 p-8 text-center shadow-xl relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-24 h-24 bg-accent-yellow/10 rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-12 -left-12 w-24 h-24 bg-accent-yellow/5 rounded-full blur-2xl"></div>
+            
+            <div class="relative z-10">
+                <div class="w-20 h-20 rounded-2xl bg-accent-yellow/10 text-accent-yellow flex items-center justify-center text-4xl mx-auto mb-5">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-text-main mb-2">You're on the Premium Plan!</h3>
+                <p class="text-sm text-text-dark/60 mb-6">You already have the best plan with all features unlocked. No upgrade needed.</p>
+                
+                <div class="bg-accent-yellow/5 border border-accent-yellow/20 rounded-xl p-4 mb-6">
+                    <ul class="space-y-3 text-left">
+                        <li class="flex items-center gap-3 text-sm text-text-main">
+                            <i class="fas fa-check text-accent-yellow"></i> Priority application processing
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-text-main">
+                            <i class="fas fa-check text-accent-yellow"></i> Profile highlighted to employers
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-text-main">
+                            <i class="fas fa-check text-accent-yellow"></i> Dedicated Relationship Manager
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-text-main">
+                            <i class="fas fa-check text-accent-yellow"></i> Guaranteed Interviews
+                        </li>
+                    </ul>
+                </div>
+
+                <span class="inline-block px-6 py-3 bg-accent-yellow/10 text-accent-yellow font-bold text-sm rounded-xl border border-accent-yellow/20">
+                    <i class="fas fa-star mr-1"></i> Active Premium Member
+                </span>
+
+                <div class="mt-6">
+                    <a href="{{ route('candidate.dashboard') }}" class="text-sm text-accent-blue hover:text-accent-blue-hover font-semibold">
+                        <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
     @else
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto mb-10">
 
-        {{-- Basic Plan --}}
+        {{-- Standard Plan --}}
         <div class="bg-card-bg rounded-2xl border border-card-border p-8 flex flex-col hover:border-accent-blue/30 hover:shadow-xl transition-all duration-300 group reveal reveal-delay-1 relative overflow-hidden">
             {{-- Decorative --}}
             <div class="absolute -top-12 -right-12 w-24 h-24 bg-accent-blue/5 rounded-full blur-2xl"></div>
@@ -63,12 +106,12 @@
                     <div class="w-10 h-10 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-lg">
                         <i class="fas fa-rocket"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-text-main">Basic Plan</h3>
+                    <h3 class="text-lg font-bold text-text-main">Standard Plan</h3>
                 </div>
 
                 <div class="mb-6 pb-6 border-b border-card-border">
                     <span class="text-4xl font-extrabold text-text-main">₹500</span>
-                    <span class="text-sm text-text-dark/40 ml-1">/ One Time</span>
+                    <span class="text-sm text-text-dark/40 ml-1">/ Initially</span>
                 </div>
 
                 <ul class="space-y-4 mb-8 flex-grow">
@@ -83,6 +126,10 @@
                     <li class="flex items-start gap-3">
                         <span class="w-5 h-5 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center text-[10px] shrink-0 mt-0.5"><i class="fas fa-check"></i></span>
                         <span class="text-sm text-text-dark/60">Email alerts for matching jobs</span>
+                    </li>
+                    <li class="flex items-start gap-3 opacity-80">
+                        <span class="w-5 h-5 rounded-full bg-accent-yellow/10 text-accent-yellow flex items-center justify-center text-[10px] shrink-0 mt-0.5"><i class="fas fa-info"></i></span>
+                        <span class="text-sm text-text-main font-medium">Final ₹500 required upon job placement</span>
                     </li>
                     <li class="flex items-start gap-3 opacity-40">
                         <span class="w-5 h-5 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center text-[10px] shrink-0 mt-0.5"><i class="fas fa-times"></i></span>
@@ -99,7 +146,7 @@
                         @csrf
                         <input type="hidden" name="plan" value="basic">
                         <button type="submit" class="w-full py-3.5 border border-card-border text-text-main font-semibold rounded-xl hover:bg-accent-blue/10 hover:border-accent-blue/30 transition-all flex items-center justify-center gap-2 group-hover:border-accent-blue/30">
-                            Select Basic Plan
+                            Select Standard Plan
                         </button>
                     </form>
                 @endif

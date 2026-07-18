@@ -51,19 +51,18 @@ class PaymentController extends Controller
         if ($request->plan === 'premium') $amount = 1000;
         if ($isUpgrade) $amount = 500;
         
+        $profile = $user->profile;
+
+        // Prevent duplicate payments
+        if ($request->plan === 'basic' && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid)) {
+            return back()->with('error', 'You have already paid for the Basic plan.');
+        }
+        if (($request->plan === 'premium' || $request->plan === 'upgrade') && $profile->plan_type === 'premium' && $profile->is_fee_paid) {
+            return back()->with('error', 'You are already on the Premium plan.');
+        }
+
         $prefix = $isRenewal ? 'RENEW_' : ($isUpgrade ? 'UPGRADE_' : 'TXN_');
         $transactionId = $prefix . $user->id . '_' . time();
-
-        // --- LOCAL BYPASS ---
-        if (env('APP_ENV') === 'local') {
-            return redirect()->route('candidate.payment.callback', [
-                'transactionId' => 'BYPASS_' . time(),
-                'bypass' => true,
-                'amount' => $amount,
-                'plan' => $request->plan
-            ]);
-        }
-        // --------------------
 
         $isProd = $this->env === 'production';
 
@@ -121,20 +120,6 @@ class PaymentController extends Controller
         $transactionId = $request->transactionId ?? session('last_txn_id');
         $merchantId = $request->merchantId;
 
-        // --- LOCAL BYPASS ---
-        if ($request->bypass && env('APP_ENV') === 'local') {
-            $rData = [
-                'success' => true,
-                'data' => [
-                    'state' => 'COMPLETED',
-                    'amount' => $request->amount * 100,
-                    'transactionId' => $transactionId
-                ]
-            ];
-            goto handle_success; // Skip the HTTP call
-        }
-        // --------------------
-
         // Verify status with PhonePe
         $string = "/pg/v1/status/{$this->merchantId}/{$transactionId}" . $this->saltKey;
         $sha256 = hash('sha256', $string);
@@ -158,8 +143,9 @@ class PaymentController extends Controller
         $response = $http->get($url);
 
         $rData = $response->json();
-
-        handle_success:
+        
+        \Illuminate\Support\Facades\Log::info('PhonePe Upgrade/Renewal Callback Status', ['response' => $rData, 'txn' => $transactionId]);
+        
         $user = auth()->user();
 
         if ($user) {
@@ -191,6 +177,7 @@ class PaymentController extends Controller
                     'plan_type' => 'premium',
                     'is_fee_paid' => true,
                     'paid_amount' => $user->profile->paid_amount + $amountPaid,
+                    'pending_amount' => 0, // Cleared upon upgrade
                     'payment_id' => $rData['data']['transactionId'],
                     'plan_started_at' => now()
                 ]);
@@ -202,6 +189,7 @@ class PaymentController extends Controller
                         'plan_type' => 'standard',
                         'initial_fee_paid' => true,
                         'paid_amount' => $user->profile->paid_amount + $amountPaid,
+                        'pending_amount' => 500, // Initial 500 paid, 500 pending
                         'payment_id' => $rData['data']['transactionId'],
                         'registration_completed_at' => now(),
                         'plan_started_at' => now()

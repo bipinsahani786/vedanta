@@ -7,7 +7,7 @@ A new job post has been approved that matches **{{ $matchScore }}%** of your pro
 
 **Job Title:** {{ $job->title ?? 'Teacher' }}  
 **Institution:** {{ $job->school_name }}  
-**Location:** {{ $job->location->city }}  
+**Location:** {{ $job->city?->name ?? 'N/A' }}  
 **Subject:** {{ $job->subject->name }}  
 
 <x-mail::button :url="route('candidate.applications.available')">

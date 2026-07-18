@@ -100,7 +100,7 @@
                 </td>
                 <td>
                     <div class="text-sm text-text-main flex items-center gap-1.5">
-                        <i class="fas fa-map-marker-alt text-red-400"></i> {{ $job->location?->city ?? 'N/A' }}
+                        <i class="fas fa-map-marker-alt text-red-400"></i> {{ $job->city?->name ?? 'N/A' }}, {{ $job->state?->name ?? '' }}
                     </div>
                 </td>
                 <td>

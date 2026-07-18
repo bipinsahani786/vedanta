@@ -11,10 +11,10 @@
         <div class="bg-gradient-to-r from-accent-blue to-blue-600 p-8 text-center relative overflow-hidden">
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-accent-blue shadow-lg text-2xl mx-auto mb-4 relative z-10">
-                <i class="fas fa-user-plus"></i>
+                <i class="fas fa-file-alt"></i>
             </div>
-            <h3 class="text-2xl font-bold text-white relative z-10">Join Us Now!</h3>
-            <p class="text-blue-100 mt-2 text-sm relative z-10">Register to apply for jobs and get notified about new opportunities.</p>
+            <h3 class="text-2xl font-bold text-white relative z-10">Build Your Resume!</h3>
+            <p class="text-blue-100 mt-2 text-sm relative z-10">Register now to create a professional resume and land your dream job.</p>
         </div>
         
         <!-- Registration Form -->
@@ -63,11 +63,17 @@
                 </div>
                 
                 <button type="submit" class="w-full bg-accent-blue text-white font-bold py-2.5 rounded-lg hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 mt-2">
-                    <i class="fas fa-paper-plane"></i> Register as Candidate
+                    <i class="fas fa-user-plus"></i> Register & Build Profile
                 </button>
             </form>
             
-            <div class="mt-4 text-center">
+            <div class="mt-3">
+                <a href="{{ route('resume.builder') }}" class="w-full bg-white border-2 border-accent-blue text-accent-blue font-bold py-2 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-file-pdf"></i> Try Free Resume Builder
+                </a>
+            </div>
+
+            <div class="mt-4 text-center border-t border-slate-200 pt-4">
                 <p class="text-xs text-slate-500">Already have an account? <a href="{{ route('login') }}" class="text-accent-blue font-bold hover:underline">Login here</a></p>
                 <p class="text-xs text-slate-400 mt-2">Looking to hire? <a href="{{ route('employer.register') }}" class="text-slate-600 hover:text-accent-yellow transition-colors underline">Register as Employer</a></p>
             </div>

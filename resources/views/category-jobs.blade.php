@@ -36,7 +36,7 @@
                         </p>
                         <p class="mb-2 text-slate-800 text-sm">
                             <b class="text-slate-900">Location:</b>
-                            {{ $job->location->name ?? '-' }}
+                            {{ $job->city?->name ?? '-' }}, {{ $job->state?->name ?? '' }}
                         </p>
                         <p class="mb-2 text-slate-800 text-sm">
                             <b class="text-slate-900">Qualification:</b>

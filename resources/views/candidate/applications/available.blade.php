@@ -69,12 +69,12 @@
             </div>
 
             {{-- Description --}}
-            <p class="text-sm text-text-dark/50 line-clamp-3 mb-4 flex-grow leading-relaxed">{{ $job->description }}</p>
+            <p class="text-sm text-text-dark/50 line-clamp-3 mb-4 flex-grow leading-relaxed">{{ strip_tags($job->description) }}</p>
 
             {{-- Tags --}}
             <div class="flex flex-wrap gap-2 mb-5">
                 <span class="bg-secondary-bg border border-card-border text-text-dark/50 px-2.5 py-1 rounded-lg text-[10px] font-medium flex items-center gap-1">
-                    <i class="fas fa-map-marker-alt text-accent-blue/60"></i> {{ $job->location->city }}
+                    <i class="fas fa-map-marker-alt text-accent-blue/60"></i> {{ $job->city?->name ?? 'N/A' }}
                 </span>
                 <span class="bg-secondary-bg border border-card-border text-text-dark/50 px-2.5 py-1 rounded-lg text-[10px] font-medium flex items-center gap-1">
                     <i class="fas fa-book text-accent-yellow/60"></i> {{ $job->subject->name }}

@@ -32,7 +32,7 @@
     </a>
 
     <!-- Active Jobs Stat -->
-    <a href="{{ route('admin.jobs.index', ['status' => 'active']) }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-emerald-200 hover:-translate-y-1 transition-all group">
+    <a href="{{ route('admin.jobs.index') }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-emerald-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Active Jobs</p>

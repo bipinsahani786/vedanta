@@ -13,7 +13,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $recentJobs = JobPost::with(['category', 'subject', 'location', 'qualification'])
+        $recentJobs = JobPost::with(['category', 'subject', 'state', 'city', 'qualification'])
             ->where('status', 'approved')
             ->latest()
             ->take(6)
@@ -36,7 +36,8 @@ class HomeController extends Controller
         $jobs = JobPost::with([
                 'category',
                 'subject',
-                'location',
+                'state',
+                'city',
                 'qualification'
             ])
             ->where('category_id', $id)
@@ -55,13 +56,11 @@ class HomeController extends Controller
 
     public function jobs(\Illuminate\Http\Request $request)
     {
-        $query = JobPost::with(['category', 'subject', 'location', 'qualification'])
+        $query = JobPost::with(['category', 'subject', 'state', 'city', 'qualification'])
             ->where('status', 'approved');
 
         if ($request->filled('state')) {
-            $query->whereHas('location', function($q) use ($request) {
-                $q->where('state', $request->state);
-            });
+            $query->where('state_id', $request->state);
         }
 
         if ($request->filled('subject')) {
@@ -82,7 +81,7 @@ class HomeController extends Controller
 
         $jobs = $query->orderBy('created_at', 'desc')->paginate(12);
 
-        $states = \App\Models\Location::whereNotNull('state')->where('state', '!=', '')->distinct()->orderBy('state')->pluck('state');
+        $states = \App\Models\State::where('is_active', true)->orderBy('name')->get();
         $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
         $categories = \App\Models\Category::where('is_active', true)->orderBy('name')->get();
             

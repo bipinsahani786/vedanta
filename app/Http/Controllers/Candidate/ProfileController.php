@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Candidate;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use App\Models\Location;
+use App\Models\State;
+use App\Models\City;
 use App\Models\Qualification;
 use App\Models\Subject;
 use Illuminate\Http\Request;
@@ -19,9 +20,10 @@ class ProfileController extends Controller
         $categories = Category::where('is_active', true)->get();
         $subjects = Subject::where('is_active', true)->get();
         $qualifications = Qualification::where('is_active', true)->get();
-        $locations = Location::where('is_active', true)->get();
+        $states = State::where('is_active', true)->get();
+        $cities = City::where('state_id', $profile->preferred_state_id)->where('is_active', true)->get();
 
-        return view('candidate.profile.edit', compact('user', 'profile', 'categories', 'subjects', 'qualifications', 'locations'));
+        return view('candidate.profile.edit', compact('user', 'profile', 'categories', 'subjects', 'qualifications', 'states', 'cities'));
     }
 
     public function update(Request $request)
@@ -33,7 +35,8 @@ class ProfileController extends Controller
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
             'highest_qualification_id' => 'required|exists:qualifications,id',
-            'preferred_location_id' => 'required|exists:locations,id',
+            'preferred_state_id' => 'required|exists:states,id',
+            'preferred_city_id' => 'required|exists:cities,id',
             'experience_years' => 'required|integer|min:0',
             'current_salary' => 'nullable|string',
             'expected_salary' => 'required|string',
@@ -65,7 +68,8 @@ class ProfileController extends Controller
             'category_id' => $request->category_id,
             'subject_id' => $request->subject_id,
             'highest_qualification_id' => $request->highest_qualification_id,
-            'preferred_location_id' => $request->preferred_location_id,
+            'preferred_state_id' => $request->preferred_state_id,
+            'preferred_city_id' => $request->preferred_city_id,
             'experience_years' => $request->experience_years,
             'current_salary' => $request->current_salary,
             'expected_salary' => $request->expected_salary,
