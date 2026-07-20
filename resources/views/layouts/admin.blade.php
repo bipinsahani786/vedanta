@@ -111,6 +111,21 @@
         .admin-table tr:hover td {
             background-color: #f1f5f9;
         }
+
+        /* Mobile Sidebar Custom CSS */
+        @media (max-width: 767px) {
+            #admin-sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                transform: translateX(-100%);
+                display: flex !important;
+            }
+            #admin-sidebar.sidebar-open {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 
@@ -119,7 +134,7 @@
     <div class="flex h-screen overflow-hidden">
 
         <!-- Sidebar -->
-        <aside
+        <aside id="admin-sidebar"
             class="admin-sidebar w-64 flex-shrink-0 flex flex-col transition-transform duration-300 z-30 shadow-2xl hidden md:flex">
             <!-- Brand -->
             <div
@@ -584,6 +599,21 @@
                     citySelect.innerHTML = '<option value="">Any City</option>';
                 }
             });
+        }
+
+        // Mobile Sidebar Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const adminSidebar = document.getElementById('admin-sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        if (mobileMenuBtn && adminSidebar && mobileOverlay) {
+            function toggleSidebar() {
+                adminSidebar.classList.toggle('sidebar-open');
+                mobileOverlay.classList.toggle('hidden');
+            }
+
+            mobileMenuBtn.addEventListener('click', toggleSidebar);
+            mobileOverlay.addEventListener('click', toggleSidebar);
         }
     </script>
 </body>
