@@ -12,7 +12,7 @@ An invoice for your service charge has been generated. Please review the details
 **Due Date:** {{ \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y') }}  
 **Status:** {{ ucfirst($invoice->status) }}  
 
-<x-mail::button :url="route('candidate.serviceCharge.index')">
+<x-mail::button :url="route('candidate.serviceCharge.show')">
 Pay Invoice Now
 </x-mail::button>
 
