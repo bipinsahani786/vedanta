@@ -111,13 +111,18 @@
                         <div class="bg-blue-50/50 border border-blue-200/50 rounded-2xl p-6 flex items-center justify-between shadow-sm reveal reveal-delay-2">
                             <div>
                                 <h3 class="text-lg font-bold text-blue-800 flex items-center gap-2">
-                                    <i class="fas fa-info-circle"></i> Pending Final Registration Fee
+                                    <i class="fas fa-info-circle"></i> Pending Service Charge
                                 </h3>
                                 <p class="text-sm text-blue-700/80 mt-1">
-                                    You have a pending balance of <strong>₹{{ number_format($profile->pending_amount, 0) }}</strong> for your Standard Plan.
+                                    You have a pending balance of <strong>₹{{ number_format($profile->pending_amount, 0) }}</strong>.
                                     <br>
-                                    <span class="text-xs opacity-90 block mt-1"><i class="fas fa-clock mr-1"></i> This amount will be requested by the Admin upon successful job placement / final registration.</span>
+                                    <span class="text-xs opacity-90 block mt-1"><i class="fas fa-clock mr-1"></i> Please clear your dues to continue accessing premium features.</span>
                                 </p>
+                            </div>
+                            <div class="ml-4 flex-shrink-0">
+                                <a href="{{ route('candidate.serviceCharge.show') }}" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 shadow-md transition-colors flex items-center gap-2">
+                                    <i class="fas fa-credit-card"></i> Pay Now
+                                </a>
                             </div>
                         </div>
                     @endif
@@ -130,36 +135,29 @@
                                     class="fas fa-bell text-accent-yellow"></i> Notifications & Updates</h3>
                         </div>
                         <div class="divide-y divide-card-border">
-                            <div class="p-5 flex gap-4 hover:bg-secondary-bg/30 transition-colors">
-                                <div
-                                    class="w-10 h-10 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center flex-shrink-0 mt-1">
-                                    <i class="fas fa-check"></i>
+                            @forelse(auth()->user()->notifications()->take(3)->get() as $notification)
+                                <div class="p-5 flex gap-4 hover:bg-secondary-bg/30 transition-colors {{ $notification->unread() ? 'bg-secondary-bg/10' : '' }}">
+                                    <div
+                                        class="w-10 h-10 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center flex-shrink-0 mt-1">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-text-main mb-1">{{ $notification->data['title'] ?? 'Notification' }}</h4>
+                                        <p class="text-xs text-text-dark/70 leading-relaxed">{{ $notification->data['message'] ?? 'You have a new update.' }}</p>
+                                        <span
+                                            class="text-[10px] text-text-dark/40 font-medium mt-2 block">{{ $notification->created_at->diffForHumans() }}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-text-main mb-1">Registration Complete</h4>
-                                    <p class="text-xs text-text-dark/70 leading-relaxed">Your profile, agreement, and payment
-                                        have been verified. You can now apply to unlimited jobs.</p>
-                                    <span
-                                        class="text-[10px] text-text-dark/40 font-medium mt-2 block">{{ $profile->updated_at->diffForHumans() }}</span>
+                            @empty
+                                <div class="p-5 text-center text-text-dark/50 text-sm">
+                                    No new notifications
                                 </div>
-                            </div>
-                            <div class="p-5 flex gap-4 hover:bg-secondary-bg/30 transition-colors">
-                                <div
-                                    class="w-10 h-10 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center flex-shrink-0 mt-1">
-                                    <i class="fas fa-search"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-text-main mb-1">New Jobs Available</h4>
-                                    <p class="text-xs text-text-dark/70 leading-relaxed">We have added new teaching
-                                        opportunities that match your preferred location and subject.</p>
-                                    <span class="text-[10px] text-text-dark/40 font-medium mt-2 block">1 day ago</span>
-                                </div>
-                            </div>
+                            @endforelse
                         </div>
-                        <div class="px-6 py-3 border-t border-card-border bg-secondary-bg/30 text-center">
+                        <!-- <div class="px-6 py-3 border-t border-card-border bg-secondary-bg/30 text-center">
                             <a href="#" class="text-xs font-semibold text-accent-blue hover:text-accent-blue-hover">View All
                                 Notifications</a>
-                        </div>
+                        </div> -->
                     </div>
 
                 </div>

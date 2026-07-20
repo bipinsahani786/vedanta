@@ -112,7 +112,10 @@ class ServiceChargeController extends Controller
         if ($request->bypass && env('APP_ENV') === 'local') {
             $invoice = ServiceChargeInvoice::where('candidate_id', $user->id)->whereIn('status', ['pending', 'overdue'])->latest()->first();
             if ($invoice) {
-                $invoice->update(['status' => 'paid', 'paid_at' => now()]);
+                $invoice->update(['status' => 'paid', 'payment_date' => now()]);
+                if ($user->profile) {
+                    $user->profile->decrement('pending_amount', $invoice->amount);
+                }
                 PaymentTransaction::create([
                     'candidate_id' => $user->id,
                     'amount' => $request->amount,
@@ -170,14 +173,24 @@ class ServiceChargeController extends Controller
             if ($invoiceId) {
                 ServiceChargeInvoice::where('id', $invoiceId)->update([
                     'status' => 'paid',
-                    'paid_at' => now()
+                    'payment_date' => now()
                 ]);
+                $inv = ServiceChargeInvoice::find($invoiceId);
+                if ($inv && $user->profile) {
+                    $user->profile->decrement('pending_amount', $inv->amount);
+                }
             } else {
                 // Fallback to latest pending invoice
                 ServiceChargeInvoice::where('candidate_id', $user->id)->whereIn('status', ['pending', 'overdue'])->update([
                     'status' => 'paid',
-                    'paid_at' => now()
+                    'payment_date' => now()
                 ]);
+                // We decrement pending_amount by the total paid here or just reset it
+                // To be safe, let's just fetch the invoice before updating
+                $invs = ServiceChargeInvoice::where('candidate_id', $user->id)->where('status', 'paid')->latest()->first();
+                if ($invs && $user->profile) {
+                    $user->profile->decrement('pending_amount', $invs->amount);
+                }
             }
             return redirect()->route('candidate.serviceCharge.show')->with('success', 'Service charge paid successfully!');
         }
