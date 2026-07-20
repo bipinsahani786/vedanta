@@ -100,7 +100,7 @@
                             class="w-4 h-4 rounded border-card-border text-accent-blue focus:ring-accent-blue/50 bg-secondary-bg cursor-pointer">
                         <span class="text-sm text-text-dark/60 group-hover:text-text-main transition-colors">Remember me</span>
                     </label>
-                    <a href="#" class="text-sm font-medium text-accent-blue hover:text-accent-blue/80 transition-colors">Forgot password?</a>
+                    <a href="{{ route('password.request') }}" class="text-sm font-medium text-accent-blue hover:text-accent-blue/80 transition-colors">Forgot password?</a>
                 </div>
 
                 <button type="submit"
