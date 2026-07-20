@@ -625,7 +625,7 @@
 
                 elementsToFade.forEach(el => el.classList.remove('fade-out'));
                 floatingCards.forEach(el => el.classList.remove('float-fade-out'));
-            }, 10);
+            }, 300);
         }
     </script>
     <script>

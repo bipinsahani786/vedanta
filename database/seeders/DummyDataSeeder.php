@@ -196,126 +196,126 @@ class DummyDataSeeder extends Seeder
         $stateIds = State::pluck('id')->toArray();
         $cityIds = City::pluck('id')->toArray();
 
-        // 5. Candidates (Users + Profiles)
-        $candidates = [];
-        for ($i = 1; $i <= 30; $i++) {
-            $user = User::firstOrCreate(
-                ['email' => "candidate$i@example.com"],
-                [
-                    'name' => "Candidate $i",
-                    'phone' => '98765432' . str_pad($i, 2, '0', STR_PAD_LEFT),
-                    'password' => Hash::make('password'),
-                    'role' => 'candidate',
-                ]
-            );
-
-            $isFeePaid = rand(0, 1) == 1;
-
-            $profile = CandidateProfile::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'category_id' => $categoryIds[array_rand($categoryIds)],
-                    'subject_id' => $subjectIds[array_rand($subjectIds)],
-                    'highest_qualification_id' => $qualificationIds[array_rand($qualificationIds)],
-                    'preferred_state_id' => !empty($stateIds) ? $stateIds[array_rand($stateIds)] : null,
-                    'preferred_city_id' => !empty($cityIds) ? $cityIds[array_rand($cityIds)] : null,
-                    'experience_years' => rand(0, 15),
-                    'current_salary' => rand(20000, 80000),
-                    'expected_salary' => rand(30000, 100000),
-                    'is_profile_complete' => true,
-                    'is_agreement_signed' => true,
-                    'is_fee_paid' => $isFeePaid,
-                    'payment_id' => $isFeePaid ? 'pay_' . Str::random(10) : null,
-                    'registration_completed_at' => Carbon::now()->subDays(rand(1, 60)),
-                ]
-            );
-
-            $candidates[] = $user;
-        }
-
-        // 5.5 Employers (Users + Profiles)
-        $employers = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $user = User::firstOrCreate(
-                ['email' => "employer$i@example.com"],
-                [
-                    'name' => "Employer $i",
-                    'phone' => '88776655' . str_pad($i, 2, '0', STR_PAD_LEFT),
-                    'password' => Hash::make('password'),
-                    'role' => 'employer',
-                ]
-            );
-
-            $profile = EmployerProfile::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'school_name' => "International School $i",
-                    'contact_person' => "Mr. Principal $i",
-                    'address' => "Block A, City Center, Sector $i",
-                    'about' => "We are a reputed educational institution focused on holistic development.",
-                ]
-            );
-
-            $employers[] = $user;
-        }
-
-        // 6. Job Posts
-        $jobs = [];
-        for ($i = 1; $i <= 20; $i++) {
-            $catId = $categoryIds[array_rand($categoryIds)];
-            $subId = $subjectIds[array_rand($subjectIds)];
-            $stateId = !empty($stateIds) ? $stateIds[array_rand($stateIds)] : null;
-            $cityId = !empty($cityIds) ? $cityIds[array_rand($cityIds)] : null;
-            $qualId = $qualificationIds[array_rand($qualificationIds)];
-            
-            $catName = Category::find($catId)->name;
-            $subName = Subject::find($subId)->name;
-            
-            $status = ['pending', 'approved', 'rejected'][rand(0, 2)];
-            $employer = $employers[array_rand($employers)];
-
-            $job = JobPost::create([
-                'title' => "Required $catName Teacher for $subName",
-                'school_name' => $employer->employerProfile->school_name,
-                'contact_person' => $employer->employerProfile->contact_person,
-                'email' => $employer->email,
-                'phone' => $employer->phone,
-                'category_id' => $catId,
-                'subject_id' => $subId,
-                'qualification_id' => $qualId,
-                'state_id' => $stateId,
-                'city_id' => $cityId,
-                'salary_range' => (rand(20, 40) * 1000) . " - " . (rand(40, 80) * 1000),
-                'description' => "We are looking for an experienced and passionate $catName teacher for $subName. The ideal candidate should have excellent communication skills and a deep understanding of the subject matter.",
-                'status' => $status,
-                'user_id' => $employer->id,
-            ]);
-            
-            $jobs[] = $job;
-        }
-
-        // 7. Job Applications
-        foreach ($candidates as $candidate) {
-            // Apply to 1-3 random jobs
-            $numApps = rand(1, 3);
-            $appliedJobs = array_rand($jobs, $numApps);
-            if (!is_array($appliedJobs)) $appliedJobs = [$appliedJobs];
-
-            foreach ($appliedJobs as $jobIndex) {
-                // Ignore duplicate applications if any
-                try {
-                    JobApplication::create([
-                        'job_post_id' => $jobs[$jobIndex]->id,
-                        'candidate_id' => $candidate->id,
-                        'status' => ['applied', 'shortlisted', 'rejected', 'hired'][rand(0, 3)],
-                        'match_score' => rand(50, 100),
-                        'cover_letter' => rand(0, 1) ? 'I am very interested in this position and believe I am a strong fit.' : null,
-                    ]);
-                } catch (\Exception $e) {
-                    // Ignore duplicate unique constraints
-                }
-            }
-        }
+//         // 5. Candidates (Users + Profiles)
+//         $candidates = [];
+//         for ($i = 1; $i <= 30; $i++) {
+//             $user = User::firstOrCreate(
+//                 ['email' => "candidate$i@example.com"],
+//                 [
+//                     'name' => "Candidate $i",
+//                     'phone' => '98765432' . str_pad($i, 2, '0', STR_PAD_LEFT),
+//                     'password' => Hash::make('password'),
+//                     'role' => 'candidate',
+//                 ]
+//             );
+// 
+//             $isFeePaid = rand(0, 1) == 1;
+// 
+//             $profile = CandidateProfile::firstOrCreate(
+//                 ['user_id' => $user->id],
+//                 [
+//                     'category_id' => $categoryIds[array_rand($categoryIds)],
+//                     'subject_id' => $subjectIds[array_rand($subjectIds)],
+//                     'highest_qualification_id' => $qualificationIds[array_rand($qualificationIds)],
+//                     'preferred_state_id' => !empty($stateIds) ? $stateIds[array_rand($stateIds)] : null,
+//                     'preferred_city_id' => !empty($cityIds) ? $cityIds[array_rand($cityIds)] : null,
+//                     'experience_years' => rand(0, 15),
+//                     'current_salary' => rand(20000, 80000),
+//                     'expected_salary' => rand(30000, 100000),
+//                     'is_profile_complete' => true,
+//                     'is_agreement_signed' => true,
+//                     'is_fee_paid' => $isFeePaid,
+//                     'payment_id' => $isFeePaid ? 'pay_' . Str::random(10) : null,
+//                     'registration_completed_at' => Carbon::now()->subDays(rand(1, 60)),
+//                 ]
+//             );
+// 
+//             $candidates[] = $user;
+//         }
+// 
+//         // 5.5 Employers (Users + Profiles)
+//         $employers = [];
+//         for ($i = 1; $i <= 5; $i++) {
+//             $user = User::firstOrCreate(
+//                 ['email' => "employer$i@example.com"],
+//                 [
+//                     'name' => "Employer $i",
+//                     'phone' => '88776655' . str_pad($i, 2, '0', STR_PAD_LEFT),
+//                     'password' => Hash::make('password'),
+//                     'role' => 'employer',
+//                 ]
+//             );
+// 
+//             $profile = EmployerProfile::firstOrCreate(
+//                 ['user_id' => $user->id],
+//                 [
+//                     'school_name' => "International School $i",
+//                     'contact_person' => "Mr. Principal $i",
+//                     'address' => "Block A, City Center, Sector $i",
+//                     'about' => "We are a reputed educational institution focused on holistic development.",
+//                 ]
+//             );
+// 
+//             $employers[] = $user;
+//         }
+// 
+//         // 6. Job Posts
+//         $jobs = [];
+//         for ($i = 1; $i <= 20; $i++) {
+//             $catId = $categoryIds[array_rand($categoryIds)];
+//             $subId = $subjectIds[array_rand($subjectIds)];
+//             $stateId = !empty($stateIds) ? $stateIds[array_rand($stateIds)] : null;
+//             $cityId = !empty($cityIds) ? $cityIds[array_rand($cityIds)] : null;
+//             $qualId = $qualificationIds[array_rand($qualificationIds)];
+//             
+//             $catName = Category::find($catId)->name;
+//             $subName = Subject::find($subId)->name;
+//             
+//             $status = ['pending', 'approved', 'rejected'][rand(0, 2)];
+//             $employer = $employers[array_rand($employers)];
+// 
+//             $job = JobPost::create([
+//                 'title' => "Required $catName Teacher for $subName",
+//                 'school_name' => $employer->employerProfile->school_name,
+//                 'contact_person' => $employer->employerProfile->contact_person,
+//                 'email' => $employer->email,
+//                 'phone' => $employer->phone,
+//                 'category_id' => $catId,
+//                 'subject_id' => $subId,
+//                 'qualification_id' => $qualId,
+//                 'state_id' => $stateId,
+//                 'city_id' => $cityId,
+//                 'salary_range' => (rand(20, 40) * 1000) . " - " . (rand(40, 80) * 1000),
+//                 'description' => "We are looking for an experienced and passionate $catName teacher for $subName. The ideal candidate should have excellent communication skills and a deep understanding of the subject matter.",
+//                 'status' => $status,
+//                 'user_id' => $employer->id,
+//             ]);
+//             
+//             $jobs[] = $job;
+//         }
+// 
+//         // 7. Job Applications
+//         foreach ($candidates as $candidate) {
+//             // Apply to 1-3 random jobs
+//             $numApps = rand(1, 3);
+//             $appliedJobs = array_rand($jobs, $numApps);
+//             if (!is_array($appliedJobs)) $appliedJobs = [$appliedJobs];
+// 
+//             foreach ($appliedJobs as $jobIndex) {
+//                 // Ignore duplicate applications if any
+//                 try {
+//                     JobApplication::create([
+//                         'job_post_id' => $jobs[$jobIndex]->id,
+//                         'candidate_id' => $candidate->id,
+//                         'status' => ['applied', 'shortlisted', 'rejected', 'hired'][rand(0, 3)],
+//                         'match_score' => rand(50, 100),
+//                         'cover_letter' => rand(0, 1) ? 'I am very interested in this position and believe I am a strong fit.' : null,
+//                     ]);
+//                 } catch (\Exception $e) {
+//                     // Ignore duplicate unique constraints
+//                 }
+//             }
+//         }
 
         // 8. Contact Leads
         for ($i = 1; $i <= 15; $i++) {
