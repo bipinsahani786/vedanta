@@ -169,6 +169,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/candidates/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'show'])->name('crm.show');
     Route::post('/crm/candidate/{id}/follow-up', [\App\Http\Controllers\Admin\CrmController::class, 'storeFollowUp'])->name('crm.followup.store');
     Route::post('/crm/candidate/{id}/invoice', [\App\Http\Controllers\Admin\CrmController::class, 'storeInvoice'])->name('crm.invoice.store');
+    Route::post('/crm/candidate/{id}/assign-job', [\App\Http\Controllers\Admin\CrmController::class, 'assignJob'])->name('crm.application.assign');
     Route::put('/crm/invoice/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'updateInvoiceStatus'])->name('crm.invoice.update');
     Route::post('/crm/invoice/{id}/adjust', [\App\Http\Controllers\Admin\CrmController::class, 'adjustInvoice'])->name('crm.invoice.adjust');
     Route::post('/crm/candidate/{id}/toggle-verification', [\App\Http\Controllers\Admin\CrmController::class, 'toggleVerification'])->name('crm.candidate.verify');

@@ -363,6 +363,10 @@ class CrmController extends Controller
         $rating = CandidateRating::where('candidate_id', $id)->first();
         $payments = \App\Models\PaymentTransaction::where('candidate_id', $id)->where('status', 'success')->get();
 
+        $availableJobs = \App\Models\JobPost::where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         $history = collect();
 
         // 1. Profile Creation
@@ -455,7 +459,7 @@ class CrmController extends Controller
 
         $history = $history->sortByDesc('date')->values();
 
-        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'rating', 'history'));
+        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'rating', 'history', 'availableJobs'));
     }
 
     public function uploadAgreement(Request $request, $id)
@@ -596,6 +600,28 @@ class CrmController extends Controller
         }
 
         return back()->with('success', 'Invoice adjusted successfully. ₹' . $deduction . ' waived from late fine.');
+    }
+
+    public function assignJob(Request $request, $id)
+    {
+        $request->validate([
+            'job_post_id' => 'required|exists:job_posts,id'
+        ]);
+
+        $candidate = User::findOrFail($id);
+
+        if (\App\Models\JobApplication::where('job_post_id', $request->job_post_id)->where('candidate_id', $candidate->id)->exists()) {
+            return back()->with('error', 'Candidate is already applied to this job.');
+        }
+
+        \App\Models\JobApplication::create([
+            'job_post_id' => $request->job_post_id,
+            'candidate_id' => $candidate->id,
+            'status' => 'applied',
+            'match_score' => 0 // Manually assigned by admin
+        ]);
+
+        return back()->with('success', 'Job application assigned successfully.');
     }
 
     public function toggleVerification($id)

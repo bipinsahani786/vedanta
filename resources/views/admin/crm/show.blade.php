@@ -219,7 +219,19 @@
         <!-- Job Applications -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 border-b border-gray-200">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Job Applications</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Job Applications</h3>
+                    <form action="{{ route('admin.crm.application.assign', $candidate->id) }}" method="POST" class="flex gap-2 items-center">
+                        @csrf
+                        <select name="job_post_id" required class="text-sm rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 w-64">
+                            <option value="">-- Assign a Job to Candidate --</option>
+                            @foreach($availableJobs as $job)
+                                <option value="{{ $job->id }}">{{ $job->title }} ({{ $job->school_name }})</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="px-3 py-1.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition shadow-sm">Assign Job</button>
+                    </form>
+                </div>
                 @forelse($candidate->applications as $app)
                     <div class="mb-4 pb-4 border-b border-gray-100 last:border-0 last:mb-0 last:pb-0">
                         <div class="font-semibold text-gray-800">{{ $app->jobPost->title }}</div>
