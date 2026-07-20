@@ -8,4 +8,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 use Illuminate\Support\Facades\Schedule;
-Schedule::command('invoices:apply-late-fees')->daily();
+Schedule::command('invoices:calculate-late-fees')->daily();

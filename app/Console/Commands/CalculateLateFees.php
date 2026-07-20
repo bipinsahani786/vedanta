@@ -37,6 +37,22 @@ class CalculateLateFees extends Command
                     $candidate = \App\Models\User::find($invoice->candidate_id);
                     if ($candidate && $candidate->profile) {
                         $candidate->profile->increment('pending_amount', $difference);
+
+                        // Notify Candidate
+                        \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                            'id' => \Illuminate\Support\Str::uuid()->toString(),
+                            'type' => 'App\Notifications\ServiceChargeLateFeeAdded',
+                            'notifiable_type' => 'App\Models\User',
+                            'notifiable_id' => $candidate->id,
+                            'data' => json_encode([
+                                'title' => 'Invoice Overdue - Late Fine Added',
+                                'message' => 'A late fine of ₹' . number_format($difference, 2) . ' has been added to your pending invoice.',
+                                'amount' => $difference,
+                                'invoice_id' => $invoice->id
+                            ]),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
                     }
                     $count++;
                 }

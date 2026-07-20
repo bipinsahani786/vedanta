@@ -170,6 +170,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/candidate/{id}/follow-up', [\App\Http\Controllers\Admin\CrmController::class, 'storeFollowUp'])->name('crm.followup.store');
     Route::post('/crm/candidate/{id}/invoice', [\App\Http\Controllers\Admin\CrmController::class, 'storeInvoice'])->name('crm.invoice.store');
     Route::put('/crm/invoice/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'updateInvoiceStatus'])->name('crm.invoice.update');
+    Route::post('/crm/invoice/{id}/adjust', [\App\Http\Controllers\Admin\CrmController::class, 'adjustInvoice'])->name('crm.invoice.adjust');
     Route::post('/crm/candidate/{id}/toggle-verification', [\App\Http\Controllers\Admin\CrmController::class, 'toggleVerification'])->name('crm.candidate.verify');
     Route::post('/crm/candidate/{id}/rate', [\App\Http\Controllers\Admin\CrmController::class, 'rateCandidate'])->name('crm.candidate.rate');
     Route::get('/crm/candidate/{id}/magic-login', [\App\Http\Controllers\Admin\CrmController::class, 'magicLogin'])->name('crm.candidate.magic-login');

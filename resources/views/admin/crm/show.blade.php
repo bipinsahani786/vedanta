@@ -224,24 +224,54 @@
                     <div class="mb-4 pb-4 border-b border-gray-100 last:border-0 last:mb-0 last:pb-0">
                         <div class="font-semibold text-gray-800">{{ $app->jobPost->title }}</div>
                         <div class="text-xs text-gray-500 mb-1">{{ $app->jobPost->school_name }}</div>
-                            <div class="flex justify-between items-center mt-2">
-                                <form action="{{ route('admin.applications.status.update', $app->id) }}" method="POST" class="inline">
+                            <div class="mt-3">
+                                <form action="{{ route('admin.applications.status.update', $app->id) }}" method="POST" class="space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
                                     @csrf
-                                    <select name="status" onchange="this.form.submit()" class="text-xs font-bold px-2 py-1 rounded bg-gray-100 text-gray-700 border-none focus:ring-0 cursor-pointer">
-                                        <option value="applied" {{ $app->status === 'applied' ? 'selected' : '' }}>Applied</option>
-                                        <option value="shortlisted" {{ $app->status === 'shortlisted' ? 'selected' : '' }}>Shortlisted</option>
-                                        <option value="hired" {{ $app->status === 'hired' ? 'selected' : '' }}>Hired</option>
-                                        <option value="rejected" {{ $app->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
-                                    </select>
+                                    <div class="flex items-center gap-2">
+                                        <label class="text-xs font-bold text-gray-700">Status:</label>
+                                        <select name="status" class="text-xs font-bold px-2 py-1.5 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 cursor-pointer w-full md:w-auto">
+                                            <option value="applied" {{ $app->status === 'applied' ? 'selected' : '' }}>Applied</option>
+                                            <option value="shortlisted" {{ $app->status === 'shortlisted' ? 'selected' : '' }}>Shortlisted (Schedule Interview)</option>
+                                            <option value="hired" {{ $app->status === 'hired' ? 'selected' : '' }}>Hired</option>
+                                            <option value="rejected" {{ $app->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Interview Date (If Shortlisted)</label>
+                                            <input type="datetime-local" name="interview_date" value="{{ $app->interview_date }}" class="w-full text-xs rounded-lg border-gray-300 shadow-sm px-2 py-1.5 focus:ring-blue-500 focus:border-blue-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Interview Link / Location</label>
+                                            <input type="text" name="interview_link" value="{{ $app->interview_link }}" placeholder="e.g. Zoom Link or Address" class="w-full text-xs rounded-lg border-gray-300 shadow-sm px-2 py-1.5 focus:ring-blue-500 focus:border-blue-500">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Remarks (Visible to Candidate)</label>
+                                        <textarea name="remarks" rows="2" class="w-full text-xs rounded-lg border-gray-300 shadow-sm px-2 py-1.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Add feedback or updates here...">{{ $app->remarks }}</textarea>
+                                    </div>
+
+                                    <div class="flex justify-end gap-2 items-center">
+                                        @if($app->status === 'hired')
+                                            @if(!$app->invoice)
+                                                <button type="button" onclick="prepareInvoice({{ $app->id }})" class="text-xs px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-bold transition-colors shadow-sm">
+                                                    <i class="fas fa-file-invoice-dollar mr-1"></i> Generate Invoice
+                                                </button>
+                                            @else
+                                                <span class="text-xs px-3 py-1.5 bg-gray-100 text-green-700 font-bold rounded-lg border border-green-200">
+                                                    <i class="fas fa-check-circle mr-1"></i> Invoiced
+                                                </span>
+                                            @endif
+                                        @endif
+                                        
+                                        <button type="submit" class="text-xs px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition-colors shadow-sm">
+                                            Save Updates
+                                        </button>
+                                    </div>
                                 </form>
-                            @if($app->status === 'hired')
-                                @if(!$app->invoice)
-                                    <button type="button" onclick="prepareInvoice({{ $app->id }})" class="text-xs text-indigo-600 hover:underline font-bold">Generate Invoice</button>
-                                @else
-                                    <span class="text-xs text-green-600 font-bold"><i class="fas fa-check"></i> Invoiced</span>
-                                @endif
-                            @endif
-                        </div>
+                            </div>
                     </div>
                 @empty
                     <p class="text-sm text-gray-500">No applications found.</p>
@@ -346,7 +376,7 @@
                                         {{ ucfirst($invoice->status) }}
                                     </span>
                                 </td>
-                                <td class="py-2 px-4">
+                                <td class="py-2 px-4 space-y-2">
                                     @if($invoice->status !== 'paid')
                                     <form action="{{ route('admin.crm.invoice.update', $invoice->id) }}" method="POST" class="inline">
                                         @csrf
@@ -354,6 +384,17 @@
                                         <input type="hidden" name="status" value="paid">
                                         <button type="submit" class="text-xs text-green-600 hover:text-green-900 font-bold" onclick="return confirm('Mark this invoice as Paid?')">Mark Paid</button>
                                     </form>
+                                    
+                                    @if($invoice->late_fee > 0)
+                                    <div class="mt-2 border-t border-gray-100 pt-2">
+                                        <form action="{{ route('admin.crm.invoice.adjust', $invoice->id) }}" method="POST" class="flex items-center gap-2">
+                                            @csrf
+                                            <input type="number" name="deduction" max="{{ $invoice->late_fee }}" min="1" required placeholder="Amt" class="w-16 rounded-md border-gray-300 shadow-sm text-xs py-1 px-2 focus:ring-blue-500 focus:border-blue-500">
+                                            <button type="submit" class="text-xs text-blue-600 hover:text-blue-900 font-bold bg-blue-50 px-2 py-1 rounded">Waive</button>
+                                        </form>
+                                    </div>
+                                    @endif
+
                                     @else
                                         <span class="text-xs text-gray-400">Settled</span>
                                     @endif

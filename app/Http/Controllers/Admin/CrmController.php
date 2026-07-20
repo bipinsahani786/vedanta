@@ -555,10 +555,12 @@ class CrmController extends Controller
             'status' => 'required|in:pending,paid,overdue'
         ]);
 
-        $invoice->status = $request->status;
+        $invoice->update([
+            'status' => $request->status,
+            'payment_date' => $request->status === 'paid' ? now() : null
+        ]);
+
         if ($request->status === 'paid' && $invoice->getOriginal('status') !== 'paid') {
-            $invoice->payment_date = now();
-            
             $candidate = User::find($invoice->candidate_id);
             if ($candidate && $candidate->profile) {
                 $candidate->profile->decrement('pending_amount', $invoice->amount);
@@ -568,6 +570,32 @@ class CrmController extends Controller
         $invoice->save();
 
         return back()->with('success', 'Invoice status updated.');
+    }
+
+    public function adjustInvoice(Request $request, $invoiceId)
+    {
+        $invoice = ServiceChargeInvoice::findOrFail($invoiceId);
+        
+        $request->validate([
+            'deduction' => 'required|numeric|min:0|max:' . $invoice->late_fee
+        ]);
+
+        $deduction = $request->deduction;
+        
+        if ($deduction > 0) {
+            $invoice->update([
+                'late_fee' => $invoice->late_fee - $deduction
+            ]);
+
+            $candidate = User::find($invoice->candidate_id);
+            if ($candidate && $candidate->profile) {
+                // Ensure we don't drop pending amount below 0 artificially
+                $newPending = max(0, $candidate->profile->pending_amount - $deduction);
+                $candidate->profile->update(['pending_amount' => $newPending]);
+            }
+        }
+
+        return back()->with('success', 'Invoice adjusted successfully. ₹' . $deduction . ' waived from late fine.');
     }
 
     public function toggleVerification($id)
