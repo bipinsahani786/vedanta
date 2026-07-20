@@ -24,7 +24,7 @@
 | Laravel | 13.x |
 | MySQL | 8.0+ |
 | Tailwind CSS | 4.x (via Vite) |
-| Payment Gateway | Razorpay |
+| Payment Gateway | PhonePe |
 | PDF Generation | barryvdh/laravel-dompdf |
 | Email | SMTP (Hostinger Mail) |
 
@@ -128,10 +128,12 @@ MAIL_FROM_ADDRESS=info@vedantaplacementagency.in
 MAIL_FROM_NAME="Vedanta Placement Agency"
 
 # ============================================
-# RAZORPAY (Payment Gateway)
+# PHONEPE (Payment Gateway)
 # ============================================
-RAZORPAY_KEY=rzp_live_xxxxxxxxxxxxxxxx
-RAZORPAY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
+PHONEPE_MERCHANT_ID=your_merchant_id
+PHONEPE_SALT_KEY=your_salt_key
+PHONEPE_SALT_INDEX=1
+PHONEPE_ENV=production       # Use 'sandbox' for testing
 
 # ============================================
 # FILESYSTEM

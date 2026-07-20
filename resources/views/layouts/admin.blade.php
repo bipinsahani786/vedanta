@@ -253,14 +253,100 @@
                 </div>
 
                 <div class="flex items-center gap-3 sm:gap-5">
-                    {{-- Notifications --}}
-                    <button
-                        class="relative w-10 h-10 rounded-full hover:bg-secondary-bg border border-transparent hover:border-card-border text-text-dark hover:text-accent-blue transition-all flex items-center justify-center focus:outline-none group">
-                        <i class="fas fa-bell"></i>
-                        <span
-                            class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full group-hover:animate-ping"></span>
-                        <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full"></span>
-                    </button>
+                    {{-- Notifications Dropdown --}}
+                    @php
+                        $adminNotifications = \Illuminate\Support\Facades\DB::table('notifications')
+                            ->where('notifiable_type', 'App\Models\User')
+                            ->where('notifiable_id', auth()->id())
+                            ->whereNull('read_at')
+                            ->orderByDesc('created_at')
+                            ->take(10)
+                            ->get()
+                            ->map(function($n) {
+                                $n->data = json_decode($n->data);
+                                return $n;
+                            });
+                        $unreadCount = $adminNotifications->count();
+                    @endphp
+
+                    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                        <button @click="open = !open"
+                            class="relative w-10 h-10 rounded-full hover:bg-secondary-bg border border-transparent hover:border-card-border text-text-dark hover:text-accent-blue transition-all flex items-center justify-center focus:outline-none group">
+                            <i class="fas fa-bell"></i>
+                            @if($unreadCount > 0)
+                                <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] font-black flex items-center justify-center shadow-lg">
+                                    {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                                </span>
+                            @endif
+                        </button>
+
+                        <!-- Dropdown Panel -->
+                        <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 transform scale-95 translate-y-1"
+                            x-transition:enter-end="opacity-100 transform scale-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                            class="absolute right-0 top-12 w-80 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                            style="display:none">
+
+                            <!-- Header -->
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-bell text-accent-blue text-sm"></i>
+                                    <span class="text-sm font-bold text-gray-800">Notifications</span>
+                                    @if($unreadCount > 0)
+                                        <span class="bg-red-100 text-red-600 text-[10px] font-black px-1.5 py-0.5 rounded-full">{{ $unreadCount }} new</span>
+                                    @endif
+                                </div>
+                                @if($unreadCount > 0)
+                                    <a href="{{ route('admin.notifications.mark-all-read') }}"
+                                        class="text-[11px] text-accent-blue hover:underline font-semibold">Mark all read</a>
+                                @endif
+                            </div>
+
+                            <!-- Notification List -->
+                            <div class="max-h-80 overflow-y-auto divide-y divide-gray-50">
+                                @forelse($adminNotifications as $notif)
+                                    <a href="{{ route('admin.notifications.mark-read', $notif->id) }}"
+                                        class="flex items-start gap-3 px-4 py-3 hover:bg-blue-50/50 transition-colors group">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                                            @if(str_contains($notif->type, 'LeadFollowUp'))
+                                                <i class="fas fa-user-clock"></i>
+                                            @elseif(str_contains($notif->type, 'LateFee'))
+                                                <i class="fas fa-exclamation-triangle text-orange-500"></i>
+                                            @elseif(str_contains($notif->type, 'ProfileVerified'))
+                                                <i class="fas fa-check-circle text-green-500"></i>
+                                            @else
+                                                <i class="fas fa-bell"></i>
+                                            @endif
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-bold text-gray-800 leading-snug">{{ $notif->data->title ?? 'Notification' }}</p>
+                                            <p class="text-xs text-gray-500 mt-0.5 leading-snug">{{ $notif->data->message ?? '' }}</p>
+                                            <p class="text-[10px] text-gray-400 mt-1 font-medium">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</p>
+                                        </div>
+                                        <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                    </a>
+                                @empty
+                                    <div class="py-10 text-center">
+                                        <div class="text-3xl text-gray-200 mb-2"><i class="fas fa-bell-slash"></i></div>
+                                        <p class="text-sm text-gray-400 font-medium">All caught up!</p>
+                                        <p class="text-xs text-gray-300 mt-1">No new notifications</p>
+                                    </div>
+                                @endforelse
+                            </div>
+
+                            <!-- Footer -->
+                            @if($adminNotifications->isNotEmpty())
+                                <div class="px-4 py-2.5 border-t border-gray-100 bg-gray-50/50">
+                                    <a href="{{ route('admin.notifications.index') }}"
+                                        class="text-xs font-bold text-accent-blue hover:underline flex items-center justify-center gap-1">
+                                        View All Notifications <i class="fas fa-arrow-right text-[10px]"></i>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
 
                     {{-- Profile Dropdown --}}
                     <div
