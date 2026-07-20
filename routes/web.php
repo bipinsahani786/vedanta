@@ -160,9 +160,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('jobs/{job}/approve', [\App\Http\Controllers\Admin\JobController::class, 'approve'])->name('jobs.approve');
     Route::post('jobs/{job}/reject', [\App\Http\Controllers\Admin\JobController::class, 'reject'])->name('jobs.reject');
 
-    // CRM & Invoices
-    Route::get('/crm', [\App\Http\Controllers\Admin\CrmController::class, 'index'])->name('crm.index');
-    Route::get('/crm/candidate/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'show'])->name('crm.show');
+    // Candidates CRM
+    Route::get('/candidates/create', [\App\Http\Controllers\Admin\CrmController::class, 'create'])->name('crm.create');
+    Route::post('/candidates/store', [\App\Http\Controllers\Admin\CrmController::class, 'store'])->name('crm.store');
+    Route::get('/candidates/{id}/edit', [\App\Http\Controllers\Admin\CrmController::class, 'edit'])->name('crm.edit');
+    Route::put('/candidates/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'update'])->name('crm.update');
+    Route::get('/candidates', [\App\Http\Controllers\Admin\CrmController::class, 'index'])->name('crm.index');
+    Route::get('/candidates/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'show'])->name('crm.show');
     Route::post('/crm/candidate/{id}/follow-up', [\App\Http\Controllers\Admin\CrmController::class, 'storeFollowUp'])->name('crm.followup.store');
     Route::post('/crm/candidate/{id}/invoice', [\App\Http\Controllers\Admin\CrmController::class, 'storeInvoice'])->name('crm.invoice.store');
     Route::put('/crm/invoice/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'updateInvoiceStatus'])->name('crm.invoice.update');

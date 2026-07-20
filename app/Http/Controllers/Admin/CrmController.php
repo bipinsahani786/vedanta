@@ -7,12 +7,251 @@ use App\Models\CrmFollowUp;
 use App\Models\JobApplication;
 use App\Models\ServiceChargeInvoice;
 use App\Models\User;
+use App\Models\CandidateProfile;
 use App\Models\CandidateRating;
+use App\Models\PaymentTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class CrmController extends Controller
 {
+    public function create()
+    {
+        $categories = \App\Models\Category::all();
+        $subjects = \App\Models\Subject::all();
+        $qualifications = \App\Models\Qualification::all();
+        $states = \App\Models\State::where('is_active', true)->get();
+        $cities = \App\Models\City::where('is_active', true)->get();
+
+        return view('admin.crm.create', compact('categories', 'subjects', 'qualifications', 'states', 'cities'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|max:20|unique:users,phone',
+            'password' => 'required|string|min:6',
+            'gender' => 'required|in:Male,Female,Other',
+            'date_of_birth' => 'required|date',
+            'address' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'subject_id' => 'required|exists:subjects,id',
+            'highest_qualification_id' => 'required|exists:qualifications,id',
+            'experience_years' => 'required|integer|min:0',
+            'current_salary' => 'nullable|string',
+            'expected_salary' => 'nullable|string',
+            'preferred_state_id' => 'required|exists:states,id',
+            'preferred_city_id' => 'required|exists:cities,id',
+            'english_fluency' => 'nullable|string',
+            'residential_preference' => 'nullable|string',
+            'availability_to_join' => 'nullable|string',
+            'current_school' => 'nullable|string',
+            'plan_type' => 'required|string',
+            'payment_method' => 'required|string',
+            'payment_amount' => 'required|numeric|min:0',
+            'payment_notes' => 'nullable|string',
+            'resume' => 'nullable|mimes:pdf,doc,docx|max:5120',
+            'profile_photo' => 'nullable|image|max:5120',
+            'live_photo' => 'nullable|image|max:5120',
+            'salary_slip' => 'nullable|mimes:pdf,jpg,png,jpeg|max:5120',
+            'offer_letter' => 'nullable|mimes:pdf,jpg,png,jpeg|max:5120',
+            'agreement_pdf' => 'nullable|mimes:pdf|max:5120',
+        ]);
+
+        try {
+            // 1. Create User
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'role' => 'candidate',
+                'password' => Hash::make($request->password),
+                'email_verified_at' => now(),
+            ]);
+
+            // 2. Handle File Uploads
+            $resumePath = $request->hasFile('resume') ? $request->file('resume')->store('resumes', 'public') : null;
+            $profilePhotoPath = $request->hasFile('profile_photo') ? $request->file('profile_photo')->store('profile_photos', 'public') : null;
+            $livePhotoPath = $request->hasFile('live_photo') ? $request->file('live_photo')->store('live_photos', 'public') : null;
+            $salarySlipPath = $request->hasFile('salary_slip') ? $request->file('salary_slip')->store('salary_slips', 'public') : null;
+            $offerLetterPath = $request->hasFile('offer_letter') ? $request->file('offer_letter')->store('offer_letters', 'public') : null;
+            $agreementPdfPath = $request->hasFile('agreement_pdf') ? $request->file('agreement_pdf')->store('agreements', 'public') : null;
+
+            $paymentId = $request->payment_method . '-ADMIN-' . strtoupper(uniqid());
+
+            // 3. Create Candidate Profile
+            $profile = CandidateProfile::create([
+                'user_id' => $user->id,
+                'gender' => $request->gender,
+                'date_of_birth' => $request->date_of_birth,
+                'address' => $request->address,
+                'category_id' => $request->category_id,
+                'subject_id' => $request->subject_id,
+                'highest_qualification_id' => $request->highest_qualification_id,
+                'experience_years' => $request->experience_years,
+                'current_salary' => $request->current_salary,
+                'expected_salary' => $request->expected_salary,
+                'preferred_state_id' => $request->preferred_state_id,
+                'preferred_city_id' => $request->preferred_city_id,
+                'english_fluency' => $request->english_fluency,
+                'residential_preference' => $request->residential_preference,
+                'availability_to_join' => $request->availability_to_join,
+                'current_school' => $request->current_school,
+                
+                'resume_path' => $resumePath,
+                'profile_photo_path' => $profilePhotoPath,
+                'live_photo_path' => $livePhotoPath,
+                'salary_slip_path' => $salarySlipPath,
+                'offer_letter_path' => $offerLetterPath,
+                'agreement_pdf_path' => $agreementPdfPath,
+
+                'is_profile_complete' => true,
+                'is_fee_paid' => true,
+                'plan_type' => $request->plan_type,
+                'plan_started_at' => now(),
+                'payment_id' => $paymentId,
+                'registration_completed_at' => now(),
+                
+                'is_terms_agreed' => true,
+                'is_agreement_signed' => $agreementPdfPath ? true : false,
+            ]);
+
+            // 4. Create Payment Transaction
+            PaymentTransaction::create([
+                'candidate_id' => $user->id,
+                'transaction_id' => $paymentId,
+                'amount' => $request->payment_amount,
+                'type' => 'registration_fee',
+                'status' => 'success',
+                'gateway_response' => [
+                    'note' => 'Manually collected by Admin', 
+                    'admin_notes' => $request->payment_notes,
+                    'payment_method' => $request->payment_method
+                ],
+            ]);
+
+            return redirect()->route('admin.crm.show', $user->id)->with('success', 'Candidate manually onboarded successfully.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Manual Onboard Error: ' . $e->getMessage());
+            return back()->withInput()->withErrors(['error' => 'Failed to onboard candidate: ' . $e->getMessage()]);
+        }
+    }
+
+    public function edit($id)
+    {
+        $user = User::where('role', 'candidate')->findOrFail($id);
+        $profile = $user->profile;
+
+        $categories = \App\Models\Category::all();
+        $subjects = \App\Models\Subject::all();
+        $qualifications = \App\Models\Qualification::all();
+        $states = \App\Models\State::where('is_active', true)->get();
+        $cities = \App\Models\City::where('is_active', true)->get();
+
+        return view('admin.crm.edit', compact('user', 'profile', 'categories', 'subjects', 'qualifications', 'states', 'cities'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = User::where('role', 'candidate')->findOrFail($id);
+        $profile = $user->profile;
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'required|string|max:20|unique:users,phone,' . $user->id,
+            'password' => 'nullable|string|min:6',
+            'gender' => 'required|in:Male,Female,Other',
+            'date_of_birth' => 'required|date',
+            'address' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'subject_id' => 'required|exists:subjects,id',
+            'highest_qualification_id' => 'required|exists:qualifications,id',
+            'experience_years' => 'required|integer|min:0',
+            'current_salary' => 'nullable|string',
+            'expected_salary' => 'nullable|string',
+            'preferred_state_id' => 'required|exists:states,id',
+            'preferred_city_id' => 'required|exists:cities,id',
+            'english_fluency' => 'nullable|string',
+            'residential_preference' => 'nullable|string',
+            'availability_to_join' => 'nullable|string',
+            'current_school' => 'nullable|string',
+            'resume' => 'nullable|mimes:pdf,doc,docx|max:5120',
+            'profile_photo' => 'nullable|image|max:5120',
+            'live_photo' => 'nullable|image|max:5120',
+            'salary_slip' => 'nullable|mimes:pdf,jpg,png,jpeg|max:5120',
+            'offer_letter' => 'nullable|mimes:pdf,jpg,png,jpeg|max:5120',
+            'agreement_pdf' => 'nullable|mimes:pdf|max:5120',
+        ]);
+
+        try {
+            // Update User
+            $userData = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+            ];
+            
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+            
+            $user->update($userData);
+
+            // Handle File Uploads (only update if a new file is provided)
+            $updates = [
+                'gender' => $request->gender,
+                'date_of_birth' => $request->date_of_birth,
+                'address' => $request->address,
+                'category_id' => $request->category_id,
+                'subject_id' => $request->subject_id,
+                'highest_qualification_id' => $request->highest_qualification_id,
+                'experience_years' => $request->experience_years,
+                'current_salary' => $request->current_salary,
+                'expected_salary' => $request->expected_salary,
+                'preferred_state_id' => $request->preferred_state_id,
+                'preferred_city_id' => $request->preferred_city_id,
+                'english_fluency' => $request->english_fluency,
+                'residential_preference' => $request->residential_preference,
+                'availability_to_join' => $request->availability_to_join,
+                'current_school' => $request->current_school,
+            ];
+
+            if ($request->hasFile('resume')) {
+                $updates['resume_path'] = $request->file('resume')->store('resumes', 'public');
+            }
+            if ($request->hasFile('profile_photo')) {
+                $updates['profile_photo_path'] = $request->file('profile_photo')->store('profile_photos', 'public');
+            }
+            if ($request->hasFile('live_photo')) {
+                $updates['live_photo_path'] = $request->file('live_photo')->store('live_photos', 'public');
+            }
+            if ($request->hasFile('salary_slip')) {
+                $updates['salary_slip_path'] = $request->file('salary_slip')->store('salary_slips', 'public');
+            }
+            if ($request->hasFile('offer_letter')) {
+                $updates['offer_letter_path'] = $request->file('offer_letter')->store('offer_letters', 'public');
+            }
+            if ($request->hasFile('agreement_pdf')) {
+                $updates['agreement_pdf_path'] = $request->file('agreement_pdf')->store('agreements', 'public');
+                $updates['is_agreement_signed'] = true;
+            }
+
+            $profile->update($updates);
+
+            return redirect()->route('admin.crm.show', $user->id)->with('success', 'Candidate profile updated successfully.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Profile Update Error: ' . $e->getMessage());
+            return back()->withInput()->withErrors(['error' => 'Failed to update candidate profile: ' . $e->getMessage()]);
+        }
+    }
+
     public function index(Request $request)
     {
         $query = User::where('role', 'candidate')

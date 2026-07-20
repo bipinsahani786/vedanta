@@ -3,6 +3,13 @@
 @section('title', 'CRM & Follow-ups')
 @section('subtitle', 'Manage candidates, track hiring status, generate invoices, and log follow-ups.')
 
+@section('actions')
+    <a href="{{ route('admin.crm.create') }}" class="px-5 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 shadow-sm">
+        <i class="fas fa-user-plus text-xs"></i>
+        <span>Manually Onboard Candidate</span>
+    </a>
+@endsection
+
 @section('content')
 
 {{-- Filter/Search Bar --}}
