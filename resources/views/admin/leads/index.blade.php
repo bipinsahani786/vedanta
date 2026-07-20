@@ -7,15 +7,26 @@
 
 {{-- Filter/Search Bar --}}
 <div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-    <div class="text-sm text-text-dark/50 font-medium">
+    <div class="text-sm text-text-dark/50 font-medium whitespace-nowrap">
         Showing {{ $leads->firstItem() ?? 0 }} to {{ $leads->lastItem() ?? 0 }} of {{ $leads->total() }} entries
     </div>
-    <form action="{{ route('admin.leads.index') }}" method="GET" class="w-full sm:w-auto flex items-center relative">
-        <i class="fas fa-search absolute left-3 text-text-dark/40 text-sm"></i>
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, subject..." 
-               class="w-full sm:w-80 pl-9 pr-4 py-2 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
-        @if(request('search'))
-            <a href="{{ route('admin.leads.index') }}" class="absolute right-3 text-text-dark/40 hover:text-red-400 transition-colors">
+    <form action="{{ route('admin.leads.index') }}" method="GET" class="w-full flex flex-col sm:flex-row items-center justify-end gap-3">
+        <div class="relative w-full sm:w-64">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-text-dark/40 text-sm"></i>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, subject..." 
+                   class="w-full pl-9 pr-4 py-2 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+        </div>
+        
+        <div class="relative w-full sm:w-auto flex items-center gap-2">
+            <span class="text-xs font-bold text-text-dark/50 uppercase tracking-wider whitespace-nowrap">Next Follow-up:</span>
+            <input type="date" name="follow_up_date" value="{{ request('follow_up_date') }}" title="Filter by Follow-up Date"
+                   class="w-full sm:w-40 px-3 py-2 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+        </div>
+        
+        <button type="submit" class="w-full sm:w-auto bg-accent-blue text-white rounded-xl px-4 py-2 text-sm font-bold shadow hover:bg-accent-blue-hover transition-colors whitespace-nowrap">Filter</button>
+        
+        @if(request()->anyFilled(['search', 'follow_up_date']))
+            <a href="{{ route('admin.leads.index') }}" class="text-text-dark/40 hover:text-red-400 transition-colors w-full sm:w-auto text-center" title="Clear Filters">
                 <i class="fas fa-times"></i>
             </a>
         @endif
@@ -100,18 +111,9 @@
                 </td>
                 <td class="align-top">
                     <div class="flex justify-end">
-                        <form action="{{ route('admin.leads.status.update', $lead->id) }}" method="POST" class="flex flex-col gap-2 w-32">
-                            @csrf
-                            @method('PUT')
-                            <select name="status" class="w-full bg-secondary-bg border border-card-border rounded-lg text-xs text-text-main py-1.5 px-2 focus:ring-accent-blue focus:border-accent-blue">
-                                <option value="new" {{ $lead->status === 'new' ? 'selected' : '' }}>New</option>
-                                <option value="contacted" {{ $lead->status === 'contacted' ? 'selected' : '' }}>Contacted</option>
-                                <option value="closed" {{ $lead->status === 'closed' ? 'selected' : '' }}>Closed</option>
-                            </select>
-                            <button type="submit" class="w-full py-1.5 bg-accent-blue/10 text-accent-blue hover:bg-accent-blue hover:text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors">
-                                Update Status
-                            </button>
-                        </form>
+                        <a href="{{ route('admin.leads.show', $lead->id) }}" class="flex items-center gap-1.5 px-3 py-1.5 bg-accent-blue/10 text-accent-blue hover:bg-accent-blue hover:text-white rounded-lg text-xs font-bold transition-colors whitespace-nowrap">
+                            Manage Lead <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
                 </td>
             </tr>

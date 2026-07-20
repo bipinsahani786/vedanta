@@ -237,12 +237,14 @@
                     </button>
 
                     {{-- Global Advanced Search Button --}}
+                    {{-- 
                     <button type="button" onclick="document.getElementById('globalSearchModal').classList.remove('hidden')" 
                         class="hidden sm:flex items-center gap-2 bg-secondary-bg border border-card-border rounded-full px-4 py-2 hover:border-accent-blue transition-colors text-text-dark hover:text-accent-blue focus:outline-none">
                         <i class="fas fa-search text-sm"></i>
                         <span class="text-sm font-medium mr-2">Advanced Search...</span>
                         <div class="bg-card-border/50 text-[10px] px-2 py-0.5 rounded font-bold">/</div>
-                    </button>
+                    </button> 
+                    --}}
                 </div>
 
                 <div class="flex items-center gap-3 sm:gap-5">

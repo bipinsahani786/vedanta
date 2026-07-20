@@ -343,13 +343,25 @@ class CrmController extends Controller
 
         $candidates = $query->with('rating')->paginate(15)->withQueryString();
 
+        // Analytics based on current filtered query
+        $stats = [
+            'total' => (clone $query)->count(),
+            'active_paid' => (clone $query)->whereHas('profile', function($q) {
+                $q->where('is_fee_paid', true);
+            })->count(),
+            'signed' => (clone $query)->whereHas('profile', function($q) {
+                $q->where('is_fee_paid', false)->where('is_agreement_signed', true);
+            })->count(),
+        ];
+        $stats['incomplete'] = $stats['total'] - $stats['active_paid'] - $stats['signed'];
+
         // Pass master data for filters
         $subjects = \App\Models\Subject::all();
         $qualifications = \App\Models\Qualification::all();
         $states = \App\Models\State::all();
         $cities = \App\Models\City::all();
 
-        return view('admin.crm.index', compact('candidates', 'sortField', 'sortDirection', 'subjects', 'qualifications', 'states', 'cities'));
+        return view('admin.crm.index', compact('candidates', 'stats', 'sortField', 'sortDirection', 'subjects', 'qualifications', 'states', 'cities'));
     }
 
     public function show($id)

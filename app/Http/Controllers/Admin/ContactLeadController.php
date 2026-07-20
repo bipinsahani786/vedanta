@@ -21,6 +21,13 @@ class ContactLeadController extends Controller
             });
         }
 
+        // Follow-up Date Filter
+        if ($followUpDate = $request->input('follow_up_date')) {
+            $query->whereHas('followUps', function ($q) use ($followUpDate) {
+                $q->whereDate('follow_up_date', $followUpDate);
+            });
+        }
+
         // Sorting
         $sortField = $request->input('sort_by', 'created_at');
         $sortDirection = $request->input('order', 'desc');
@@ -37,6 +44,12 @@ class ContactLeadController extends Controller
         return view('admin.leads.index', compact('leads', 'sortField', 'sortDirection'));
     }
 
+    public function show($id)
+    {
+        $lead = ContactLead::with(['followUps.admin'])->findOrFail($id);
+        return view('admin.leads.show', compact('lead'));
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $lead = ContactLead::findOrFail($id);
@@ -49,5 +62,30 @@ class ContactLeadController extends Controller
         $lead->save();
 
         return back()->with('success', 'Lead status updated successfully.');
+    }
+
+    public function storeFollowUp(Request $request, $id)
+    {
+        $request->validate([
+            'notes' => 'required|string',
+            'follow_up_date' => 'nullable|date',
+            'status' => 'nullable|in:new,contacted,closed'
+        ]);
+
+        $lead = ContactLead::findOrFail($id);
+
+        \App\Models\LeadFollowUp::create([
+            'lead_id' => $lead->id,
+            'notes' => $request->notes,
+            'follow_up_date' => $request->follow_up_date,
+            'created_by' => auth()->id(),
+        ]);
+
+        if ($request->filled('status') && $request->status !== $lead->status) {
+            $lead->status = $request->status;
+            $lead->save();
+        }
+
+        return back()->with('success', 'Follow-up added successfully.');
     }
 }
