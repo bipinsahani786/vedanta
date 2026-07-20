@@ -13,7 +13,9 @@
         "barryvdh/laravel-dompdf": "^3.1",
         "fakerphp/faker": "^1.23",
         "laravel/framework": "^13.8",
-        "laravel/tinker": "^3.0"
+        "laravel/tinker": "^3.0",
+        "setasign/fpdf": "^1.9",
+        "setasign/fpdi": "^2.6"
     },
     "require-dev": {
         "laravel/pail": "^1.2.5",
