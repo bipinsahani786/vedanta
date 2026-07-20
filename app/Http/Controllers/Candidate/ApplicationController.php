@@ -111,6 +111,46 @@ class ApplicationController extends Controller
 
         $profile->increment('used_applications');
 
+        // Check if they need a warning (1 remaining)
+        $remaining = $profile->total_allowed_applications - $profile->used_applications;
+        if ($remaining === 1) {
+            // DB Notification
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\RegistrationExpiryWarning',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $user->id,
+                'data' => json_encode([
+                    'title' => 'Almost Out of Applications!',
+                    'message' => 'You only have 1 application remaining on your current plan.',
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Email Notification
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationExpiryMail($user, $remaining));
+        }
+
+        // Notify Admin of new application
+        $adminUser = \App\Models\User::where('role', 'admin')->first();
+        if ($adminUser) {
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\NewJobApplication',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $adminUser->id,
+                'data' => json_encode([
+                    'title' => 'New Job Application',
+                    'message' => $user->name . ' has applied for ' . $job->title . ' at ' . $job->school_name . '.',
+                    'candidate_id' => $user->id,
+                    'job_id' => $job->id
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
         return redirect()->route('candidate.applications.index')->with('success', 'Application submitted successfully.');
     }
 }

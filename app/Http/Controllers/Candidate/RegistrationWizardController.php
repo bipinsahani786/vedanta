@@ -338,9 +338,45 @@ class RegistrationWizardController extends Controller
             }
 
             // Clear session
-            session()->forget(['last_txn_id', 'pending_plan_type']);
+            $request->session()->forget(['registration_plan', 'payment_txn_id']);
 
-            return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Your profile is now active.');
+            // Insert Database Notification for Candidate
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\RegistrationSuccess',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $user->id,
+                'data' => json_encode([
+                    'title' => 'Registration Successful',
+                    'message' => 'Welcome to Vedanta! Your registration plan is now active.',
+                    'plan' => $pendingPlanType
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Notify Admin of new registration
+            $adminUser = \App\Models\User::where('role', 'admin')->first();
+            if ($adminUser) {
+                \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                    'id' => \Illuminate\Support\Str::uuid(),
+                    'type' => 'App\Notifications\NewRegistration',
+                    'notifiable_type' => 'App\Models\User',
+                    'notifiable_id' => $adminUser->id,
+                    'data' => json_encode([
+                        'title' => 'New Registration',
+                        'message' => $user->name . ' has successfully completed registration and signed the agreement.',
+                        'candidate_id' => $user->id
+                    ]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // Send Email to Candidate (Queued)
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
+
+            return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Registration complete.');
         }
 
         return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or cancelled.');

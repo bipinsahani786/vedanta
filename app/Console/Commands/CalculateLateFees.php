@@ -21,7 +21,7 @@ class CalculateLateFees extends Command
 
         $count = 0;
         foreach ($overdueInvoices as $invoice) {
-            $daysOverdue = now()->diffInDays(\Carbon\Carbon::parse($invoice->due_date));
+            $daysOverdue = (int) now()->diffInDays(\Carbon\Carbon::parse($invoice->due_date), false) * -1;
             if ($daysOverdue > 0) {
                 $newLateFee = $daysOverdue * 300; // 300 per day
 
@@ -38,7 +38,7 @@ class CalculateLateFees extends Command
                     if ($candidate && $candidate->profile) {
                         $candidate->profile->increment('pending_amount', $difference);
 
-                        // Notify Candidate
+                        // Notify Candidate DB
                         \Illuminate\Support\Facades\DB::table('notifications')->insert([
                             'id' => \Illuminate\Support\Str::uuid()->toString(),
                             'type' => 'App\Notifications\ServiceChargeLateFeeAdded',
@@ -53,6 +53,9 @@ class CalculateLateFees extends Command
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
+
+                        // Send Email
+                        \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\LateFeeAlertMail($invoice, $difference));
                     }
                     $count++;
                 }

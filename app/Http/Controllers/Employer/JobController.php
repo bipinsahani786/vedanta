@@ -69,7 +69,24 @@ class JobController extends Controller
             ]);
         }
 
-        return redirect()->route('employer.jobs.index')->with('success', 'Job posted successfully. It will be live after admin approval.');
+        // Notify Admin
+        $adminUser = \App\Models\User::where('role', 'admin')->first();
+        if ($adminUser) {
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\NewJobPosted',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $adminUser->id,
+                'data' => json_encode([
+                    'title' => 'New Job Posted',
+                    'message' => auth()->user()->name . ' has posted a new job vacancy.',
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('employer.jobs.index')->with('success', 'Job posted successfully. It will be live once approved by admin.');
     }
 
     public function show($id)

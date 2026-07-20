@@ -137,9 +137,10 @@ class JobController extends Controller
                 // Update job with user ID
                 $job->update(['user_id' => $user->id]);
 
-                // Fire registered event to send verification email (could also send password here)
-                event(new Registered($user));
-
+                // Fire registered event to send verification email and send password email
+                event(new \Illuminate\Auth\Events\Registered($user));
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\SchoolAccountCreatedMail($user, $password));
+                
                 return redirect()->route('admin.jobs.index')->with('success', "Job approved and employer account created. Temporary password is: $password");
             } else {
                 // User exists, just link it

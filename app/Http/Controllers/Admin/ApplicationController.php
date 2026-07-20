@@ -70,8 +70,34 @@ class ApplicationController extends Controller
 
         if ($request->status === 'shortlisted' && $oldStatus !== 'shortlisted') {
             $application->is_forwarded = true;
-            // Send email to candidate
+            // Send ApplicationForwarded to Candidate
             Mail::to($application->candidate->email)->send(new ApplicationForwarded($application));
+            
+            // Note: Send CandidateForwardedMail to School
+            $employerEmail = $application->jobPost->user->email ?? $application->jobPost->email;
+            if ($employerEmail) {
+                Mail::to($employerEmail)->send(new \App\Mail\CandidateForwardedMail($application));
+            }
+        } elseif ($request->status !== $oldStatus) {
+            // For other status changes, send the generic ApplicationStatusMail
+            Mail::to($application->candidate->email)->send(new \App\Mail\ApplicationStatusMail($application));
+        }
+
+        if ($request->status !== $oldStatus) {
+            // DB Notification for Candidate Dashboard
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\ApplicationStatusUpdated',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $application->candidate_id,
+                'data' => json_encode([
+                    'title' => 'Application Update',
+                    'message' => 'Your application for ' . $application->jobPost->title . ' is now ' . $request->status . '.',
+                    'application_id' => $application->id
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
 
         $application->save();

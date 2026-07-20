@@ -99,6 +99,23 @@ class HomeController extends Controller
 
         \App\Models\ContactLead::create($request->only(['name', 'email', 'phone', 'message']));
 
+        // Notify Admin of new lead
+        $adminUser = \App\Models\User::where('role', 'admin')->first();
+        if ($adminUser) {
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\NewContactLead',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $adminUser->id,
+                'data' => json_encode([
+                    'title' => 'New Contact Query',
+                    'message' => $request->name . ' has submitted a new contact query.',
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true, 
