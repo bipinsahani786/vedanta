@@ -15,13 +15,13 @@
 {{-- Stats Grid --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Candidates Stat -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.crm.index') }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Total Candidates</p>
-                <h3 class="text-3xl font-bold text-gray-900">{{ number_format($totalCandidates) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ number_format($totalCandidates) }}</h3>
             </div>
-            <div class="w-12 h-12 rounded-full bg-blue-50 text-[#00a8e8] flex items-center justify-center text-xl shrink-0">
+            <div class="w-12 h-12 rounded-full bg-blue-50 text-[#00a8e8] flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-users"></i>
             </div>
         </div>
@@ -29,16 +29,16 @@
             <span class="text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md"><i class="fas fa-arrow-up text-[10px]"></i> 12%</span>
             <span class="text-gray-400 ml-2">vs last month</span>
         </div>
-    </div>
+    </a>
 
     <!-- Active Jobs Stat -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.jobs.index') }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-emerald-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Active Jobs</p>
-                <h3 class="text-3xl font-bold text-gray-900">{{ number_format($activeJobs) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">{{ number_format($activeJobs) }}</h3>
             </div>
-            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-briefcase"></i>
             </div>
         </div>
@@ -46,32 +46,32 @@
             <span class="text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md"><i class="fas fa-arrow-up text-[10px]"></i> 5%</span>
             <span class="text-gray-400 ml-2">vs last month</span>
         </div>
-    </div>
+    </a>
 
     <!-- Pending Queries Stat -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.jobs.index', ['status' => 'pending']) }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-amber-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pending Jobs</p>
-                <h3 class="text-3xl font-bold text-gray-900">{{ number_format($pendingJobs->count()) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-amber-600 transition-colors">{{ number_format($pendingJobs->count()) }}</h3>
             </div>
-            <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0">
+            <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-clock"></i>
             </div>
         </div>
         <div class="mt-4 flex items-center text-xs">
             <span class="text-rose-600 font-medium flex items-center gap-1 bg-rose-50 px-2 py-0.5 rounded-md">Requires Action</span>
         </div>
-    </div>
+    </a>
 
     <!-- Revenue Stat -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.transactions.index') }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-purple-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Total Revenue</p>
-                <h3 class="text-3xl font-bold text-gray-900">₹{{ number_format($totalCollections) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">₹{{ number_format($totalCollections) }}</h3>
             </div>
-            <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">
+            <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-file-invoice-dollar"></i>
             </div>
         </div>
@@ -79,7 +79,7 @@
             <span>Reg: ₹{{ number_format($registrationRevenue) }}</span>
             <span>Services: ₹{{ number_format($serviceChargeRevenue) }}</span>
         </div>
-    </div>
+    </a>
 </div>
 
 {{-- Main Content Grid --}}
@@ -181,35 +181,42 @@
     {{-- Right Column --}}
     <div class="flex flex-col gap-8">
         
-        {{-- System Status --}}
+        {{-- Plan Purchases --}}
         <div class="bg-gray-900 rounded-2xl p-6 shadow-md relative overflow-hidden">
             <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
             
             <div class="flex items-center gap-3 mb-6 relative z-10">
                 <div class="relative flex h-2.5 w-2.5">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00a8e8] opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00a8e8]"></span>
                 </div>
-                <h3 class="font-bold text-white text-lg tracking-tight">System Status</h3>
+                <h3 class="font-bold text-white text-lg tracking-tight">Plan Purchases</h3>
             </div>
             
             <div class="space-y-4 relative z-10">
-                <div class="flex justify-between items-center py-2 border-b border-gray-800">
-                    <span class="text-gray-400 text-sm">App Version</span>
-                    <span class="text-gray-100 font-semibold text-sm">2.0.1</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-gray-800">
-                    <span class="text-gray-400 text-sm">Laravel</span>
-                    <span class="text-gray-100 font-semibold text-sm">v{{ app()->version() }}</span>
-                </div>
-                <div class="flex justify-between items-center py-2">
-                    <span class="text-gray-400 text-sm">PHP Version</span>
-                    <span class="text-gray-100 font-semibold text-sm">{{ phpversion() }}</span>
-                </div>
+                <a href="{{ route('admin.crm.index', ['plan_amount' => 500]) }}" class="flex justify-between items-center py-3 border-b border-gray-800 hover:bg-gray-800/50 px-2 rounded-lg transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-[#00a8e8]/20 text-[#00a8e8] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <span class="font-bold">₹</span>
+                        </div>
+                        <span class="text-gray-300 text-sm font-medium group-hover:text-white transition-colors">₹500 Plans</span>
+                    </div>
+                    <span class="text-white font-bold text-lg group-hover:text-[#00a8e8] transition-colors">{{ number_format($plan500Count) }} <span class="text-xs text-gray-500 font-normal">users</span></span>
+                </a>
+                
+                <a href="{{ route('admin.crm.index', ['plan_amount' => 1000]) }}" class="flex justify-between items-center py-3 hover:bg-gray-800/50 px-2 rounded-lg transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-[#00a8e8]/20 text-[#00a8e8] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <span class="font-bold">₹</span>
+                        </div>
+                        <span class="text-gray-300 text-sm font-medium group-hover:text-white transition-colors">₹1000 Plans</span>
+                    </div>
+                    <span class="text-white font-bold text-lg group-hover:text-[#00a8e8] transition-colors">{{ number_format($plan1000Count) }} <span class="text-xs text-gray-500 font-normal">users</span></span>
+                </a>
             </div>
             
             <div class="mt-6 pt-5 border-t border-gray-800 relative z-10">
-                <p class="text-xs text-gray-500 italic text-center">"The Gold Standard in Education Recruitment"</p>
+                <p class="text-xs text-gray-500 italic text-center">"Empowering Education Professionals"</p>
             </div>
         </div>
 

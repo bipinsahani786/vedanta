@@ -88,11 +88,20 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Location <span class="text-red-500">*</span></label>
-                                <select name="location_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
-                                    <option value="">Select Location</option>
-                                    @foreach($locations as $location)
-                                        <option value="{{ $location->id }}" {{ old('location_id', $job->location_id) == $location->id ? 'selected' : '' }}>{{ $location->city }}, {{ $location->state }}</option>
+                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">State <span class="text-red-500">*</span></label>
+                                <select name="state_id" id="state_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                                    <option value="">Select State</option>
+                                    @foreach($states as $state)
+                                        <option value="{{ $state->id }}" {{ old('state_id', $job->state_id) == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">City <span class="text-red-500">*</span></label>
+                                <select name="city_id" id="city_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                                    <option value="">Select City</option>
+                                    @foreach($cities as $city)
+                                        <option value="{{ $city->id }}" {{ old('city_id', $job->city_id) == $city->id ? 'selected' : '' }}>{{ $city->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -118,3 +127,30 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('state_id').addEventListener('change', function() {
+        let stateId = this.value;
+        let citySelect = document.getElementById('city_id');
+        citySelect.innerHTML = '<option value="">Loading...</option>';
+        
+        if(stateId) {
+            fetch(`/api/states/${stateId}/cities`)
+                .then(response => response.json())
+                .then(data => {
+                    citySelect.innerHTML = '<option value="">Select City</option>';
+                    data.forEach(city => {
+                        citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching cities:', error);
+                    citySelect.innerHTML = '<option value="">Select City</option>';
+                });
+        } else {
+            citySelect.innerHTML = '<option value="">Select City</option>';
+        }
+    });
+</script>
+@endpush

@@ -4,24 +4,65 @@
 @section('subtitle', 'Manage the logos displayed in the "Our Trusted Clients" section.')
 
 @section('actions')
-    <button onclick="document.getElementById('addClientModal').classList.remove('hidden')" class="px-4 py-2 bg-accent-blue text-white rounded-xl text-sm font-semibold hover:bg-accent-blue-hover transition-all shadow-lg flex items-center gap-2">
+    <button @click="$dispatch('open-modal', { isEdit: false, formData: { id: '', name: '', is_active: 1 } })" class="px-4 py-2 bg-accent-blue text-white rounded-xl text-sm font-semibold hover:bg-accent-blue-hover transition-all shadow-lg flex items-center gap-2">
         <i class="fas fa-plus"></i> Add Client Logo
     </button>
 @endsection
 
 @section('content')
+<div x-data="{ showModal: false, isEdit: false, formData: { id: '', name: '', is_active: 1 } }" @open-modal.window="isEdit = $event.detail.isEdit; formData = $event.detail.formData; showModal = true">
 
-{{-- Filter/Search Bar --}}
-<div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-    <div class="text-sm text-text-dark/50 font-medium">
-        Showing {{ $clients->firstItem() ?? 0 }} to {{ $clients->lastItem() ?? 0 }} of {{ $clients->total() }} entries
+{{-- Analytics Cards --}}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <a href="{{ route('admin.clients.index') }}" class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xl">
+            <i class="fas fa-building"></i>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Total Logos</p>
+            <p class="text-2xl font-bold text-text-main">{{ \App\Models\ClientLogo::count() }}</p>
+        </div>
+    </a>
+    
+    <a href="{{ route('admin.clients.index', ['status' => 'active']) }}" class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-xl">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Active</p>
+            <p class="text-2xl font-bold text-text-main">{{ \App\Models\ClientLogo::where('is_active', true)->count() }}</p>
+        </div>
+    </a>
+
+    <a href="{{ route('admin.clients.index', ['status' => 'inactive']) }}" class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-xl">
+            <i class="fas fa-times-circle"></i>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Inactive</p>
+            <p class="text-2xl font-bold text-text-main">{{ \App\Models\ClientLogo::where('is_active', false)->count() }}</p>
+        </div>
+    </a>
+</div>
+
+{{-- Enhanced Filter/Search Bar --}}
+<div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-secondary-bg flex items-center justify-center text-text-dark/50 border border-card-border">
+            <i class="fas fa-list"></i>
+        </div>
+        <div>
+            <h3 class="font-bold text-text-main">Client Logo List</h3>
+            <p class="text-xs text-text-dark/50 font-medium">Showing {{ $clients->firstItem() ?? 0 }} to {{ $clients->lastItem() ?? 0 }} of {{ $clients->total() }} entries</p>
+        </div>
     </div>
-    <form action="{{ route('admin.clients.index') }}" method="GET" class="w-full sm:w-auto flex items-center relative">
-        <i class="fas fa-search absolute left-3 text-text-dark/40 text-sm"></i>
+    
+    <form action="{{ route('admin.clients.index') }}" method="GET" class="w-full sm:w-auto flex items-center relative group">
+        <i class="fas fa-search absolute left-4 text-text-dark/40 text-sm group-focus-within:text-accent-blue transition-colors"></i>
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search client name..." 
-               class="w-full sm:w-72 pl-9 pr-4 py-2 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+               class="w-full sm:w-80 pl-11 pr-4 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-all shadow-inner hover:border-accent-blue/50">
         @if(request('search'))
-            <a href="{{ route('admin.clients.index') }}" class="absolute right-3 text-text-dark/40 hover:text-red-400 transition-colors">
+            <a href="{{ route('admin.clients.index') }}" class="absolute right-4 text-text-dark/40 hover:text-red-400 transition-colors">
                 <i class="fas fa-times"></i>
             </a>
         @endif
@@ -90,7 +131,7 @@
                 <td class="text-text-dark/60 text-sm">{{ $client->created_at->format('M d, Y') }}</td>
                 <td>
                     <div class="flex items-center justify-end gap-2">
-                        <button onclick="editClient({{ $client->id }}, '{{ addslashes($client->name) }}', {{ $client->is_active ? 'true' : 'false' }})" class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center hover:bg-accent-blue hover:text-white transition-colors tooltip" title="Edit">
+                        <button @click="$dispatch('open-modal', { isEdit: true, formData: { id: '{{ $client->id }}', name: '{{ addslashes($client->name) }}', is_active: {{ $client->is_active ? 1 : 0 }} } })" class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center hover:bg-accent-blue hover:text-white transition-colors tooltip" title="Edit">
                             <i class="fas fa-edit text-xs"></i>
                         </button>
                         <form action="{{ route('admin.clients.destroy', $client) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this client logo?');">
@@ -125,82 +166,57 @@
 </div>
 @endif
 
-<!-- Add Client Modal -->
-<div id="addClientModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-    <div class="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-card-border animate-[slideIn_0.3s_ease-out]">
-        <div class="px-6 py-4 border-b border-card-border flex justify-between items-center bg-secondary-bg/30">
-            <h3 class="font-bold text-text-main text-lg">Add Client Logo</h3>
-            <button onclick="document.getElementById('addClientModal').classList.add('hidden')" class="text-text-dark/40 hover:text-red-400 transition-colors">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        <form action="{{ route('admin.clients.store') }}" method="POST" enctype="multipart/form-data" class="p-6">
-            @csrf
-            <div class="space-y-4 mb-6">
-                <div>
-                    <label class="block text-xs font-semibold text-text-dark/60 mb-1 uppercase tracking-wider">Client / School Name</label>
-                    <input type="text" name="name" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-text-dark/60 mb-1 uppercase tracking-wider">Logo Image</label>
-                    <input type="file" name="logo" accept="image/*" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue/10 file:text-accent-blue hover:file:bg-accent-blue/20 transition-all">
-                </div>
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" name="is_active" id="is_active" checked class="rounded border-card-border text-accent-blue focus:ring-accent-blue bg-secondary-bg">
-                    <label for="is_active" class="text-sm text-text-main">Active on website</label>
-                </div>
-            </div>
-            <div class="flex justify-end gap-3 pt-4 border-t border-card-border">
-                <button type="button" onclick="document.getElementById('addClientModal').classList.add('hidden')" class="px-5 py-2 text-text-dark/60 hover:bg-secondary-bg rounded-xl text-sm font-semibold transition-colors">Cancel</button>
-                <button type="submit" class="px-5 py-2 bg-accent-blue text-white rounded-xl text-sm font-semibold hover:bg-accent-blue-hover transition-colors shadow-lg shadow-accent-blue/20">Upload Logo</button>
-            </div>
-        </form>
-    </div>
 </div>
 
-<!-- Edit Client Modal -->
-<div id="editClientModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-    <div class="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-card-border">
-        <div class="px-6 py-4 border-b border-card-border flex justify-between items-center bg-secondary-bg/30">
-            <h3 class="font-bold text-text-main text-lg">Edit Client</h3>
-            <button onclick="document.getElementById('editClientModal').classList.add('hidden')" class="text-text-dark/40 hover:text-red-400 transition-colors">
-                <i class="fas fa-times text-xl"></i>
-            </button>
+{{-- Alpine Modal Form --}}
+<template x-teleport="body">
+    <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @click="showModal = false"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-card-bg rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full border border-card-border">
+                
+                <div class="px-6 py-4 border-b border-card-border flex justify-between items-center bg-secondary-bg/30">
+                    <h3 class="font-bold text-text-main text-lg" x-text="isEdit ? 'Edit Client Logo' : 'Add Client Logo'"></h3>
+                    <button @click="showModal = false" class="text-text-dark/40 hover:text-red-400 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form :action="isEdit ? '/admin/clients/' + formData.id : '{{ route('admin.clients.store') }}'" method="POST" enctype="multipart/form-data" class="p-6">
+                    @csrf
+                    <template x-if="isEdit">
+                        @method('PUT')
+                    </template>
+
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-text-dark/60 mb-1 uppercase tracking-wider">Client / School Name</label>
+                            <input type="text" name="name" x-model="formData.name" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-text-dark/60 mb-1 uppercase tracking-wider">
+                                Logo Image <span x-show="isEdit" class="text-text-dark/40 lowercase normal-case">(Leave blank to keep current)</span>
+                            </label>
+                            <input type="file" name="logo" accept="image/*" :required="!isEdit" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue/10 file:text-accent-blue hover:file:bg-accent-blue/20 transition-all">
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-2">
+                            <input type="checkbox" name="is_active" id="is_active" x-model="formData.is_active" value="1" class="rounded border-card-border text-accent-blue focus:ring-accent-blue bg-secondary-bg">
+                            <label for="is_active" class="text-sm text-text-main font-medium">Active on website</label>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-card-border">
+                        <button type="button" @click="showModal = false" class="px-5 py-2 text-text-dark/60 hover:bg-secondary-bg rounded-xl text-sm font-semibold transition-colors">Cancel</button>
+                        <button type="submit" class="px-5 py-2 bg-accent-blue text-white rounded-xl text-sm font-semibold hover:bg-accent-blue-hover transition-colors shadow-lg shadow-accent-blue/20" x-text="isEdit ? 'Update Logo' : 'Upload Logo'"></button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <form id="editForm" method="POST" enctype="multipart/form-data" class="p-6">
-            @csrf
-            @method('PUT')
-            <div class="space-y-4 mb-6">
-                <div>
-                    <label class="block text-xs font-semibold text-text-dark/60 mb-1 uppercase tracking-wider">Client / School Name</label>
-                    <input type="text" name="name" id="edit_name" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-text-dark/60 mb-1 uppercase tracking-wider">Logo Image (Leave blank to keep current)</label>
-                    <input type="file" name="logo" accept="image/*" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue/10 file:text-accent-blue hover:file:bg-accent-blue/20 transition-all">
-                </div>
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" name="is_active" id="edit_is_active" class="rounded border-card-border text-accent-blue focus:ring-accent-blue bg-secondary-bg">
-                    <label for="edit_is_active" class="text-sm text-text-main">Active on website</label>
-                </div>
-            </div>
-            <div class="flex justify-end gap-3 pt-4 border-t border-card-border">
-                <button type="button" onclick="document.getElementById('editClientModal').classList.add('hidden')" class="px-5 py-2 text-text-dark/60 hover:bg-secondary-bg rounded-xl text-sm font-semibold transition-colors">Cancel</button>
-                <button type="submit" class="px-5 py-2 bg-accent-blue text-white rounded-xl text-sm font-semibold hover:bg-accent-blue-hover transition-colors shadow-lg shadow-accent-blue/20">Update Logo</button>
-            </div>
-        </form>
     </div>
-</div>
-
-@push('scripts')
-<script>
-    function editClient(id, name, isActive) {
-        document.getElementById('editForm').action = `/admin/clients/${id}`;
-        document.getElementById('edit_name').value = name;
-        document.getElementById('edit_is_active').checked = isActive;
-        document.getElementById('editClientModal').classList.remove('hidden');
-    }
-</script>
-@endpush
-
+</template>
 @endsection

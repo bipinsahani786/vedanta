@@ -81,7 +81,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-bold text-theme-text-light mb-2 uppercase">Job Category <span class="text-red-500">*</span></label>
-                                <select name="category_id" required class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
+                                <select name="category_id" id="job_category" required class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
                                     <option value="">Select Category</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
@@ -90,11 +90,17 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-theme-text-light mb-2 uppercase">Subject <span class="text-red-500">*</span></label>
-                                <select name="subject_id" required class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
+                                <select name="subject_id" id="job_subject" required class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
                                     <option value="">Select Subject</option>
                                     @foreach($subjects as $subject)
                                         <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
                                     @endforeach
+                                </select>
+                            </div>
+                            <div id="job_specialization_container" style="display: none;">
+                                <label class="block text-xs font-bold text-theme-text-light mb-2 uppercase">Specialization <span class="text-red-500">*</span></label>
+                                <select name="specialization_id" id="job_specialization" class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
+                                    <option value="">Select Specialization</option>
                                 </select>
                             </div>
                             <div>
@@ -107,12 +113,18 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-theme-text-light mb-2 uppercase">Location <span class="text-red-500">*</span></label>
-                                <select name="location_id" required class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
-                                    <option value="">Select Location</option>
-                                    @foreach($locations as $location)
-                                        <option value="{{ $location->id }}" {{ old('location_id') == $location->id ? 'selected' : '' }}>{{ $location->city }}, {{ $location->state }}</option>
+                                <label class="block text-xs font-bold text-theme-text-light mb-2 uppercase">State <span class="text-red-500">*</span></label>
+                                <select name="state_id" id="state_id" required class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
+                                    <option value="">Select State</option>
+                                    @foreach($states as $state)
+                                        <option value="{{ $state->id }}" {{ old('state_id') == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
                                     @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-theme-text-light mb-2 uppercase">City <span class="text-red-500">*</span></label>
+                                <select name="city_id" id="city_id" required class="w-full bg-theme-primary-bg border border-theme-card-border rounded-lg px-4 py-3 text-sm text-theme-text-dark focus:outline-none focus:border-theme-accent-blue transition-colors">
+                                    <option value="">Select City</option>
                                 </select>
                             </div>
                             <div class="md:col-span-2">
@@ -135,4 +147,69 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const jobCategory = document.getElementById('job_category');
+        const jobSubject = document.getElementById('job_subject');
+        const jobSpecialization = document.getElementById('job_specialization');
+        const specializationContainer = document.getElementById('job_specialization_container');
+
+        if(jobCategory && jobSubject) {
+            jobCategory.addEventListener('change', function() {
+                const categoryId = this.value;
+                
+                // Clear existing options
+                jobSubject.innerHTML = '<option value="">Select Subject</option>';
+                if(jobSpecialization) jobSpecialization.innerHTML = '<option value="">Select Specialization</option>';
+                if(specializationContainer) specializationContainer.style.display = 'none';
+                
+                if(categoryId) {
+                    fetch(`/api/categories/${categoryId}/subjects`)
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(subject => {
+                                const option = document.createElement('option');
+                                option.value = subject.id;
+                                option.textContent = subject.name;
+                                jobSubject.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error('Error fetching subjects:', error));
+                }
+            });
+        }
+
+        if(jobSubject && jobSpecialization && specializationContainer) {
+            jobSubject.addEventListener('change', function() {
+                const subjectId = this.value;
+                
+                // Clear existing options
+                jobSpecialization.innerHTML = '<option value="">Select Specialization</option>';
+                specializationContainer.style.display = 'none';
+                jobSpecialization.required = false;
+                
+                if(subjectId) {
+                    fetch(`/api/subjects/${subjectId}/specializations`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if(data.length > 0) {
+                                specializationContainer.style.display = 'block';
+                                jobSpecialization.required = true;
+                                data.forEach(spec => {
+                                    const option = document.createElement('option');
+                                    option.value = spec.id;
+                                    option.textContent = spec.name;
+                                    jobSpecialization.appendChild(option);
+                                });
+                            }
+                        })
+                        .catch(error => console.error('Error fetching specializations:', error));
+                }
+            });
+        }
+    });
+</script>
+@endpush
 @endsection

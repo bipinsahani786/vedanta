@@ -33,10 +33,7 @@ class QualificationController extends Controller
         return view('admin.qualifications.index', compact('qualifications', 'sortField', 'sortDirection'));
     }
 
-    public function create()
-    {
-        return view('admin.qualifications.create');
-    }
+    // Removed create()
 
     public function store(Request $request)
     {
@@ -52,10 +49,7 @@ class QualificationController extends Controller
         return redirect()->route('admin.qualifications.index')->with('success', 'Qualification created successfully.');
     }
 
-    public function edit(Qualification $qualification)
-    {
-        return view('admin.qualifications.edit', compact('qualification'));
-    }
+    // Removed edit()
 
     public function update(Request $request, Qualification $qualification)
     {

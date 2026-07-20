@@ -95,12 +95,12 @@
                     </div>
                 </td>
                 <td>
-                    <div class="text-sm text-text-main font-medium">{{ $job->subject->name ?? 'N/A' }}</div>
-                    <div class="text-[10px] text-text-dark/40 uppercase tracking-wider mt-1">{{ $job->category->name ?? 'N/A' }}</div>
+                    <div class="text-sm text-text-main font-medium">{{ $job->subject?->name ?? 'N/A' }}</div>
+                    <div class="text-[10px] text-text-dark/40 uppercase tracking-wider mt-1">{{ $job->category?->name ?? 'N/A' }}</div>
                 </td>
                 <td>
                     <div class="text-sm text-text-main flex items-center gap-1.5">
-                        <i class="fas fa-map-marker-alt text-red-400"></i> {{ $job->location->city ?? 'N/A' }}
+                        <i class="fas fa-map-marker-alt text-red-400"></i> {{ $job->city?->name ?? 'N/A' }}, {{ $job->state?->name ?? '' }}
                     </div>
                 </td>
                 <td>
@@ -126,6 +126,9 @@
                     <div class="flex items-center justify-end gap-2">
                         <a href="{{ route('admin.jobs.show', $job) }}" class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center hover:bg-accent-blue hover:text-white transition-colors tooltip" title="Review Job">
                             <i class="fas fa-eye text-xs"></i>
+                        </a>
+                        <a href="{{ route('admin.jobs.edit', $job) }}" class="w-8 h-8 rounded-lg bg-accent-yellow/10 text-accent-yellow flex items-center justify-center hover:bg-accent-yellow hover:text-white transition-colors tooltip" title="Edit Job">
+                            <i class="fas fa-pen text-xs"></i>
                         </a>
                         
                         @if($job->status === 'pending')

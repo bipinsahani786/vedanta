@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\JobPost;
-use App\Models\Location;
+use App\Models\State;
+use App\Models\City;
 use App\Models\Qualification;
 use App\Models\Subject;
 use Illuminate\Http\Request;
@@ -16,9 +17,9 @@ class JobController extends Controller
         $categories = Category::where('is_active', true)->get();
         $subjects = Subject::where('is_active', true)->get();
         $qualifications = Qualification::where('is_active', true)->get();
-        $locations = Location::where('is_active', true)->get();
+        $states = State::where('is_active', true)->get();
 
-        return view('post-job', compact('categories', 'subjects', 'qualifications', 'locations'));
+        return view('post-job', compact('categories', 'subjects', 'qualifications', 'states'));
     }
 
     public function show(JobPost $job)
@@ -33,16 +34,17 @@ class JobController extends Controller
     public function storeJobQuery(Request $request)
     {
         $request->validate([
-            'school_name' => 'required|string|max:255',
-            'contact_person' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:15',
+            'school_name' => 'nullable|string|max:255',
+            'contact_person' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:15',
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
             'qualification_id' => 'required|exists:qualifications,id',
-            'location_id' => 'required|exists:locations,id',
+            'state_id' => 'required|exists:states,id',
+            'city_id' => 'required|exists:cities,id',
             'salary_range' => 'nullable|string|max:255',
         ]);
 
@@ -57,7 +59,8 @@ class JobController extends Controller
             'category_id' => $request->category_id,
             'subject_id' => $request->subject_id,
             'qualification_id' => $request->qualification_id,
-            'location_id' => $request->location_id,
+            'state_id' => $request->state_id,
+            'city_id' => $request->city_id,
             'salary_range' => $request->salary_range,
             'status' => 'pending',
         ]);

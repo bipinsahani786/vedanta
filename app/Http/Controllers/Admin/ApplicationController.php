@@ -36,7 +36,9 @@ class ApplicationController extends Controller
     {
         $request->validate([
             'status' => 'required|in:applied,shortlisted,hired,rejected',
-            'remarks' => 'nullable|string'
+            'remarks' => 'nullable|string',
+            'interview_date' => 'nullable|date',
+            'interview_link' => 'nullable|string|max:255',
         ]);
 
         $application = JobApplication::findOrFail($id);
@@ -46,6 +48,15 @@ class ApplicationController extends Controller
         
         if ($request->has('remarks')) {
             $application->remarks = $request->remarks;
+        }
+
+        if ($request->has('interview_date') && !empty($request->interview_date)) {
+            $application->interview_date = $request->interview_date;
+            $application->interview_link = $request->interview_link;
+        } else if ($request->status === 'applied') {
+            // Optional: Clear schedule if status is set back to applied
+            $application->interview_date = null;
+            $application->interview_link = null;
         }
 
         if ($request->status === 'shortlisted' && $oldStatus !== 'shortlisted') {

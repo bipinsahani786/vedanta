@@ -33,10 +33,7 @@ class PaymentController extends Controller
             return redirect()->route('candidate.dashboard')->with('error', 'Please complete previous steps first.');
         }
 
-        if ($profile->is_fee_paid && !$isRenewal) {
-            return redirect()->route('candidate.dashboard')->with('info', 'Your fee is already paid. Profile is active.');
-        }
-
+        // Removed the check that blocked paid users from viewing their plans
         return view('candidate.payment.show', compact('user', 'profile', 'isRenewal'));
     }
 
@@ -54,6 +51,16 @@ class PaymentController extends Controller
         if ($request->plan === 'premium') $amount = 1000;
         if ($isUpgrade) $amount = 500;
         
+        $profile = $user->profile;
+
+        // Prevent duplicate payments
+        if ($request->plan === 'basic' && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid)) {
+            return back()->with('error', 'You have already paid for the Basic plan.');
+        }
+        if (($request->plan === 'premium' || $request->plan === 'upgrade') && $profile->plan_type === 'premium' && $profile->is_fee_paid) {
+            return back()->with('error', 'You are already on the Premium plan.');
+        }
+
         $prefix = $isRenewal ? 'RENEW_' : ($isUpgrade ? 'UPGRADE_' : 'TXN_');
         $transactionId = $prefix . $user->id . '_' . time();
 
@@ -136,7 +143,9 @@ class PaymentController extends Controller
         $response = $http->get($url);
 
         $rData = $response->json();
-
+        
+        \Illuminate\Support\Facades\Log::info('PhonePe Upgrade/Renewal Callback Status', ['response' => $rData, 'txn' => $transactionId]);
+        
         $user = auth()->user();
 
         if ($user) {
@@ -168,6 +177,7 @@ class PaymentController extends Controller
                     'plan_type' => 'premium',
                     'is_fee_paid' => true,
                     'paid_amount' => $user->profile->paid_amount + $amountPaid,
+                    'pending_amount' => 0, // Cleared upon upgrade
                     'payment_id' => $rData['data']['transactionId'],
                     'plan_started_at' => now()
                 ]);
@@ -179,6 +189,7 @@ class PaymentController extends Controller
                         'plan_type' => 'standard',
                         'initial_fee_paid' => true,
                         'paid_amount' => $user->profile->paid_amount + $amountPaid,
+                        'pending_amount' => 500, // Initial 500 paid, 500 pending
                         'payment_id' => $rData['data']['transactionId'],
                         'registration_completed_at' => now(),
                         'plan_started_at' => now()
@@ -199,5 +210,25 @@ class PaymentController extends Controller
         }
 
         return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or cancelled.');
+    }
+
+    public function invoice($id)
+    {
+        $transaction = \App\Models\PaymentTransaction::where('candidate_id', auth()->id())
+            ->where('id', $id)
+            ->firstOrFail();
+
+        if ($transaction->status !== 'success' && $transaction->status !== 'COMPLETED') {
+            return redirect()->back()->with('error', 'Invoice is only available for successful payments.');
+        }
+
+        $user = auth()->user();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('candidate.payment.invoice', [
+            'transaction' => $transaction,
+            'user' => $user
+        ]);
+
+        return $pdf->download('Invoice-' . $transaction->transaction_id . '.pdf');
     }
 }

@@ -37,13 +37,23 @@ class CandidateProfile extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    public function specialization()
+    {
+        return $this->belongsTo(Specialization::class);
+    }
+
     public function highestQualification()
     {
         return $this->belongsTo(Qualification::class, 'highest_qualification_id');
     }
 
-    public function preferredLocation()
+    public function preferredState()
     {
-        return $this->belongsTo(Location::class, 'preferred_location_id');
+        return $this->belongsTo(State::class, 'preferred_state_id');
+    }
+
+    public function preferredCity()
+    {
+        return $this->belongsTo(City::class, 'preferred_city_id');
     }
 }

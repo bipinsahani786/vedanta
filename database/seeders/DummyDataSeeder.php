@@ -6,7 +6,8 @@ use Illuminate\Database\Seeder;
 use App\Models\Category;
 use App\Models\Subject;
 use App\Models\Qualification;
-use App\Models\Location;
+use App\Models\State;
+use App\Models\City;
 use App\Models\User;
 use App\Models\CandidateProfile;
 use App\Models\JobPost;
@@ -25,15 +26,162 @@ class DummyDataSeeder extends Seeder
     public function run()
     {
         // 1. Categories
-        $categories = ['PGT', 'TGT', 'PRT', 'Pre-Primary', 'Principal', 'Vice Principal', 'Coordinator', 'Admin Staff', 'Librarian', 'Physical Education'];
+        $categories = [
+            'PRT',
+            'TGT',
+            'PGT',
+            'School Leadership & Administration',
+            'Administration & Office',
+            'Student Support Services',
+            'IT Department',
+            'Library',
+            'Performing Arts',
+            'Hostel Department'
+        ];
         foreach ($categories as $cat) {
             Category::firstOrCreate(['name' => $cat], ['is_active' => true]);
         }
 
-        // 2. Subjects
-        $subjects = ['Mathematics', 'Science', 'English', 'Hindi', 'Social Studies', 'Computer Science', 'Physics', 'Chemistry', 'Biology', 'Accountancy', 'Economics', 'Business Studies'];
-        foreach ($subjects as $sub) {
+        // 2. Subjects & Specializations
+        $prtSubjects = ['English', 'Hindi', 'Mathematics', 'EVS', 'Science', 'Social Studies', 'Computer', 'General Teacher', 'Art & Craft'];
+        $tgtSubjects = ['English', 'Hindi', 'Mathematics', 'Science', 'Social Science', 'Sanskrit', 'Urdu', 'French', 'German', 'Computer Science', 'Information Technology (IT)'];
+        $pgtSubjects = ['English', 'Hindi', 'Mathematics', 'Physics', 'Chemistry', 'Biology', 'Commerce', 'Arts / Humanities', 'Computer Science', 'Informatics Practices (IP)', 'Physical Education', 'Fine Arts'];
+        $leadershipSubjects = ['Principal', 'Vice Principal', 'Headmaster/Headmistress', 'Academic Coordinator', 'Examination In-charge', 'Dean Academics', 'Dean Student Affairs', 'Head of Boarding (HOB)', 'Hostel Warden (Male)', 'Hostel Warden (Female)'];
+        $adminSubjects = ['School Administrator', 'HR Manager', 'HR Executive', 'Office Executive', 'Front Office Executive', 'Receptionist', 'Admission Counsellor', 'Administrative Officer', 'Office Assistant', 'Data Entry Operator', 'Accountant', 'Cashier'];
+        $supportSubjects = ['School Counsellor', 'Special Educator', 'Wellness Counsellor', 'Career Counsellor', 'Speech Therapist', 'Occupational Therapist', 'Psychologist', 'Nurse (GNM/B.Sc Nursing)'];
+        $itSubjects = ['IT Executive', 'IT Administrator', 'Network Engineer', 'ERP Executive', 'Computer Lab Assistant', 'Digital Marketing Executive', 'Graphic Designer', 'Website Administrator'];
+        $librarySubjects = ['Librarian', 'Assistant Librarian', 'Library Assistant'];
+        $performingArtsSubjects = ['Music Teacher (Vocal)', 'Music Teacher (Instrumental)', 'Dance Teacher', 'Art Teacher', 'Craft Teacher', 'Theatre/Drama Teacher'];
+        $hostelSubjects = ['Head of Boarding (HOB)', 'Hostel Superintendent', 'Hostel Warden (Male)', 'Hostel Warden (Female)', 'Residential Tutor', 'Caretaker'];
+        
+        $allSubjects = array_unique(array_merge($prtSubjects, $tgtSubjects, $pgtSubjects, $leadershipSubjects, $adminSubjects, $supportSubjects, $itSubjects, $librarySubjects, $performingArtsSubjects, $hostelSubjects));
+        
+        foreach ($allSubjects as $sub) {
             Subject::firstOrCreate(['name' => $sub], ['is_active' => true]);
+        }
+
+        // Map PRT subjects
+        $prtCategory = Category::where('name', 'PRT')->first();
+        if ($prtCategory) {
+            $prtCategory->subjects()->sync(Subject::whereIn('name', $prtSubjects)->pluck('id'));
+        }
+
+        // Map TGT subjects
+        $tgtCategory = Category::where('name', 'TGT')->first();
+        if ($tgtCategory) {
+            $tgtCategory->subjects()->sync(Subject::whereIn('name', $tgtSubjects)->pluck('id'));
+        }
+
+        // Map PGT subjects
+        $pgtCategory = Category::where('name', 'PGT')->first();
+        if ($pgtCategory) {
+            $pgtCategory->subjects()->sync(Subject::whereIn('name', $pgtSubjects)->pluck('id'));
+        }
+
+        // Map School Leadership subjects
+        $leadershipCategory = Category::where('name', 'School Leadership & Administration')->first();
+        if ($leadershipCategory) {
+            $leadershipCategory->subjects()->sync(Subject::whereIn('name', $leadershipSubjects)->pluck('id'));
+        }
+
+        // Map Administration & Office subjects
+        $adminCategory = Category::where('name', 'Administration & Office')->first();
+        if ($adminCategory) {
+            $adminCategory->subjects()->sync(Subject::whereIn('name', $adminSubjects)->pluck('id'));
+        }
+
+        // Map Student Support Services subjects
+        $supportCategory = Category::where('name', 'Student Support Services')->first();
+        if ($supportCategory) {
+            $supportCategory->subjects()->sync(Subject::whereIn('name', $supportSubjects)->pluck('id'));
+        }
+
+        // Map IT Department subjects
+        $itCategory = Category::where('name', 'IT Department')->first();
+        if ($itCategory) {
+            $itCategory->subjects()->sync(Subject::whereIn('name', $itSubjects)->pluck('id'));
+        }
+
+        // Map Library subjects
+        $libraryCategory = Category::where('name', 'Library')->first();
+        if ($libraryCategory) {
+            $libraryCategory->subjects()->sync(Subject::whereIn('name', $librarySubjects)->pluck('id'));
+        }
+
+        // Map Performing Arts subjects
+        $performingArtsCategory = Category::where('name', 'Performing Arts')->first();
+        if ($performingArtsCategory) {
+            $performingArtsCategory->subjects()->sync(Subject::whereIn('name', $performingArtsSubjects)->pluck('id'));
+        }
+
+        // Map Hostel Department subjects
+        $hostelCategory = Category::where('name', 'Hostel Department')->first();
+        if ($hostelCategory) {
+            $hostelCategory->subjects()->sync(Subject::whereIn('name', $hostelSubjects)->pluck('id'));
+        }
+
+        // Map other subjects randomly to other active categories so there's dummy data
+        $otherCategoryIds = Category::whereNotIn('name', ['PRT', 'TGT', 'PGT', 'School Leadership & Administration', 'Administration & Office', 'Student Support Services', 'IT Department', 'Library', 'Performing Arts', 'Hostel Department'])->pluck('id');
+        $allSubjectIds = Subject::pluck('id');
+        foreach ($otherCategoryIds as $catId) {
+            $cat = Category::find($catId);
+            $cat->subjects()->syncWithoutDetaching($allSubjectIds->random(min(5, $allSubjectIds->count())));
+        }
+        // Specializations for TGT
+        $scienceSubject = Subject::where('name', 'Science')->first();
+        if ($scienceSubject) {
+            $scienceSpecializations = ['Physics', 'Chemistry', 'Biology'];
+            foreach ($scienceSpecializations as $spec) {
+                \App\Models\Specialization::firstOrCreate([
+                    'subject_id' => $scienceSubject->id,
+                    'name' => $spec
+                ], ['is_active' => true]);
+            }
+        }
+
+        $socialScienceSubject = Subject::where('name', 'Social Science')->first();
+        if ($socialScienceSubject) {
+            $socialScienceSpecializations = ['History', 'Geography', 'Political Science', 'Economics'];
+            foreach ($socialScienceSpecializations as $spec) {
+                \App\Models\Specialization::firstOrCreate([
+                    'subject_id' => $socialScienceSubject->id,
+                    'name' => $spec
+                ], ['is_active' => true]);
+            }
+        }
+
+        // Specializations for PGT
+        $biologySubject = Subject::where('name', 'Biology')->first();
+        if ($biologySubject) {
+            $biologySpecializations = ['Botany', 'Zoology'];
+            foreach ($biologySpecializations as $spec) {
+                \App\Models\Specialization::firstOrCreate([
+                    'subject_id' => $biologySubject->id,
+                    'name' => $spec
+                ], ['is_active' => true]);
+            }
+        }
+
+        $commerceSubject = Subject::where('name', 'Commerce')->first();
+        if ($commerceSubject) {
+            $commerceSpecializations = ['Accountancy', 'Business Studies', 'Economics', 'English'];
+            foreach ($commerceSpecializations as $spec) {
+                \App\Models\Specialization::firstOrCreate([
+                    'subject_id' => $commerceSubject->id,
+                    'name' => $spec
+                ], ['is_active' => true]);
+            }
+        }
+
+        $artsHumanitiesSubject = Subject::where('name', 'Arts / Humanities')->first();
+        if ($artsHumanitiesSubject) {
+            $artsSpecializations = ['History', 'Geography', 'Political Science', 'Psychology', 'Economics', 'English'];
+            foreach ($artsSpecializations as $spec) {
+                \App\Models\Specialization::firstOrCreate([
+                    'subject_id' => $artsHumanitiesSubject->id,
+                    'name' => $spec
+                ], ['is_active' => true]);
+            }
         }
 
         // 3. Qualifications
@@ -42,16 +190,11 @@ class DummyDataSeeder extends Seeder
             Qualification::firstOrCreate(['name' => $qual], ['is_active' => true]);
         }
 
-        // 4. Locations
-        $locations = ['Delhi NCR', 'Gurgaon', 'Noida', 'Faridabad', 'Ghaziabad', 'Mumbai', 'Pune', 'Bangalore', 'Hyderabad', 'Chennai', 'Jaipur', 'Lucknow'];
-        foreach ($locations as $loc) {
-            Location::firstOrCreate(['city' => $loc, 'state' => 'State'], ['is_active' => true]);
-        }
-
         $categoryIds = Category::pluck('id')->toArray();
         $subjectIds = Subject::pluck('id')->toArray();
         $qualificationIds = Qualification::pluck('id')->toArray();
-        $locationIds = Location::pluck('id')->toArray();
+        $stateIds = State::pluck('id')->toArray();
+        $cityIds = City::pluck('id')->toArray();
 
         // 5. Candidates (Users + Profiles)
         $candidates = [];
@@ -74,7 +217,8 @@ class DummyDataSeeder extends Seeder
                     'category_id' => $categoryIds[array_rand($categoryIds)],
                     'subject_id' => $subjectIds[array_rand($subjectIds)],
                     'highest_qualification_id' => $qualificationIds[array_rand($qualificationIds)],
-                    'preferred_location_id' => $locationIds[array_rand($locationIds)],
+                    'preferred_state_id' => !empty($stateIds) ? $stateIds[array_rand($stateIds)] : null,
+                    'preferred_city_id' => !empty($cityIds) ? $cityIds[array_rand($cityIds)] : null,
                     'experience_years' => rand(0, 15),
                     'current_salary' => rand(20000, 80000),
                     'expected_salary' => rand(30000, 100000),
@@ -120,7 +264,8 @@ class DummyDataSeeder extends Seeder
         for ($i = 1; $i <= 20; $i++) {
             $catId = $categoryIds[array_rand($categoryIds)];
             $subId = $subjectIds[array_rand($subjectIds)];
-            $locId = $locationIds[array_rand($locationIds)];
+            $stateId = !empty($stateIds) ? $stateIds[array_rand($stateIds)] : null;
+            $cityId = !empty($cityIds) ? $cityIds[array_rand($cityIds)] : null;
             $qualId = $qualificationIds[array_rand($qualificationIds)];
             
             $catName = Category::find($catId)->name;
@@ -138,7 +283,8 @@ class DummyDataSeeder extends Seeder
                 'category_id' => $catId,
                 'subject_id' => $subId,
                 'qualification_id' => $qualId,
-                'location_id' => $locId,
+                'state_id' => $stateId,
+                'city_id' => $cityId,
                 'salary_range' => (rand(20, 40) * 1000) . " - " . (rand(40, 80) * 1000),
                 'description' => "We are looking for an experienced and passionate $catName teacher for $subName. The ideal candidate should have excellent communication skills and a deep understanding of the subject matter.",
                 'status' => $status,

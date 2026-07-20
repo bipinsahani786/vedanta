@@ -32,80 +32,97 @@ class RegistrationWizardController extends Controller
         }
 
         // Load relationships if necessary
-        $profile->load(['category', 'subject', 'highestQualification', 'preferredLocation']);
+        $profile->load(['category', 'subject', 'highestQualification', 'preferredState', 'preferredCity']);
         
         $categories = \App\Models\Category::all();
         $subjects = \App\Models\Subject::all();
         $qualifications = \App\Models\Qualification::all();
-        $locations = \App\Models\Location::all();
+        $states = \App\Models\State::where('is_active', true)->get();
 
-        return view('candidate.wizard', compact('user', 'profile', 'categories', 'subjects', 'qualifications', 'locations'));
+        return view('candidate.wizard', compact('user', 'profile', 'categories', 'subjects', 'qualifications', 'states'));
     }
 
     public function saveStep1(Request $request)
     {
-        $request->validate([
-            'date_of_birth' => 'required|date',
-            'gender' => 'required|in:Male,Female,Other',
-            'address' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'subject_id' => 'required|exists:subjects,id',
-            'highest_qualification_id' => 'required|exists:qualifications,id',
-            'preferred_location_id' => 'required|exists:locations,id',
-            'experience_years' => 'required|integer|min:0',
-            'current_salary' => 'nullable|string',
-            'expected_salary' => 'nullable|string',
-            'current_school' => 'nullable|string',
-            'english_fluency' => 'nullable|in:beginner,intermediate,fluent',
-            'residential_preference' => 'nullable|in:residential,day,both',
-            'availability_to_join' => 'nullable|string',
-            'resume' => 'required|mimes:pdf,doc,docx|max:2048',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'salary_slip' => 'nullable|mimes:pdf,doc,docx,jpg,png,jpeg|max:2048',
-            'offer_letter' => 'nullable|mimes:pdf,doc,docx,jpg,png,jpeg|max:2048',
-        ]);
+        try {
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                'date_of_birth' => 'required|date',
+                'gender' => 'required|in:Male,Female,Other',
+                'address' => 'required|string',
+                'category_id' => 'required|exists:categories,id',
+                'subject_id' => 'required|exists:subjects,id',
+                'highest_qualification_id' => 'required|exists:qualifications,id',
+                'preferred_state_id' => 'required|exists:states,id',
+                'preferred_city_id' => 'required|exists:cities,id',
+                'experience_years' => 'required|integer|min:0',
+                'current_salary' => 'nullable|string',
+                'expected_salary' => 'nullable|string',
+                'current_school' => 'nullable|string',
+                'english_fluency' => 'nullable|in:beginner,intermediate,fluent',
+                'residential_preference' => 'nullable|in:residential,day,both',
+                'availability_to_join' => 'nullable|string',
+                'resume' => 'nullable|mimes:pdf,doc,docx|max:2048',
+                'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+                'salary_slip' => 'nullable|mimes:pdf,doc,docx,jpg,png,jpeg|max:2048',
+                'offer_letter' => 'nullable|mimes:pdf,doc,docx,jpg,png,jpeg|max:2048',
+            ]);
 
-        $profile = auth()->user()->profile;
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()->toArray(),
+                    'message' => 'Validation failed.'
+                ], 422);
+            }
 
-        if ($request->hasFile('resume')) {
-            $path = $request->file('resume')->store('resumes', 'public');
-            $profile->resume_path = $path;
+            $profile = auth()->user()->profile;
+
+            if ($request->hasFile('resume')) {
+                $path = $request->file('resume')->store('resumes', 'public');
+                $profile->resume_path = $path;
+            }
+
+            if ($request->hasFile('profile_photo')) {
+                $path = $request->file('profile_photo')->store('profile_photos', 'public');
+                $profile->profile_photo_path = $path;
+            }
+
+            if ($request->hasFile('salary_slip')) {
+                $path = $request->file('salary_slip')->store('salary_slips', 'public');
+                $profile->salary_slip_path = $path;
+            }
+
+            if ($request->hasFile('offer_letter')) {
+                $path = $request->file('offer_letter')->store('offer_letters', 'public');
+                $profile->offer_letter_path = $path;
+            }
+
+            $profile->update([
+                'date_of_birth' => $request->date_of_birth,
+                'gender' => $request->gender,
+                'address' => $request->address,
+                'category_id' => $request->category_id,
+                'subject_id' => $request->subject_id,
+                'highest_qualification_id' => $request->highest_qualification_id,
+                'preferred_state_id' => $request->preferred_state_id,
+                'preferred_city_id' => $request->preferred_city_id,
+                'experience_years' => $request->experience_years,
+                'current_salary' => $request->current_salary,
+                'expected_salary' => $request->expected_salary,
+                'current_school' => $request->current_school,
+                'english_fluency' => $request->english_fluency,
+                'residential_preference' => $request->residential_preference,
+                'availability_to_join' => $request->availability_to_join,
+                'is_profile_complete' => true,
+            ]);
+
+            return response()->json(['success' => true]);
+
+        } catch (\Exception $e) {
+            \Log::error('Wizard Step 1 Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return response()->json([
+                'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
         }
-
-        if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')->store('profile_photos', 'public');
-            $profile->profile_photo_path = $path;
-        }
-
-        if ($request->hasFile('salary_slip')) {
-            $path = $request->file('salary_slip')->store('salary_slips', 'public');
-            $profile->salary_slip_path = $path;
-        }
-
-        if ($request->hasFile('offer_letter')) {
-            $path = $request->file('offer_letter')->store('offer_letters', 'public');
-            $profile->offer_letter_path = $path;
-        }
-
-        $profile->update([
-            'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
-            'address' => $request->address,
-            'category_id' => $request->category_id,
-            'subject_id' => $request->subject_id,
-            'highest_qualification_id' => $request->highest_qualification_id,
-            'preferred_location_id' => $request->preferred_location_id,
-            'experience_years' => $request->experience_years,
-            'current_salary' => $request->current_salary,
-            'expected_salary' => $request->expected_salary,
-            'current_school' => $request->current_school,
-            'english_fluency' => $request->english_fluency,
-            'residential_preference' => $request->residential_preference,
-            'availability_to_join' => $request->availability_to_join,
-            'is_profile_complete' => true,
-        ]);
-
-        return response()->json(['success' => true]);
     }
 
     public function saveStep2(Request $request)
@@ -179,12 +196,20 @@ class RegistrationWizardController extends Controller
         $user = auth()->user();
         $profile = $user->profile;
 
-        $profile->update([
-            'plan_type' => $request->plan_type
-        ]);
+        if ($profile->initial_fee_paid || $profile->is_fee_paid) {
+            return response()->json(['success' => false, 'message' => 'You have already paid the registration fee.']);
+        }
 
-        $amount = $request->plan_type === 'standard' ? 500 : 1000;
+        // Don't save plan_type yet — only save after payment confirmation
+        $planType = $request->plan_type;
+        $amount = $planType === 'standard' ? 500 : 1000;
         $transactionId = 'TXN_' . $user->id . '_' . time();
+
+        // Store plan choice in session for callback
+        session([
+            'last_txn_id' => $transactionId,
+            'pending_plan_type' => $planType
+        ]);
 
         $isProd = $this->env === 'production';
 
@@ -228,7 +253,6 @@ class RegistrationWizardController extends Controller
         $rData = $response->json();
 
         if (isset($rData['success']) && $rData['success'] === true) {
-            session(['last_txn_id' => $transactionId]);
             return response()->json([
                 'success' => true,
                 'redirect_url' => $rData['data']['instrumentResponse']['redirectInfo']['url']
@@ -242,6 +266,7 @@ class RegistrationWizardController extends Controller
     {
         $code = $request->code;
         $transactionId = $request->transactionId ?? session('last_txn_id');
+        $pendingPlanType = session('pending_plan_type', 'standard');
 
         // Verify status with PhonePe
         $string = "/pg/v1/status/{$this->merchantId}/{$transactionId}" . $this->saltKey;
@@ -267,7 +292,7 @@ class RegistrationWizardController extends Controller
 
         $rData = $response->json();
         
-        \Illuminate\Support\Facades\Log::info('PhonePe Callback Status', ['response' => $rData, 'txn' => $transactionId]);
+        \Illuminate\Support\Facades\Log::info('PhonePe Wizard Callback', ['response' => $rData, 'txn' => $transactionId, 'plan' => $pendingPlanType]);
 
         $user = auth()->user();
 
@@ -287,25 +312,33 @@ class RegistrationWizardController extends Controller
             
             $amountPaid = $rData['data']['amount'] / 100;
 
-            if ($profile->plan_type === 'standard' && $amountPaid == 500) {
-                // Initial payment for standard
+            if ($pendingPlanType === 'standard') {
+                // Standard plan payment
                 $profile->update([
+                    'plan_type' => 'standard',
                     'initial_fee_paid' => true,
                     'paid_amount' => $profile->paid_amount + $amountPaid,
+                    'pending_amount' => 500, // Initial 500 paid, 500 pending
                     'payment_id' => $rData['data']['transactionId'],
                     'registration_completed_at' => now(),
+                    'plan_started_at' => now(),
                 ]);
             } else {
-                // Full payment (Premium or full standard)
+                // Premium plan payment
                 $profile->update([
+                    'plan_type' => 'premium',
                     'initial_fee_paid' => true,
                     'is_fee_paid' => true,
                     'paid_amount' => $profile->paid_amount + $amountPaid,
                     'pending_amount' => 0,
                     'payment_id' => $rData['data']['transactionId'],
-                    'registration_completed_at' => now()
+                    'registration_completed_at' => now(),
+                    'plan_started_at' => now(),
                 ]);
             }
+
+            // Clear session
+            session()->forget(['last_txn_id', 'pending_plan_type']);
 
             return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Your profile is now active.');
         }

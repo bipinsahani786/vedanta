@@ -1,8 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- Hero Section -->
-    <section class="bg-[#040e2d] relative min-h-[90vh] flex flex-col lg:flex-row items-center px-6 lg:px-[8%] py-20 lg:py-0 overflow-hidden font-sans">
+    <section class="bg-[#040e2d] relative min-h-[90vh] flex flex-col lg:flex-row items-center px-6 lg:px-[8%] pt-4 pb-16 lg:py-0 overflow-hidden font-sans">
         
         <style>
             @keyframes slowFloat {
@@ -77,17 +76,23 @@
             </h1>
             
             <p id="hero-subtitle" class="text-[15px] lg:text-[17px] font-light max-w-[480px] leading-relaxed mb-8 text-white/90 relative z-10 transition-all duration-1000 ease-in-out">
+        <div class="flex-1 relative z-10 w-full lg:pr-12 flex flex-col items-start text-left mb-8 lg:mb-0 pt-4 lg:pt-10">
+            <h1 id="hero-title" class="text-4xl lg:text-[54px] font-extrabold leading-[1.1] mb-6 text-white tracking-tight drop-shadow-md relative z-10 transition-all duration-[10ms] ease-in-out">
+                Get placed in top<br>schools across india
+            </h1>
+            
+            <p id="hero-subtitle" class="text-[15px] lg:text-[17px] font-light max-w-[480px] leading-relaxed mb-4 lg:mb-8 text-white/90 relative z-10 transition-all duration-[10ms] ease-in-out">
                 step into the right opportunity with trusted schools that value your talent
             </p>
 
-            <a href="{{ route('candidate.register') }}" id="hero-cta-btn" class="bg-[#ffb800] text-slate-900 px-7 py-3 rounded-full font-bold text-[15px] inline-flex items-center gap-4 transition-transform hover:scale-105 shadow-[0_4px_15px_rgba(255,184,0,0.3)] mb-12 relative z-10">
+            <a href="{{ route('candidate.register') }}" id="hero-cta-btn" class="bg-[#ffb800] text-slate-900 px-7 py-3 rounded-full font-bold text-[15px] inline-flex items-center gap-4 transition-transform hover:scale-105 shadow-[0_4px_15px_rgba(255,184,0,0.3)] mb-6 lg:mb-12 relative z-10">
                 <span id="cta-text">Job Seeker</span> 
                 <span class="bg-white w-7 h-7 rounded-full flex items-center justify-center text-slate-900 text-sm shadow-sm">
                     <i class="fas fa-chevron-right"></i>
                 </span>
             </a>
 
-            <div class="w-full relative z-10">
+            <div class="hidden lg:block w-full relative z-10">
                 <h3 class="text-[22px] font-bold mb-3 text-white drop-shadow-sm">I am a</h3>
                 <div class="bg-white inline-flex rounded-xl p-1.5 shadow-xl w-full max-w-[400px]">
                     <button id="btn-seeker" onclick="toggleRole('seeker')" class="role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold flex items-center justify-center gap-2.5 transition-all duration-300 bg-gradient-to-r from-[#2196f3] to-[#00bcd4] text-white shadow-md">
@@ -101,7 +106,7 @@
         </div>
 
         <!-- Right Content (Image & Graphics) -->
-        <div class="flex-1 relative z-10 flex justify-center items-center min-h-[550px] lg:min-h-[650px] w-full lg:mt-0">
+        <div class="flex-1 relative z-10 flex justify-center items-center min-h-[400px] lg:min-h-[650px] w-full lg:mt-0">
             
             <div class="relative w-[340px] h-[340px] lg:w-[400px] lg:h-[400px] flex justify-center items-center">
                 <!-- Large White Background Circle -->
@@ -110,6 +115,7 @@
                 <!-- SVG Arcs for perfect rounded caps and exact circle tracing -->
                 <div class="absolute z-0 pointer-events-none flex justify-center items-center">
                     <svg id="hero-svg-rings" class="w-[480px] h-[480px] lg:w-[580px] lg:h-[580px] drop-shadow-xl transition-transform duration-1000 ease-in-out" viewBox="0 0 700 700">
+                    <svg id="hero-svg-rings" class="w-[480px] h-[480px] lg:w-[580px] lg:h-[580px] drop-shadow-xl transition-transform duration-[10ms] ease-in-out" viewBox="0 0 700 700">
                         <!-- Yellow Arch (Top Right, slightly longer) -->
                         <circle cx="350" cy="350" r="290" fill="none" stroke="#ffb800" stroke-width="4" stroke-linecap="round" stroke-dasharray="450 2000" transform="rotate(-110 350 350)" />
                         
@@ -132,6 +138,11 @@
 
                 <!-- Floating Card 1 (Top Left) -->
                 <div id="fc-1" class="absolute z-30 top-[5%] lg:top-[10%] -left-[10%] lg:-left-[15%] cursor-pointer group transition-all duration-1000 ease-in-out">
+                    <img id="hero-img" src="images/men.jpg" alt="Professional" class="w-full h-full object-cover relative z-10 transition-all duration-[10ms] ease-in-out">
+                </div>
+
+                <!-- Floating Card 1 (Top Left) -->
+                <div id="fc-1" class="absolute z-30 top-[5%] lg:top-[10%] -left-[10%] lg:-left-[15%] cursor-pointer group transition-all duration-[10ms] ease-in-out">
                     <div class="bg-white rounded-[14px] p-5 shadow-2xl flex flex-col items-center min-w-[130px] animate-float group-hover:animate-none group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300">
                         <div id="fc-1-icon-wrap" class="bg-[#ffb800] w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl mb-3 shadow-md border border-[#ffb800]/50 transition-colors duration-300">
                             <i id="fc-1-icon" class="fas fa-briefcase"></i>
@@ -143,6 +154,7 @@
 
                 <!-- Floating Card 2 (Bottom Right) -->
                 <div id="fc-2" class="absolute z-30 bottom-[0%] lg:bottom-[5%] -right-[5%] lg:-right-[10%] cursor-pointer group transition-all duration-1000 ease-in-out">
+                <div id="fc-2" class="absolute z-30 bottom-[0%] lg:bottom-[5%] -right-[5%] lg:-right-[10%] cursor-pointer group transition-all duration-[10ms] ease-in-out">
                     <div class="bg-white rounded-[14px] p-5 shadow-2xl flex flex-col items-center min-w-[130px] animate-float group-hover:animate-none group-hover:scale-105 group-hover:-rotate-3 transition-transform duration-300" style="animation-delay: 1.5s;">
                         <h4 id="fc-2-title" class="text-slate-800 font-extrabold text-[14px] mb-1">1+ Million</h4>
                         <p id="fc-2-desc" class="text-[10px] text-slate-500 font-bold mb-3">Trusted User</p>
@@ -157,6 +169,19 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Mobile Toggle Button -->
+        <div class="block lg:hidden w-full relative z-10 mt-8 mb-4">
+            <h3 class="text-[22px] font-bold mb-3 text-white drop-shadow-sm">I am a</h3>
+            <div class="bg-white inline-flex rounded-xl p-1.5 shadow-xl w-full max-w-[400px]">
+                <button id="btn-seeker-mobile" onclick="toggleRole('seeker')" class="role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold flex items-center justify-center gap-2.5 transition-all duration-300 bg-gradient-to-r from-[#2196f3] to-[#00bcd4] text-white shadow-md">
+                    <i class="fas fa-user-tie text-[17px]"></i> Job Seeker
+                </button>
+                <button id="btn-employer-mobile" onclick="toggleRole('employer')" class="role-btn flex-1 py-3.5 rounded-lg text-[15px] font-extrabold text-slate-800 flex items-center justify-center gap-2.5 transition-all duration-300 bg-transparent hover:bg-slate-50">
+                    <i class="fas fa-building text-[17px]"></i> Employer
+                </button>
+            </div>
+        </div>
     </section>
     <!-- Welcome & Statistics Section -->
     <section class="relative bg-cover bg-center bg-no-repeat bg-fixed py-16 px-6 lg:px-[8%]" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=100');">
@@ -166,13 +191,13 @@
         <!-- Glassmorphism Card -->
         <div class="relative z-20 flex flex-col md:flex-row rounded-3xl overflow-hidden mt-8 border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.1)]" style="background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
             <div class="md:w-1/2 p-10 lg:p-16 flex flex-col justify-center">
-                <h4 class="text-[#129aef] font-semibold tracking-wider uppercase mb-3">Welcome</h4>
+                <h4 class="text-[#ffb800] text-xl lg:text-2xl font-black tracking-wider uppercase mb-3">Welcome</h4>
                 <h2 class="text-3xl lg:text-5xl font-bold leading-tight mb-2 text-slate-900">Vedanta Placement<br>Agency</h2>
             </div>
             <div class="md:w-1/2 p-10 lg:p-16 text-slate-900 text-sm leading-relaxed flex flex-col justify-center relative border-t md:border-t-0 md:border-l border-white/40">
                 <p class="mb-5 text-[15px] font-medium">Vedanta Placement Agency is an ISO-certified and government-registered education recruitment consultancy operating at a national level across India. We provide structured, compliance-driven, and outcome-focused hiring solutions to schools, colleges, and educational institutions.</p>
                 <p class="mb-8 text-[15px] font-medium">With a strong operational presence and an extensive talent network across multiple states, we support institutions in building high-performing academic and administrative teams. Our recruitment methodology is aligned with national education standards, institutional governance requirements, and best practices followed by leading recruitment consultancies in India.</p>
-                <a href="#" class="text-[#129aef] font-bold text-base flex items-center gap-2 hover:text-[#031b4e] transition-colors inline-block w-fit">Know More <i class="fas fa-chevron-right text-[10px] bg-[#129aef] text-white rounded-full w-5 h-5 flex items-center justify-center ml-1 inline-flex"></i></a>
+                <a href="{{ route('about') }}" class="text-[#129aef] font-bold text-base inline-flex items-center gap-2 hover:text-[#031b4e] transition-colors w-fit">Know More <i class="fas fa-chevron-right text-[10px] bg-[#129aef] text-white rounded-full w-5 h-5 flex items-center justify-center ml-1"></i></a>
                 
                 <!-- Wavy line decoration -->
                 <svg class="absolute right-0 top-1/2 text-[#129aef] opacity-30 w-32 h-32 -mr-8 pointer-events-none" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -234,26 +259,26 @@
             <h2 class="text-4xl lg:text-5xl font-bold text-white">Our Services</h2>
         </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
             @forelse($services as $index => $service)
-            <div class="relative bg-slate-50 border border-transparent p-10 rounded-3xl transition-all duration-300 hover:-translate-y-6 hover:scale-110 hover:shadow-[0_40px_80px_rgba(0,0,0,0.2)] hover:border-[#129aef]/30 hover:z-50 group flex flex-col items-center text-center reveal overflow-hidden z-10 reveal-delay-{{ ($index % 4) + 1 }}">
+            <div class="relative bg-slate-50 border border-transparent p-8 rounded-3xl transition-all duration-300 hover:-translate-y-6 hover:scale-110 hover:shadow-[0_40px_80px_rgba(0,0,0,0.2)] hover:border-[#129aef]/30 hover:z-50 group flex flex-col items-center text-center reveal overflow-hidden z-10 reveal-delay-{{ ($index % 4) + 1 }}">
                 
                 <!-- Animated Background Blob -->
                 <div class="absolute top-0 right-0 w-32 h-32 bg-[#129aef] rounded-bl-full opacity-0 group-hover:opacity-10 transition-all duration-700 group-hover:scale-[2.5] origin-top-right z-0 pointer-events-none"></div>
 
                 <!-- Icon Box with Advanced Animation -->
-                <div class="relative z-10 w-24 h-24 rounded-3xl bg-[#129aef] text-white flex items-center justify-center text-4xl mb-6 transition-all duration-500 group-hover:-translate-y-4 group-hover:scale-110 group-hover:shadow-[0_20px_40px_rgba(18,154,239,0.5)] group-hover:rotate-12">
+                <div class="relative z-10 w-20 h-20 rounded-3xl bg-[#129aef] text-white flex items-center justify-center text-3xl mb-5 transition-all duration-500 group-hover:-translate-y-4 group-hover:scale-110 group-hover:shadow-[0_20px_40px_rgba(18,154,239,0.5)] group-hover:rotate-12">
                     <i class="{{ $service->icon }} transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110"></i>
                 </div>
                 
                 <!-- Title -->
-                <h3 class="relative z-10 text-slate-900 font-extrabold text-xl mb-6 transition-colors duration-300 group-hover:text-[#129aef]">{{ $service->title }}</h3>
+                <h3 class="relative z-10 text-slate-900 font-extrabold text-lg mb-5 transition-colors duration-300 group-hover:text-[#129aef]">{{ $service->title }}</h3>
                 
                 <!-- Read More Link with split animation -->
-                <a href="#" class="relative z-10 inline-flex items-center gap-3 text-[#129aef] font-semibold text-[15px] mt-auto overflow-visible">
+                <a href="{{ route('service.details', $service->slug) }}" class="relative z-10 inline-flex items-center gap-3 text-[#129aef] font-semibold text-[14px] mt-auto overflow-visible">
                     <span class="transition-transform duration-500 group-hover:-translate-x-1">Read More</span>
-                    <div class="bg-[#ffb800] text-slate-900 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 group-hover:translate-x-3 group-hover:bg-[#129aef] group-hover:text-white group-hover:shadow-lg group-hover:scale-110">
-                        <i class="fas fa-chevron-right text-[11px] transition-transform duration-500 group-hover:translate-x-0.5"></i>
+                    <div class="bg-[#ffb800] text-slate-900 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500 group-hover:translate-x-3 group-hover:bg-[#129aef] group-hover:text-white group-hover:shadow-lg group-hover:scale-110">
+                        <i class="fas fa-chevron-right text-[10px] transition-transform duration-500 group-hover:translate-x-0.5"></i>
                     </div>
                 </a>
             </div>
@@ -272,185 +297,98 @@
         </div>
         <div class="swiper marquee-swiper reveal">
             <div class="swiper-wrapper items-center">
+                @forelse($clients as $client)
                 <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-red-400 text-sm text-center leading-tight">BIRLA<br>OPEN MINDS</span>
+                    <div class="bg-white border border-slate-200 px-6 py-3 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[180px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group overflow-hidden">
+                        <img src="{{ Storage::url($client->logo_path) }}" alt="{{ $client->name }}" class="max-h-12 max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300">
                     </div>
                 </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
-                            <i class="fas fa-graduation-cap text-red-600 text-xs"></i> D. GOENKA
-                        </span>
+                @empty
+                <div class="w-full text-center text-slate-500 py-4 italic">
+                    Our trusted clients will appear here.
+                </div>
+                @endforelse
+            </div>
+
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <!-- Available On Section -->
+    <section class="py-16 bg-white overflow-hidden border-b border-slate-100">
+        <div class="text-center reveal mb-10 px-6 lg:px-[5%]">
+            <h2 class="text-3xl font-bold text-slate-800">We are available on</h2>
+        </div>
+
+        <style>
+            @keyframes marqueeLeftAvailable {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+            }
+            .animate-marquee-available {
+                animation: marqueeLeftAvailable 30s linear infinite reverse;
+                display: flex;
+                width: max-content;
+            }
+            .animate-marquee-available:hover {
+                animation-play-state: paused;
+            }
+            .available-card {
+                flex-shrink: 0;
+            }
+            .fade-edges-available {
+                -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+                mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            }
+        </style>
+
+        <div class="overflow-hidden w-full relative z-10 fade-edges-available reveal">
+            <div class="animate-marquee-available flex gap-6 px-3">
+                @for($i = 0; $i < 3; $i++)
+                <div class="flex gap-6">
+                    <!-- Card 1: Naukri -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="text-2xl tracking-tight font-sans"><span class="font-black" style="color: #031b4e;">naukri</span><span class="font-bold" style="color: #129aef;">.com</span></span>
+                    </div>
+                    <!-- Card 2: Job Hai -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <div class="font-black text-xl leading-tight text-center font-sans tracking-tight" style="color: #00c853;">JOB<span style="color: #16a34a;" class="text-lg ml-1">✓</span><br><span style="color: #1e293b;">hai</span></div>
+                    </div>
+                    <!-- Card 3: Justdial -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="text-2xl tracking-tighter font-black font-sans"><span style="color: #005fb8;">Just</span><span style="color: #ff5e00;">dial</span></span>
+                    </div>
+                    <!-- Card 4: LinkedIn -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="font-bold text-2xl flex items-center gap-1.5 font-sans tracking-tight" style="color: #0a66c2;">Linked<i class="fab fa-linkedin"></i></span>
+                    </div>
+                    <!-- Card 5: Indeed -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="font-black text-2xl tracking-tighter font-sans flex items-center gap-1" style="color: #2164f3;">indeed</span>
+                    </div>
+                    <!-- Card 6: Glassdoor -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="font-black text-xl tracking-tight font-sans" style="color: #0caa41;">glassdoor</span>
+                    </div>
+                    <!-- Card 7: foundit -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="font-black text-xl tracking-tight font-sans" style="color: #6c2da5;">foundit</span>
+                    </div>
+                    <!-- Card 8: Shine -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="text-xl tracking-tight font-sans"><span class="font-black" style="color: #154696;">Shine</span><span class="font-bold" style="color: #ff9800;">.com</span></span>
+                    </div>
+                    <!-- Card 9: Apna -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="font-black text-2xl tracking-tighter font-sans" style="color: #00a650;">apna</span>
+                    </div>
+                    <!-- Card 10: TeacherOn -->
+                    <div class="available-card bg-white border border-slate-200 rounded-xl px-8 py-5 flex items-center justify-center min-w-[180px] shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                        <span class="text-2xl tracking-tighter font-black font-sans"><span style="color: #1e293b;">Teacher</span><span style="color: #f15a29;">On</span></span>
                     </div>
                 </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-xs leading-tight text-center">Mount Litera<br>Zee
-                            School</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="bg-slate-100 text-slate-800 rounded-full w-9 h-9 flex justify-center items-center font-bold text-lg">
-                            PW</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="border-2 border-accent-yellow rounded-full w-10 h-10 flex justify-center items-center font-extrabold text-primary-bg text-[11px]">
-                            ALLEN</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-indigo-300 text-base tracking-tight">VMC <span
-                                class="text-xs font-normal">Classes</span></span>
-                    </div>
-                </div>
-            
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-red-400 text-sm text-center leading-tight">BIRLA<br>OPEN MINDS</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
-                            <i class="fas fa-graduation-cap text-red-600 text-xs"></i> D. GOENKA
-                        </span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-xs leading-tight text-center">Mount Litera<br>Zee
-                            School</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="bg-slate-100 text-slate-800 rounded-full w-9 h-9 flex justify-center items-center font-bold text-lg">
-                            PW</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="border-2 border-accent-yellow rounded-full w-10 h-10 flex justify-center items-center font-extrabold text-primary-bg text-[11px]">
-                            ALLEN</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-indigo-300 text-base tracking-tight">VMC <span
-                                class="text-xs font-normal">Classes</span></span>
-                    </div>
-                </div>
-            
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-red-400 text-sm text-center leading-tight">BIRLA<br>OPEN MINDS</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
-                            <i class="fas fa-graduation-cap text-red-600 text-xs"></i> D. GOENKA
-                        </span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-xs leading-tight text-center">Mount Litera<br>Zee
-                            School</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="bg-slate-100 text-slate-800 rounded-full w-9 h-9 flex justify-center items-center font-bold text-lg">
-                            PW</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="border-2 border-accent-yellow rounded-full w-10 h-10 flex justify-center items-center font-extrabold text-primary-bg text-[11px]">
-                            ALLEN</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-indigo-300 text-base tracking-tight">VMC <span
-                                class="text-xs font-normal">Classes</span></span>
-                    </div>
-                </div>
-            
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-red-400 text-sm text-center leading-tight">BIRLA<br>OPEN MINDS</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
-                            <i class="fas fa-graduation-cap text-red-600 text-xs"></i> D. GOENKA
-                        </span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-bold text-blue-400 text-xs leading-tight text-center">Mount Litera<br>Zee
-                            School</span>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="bg-slate-100 text-slate-800 rounded-full w-9 h-9 flex justify-center items-center font-bold text-lg">
-                            PW</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <div
-                            class="border-2 border-accent-yellow rounded-full w-10 h-10 flex justify-center items-center font-extrabold text-primary-bg text-[11px]">
-                            ALLEN</div>
-                    </div>
-                </div>
-                <div class="swiper-slide w-auto">
-                    <div
-                        class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <span class="font-extrabold text-indigo-300 text-base tracking-tight">VMC <span
-                                class="text-xs font-normal">Classes</span></span>
-                    </div>
-                </div>
+                @endfor
             </div>
         </div>
     </section>
@@ -469,22 +407,22 @@
                 class="block bg-white border border-slate-200 rounded-2xl p-7 text-slate-800 transition-all duration-300 hover:-translate-y-2 shadow-lg hover:shadow-[0_20px_40px_rgba(18,154,239,0.15)] hover:border-[#129aef]/30 flex flex-col group reveal cursor-pointer">
                 <h3 class="text-xl font-bold mb-3 text-slate-900 group-hover:text-[#129aef] transition-colors">{{ $job->title ?? 'Job Requirement' }}</h3>
                 <p class="text-xs text-slate-500 mb-4 flex items-center gap-3">
-                    <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> {{ $job->location->city }}, {{ $job->location->state }}</span>
+                    <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> {{ $job->city?->name ?? 'N/A' }}, {{ $job->state?->name ?? 'N/A' }}</span>
                     <span><i class="far fa-calendar-alt mr-0.5"></i> {{ $job->created_at->format('d M Y') }}</span>
                 </p>
                 <div class="flex flex-wrap gap-2 mb-4">
                     <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
-                        <i class="fas fa-folder-open text-[9px]"></i> {{ $job->category->name }}
+                        <i class="fas fa-folder-open text-[9px]"></i> {{ $job->category?->name ?? 'N/A' }}
                     </span>
                     <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
-                        <i class="fas fa-book text-[9px]"></i> {{ $job->subject->name }}
+                        <i class="fas fa-book text-[9px]"></i> {{ $job->subject?->name ?? 'N/A' }}
                     </span>
                     <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
-                        <i class="fas fa-graduation-cap text-[9px]"></i> {{ $job->qualification->name }}
+                        <i class="fas fa-graduation-cap text-[9px]"></i> {{ $job->qualification?->name ?? 'N/A' }}
                     </span>
                 </div>
                 <p class="text-[13px] text-slate-600 leading-relaxed mb-6 flex-grow">
-                    {{ Str::limit($job->description, 100) }}
+                    {{ Str::limit(strip_tags($job->description), 100) }}
                 </p>
                 <div class="text-accent-blue font-semibold text-[13px] inline-flex items-center gap-2 self-start group-hover:gap-3 transition-all mt-auto">
                     View Details 
@@ -558,8 +496,8 @@
         </style>
 
         <!-- Marquee Row 1 (Right to Left) -->
-        <div class="overflow-hidden w-full relative z-10 mt-16 mb-12 py-6 fade-edges reveal">
-            <div class="animate-marquee-left flex" style="padding-top: 50px;">
+        <div class="overflow-hidden w-full relative z-10 mt-8 mb-4 fade-edges reveal">
+            <div class="animate-marquee-left flex" style="padding-top: 35px; padding-bottom: 10px;">
                 @for($i = 0; $i < 2; $i++)
                 <div class="flex gap-6 px-3">
                     @foreach($testimonials as $testimonial)
@@ -587,8 +525,8 @@
         </div>
 
         <!-- Marquee Row 2 (Left to Right) -->
-        <div class="overflow-hidden w-full relative z-10 mb-16 py-6 fade-edges reveal reveal-delay-1">
-            <div class="animate-marquee-right flex" style="padding-top: 50px;">
+        <div class="overflow-hidden w-full relative z-10 mb-8 fade-edges reveal reveal-delay-1">
+            <div class="animate-marquee-right flex" style="padding-top: 35px; padding-bottom: 10px;">
                 @for($i = 0; $i < 2; $i++)
                 <div class="flex gap-6 px-3">
                     @foreach($testimonials->reverse() as $testimonial)
@@ -734,27 +672,6 @@
         </div>
     </section>
 
-<!-- We Are Available On Section -->
-    <section class="py-12 bg-slate-100 overflow-hidden">
-        <div class="mb-10 text-center px-6 lg:px-[5%] reveal">
-            <h2 class="text-slate-800 text-2xl font-bold">We are available on</h2>
-        </div>
-        <div class="swiper marquee-swiper reveal">
-            <div class="swiper-wrapper items-center">
-                @forelse($clients as $client)
-                <div class="swiper-slide w-auto">
-                    <div class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[200px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group">
-                        <img src="{{ Storage::url($client->logo_path) }}" alt="{{ $client->name }}" class="max-h-12 max-w-[150px] object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300">
-                    </div>
-                </div>
-                @empty
-                <div class="swiper-slide !w-full flex justify-center text-center text-slate-800 py-4 opacity-60">
-                    <p>No client partners available.</p>
-                </div>
-                @endforelse
-            </div>
-        </div>
-    </section>
 
     <!-- Certifications We Have Section -->
     <section class="py-16 px-6 lg:px-[5%] bg-slate-50 text-center border-t border-slate-200">
@@ -845,7 +762,7 @@
             </div>
             <!-- Card 5 -->
             <div
-                class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-1 cert-step-5 cert-card-hover group">
+                class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-1 cert-step-5 cert-card-hover group col-span-2 md:col-span-1 w-[calc(50%-0.5rem)] md:w-full mx-auto">
                 <div class="h-16 mb-4 flex items-center justify-center">
                     <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/standup-india.jpg" class="max-h-full max-w-full object-contain" alt="START UP INDIA">
                 </div>
@@ -857,6 +774,8 @@
             </div>
         </div>
     </section>
+
+    @include('partials.job-registration-popup')
 
     @endsection
 

@@ -53,16 +53,16 @@
                     <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Required Criteria</div>
                     <div class="flex flex-wrap gap-2">
                         <span class="inline-flex items-center px-2.5 py-1 rounded bg-blue-50 text-blue-700 text-sm border border-blue-100">
-                            <i class="fas fa-folder-open mr-1.5 text-blue-400"></i> {{ $job->category->name }}
+                            <i class="fas fa-folder-open mr-1.5 text-blue-400"></i> {{ $job->category?->name ?? 'N/A' }}
                         </span>
                         <span class="inline-flex items-center px-2.5 py-1 rounded bg-purple-50 text-purple-700 text-sm border border-purple-100">
-                            <i class="fas fa-book mr-1.5 text-purple-400"></i> {{ $job->subject->name }}
+                            <i class="fas fa-book mr-1.5 text-purple-400"></i> {{ $job->subject?->name ?? 'N/A' }}
                         </span>
                         <span class="inline-flex items-center px-2.5 py-1 rounded bg-orange-50 text-orange-700 text-sm border border-orange-100">
-                            <i class="fas fa-graduation-cap mr-1.5 text-orange-400"></i> {{ $job->qualification->name }}
+                            <i class="fas fa-graduation-cap mr-1.5 text-orange-400"></i> {{ $job->qualification?->name ?? 'N/A' }}
                         </span>
                         <span class="inline-flex items-center px-2.5 py-1 rounded bg-green-50 text-green-700 text-sm border border-green-100">
-                            <i class="fas fa-map-marker-alt mr-1.5 text-green-400"></i> {{ $job->location->city }}, {{ $job->location->state }}
+                            <i class="fas fa-map-marker-alt mr-1.5 text-green-400"></i> {{ $job->city?->name ?? 'N/A' }}, {{ $job->state?->name ?? 'N/A' }}
                         </span>
                     </div>
                 </div>
@@ -74,6 +74,69 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Suggested Candidates (AI Match) -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
+                <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-magic text-blue-500 mr-2"></i> Suggested Candidates</h3>
+                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm">AI Match Engine</span>
+            </div>
+            
+            @if(isset($suggestedCandidates) && $suggestedCandidates->count() > 0)
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach($suggestedCandidates as $candidate)
+                        <div class="flex flex-col p-4 border border-gray-100 rounded-xl hover:border-blue-200 hover:shadow-md transition-all bg-gray-50/30">
+                            <div class="flex justify-between items-start mb-3">
+                                <a href="{{ route('admin.crm.show', $candidate->id) }}" class="font-bold text-gray-800 hover:text-blue-600 transition-colors text-base">{{ $candidate->name }}</a>
+                                <span class="bg-green-100 border border-green-200 text-green-800 text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm">{{ $candidate->match_score }}% Match</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3 text-xs text-gray-600 mb-4 bg-white p-3 rounded-lg border border-gray-100">
+                                <div class="flex items-center gap-1.5" title="Category">
+                                    <i class="fas fa-folder w-3.5 text-purple-400"></i> 
+                                    <span class="truncate font-medium">{{ $candidate->profile?->category?->name ?? 'N/A' }}</span>
+                                    @if(in_array('category', $candidate->matched_criteria ?? []))
+                                        <i class="fas fa-check-circle text-green-500 text-[10px]" title="Matched Category"></i>
+                                    @endif
+                                </div>
+                                <div class="flex items-center gap-1.5" title="Subject">
+                                    <i class="fas fa-book w-3.5 text-blue-400"></i> 
+                                    <span class="truncate font-medium">{{ $candidate->profile?->subject?->name ?? 'N/A' }}</span>
+                                    @if(in_array('subject', $candidate->matched_criteria ?? []))
+                                        <i class="fas fa-check-circle text-green-500 text-[10px]" title="Matched Subject"></i>
+                                    @endif
+                                </div>
+                                <div class="flex items-center gap-1.5" title="Qualification">
+                                    <i class="fas fa-graduation-cap w-3.5 text-orange-400"></i> 
+                                    <span class="truncate">{{ $candidate->profile?->highestQualification?->name ?? 'N/A' }}</span>
+                                    @if(in_array('qualification', $candidate->matched_criteria ?? []))
+                                        <i class="fas fa-check-circle text-green-500 text-[10px]" title="Matched Qualification"></i>
+                                    @endif
+                                </div>
+                                <div class="flex items-center gap-1.5" title="Location">
+                                    <i class="fas fa-map-marker-alt w-3.5 text-red-400"></i> 
+                                    <span class="truncate">{{ $candidate->profile?->preferredCity?->name ?? 'N/A' }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-auto pt-2">
+                                <a href="{{ route('admin.crm.show', $candidate->id) }}" class="block w-full text-center py-2 bg-white border border-gray-200 hover:border-blue-300 hover:text-blue-600 rounded-lg text-xs font-semibold text-gray-700 transition-colors shadow-sm">
+                                    View Full Profile
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-sm text-gray-500 flex flex-col items-center justify-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-3 text-xl">
+                        <i class="fas fa-user-slash"></i>
+                    </div>
+                    <p class="font-medium">No matches found</p>
+                    <p class="text-xs mt-1 text-gray-400">There are no highly matching candidates for this job yet.</p>
+                </div>
+            @endif
         </div>
 
     </div>
@@ -160,34 +223,7 @@
         </div>
         @endif
 
-        <!-- Suggested Candidates (AI Match) -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
-                <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-magic text-blue-500 mr-2"></i> Suggested Candidates</h3>
-                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">AI Match</span>
-            </div>
-            
-            @if(isset($suggestedCandidates) && $suggestedCandidates->count() > 0)
-                <div class="space-y-4">
-                    @foreach($suggestedCandidates as $candidate)
-                        <div class="flex flex-col p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
-                            <div class="flex justify-between items-start mb-1">
-                                <a href="{{ route('admin.crm.show', $candidate->id) }}" class="font-semibold text-gray-800 hover:text-blue-600 transition-colors text-sm">{{ $candidate->name }}</a>
-                                <span class="bg-green-100 text-green-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $candidate->match_score }}% Match</span>
-                            </div>
-                            <div class="text-xs text-gray-500 flex flex-col gap-0.5 mt-1">
-                                <span><i class="fas fa-book w-3"></i> {{ $candidate->profile->subject->name ?? 'N/A' }}</span>
-                                <span><i class="fas fa-map-marker-alt w-3"></i> {{ $candidate->profile->preferredLocation->city ?? 'N/A' }}</span>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="text-sm text-gray-500 italic text-center py-4 bg-gray-50 rounded-lg border border-gray-100">
-                    No highly matching candidates found for this job post yet.
-                </div>
-            @endif
-        </div>
+
 
     </div>
 </div>

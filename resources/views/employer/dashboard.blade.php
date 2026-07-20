@@ -93,7 +93,7 @@
                             <tr class="hover:bg-white/5 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-text-main">{{ $job->title ?? 'N/A' }}</div>
-                                    <div class="text-xs text-text-dark/50 mt-1"><i class="fas fa-map-marker-alt text-accent-yellow/70 mr-1"></i> {{ $job->location->city ?? '' }}</div>
+                                    <div class="text-xs text-text-dark/50 mt-1"><i class="fas fa-map-marker-alt text-accent-yellow/70 mr-1"></i> {{ $job->city?->name ?? 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/5 text-text-main border border-white/10">

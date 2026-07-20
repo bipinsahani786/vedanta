@@ -22,7 +22,7 @@ class ApplicationController extends Controller
     {
         if ($redirect = $this->ensureRegistrationComplete()) return $redirect;
 
-        $applications = JobApplication::with(['jobPost.category', 'jobPost.location'])
+        $applications = JobApplication::with(['jobPost.category', 'jobPost.city', 'jobPost.state'])
             ->where('candidate_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -38,7 +38,7 @@ class ApplicationController extends Controller
         $profile = $user->profile;
 
         // Get approved jobs
-        $jobs = JobPost::with(['category', 'subject', 'location', 'qualification'])
+        $jobs = JobPost::with(['category', 'subject', 'city', 'state', 'qualification'])
             ->where('status', 'approved')
             ->whereDoesntHave('applications', function ($query) use ($user) {
                 $query->where('candidate_id', $user->id);
@@ -59,7 +59,8 @@ class ApplicationController extends Controller
             if ($job->qualification_id == $profile->highest_qualification_id) $score += 20;
             
             // Location match (10%)
-            if ($job->location_id == $profile->preferred_location_id) $score += 10;
+            if ($job->city_id == $profile->preferred_city_id) $score += 10;
+            elseif ($job->state_id == $profile->preferred_state_id) $score += 5;
             
             $job->match_score = $score;
             return $job;
@@ -80,7 +81,8 @@ class ApplicationController extends Controller
         if ($job->subject_id == $profile->subject_id) $score += 40;
         if ($job->category_id == $profile->category_id) $score += 30;
         if ($job->qualification_id == $profile->highest_qualification_id) $score += 20;
-        if ($job->location_id == $profile->preferred_location_id) $score += 10;
+        if ($job->city_id == $profile->preferred_city_id) $score += 10;
+        elseif ($job->state_id == $profile->preferred_state_id) $score += 5;
 
         // Prevent duplicate application
         if (JobApplication::where('job_post_id', $job->id)->where('candidate_id', $user->id)->exists()) {
@@ -95,11 +97,9 @@ class ApplicationController extends Controller
             return back()->with('error', 'Congratulations on being selected! Your current plan has successfully ended. You cannot apply for new jobs at this time.');
         }
 
-        // Limit Check
-        if ($profile->plan_type !== 'premium') {
-            if ($profile->used_applications >= $profile->total_allowed_applications) {
-                return back()->with('error', 'You have reached your maximum allowed applications for the Standard plan. Please upgrade to Premium or clear pending dues for unlimited access.');
-            }
+        // Limit Check (Applies to all plans)
+        if ($profile->used_applications >= $profile->total_allowed_applications) {
+            return back()->with('error', 'You have reached your maximum allowed applications for your current plan.');
         }
 
         JobApplication::create([
@@ -109,9 +109,7 @@ class ApplicationController extends Controller
             'match_score' => $score
         ]);
 
-        if ($profile->plan_type !== 'premium') {
-            $profile->increment('used_applications');
-        }
+        $profile->increment('used_applications');
 
         return redirect()->route('candidate.applications.index')->with('success', 'Application submitted successfully.');
     }

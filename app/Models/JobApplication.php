@@ -11,6 +11,10 @@ class JobApplication extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'interview_date' => 'datetime',
+    ];
+
     public function jobPost()
     {
         return $this->belongsTo(JobPost::class, 'job_post_id');
@@ -19,5 +23,10 @@ class JobApplication extends Model
     public function candidate()
     {
         return $this->belongsTo(User::class, 'candidate_id');
+    }
+
+    public function invoice()
+    {
+        return $this->hasOne(ServiceChargeInvoice::class, 'job_application_id');
     }
 }

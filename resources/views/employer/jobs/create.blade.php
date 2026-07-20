@@ -43,81 +43,107 @@
                     <h3 class="text-lg font-bold text-text-main mb-4 flex items-center gap-2 border-b border-card-border pb-2"><i class="fas fa-university text-accent-yellow"></i> Institution Details</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Institution/School Name <span class="text-red-500">*</span></label>
-                            <input type="text" name="school_name" value="{{ old('school_name', $profile?->school_name ?? '') }}" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                            <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Institution/School Name</label>
+                            <input type="text" name="school_name" value="{{ old('school_name', $profile?->school_name ?? '') }}" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Contact Person <span class="text-red-500">*</span></label>
-                            <input type="text" name="contact_person" value="{{ old('contact_person', $profile?->contact_person ?? auth()->user()->name) }}" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                            <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Contact Person</label>
+                            <input type="text" name="contact_person" value="{{ old('contact_person', $profile?->contact_person ?? auth()->user()->name) }}" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Contact Email <span class="text-red-500">*</span></label>
-                            <input type="email" name="email" value="{{ old('email', auth()->user()->email) }}" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                            <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Contact Email</label>
+                            <input type="email" name="email" value="{{ old('email', auth()->user()->email) }}" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Phone Number <span class="text-red-500">*</span></label>
-                            <input type="text" name="phone" value="{{ old('phone', auth()->user()->phone) }}" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                            <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Phone Number</label>
+                            <input type="text" name="phone" value="{{ old('phone', auth()->user()->phone) }}" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
                         </div>
                     </div>
                 </div>
 
-                <!-- Job Details -->
-                <div class="pt-2">
-                    <h3 class="text-lg font-bold text-text-main mb-4 flex items-center gap-2 border-b border-card-border pb-2"><i class="fas fa-briefcase text-accent-yellow"></i> Job Requirements</h3>
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Job Title <span class="text-red-500">*</span></label>
-                            <input type="text" name="title" value="{{ old('title') }}" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors" placeholder="e.g. Senior Physics Teacher">
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Job Category <span class="text-red-500">*</span></label>
-                                <select name="category_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
-                                    <option value="">Select Category</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Subject <span class="text-red-500">*</span></label>
-                                <select name="subject_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
-                                    <option value="">Select Subject</option>
-                                    @foreach($subjects as $subject)
-                                        <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Required Qualification <span class="text-red-500">*</span></label>
-                                <select name="qualification_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
-                                    <option value="">Select Qualification</option>
-                                    @foreach($qualifications as $qualification)
-                                        <option value="{{ $qualification->id }}" {{ old('qualification_id') == $qualification->id ? 'selected' : '' }}>{{ $qualification->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Location <span class="text-red-500">*</span></label>
-                                <select name="location_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
-                                    <option value="">Select Location</option>
-                                    @foreach($locations as $location)
-                                        <option value="{{ $location->id }}" {{ old('location_id') == $location->id ? 'selected' : '' }}>{{ $location->city }}, {{ $location->state }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Salary Range (Monthly)</label>
-                                <input type="text" name="salary_range" value="{{ old('salary_range') }}" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors" placeholder="e.g. 40,000 - 60,000">
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Job Description <span class="text-red-500">*</span></label>
-                            <textarea name="description" required rows="6" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors resize-none" placeholder="Describe the responsibilities and requirements...">{{ old('description') }}</textarea>
-                        </div>
+                <!-- Job Details Repeater -->
+                <div class="pt-2" x-data="jobRepeater()">
+                    <div class="flex justify-between items-center mb-4 border-b border-card-border pb-2">
+                        <h3 class="text-lg font-bold text-text-main flex items-center gap-2"><i class="fas fa-briefcase text-accent-yellow"></i> Job Requirements</h3>
                     </div>
+
+                    <template x-for="(job, index) in jobs" :key="job.id">
+                        <div class="space-y-6 mb-6 p-6 bg-secondary-bg/20 border border-card-border rounded-2xl relative shadow-sm hover:shadow-md transition-shadow">
+                            <!-- Job Number & Remove Button -->
+                            <div class="flex justify-between items-center border-b border-card-border/50 pb-3 mb-2">
+                                <span class="text-sm font-bold text-accent-blue tracking-wide uppercase" x-text="`Job Requirement #${index + 1}`"></span>
+                                <button type="button" x-show="jobs.length > 1" @click="jobs.splice(index, 1)" class="text-red-400 hover:text-red-600 transition-colors flex items-center gap-1 text-xs font-bold uppercase" title="Remove Job">
+                                    <i class="fas fa-trash-alt"></i> Remove
+                                </button>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Job Title <span class="text-red-500">*</span></label>
+                                <input type="text" :name="`jobs[${index}][title]`" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors" placeholder="e.g. Senior Physics Teacher">
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Job Category <span class="text-red-500">*</span></label>
+                                    <select :name="`jobs[${index}][category_id]`" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                                        <option value="">Select Category</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Subject <span class="text-red-500">*</span></label>
+                                    <select :name="`jobs[${index}][subject_id]`" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                                        <option value="">Select Subject</option>
+                                        @foreach($subjects as $subject)
+                                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Required Qualification <span class="text-red-500">*</span></label>
+                                    <select :name="`jobs[${index}][qualification_id]`" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                                        <option value="">Select Qualification</option>
+                                        @foreach($qualifications as $qualification)
+                                            <option value="{{ $qualification->id }}">{{ $qualification->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">State <span class="text-red-500">*</span></label>
+                                    <select :name="`jobs[${index}][state_id]`" x-model="job.state_id" @change="fetchCities(job)" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                                        <option value="">Select State</option>
+                                        @foreach($states as $state)
+                                            <option value="{{ $state->id }}">{{ $state->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">City <span class="text-red-500">*</span></label>
+                                    <select :name="`jobs[${index}][city_id]`" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                                        <option value="">Select City</option>
+                                        <template x-for="city in job.cities" :key="city.id">
+                                            <option :value="city.id" x-text="city.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Salary Range (Monthly)</label>
+                                    <input type="text" :name="`jobs[${index}][salary_range]`" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors" placeholder="e.g. 40,000 - 60,000">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Job Description <span class="text-red-500">*</span></label>
+                                <textarea :name="`jobs[${index}][description]`" required rows="4" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors resize-none" placeholder="Describe the responsibilities and requirements..."></textarea>
+                            </div>
+                        </div>
+                    </template>
+
+                    <button type="button" @click="addJob()" class="w-full mt-2 px-6 py-4 bg-secondary-bg/50 text-text-main font-bold rounded-2xl border-2 border-dashed border-card-border hover:border-accent-yellow hover:text-accent-yellow hover:bg-accent-yellow/5 transition-all flex items-center justify-center gap-2 group">
+                        <i class="fas fa-plus-circle text-xl group-hover:scale-110 transition-transform"></i> Add Another Job Requirement
+                    </button>
                 </div>
 
                 <div class="pt-6 border-t border-card-border text-right">
@@ -129,3 +155,30 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function jobRepeater() {
+        return {
+            jobs: [ { id: Date.now(), state_id: '', cities: [] } ],
+            
+            addJob() {
+                this.jobs.push({ id: Date.now(), state_id: '', cities: [] });
+            },
+            
+            fetchCities(job) {
+                if(job.state_id) {
+                    fetch(`/api/states/${job.state_id}/cities`)
+                        .then(response => response.json())
+                        .then(data => {
+                            job.cities = data;
+                        })
+                        .catch(error => console.error('Error fetching cities:', error));
+                } else {
+                    job.cities = [];
+                }
+            }
+        }
+    }
+</script>
+@endpush

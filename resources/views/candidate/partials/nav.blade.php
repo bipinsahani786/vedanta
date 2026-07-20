@@ -10,29 +10,33 @@
                     ['route' => 'candidate.applications.index', 'routeIs' => 'candidate.applications.*', 'icon' => 'fa-paper-plane', 'label' => "Applications ($appCount)"],
                     ['route' => 'candidate.payment.show', 'routeIs' => 'candidate.payment.*', 'icon' => 'fa-credit-card', 'label' => 'Payment & Plan'],
                     ['route' => 'candidate.agreement.show', 'routeIs' => 'candidate.agreement.*', 'icon' => 'fa-file-contract', 'label' => 'My Agreement'],
+                    ['route' => 'candidate.registration.show', 'routeIs' => 'candidate.registration.*', 'icon' => 'fa-clipboard-list', 'label' => 'Registration'],
+                    ['route' => 'candidate.serviceCharge.show', 'routeIs' => 'candidate.servicecharge.*', 'icon' => 'fa-file-invoice-dollar', 'label' => 'Service Charge'],
+                    ['route' => 'candidate.aditionalFeature.show', 'routeIs' => 'candidate.aditional.*', 'icon' => 'fa-puzzle-piece', 'label' => 'Aditional Feature'],
                 ];
             @endphp
 
             @foreach($navItems as $item)
-                <a href="{{ route($item['route']) }}"
-                   class="relative px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2
-                   {{ request()->routeIs($item['routeIs'])
-                       ? 'text-accent-blue after:absolute after:bottom-0 after:left-2 after:right-2 after:h-[2px] after:bg-accent-blue after:rounded-full'
-                       : 'text-text-dark/50 hover:text-text-main' }}">
-                    
-                    @if($item['route'] === 'candidate.profile.edit' && auth()->user()->profile?->profile_photo_path)
-                        <img src="{{ asset('storage/' . auth()->user()->profile->profile_photo_path) }}" alt="Profile" class="w-5 h-5 rounded-full object-cover border border-accent-blue/30">
-                    @else
-                        <i class="fas {{ $item['icon'] }} text-xs"></i>
-                    @endif
-                    
-                    {{ $item['label'] }}
-                </a>
+                    <a href="{{ route($item['route']) }}" class="relative px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2
+                                   {{ request()->routeIs($item['routeIs'])
+                ? 'text-accent-blue after:absolute after:bottom-0 after:left-2 after:right-2 after:h-[2px] after:bg-accent-blue after:rounded-full'
+                : 'text-text-dark/50 hover:text-text-main' }}">
+
+                        @if($item['route'] === 'candidate.profile.edit' && auth()->user()->profile?->profile_photo_path)
+                            <img src="{{ asset('storage/' . auth()->user()->profile->profile_photo_path) }}" alt="Profile"
+                                class="w-5 h-5 rounded-full object-cover border border-accent-blue/30">
+                        @else
+                            <i class="fas {{ $item['icon'] }} text-xs"></i>
+                        @endif
+
+                        {{ $item['label'] }}
+                    </a>
             @endforeach
 
             <form action="{{ route('logout') }}" method="POST" class="ml-auto">
                 @csrf
-                <button type="submit" class="px-4 py-3.5 text-red-400/70 hover:text-red-400 whitespace-nowrap transition-colors flex items-center gap-1.5 text-sm">
+                <button type="submit"
+                    class="px-4 py-3.5 text-red-400/70 hover:text-red-400 whitespace-nowrap transition-colors flex items-center gap-1.5 text-sm">
                     <i class="fas fa-sign-out-alt text-xs"></i> Logout
                 </button>
             </form>
@@ -40,6 +44,12 @@
     </div>
 </div>
 <style>
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 </style>

@@ -34,11 +34,6 @@ class CategoryController extends Controller
         return view('admin.categories.index', compact('categories', 'sortField', 'sortDirection'));
     }
 
-    public function create()
-    {
-        return view('admin.categories.create');
-    }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -51,11 +46,6 @@ class CategoryController extends Controller
         ]);
 
         return redirect()->route('admin.categories.index')->with('success', 'Category created successfully.');
-    }
-
-    public function edit(Category $category)
-    {
-        return view('admin.categories.edit', compact('category'));
     }
 
     public function update(Request $request, Category $category)

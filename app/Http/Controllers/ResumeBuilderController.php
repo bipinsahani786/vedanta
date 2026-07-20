@@ -13,22 +13,45 @@ class ResumeBuilderController extends Controller
         if (auth()->check() && auth()->user()->profile) {
             $user = auth()->user();
             $profile = $user->profile;
+
+            $photoBase64 = null;
+            if ($profile->profile_photo_path) {
+                $path = storage_path('app/public/' . $profile->profile_photo_path);
+                if (file_exists($path)) {
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+                    $data = file_get_contents($path);
+                    $photoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                }
+            }
+
             $prefillData = [
                 'personal' => [
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->phone,
-                    'address' => $profile->address,
+                    'location' => $profile->address,
                     'title' => 'Teacher',
-                    'summary' => 'Experienced educator.'
+                    'photo' => $photoBase64
                 ],
+                'summary' => 'Experienced educator.',
                 'experience' => [
-                    ['title' => 'Teacher', 'company' => 'Previous School', 'duration' => $profile->years_of_experience . ' Years', 'description' => 'Taught ' . $profile->subject . '.']
+                    [
+                        'title' => 'Teacher',
+                        'company' => 'Previous School',
+                        'startDate' => 'Previous Years',
+                        'endDate' => 'Present',
+                        'description' => 'Taught ' . $profile->subject . '.'
+                    ]
                 ],
                 'education' => [
-                    ['degree' => $profile->highest_qualification, 'school' => 'University/College', 'year' => 'Graduated']
+                    [
+                        'degree' => $profile->highest_qualification,
+                        'institution' => 'University/College',
+                        'year' => 'Graduated',
+                        'grade' => ''
+                    ]
                 ],
-                'skills' => explode(',', $profile->subject ?? '')
+                'skills' => array_filter(array_map('trim', explode(',', $profile->subject ?? '')))
             ];
         }
         return view('resume-builder.index', compact('prefillData'));

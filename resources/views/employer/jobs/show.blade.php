@@ -12,7 +12,7 @@
                     <h1 class="text-3xl font-bold text-text-main mb-2 relative z-10">{{ $job->title ?? 'Teacher Required' }}</h1>
                     <div class="flex flex-wrap gap-4 text-sm font-semibold text-text-dark/70 relative z-10">
                         <span class="flex items-center gap-1.5"><i class="fas fa-university text-accent-yellow"></i> {{ $job->school_name }}</span>
-                        <span class="flex items-center gap-1.5"><i class="fas fa-map-marker-alt text-accent-yellow"></i> {{ $job->location->city ?? '' }}, {{ $job->location->state ?? '' }}</span>
+                        <span class="flex items-center gap-1.5"><i class="fas fa-map-marker-alt text-accent-yellow"></i> {{ $job->city?->name ?? '' }}, {{ $job->state?->name ?? '' }}</span>
                     </div>
                 </div>
                 <div>

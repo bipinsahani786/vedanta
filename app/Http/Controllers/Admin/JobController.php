@@ -14,7 +14,7 @@ class JobController extends Controller
 {
     public function index(Request $request)
     {
-        $query = JobPost::with(['category', 'subject', 'location', 'qualification']);
+        $query = JobPost::with(['category', 'subject', 'state', 'city', 'qualification']);
 
         // Search
         if ($search = $request->input('search')) {
@@ -26,8 +26,14 @@ class JobController extends Controller
         }
 
         // Status Filter
-        if ($status = $request->input('status')) {
-            $query->where('status', $status);
+        $status = $request->input('status');
+        if ($status) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        } else {
+            // Default to live (approved) jobs when no status is provided
+            $query->where('status', 'approved');
         }
 
         // Sorting
@@ -49,32 +55,20 @@ class JobController extends Controller
     public function show(JobPost $job)
     {
         // Module 16: AI Shortlisting Engine logic (matching candidate profiles)
-        $suggestedCandidates = User::where('role', 'candidate')
-            ->whereHas('profile', function ($q) use ($job) {
-                // We'll consider it a "match" if subject or location matches
-                $q->where('subject_id', $job->subject_id)
-                  ->orWhere('preferred_location_id', $job->location_id)
-                  ->orWhere('highest_qualification_id', $job->qualification_id);
-            })
-            ->with('profile')
-            ->get()
-            ->map(function ($candidate) use ($job) {
-                // Calculate match score
-                $score = 0;
-                $profile = $candidate->profile;
-                if ($profile) {
-                    if ($profile->subject_id === $job->subject_id) $score += 40;
-                    if ($profile->preferred_location_id === $job->location_id) $score += 30;
-                    if ($profile->highest_qualification_id === $job->qualification_id) $score += 20;
-                    // Adding experience match check loosely
-                    if ($profile->years_of_experience >= 1) $score += 10;
-                }
-                $candidate->match_score = $score;
-                return $candidate;
-            })
-            ->filter(fn($c) => $c->match_score >= 30) // Only show reasonable matches
-            ->sortByDesc('match_score')
-            ->take(10); // Show top 10 matches
+        $suggestedCandidates = clone $job->getSuggestedCandidates(10); // Use the logic from the JobPost model
+
+        // Because the model logic maps to 'match_percentage' instead of 'match_score' 
+        // and returns CandidateProfile objects rather than User objects, 
+        // we'll map them so the view doesn't break.
+        $suggestedCandidates = $suggestedCandidates->map(function ($candidate) {
+            return (object) [
+                'id' => $candidate->user->id,
+                'name' => $candidate->user->name,
+                'match_score' => $candidate->match_percentage,
+                'matched_criteria' => $candidate->matched_criteria,
+                'profile' => $candidate
+            ];
+        });
 
         return view('admin.jobs.show', compact('job', 'suggestedCandidates'));
     }
@@ -90,12 +84,12 @@ class JobController extends Controller
         ]);
 
         // Smart Job Matching: Notify Candidates with similar subject/location
-        $job->load(['subject', 'location']);
+        $job->load(['subject', 'state', 'city']);
         if ($job->subject) {
             $matchingCandidates = \App\Models\User::where('role', 'candidate')
                 ->whereHas('profile', function($q) use ($job) {
                     $q->where('subject_id', $job->subject_id)
-                      ->orWhere('preferred_location_id', $job->location_id);
+                      ->orWhere('preferred_state_id', $job->state_id);
                 })->get();
 
             foreach ($matchingCandidates as $candidate) {
@@ -162,23 +156,24 @@ class JobController extends Controller
         $categories = \App\Models\Category::where('is_active', true)->get();
         $subjects = \App\Models\Subject::where('is_active', true)->get();
         $qualifications = \App\Models\Qualification::where('is_active', true)->get();
-        $locations = \App\Models\Location::where('is_active', true)->get();
+        $states = \App\Models\State::where('is_active', true)->get();
 
-        return view('admin.jobs.create', compact('categories', 'subjects', 'qualifications', 'locations'));
+        return view('admin.jobs.create', compact('categories', 'subjects', 'qualifications', 'states'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
-            'school_name' => 'required|string|max:255',
-            'contact_person' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'school_name' => 'nullable|string|max:255',
+            'contact_person' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
             'qualification_id' => 'required|exists:qualifications,id',
-            'location_id' => 'required|exists:locations,id',
+            'state_id' => 'required|exists:states,id',
+            'city_id' => 'required|exists:cities,id',
             'salary_range' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:pending,approved,rejected',
@@ -196,23 +191,25 @@ class JobController extends Controller
         $categories = \App\Models\Category::where('is_active', true)->get();
         $subjects = \App\Models\Subject::where('is_active', true)->get();
         $qualifications = \App\Models\Qualification::where('is_active', true)->get();
-        $locations = \App\Models\Location::where('is_active', true)->get();
+        $states = \App\Models\State::where('is_active', true)->get();
+        $cities = \App\Models\City::where('state_id', $job->state_id)->where('is_active', true)->get();
 
-        return view('admin.jobs.edit', compact('job', 'categories', 'subjects', 'qualifications', 'locations'));
+        return view('admin.jobs.edit', compact('job', 'categories', 'subjects', 'qualifications', 'states', 'cities'));
     }
 
     public function update(Request $request, JobPost $job)
     {
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
-            'school_name' => 'required|string|max:255',
-            'contact_person' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'school_name' => 'nullable|string|max:255',
+            'contact_person' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
             'qualification_id' => 'required|exists:qualifications,id',
-            'location_id' => 'required|exists:locations,id',
+            'state_id' => 'required|exists:states,id',
+            'city_id' => 'required|exists:cities,id',
             'salary_range' => 'nullable|string|max:255',
             'description' => 'nullable|string',
         ]);

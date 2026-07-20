@@ -13,13 +13,13 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $recentJobs = JobPost::with(['category', 'subject', 'location', 'qualification'])
+        $recentJobs = JobPost::with(['category', 'subject', 'state', 'city', 'qualification'])
             ->where('status', 'approved')
             ->latest()
             ->take(6)
             ->get();
             
-        $categories = Category::withCount(['jobs' => function ($query) {
+        $categories = Category::where('is_active', true)->withCount(['jobs' => function ($query) {
             $query->where('status', 'approved');
         }])->get();
 
@@ -32,28 +32,35 @@ class HomeController extends Controller
     public function categoryJobs($id)
     {
         $category = Category::findOrFail($id);
+        $subjects = $category->subjects()->where('is_active', true)->get();
         $jobs = JobPost::with([
                 'category',
                 'subject',
-                'location',
+                'state',
+                'city',
                 'qualification'
             ])
             ->where('category_id', $id)
             ->where('status', 'approved')
             ->latest()
             ->get();
-        return view('category-jobs', compact('category', 'jobs'));
+        return view('category-jobs', compact('category', 'subjects', 'jobs'));
     }
+
+    public function serviceDetails($slug)
+    {
+        $service = Service::where('slug', $slug)->firstOrFail();
+        return view('service-details', compact('service'));
+    }
+
 
     public function jobs(\Illuminate\Http\Request $request)
     {
-        $query = JobPost::with(['category', 'subject', 'location', 'qualification'])
+        $query = JobPost::with(['category', 'subject', 'state', 'city', 'qualification'])
             ->where('status', 'approved');
 
         if ($request->filled('state')) {
-            $query->whereHas('location', function($q) use ($request) {
-                $q->where('state', $request->state);
-            });
+            $query->where('state_id', $request->state);
         }
 
         if ($request->filled('subject')) {
@@ -64,9 +71,17 @@ class HomeController extends Controller
             $query->where('category_id', $request->class);
         }
 
+        if ($request->filled('categories') && is_array($request->categories)) {
+            $query->whereIn('category_id', $request->categories);
+        }
+
+        if ($request->filled('job_type')) {
+            $query->where('job_type', $request->job_type);
+        }
+
         $jobs = $query->orderBy('created_at', 'desc')->paginate(12);
 
-        $states = \App\Models\Location::whereNotNull('state')->where('state', '!=', '')->distinct()->orderBy('state')->pluck('state');
+        $states = \App\Models\State::where('is_active', true)->orderBy('name')->get();
         $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
         $categories = \App\Models\Category::where('is_active', true)->orderBy('name')->get();
             
@@ -100,4 +115,16 @@ class HomeController extends Controller
             $services = Service::where('is_active', true)->latest()->get();
             return view('services', compact('services'));
         }
+
+        public function getSubjects($categoryId)
+    {
+        $category = \App\Models\Category::findOrFail($categoryId);
+        return response()->json($category->subjects()->where('is_active', true)->orderBy('name')->get());
+    }
+
+    public function getSpecializations($subjectId)
+    {
+        $subject = \App\Models\Subject::findOrFail($subjectId);
+        return response()->json($subject->specializations()->where('is_active', true)->orderBy('name')->get());
+    }
 }

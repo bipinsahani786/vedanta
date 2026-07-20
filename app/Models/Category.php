@@ -12,4 +12,9 @@ class Category extends Model
     {
         return $this->hasMany(JobPost::class, 'category_id');
     }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class);
+    }
 }

@@ -1,14 +1,23 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
 
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/jobs', [\App\Http\Controllers\HomeController::class, 'jobs'])->name('jobs');
 Route::get('/jobs/{job}', [\App\Http\Controllers\JobController::class, 'show'])->name('jobs.show');
 Route::get('/category/{id}/jobs', [\App\Http\Controllers\HomeController::class, 'categoryJobs'])->name('category.jobs');
 
+// Dynamic Subjects and Specializations
+Route::get('/api/categories/{category}/subjects', [HomeController::class, 'getSubjects'])->name('api.category.subjects');
+Route::get('/api/subjects/{subject}/specializations', [HomeController::class, 'getSpecializations'])->name('api.subject.specializations');
+Route::get('/api/states/{state}/cities', function (\App\Models\State $state) {
+    return $state->cities()->where('is_active', true)->get();
+})->name('api.state.cities');
+
 Route::view('/about', 'about')->name('about');
 Route::get('/services', [\App\Http\Controllers\HomeController::class, 'services'])->name('services');
+Route::get('/services/{slug}', [\App\Http\Controllers\HomeController::class, 'serviceDetails'])->name('service.details');
 Route::view('/hiring-process', 'hiring')->name('hiring');
 Route::view('/contact', 'contact')->name('contact');
 Route::post('/contact', [\App\Http\Controllers\HomeController::class, 'storeContact'])->name('contact.store');
@@ -18,6 +27,24 @@ Route::post('/post-job', [\App\Http\Controllers\JobController::class, 'storeJobQ
 Route::view('/terms', 'terms')->name('terms');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/media', 'media')->name('media');
+Route::get("/refund", function () {
+    return view('refund');
+})->name("refund");
+Route::get("/pricing", function () {
+    return view('pricing');
+})->name("pricing");
+Route::get('/cookie', function () {
+    return view('cookie');
+})->name("cookie");
+Route::get('/disclaimer', function () {
+    return view('disclaimer');
+})->name('disclaimer');
+Route::get('/employer', function () {
+    return view('employer');
+})->name('employer');
+Route::get('/candidate', function () {
+    return view('candidate');
+})->name('candidate');  
 
 
 // Resume Builder (Public)
@@ -45,7 +72,8 @@ Route::get('/email/verify', function () {
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
-    if (auth()->user()->role === 'employer') return redirect('/employer/dashboard');
+    if (auth()->user()->role === 'employer')
+        return redirect('/employer/dashboard');
     return redirect('/candidate/dashboard');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
@@ -87,10 +115,17 @@ Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name(
     Route::get('/payment', [\App\Http\Controllers\Candidate\PaymentController::class, 'show'])->name('payment.show');
     Route::post('/payment/process', [\App\Http\Controllers\Candidate\PaymentController::class, 'process'])->name('payment.process');
     Route::match(['get', 'post'], '/payment/callback', [\App\Http\Controllers\Candidate\PaymentController::class, 'callback'])->name('payment.callback');
+    Route::get('/payment/invoice/{id}', [\App\Http\Controllers\Candidate\PaymentController::class, 'invoice'])->name('payment.invoice');
 
     Route::get('/applications', [\App\Http\Controllers\Candidate\ApplicationController::class, 'index'])->name('applications.index');
     Route::get('/applications/available', [\App\Http\Controllers\Candidate\ApplicationController::class, 'available'])->name('applications.available');
     Route::post('/applications/{job}/apply', [\App\Http\Controllers\Candidate\ApplicationController::class, 'apply'])->name('applications.apply');
+
+    Route::get('/registration', [\App\Http\Controllers\Candidate\RegistrationController::class, 'show'])->name('registration.show');
+    Route::get('/service-charge', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'show'])->name('serviceCharge.show');
+    Route::post('/service-charge/pay', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'process'])->name('serviceCharge.pay');
+    Route::match(['get', 'post'], '/service-charge/callback', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'callback'])->name('serviceCharge.callback');
+    Route::view('/additional-feature', 'candidate.aditionalFeature.show')->name('aditionalFeature.show');
 });
 
 // Employer Auth Routes
@@ -102,7 +137,7 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
     Route::get('/dashboard', [\App\Http\Controllers\Employer\DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('jobs', \App\Http\Controllers\Employer\JobController::class);
-    
+
     Route::get('/profile', [\App\Http\Controllers\Employer\ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [\App\Http\Controllers\Employer\ProfileController::class, 'update'])->name('profile.update');
 
@@ -112,27 +147,33 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
 // Admin Routes (Protected)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Master Data
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
     Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
     Route::resource('qualifications', \App\Http\Controllers\Admin\QualificationController::class);
-    Route::resource('locations', \App\Http\Controllers\Admin\LocationController::class);
+    Route::resource('states', \App\Http\Controllers\Admin\StateController::class);
+    Route::resource('cities', \App\Http\Controllers\Admin\CityController::class);
 
     // Job Posts
     Route::resource('jobs', \App\Http\Controllers\Admin\JobController::class);
     Route::post('jobs/{job}/approve', [\App\Http\Controllers\Admin\JobController::class, 'approve'])->name('jobs.approve');
     Route::post('jobs/{job}/reject', [\App\Http\Controllers\Admin\JobController::class, 'reject'])->name('jobs.reject');
 
-    // CRM & Invoices
-    Route::get('/crm', [\App\Http\Controllers\Admin\CrmController::class, 'index'])->name('crm.index');
-    Route::get('/crm/candidate/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'show'])->name('crm.show');
+    // Candidates CRM
+    Route::get('/candidates/create', [\App\Http\Controllers\Admin\CrmController::class, 'create'])->name('crm.create');
+    Route::post('/candidates/store', [\App\Http\Controllers\Admin\CrmController::class, 'store'])->name('crm.store');
+    Route::get('/candidates/{id}/edit', [\App\Http\Controllers\Admin\CrmController::class, 'edit'])->name('crm.edit');
+    Route::put('/candidates/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'update'])->name('crm.update');
+    Route::get('/candidates', [\App\Http\Controllers\Admin\CrmController::class, 'index'])->name('crm.index');
+    Route::get('/candidates/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'show'])->name('crm.show');
     Route::post('/crm/candidate/{id}/follow-up', [\App\Http\Controllers\Admin\CrmController::class, 'storeFollowUp'])->name('crm.followup.store');
     Route::post('/crm/candidate/{id}/invoice', [\App\Http\Controllers\Admin\CrmController::class, 'storeInvoice'])->name('crm.invoice.store');
     Route::put('/crm/invoice/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'updateInvoiceStatus'])->name('crm.invoice.update');
     Route::post('/crm/candidate/{id}/toggle-verification', [\App\Http\Controllers\Admin\CrmController::class, 'toggleVerification'])->name('crm.candidate.verify');
     Route::post('/crm/candidate/{id}/rate', [\App\Http\Controllers\Admin\CrmController::class, 'rateCandidate'])->name('crm.candidate.rate');
     Route::get('/crm/candidate/{id}/magic-login', [\App\Http\Controllers\Admin\CrmController::class, 'magicLogin'])->name('crm.candidate.magic-login');
+    Route::post('/crm/candidate/{id}/upload-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'uploadAgreement'])->name('crm.candidate.upload-agreement');
 
     // Applications & Transactions
     Route::get('/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
@@ -144,7 +185,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/leads/{id}/status', [\App\Http\Controllers\Admin\ContactLeadController::class, 'updateStatus'])->name('leads.status.update');
 
     // Frontend Management
-    
+
     Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class)->except(['create', 'show', 'edit']);
     Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class)->except(['create', 'show', 'edit']);
     Route::resource('clients', \App\Http\Controllers\Admin\ClientLogoController::class)->except(['create', 'show', 'edit'])->parameters(['clients' => 'clientLogo']);

@@ -3,24 +3,65 @@
 @section('title', 'Manage Qualifications')
 
 @section('actions')
-    <a href="{{ route('admin.qualifications.create') }}" class="px-4 py-2 bg-accent-blue text-white rounded-xl text-sm font-semibold hover:bg-accent-blue-hover transition-all shadow-lg flex items-center gap-2">
+    <button x-data @click="$dispatch('open-modal', { isEdit: false, formData: { id: '', name: '', is_active: 1 } })" class="px-4 py-2 bg-accent-blue text-white rounded-xl text-sm font-semibold hover:bg-accent-blue-hover transition-all shadow-lg flex items-center gap-2">
         <i class="fas fa-plus"></i> Add Qualification
-    </a>
+    </button>
 @endsection
 
 @section('content')
+<div x-data="{ showModal: false, isEdit: false, formData: { id: '', name: '', is_active: 1 } }" @open-modal.window="isEdit = $event.detail.isEdit; formData = $event.detail.formData; showModal = true">
 
-{{-- Filter/Search Bar --}}
-<div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-    <div class="text-sm text-text-dark/50 font-medium">
-        Showing {{ $qualifications->firstItem() ?? 0 }} to {{ $qualifications->lastItem() ?? 0 }} of {{ $qualifications->total() }} entries
+{{-- Analytics Cards --}}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xl">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Total Qualifications</p>
+            <p class="text-2xl font-bold text-text-main">{{ \App\Models\Qualification::count() }}</p>
+        </div>
     </div>
-    <form action="{{ route('admin.qualifications.index') }}" method="GET" class="w-full sm:w-auto flex items-center relative">
-        <i class="fas fa-search absolute left-3 text-text-dark/40 text-sm"></i>
+    
+    <div class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-xl">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Active</p>
+            <p class="text-2xl font-bold text-text-main">{{ \App\Models\Qualification::where('is_active', true)->count() }}</p>
+        </div>
+    </div>
+
+    <div class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-xl">
+            <i class="fas fa-times-circle"></i>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Inactive</p>
+            <p class="text-2xl font-bold text-text-main">{{ \App\Models\Qualification::where('is_active', false)->count() }}</p>
+        </div>
+    </div>
+</div>
+
+{{-- Enhanced Filter/Search Bar --}}
+<div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-secondary-bg flex items-center justify-center text-text-dark/50 border border-card-border">
+            <i class="fas fa-list"></i>
+        </div>
+        <div>
+            <h3 class="font-bold text-text-main">Qualification List</h3>
+            <p class="text-xs text-text-dark/50 font-medium">Showing {{ $qualifications->firstItem() ?? 0 }} to {{ $qualifications->lastItem() ?? 0 }} of {{ $qualifications->total() }} entries</p>
+        </div>
+    </div>
+    
+    <form action="{{ route('admin.qualifications.index') }}" method="GET" class="w-full sm:w-auto flex items-center relative group">
+        <i class="fas fa-search absolute left-4 text-text-dark/40 text-sm group-focus-within:text-accent-blue transition-colors"></i>
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search qualifications..." 
-               class="w-full sm:w-72 pl-9 pr-4 py-2 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+               class="w-full sm:w-80 pl-11 pr-4 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/20 focus:border-accent-blue transition-all shadow-inner">
         @if(request('search'))
-            <a href="{{ route('admin.qualifications.index') }}" class="absolute right-3 text-text-dark/40 hover:text-red-400 transition-colors">
+            <a href="{{ route('admin.qualifications.index') }}" class="absolute right-4 text-text-dark/40 hover:text-red-400 transition-colors">
                 <i class="fas fa-times"></i>
             </a>
         @endif
@@ -94,9 +135,9 @@
                 <td class="text-text-dark/60">{{ $qualification->created_at->format('M d, Y') }}</td>
                 <td>
                     <div class="flex items-center justify-end gap-2">
-                        <a href="{{ route('admin.qualifications.edit', $qualification) }}" class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center hover:bg-accent-blue hover:text-white transition-colors tooltip" title="Edit">
+                        <button @click="$dispatch('open-modal', { isEdit: true, formData: { id: '{{ $qualification->id }}', name: '{{ addslashes($qualification->name) }}', is_active: {{ $qualification->is_active ? 1 : 0 }} } })" class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center hover:bg-accent-blue hover:text-white transition-colors tooltip" title="Edit">
                             <i class="fas fa-edit text-xs"></i>
-                        </a>
+                        </button>
                         <form action="{{ route('admin.qualifications.destroy', $qualification) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this qualification?');">
                             @csrf
                             @method('DELETE')
@@ -122,11 +163,49 @@
     </table>
 </div>
 
-{{-- Pagination --}}
-@if($qualifications->hasPages())
-<div class="mt-6 flex justify-end">
-    {{ $qualifications->links('pagination::tailwind') }}
+<div class="mt-4">
+    {{ $qualifications->links() }}
 </div>
-@endif
 
+<!-- Modal -->
+<div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <!-- Overlay -->
+        <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity bg-slate-900/50 backdrop-blur-sm" @click="showModal = false"></div>
+
+        <!-- Modal Content -->
+        <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative inline-block w-full max-w-md p-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl sm:my-8 text-slate-800">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg font-bold" x-text="isEdit ? 'Edit Qualification' : 'Add Qualification'"></h3>
+                <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form :action="isEdit ? '{{ url('admin/qualifications') }}/' + formData.id : '{{ route('admin.qualifications.store') }}'" method="POST">
+                @csrf
+                <template x-if="isEdit">
+                    @method('PUT')
+                </template>
+
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Qualification Name <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" x-model="formData.name" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-accent-blue focus:ring focus:ring-accent-blue/20 px-4 py-2 border transition-colors">
+                </div>
+
+                <div class="mb-6 flex items-center">
+                    <input type="checkbox" id="is_active" name="is_active" value="1" x-model="formData.is_active" class="rounded border-slate-300 text-accent-blue shadow-sm focus:border-accent-blue focus:ring focus:ring-accent-blue/20 w-4 h-4 cursor-pointer">
+                    <label for="is_active" class="ml-2 block text-sm text-slate-700 cursor-pointer">Active</label>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" @click="showModal = false" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-accent-blue rounded-lg hover:bg-accent-blue-hover transition-colors shadow-lg" x-text="isEdit ? 'Update Qualification' : 'Save Qualification'"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</div>
 @endsection
