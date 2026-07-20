@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             StateCitySeeder::class,
             DummyDataSeeder::class,
+            StateFixSeeder::class,
             NewServicesSeeder::class,
             UpdateServiceContentSeeder::class,
             UpdateRecruitmentServiceSeeder::class,
