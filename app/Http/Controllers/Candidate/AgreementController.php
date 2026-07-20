@@ -110,7 +110,30 @@ class AgreementController extends Controller
     private function generateStampedPdf($user, $profile, $signatureData, $sigType)
     {
         // Save signature to temporary file for FPDI
-        $tempSignaturePath = 'temp/sig_' . $user->id . '_' . time() . '.' . $sigType;
+        $tempSignaturePath = 'temp/sig_' . $user->id . '_' . time() . '.jpg';
+        
+        // Convert any image to standard JPEG to avoid FPDF format errors (like alpha channel in PNG)
+        try {
+            $image = @imagecreatefromstring($signatureData);
+            if ($image !== false) {
+                // Create a white background for transparent images
+                $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
+                imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
+                imagealphablending($bg, TRUE);
+                imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+                
+                // Save as JPEG to a temporary buffer
+                ob_start();
+                imagejpeg($bg, null, 90);
+                $signatureData = ob_get_clean();
+                
+                imagedestroy($image);
+                imagedestroy($bg);
+            }
+        } catch (\Exception $e) {
+            \Log::error("Failed to convert signature to JPEG: " . $e->getMessage());
+        }
+
         Storage::disk('local')->put($tempSignaturePath, $signatureData);
         $absoluteSigPath = Storage::disk('local')->path($tempSignaturePath);
 
@@ -122,6 +145,37 @@ class AgreementController extends Controller
             $photoPath = Storage::disk('public')->path($profile->profile_photo_path);
         } elseif ($profile->passport_photo_path && Storage::disk('public')->exists($profile->passport_photo_path)) {
             $photoPath = Storage::disk('public')->path($profile->passport_photo_path);
+        }
+
+        // Convert photo to JPEG if needed
+        $tempPhotoPath = null;
+        $absolutePhotoPath = null;
+        if ($photoPath && file_exists($photoPath)) {
+            try {
+                $tempPhotoPath = 'temp/photo_' . $user->id . '_' . time() . '.jpg';
+                $photoData = file_get_contents($photoPath);
+                $image = @imagecreatefromstring($photoData);
+                if ($image !== false) {
+                    $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
+                    imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
+                    imagealphablending($bg, TRUE);
+                    imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+                    
+                    ob_start();
+                    imagejpeg($bg, null, 90);
+                    $photoJpegData = ob_get_clean();
+                    
+                    imagedestroy($image);
+                    imagedestroy($bg);
+                    
+                    Storage::disk('local')->put($tempPhotoPath, $photoJpegData);
+                    $absolutePhotoPath = Storage::disk('local')->path($tempPhotoPath);
+                }
+            } catch (\Exception $e) {
+                \Log::error("Failed to convert photo to JPEG: " . $e->getMessage());
+                // Fallback to original
+                $absolutePhotoPath = $photoPath;
+            }
         }
 
         // Load the FPDI template
@@ -144,13 +198,13 @@ class AgreementController extends Controller
             // On page 2, add the signature and photo
             if ($pageNo == 2) {
                 // Photo on the right side
-                if ($photoPath && file_exists($photoPath)) {
+                if ($absolutePhotoPath && file_exists($absolutePhotoPath)) {
                     // Try to catch any exception with unsupported image types
                     try {
                         // X: 168, Y: 260, Width: 25, Height: 30
-                        $pdf->Image($photoPath, 168, 260, 25, 30);
+                        $pdf->Image($absolutePhotoPath, 168, 260, 25, 30);
                     } catch (\Exception $e) {
-                        // Ignore if image format is unsupported
+                        \Log::error("FPDF Image Error (Photo): " . $e->getMessage());
                     }
                 }
 
@@ -159,7 +213,7 @@ class AgreementController extends Controller
                     // X: 78, Y: 272, Width: 60, Height: 15
                     $pdf->Image($absoluteSigPath, 78, 272, 60, 15);
                 } catch (\Exception $e) {
-                    // Ignore
+                    \Log::error("FPDF Image Error (Signature): " . $e->getMessage());
                 }
             }
         }
@@ -169,8 +223,11 @@ class AgreementController extends Controller
         // Save PDF to storage
         Storage::disk('public')->put($fileName, $pdf->Output('S'));
 
-        // Clean up temp signature
+        // Clean up temp files
         Storage::disk('local')->delete($tempSignaturePath);
+        if ($tempPhotoPath) {
+            Storage::disk('local')->delete($tempPhotoPath);
+        }
 
         return $fileName;
     }
