@@ -28,6 +28,7 @@
             <i class="fas fa-search absolute left-3 text-text-dark/40 text-sm"></i>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, phone..." 
                    class="w-full pl-9 pr-4 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+            @if(request()->anyFilled(['search', 'subject_id', 'experience', 'qualification_id', 'city_id', 'gender', 'english_fluency', 'availability', 'plan_amount']))
             @if(request()->anyFilled(['search', 'subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability']))
                 <a href="{{ route('admin.crm.index') }}" class="absolute right-3 text-text-dark/40 hover:text-red-400 transition-colors text-sm font-bold flex items-center gap-1">
                     <i class="fas fa-times"></i> Clear Filters
@@ -35,6 +36,7 @@
             @endif
         </div>
 
+        <div id="advanced-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 {{ request()->anyFilled(['subject_id', 'experience', 'qualification_id', 'city_id', 'gender', 'english_fluency', 'availability', 'plan_amount']) ? '' : 'hidden' }}">
         <div id="advanced-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 {{ request()->anyFilled(['subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability']) ? '' : 'hidden' }}">
             <select name="subject_id" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
                 <option value="">All Subjects</option>
@@ -50,6 +52,10 @@
                 @endforeach
             </select>
 
+            <select name="city_id" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
+                <option value="">All Cities</option>
+                @foreach($cities as $city)
+                    <option value="{{ $city->id }}" {{ request('city_id') == $city->id ? 'selected' : '' }}>{{ $city->name ?? $city->city_name ?? 'City' }}</option>
             <select name="state_id" class="w-full bg-secondary-bg border border-card-border rounded-lg px-3 py-2 text-sm text-text-main focus:border-accent-blue focus:outline-none">
                 <option value="">All States</option>
                 @foreach($states as $state)
