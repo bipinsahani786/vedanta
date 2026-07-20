@@ -48,8 +48,16 @@ class JobController extends Controller
         }
 
         $jobs = $query->paginate(15)->withQueryString();
+
+        // Analytics based on current filtered query
+        $stats = [
+            'total' => (clone $query)->count(),
+            'live' => (clone $query)->where('status', 'approved')->count(),
+            'pending' => (clone $query)->where('status', 'pending')->count(),
+            'rejected' => (clone $query)->where('status', 'rejected')->count(),
+        ];
         
-        return view('admin.jobs.index', compact('jobs', 'sortField', 'sortDirection'));
+        return view('admin.jobs.index', compact('jobs', 'stats', 'sortField', 'sortDirection'));
     }
 
     public function show(JobPost $job)

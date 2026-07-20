@@ -29,7 +29,16 @@ class ApplicationController extends Controller
 
         $applications = $query->latest()->paginate(15)->withQueryString();
 
-        return view('admin.applications.index', compact('applications'));
+        // Analytics based on current filtered query
+        $stats = [
+            'total' => (clone $query)->count(),
+            'applied' => (clone $query)->where('status', 'applied')->count(),
+            'shortlisted' => (clone $query)->where('status', 'shortlisted')->count(),
+            'hired' => (clone $query)->where('status', 'hired')->count(),
+            'rejected' => (clone $query)->where('status', 'rejected')->count(),
+        ];
+
+        return view('admin.applications.index', compact('applications', 'stats'));
     }
 
     public function updateStatus(Request $request, $id)

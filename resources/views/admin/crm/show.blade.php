@@ -8,8 +8,8 @@
 @endsection
 
 @section('actions')
-    <div class="flex items-center gap-4">
-        <a href="{{ route('admin.crm.index') }}" class="text-sm text-gray-600 hover:underline mr-2">&larr; Back to List</a>
+    <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
+        <a href="{{ route('admin.crm.index') }}" class="text-sm text-gray-600 hover:underline shrink-0">&larr; Back to List</a>
         
         <a href="{{ route('admin.crm.edit', $candidate->id) }}" class="px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded-xl hover:bg-blue-200 transition-colors flex items-center shadow-sm">
             <i class="fas fa-edit mr-2"></i> Edit Profile
@@ -29,9 +29,9 @@
         <!-- Candidate Profile -->
         <div class="bg-white shadow-sm sm:rounded-2xl border border-gray-100 mb-6 overflow-hidden">
             <!-- Banner / Header -->
-            <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-white flex justify-between items-start relative">
-                <div class="flex items-center gap-4 relative z-10">
-                    <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-extrabold shadow-sm border-4 border-white">
+            <div class="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-white flex flex-col sm:flex-row justify-between items-start relative gap-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative z-10 w-full">
+                    <div class="w-16 h-16 shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-extrabold shadow-sm border-4 border-white">
                         {{ strtoupper(substr($candidate->name, 0, 1)) }}
                     </div>
                     <div>
@@ -219,11 +219,11 @@
         <!-- Job Applications -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-gray-900">Job Applications</h3>
-                    <form action="{{ route('admin.crm.application.assign', $candidate->id) }}" method="POST" class="flex gap-2 items-center">
+                <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 shrink-0">Job Applications</h3>
+                    <form action="{{ route('admin.crm.application.assign', $candidate->id) }}" method="POST" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full xl:w-auto">
                         @csrf
-                        <select name="job_post_id" required class="text-sm rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 w-64">
+                        <select name="job_post_id" required class="text-sm rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 w-full sm:w-64">
                             <option value="">-- Assign a Job to Candidate --</option>
                             @foreach($availableJobs as $job)
                                 <option value="{{ $job->id }}">{{ $job->title }} ({{ $job->school_name }})</option>
@@ -239,9 +239,9 @@
                             <div class="mt-3">
                                 <form action="{{ route('admin.applications.status.update', $app->id) }}" method="POST" class="space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
                                     @csrf
-                                    <div class="flex items-center gap-2">
-                                        <label class="text-xs font-bold text-gray-700">Status:</label>
-                                        <select name="status" class="text-xs font-bold px-2 py-1.5 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 cursor-pointer w-full md:w-auto">
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        <label class="text-xs font-bold text-gray-700 shrink-0">Status:</label>
+                                        <select name="status" class="text-xs font-bold px-2 py-1.5 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 cursor-pointer w-full">
                                             <option value="applied" {{ $app->status === 'applied' ? 'selected' : '' }}>Applied</option>
                                             <option value="shortlisted" {{ $app->status === 'shortlisted' ? 'selected' : '' }}>Shortlisted (Schedule Interview)</option>
                                             <option value="hired" {{ $app->status === 'hired' ? 'selected' : '' }}>Hired</option>
@@ -249,7 +249,7 @@
                                         </select>
                                     </div>
                                     
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div>
                                             <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Interview Date (If Shortlisted)</label>
                                             <input type="datetime-local" name="interview_date" value="{{ $app->interview_date }}" class="w-full text-xs rounded-lg border-gray-300 shadow-sm px-2 py-1.5 focus:ring-blue-500 focus:border-blue-500">
@@ -265,20 +265,20 @@
                                         <textarea name="remarks" rows="2" class="w-full text-xs rounded-lg border-gray-300 shadow-sm px-2 py-1.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Add feedback or updates here...">{{ $app->remarks }}</textarea>
                                     </div>
 
-                                    <div class="flex justify-end gap-2 items-center">
+                                    <div class="flex flex-col sm:flex-row justify-end gap-2 sm:items-center w-full">
                                         @if($app->status === 'hired')
                                             @if(!$app->invoice)
-                                                <button type="button" onclick="prepareInvoice({{ $app->id }})" class="text-xs px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-bold transition-colors shadow-sm">
+                                                <button type="button" onclick="prepareInvoice({{ $app->id }})" class="w-full sm:w-auto text-xs px-3 py-2 sm:py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-bold transition-colors shadow-sm text-center">
                                                     <i class="fas fa-file-invoice-dollar mr-1"></i> Generate Invoice
                                                 </button>
                                             @else
-                                                <span class="text-xs px-3 py-1.5 bg-gray-100 text-green-700 font-bold rounded-lg border border-green-200">
+                                                <span class="w-full sm:w-auto text-center text-xs px-3 py-2 sm:py-1.5 bg-gray-100 text-green-700 font-bold rounded-lg border border-green-200">
                                                     <i class="fas fa-check-circle mr-1"></i> Invoiced
                                                 </span>
                                             @endif
                                         @endif
                                         
-                                        <button type="submit" class="text-xs px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition-colors shadow-sm">
+                                        <button type="submit" class="w-full sm:w-auto text-center text-xs px-4 py-2 sm:py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition-colors shadow-sm whitespace-nowrap">
                                             Save Updates
                                         </button>
                                     </div>

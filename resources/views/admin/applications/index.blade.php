@@ -5,6 +5,35 @@
 
 @section('content')
 
+{{-- Analytics Cards --}}
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+        <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Total Apps</p>
+        <h4 class="text-2xl font-extrabold text-blue-500 relative z-10">{{ $stats['total'] }}</h4>
+    </div>
+    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gray-500/5 group-hover:bg-gray-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">New (Applied)</p>
+        <h4 class="text-2xl font-extrabold text-gray-500 relative z-10">{{ $stats['applied'] }}</h4>
+    </div>
+    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+        <div class="absolute inset-0 bg-purple-500/5 group-hover:bg-purple-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Forwarded</p>
+        <h4 class="text-2xl font-extrabold text-purple-500 relative z-10">{{ $stats['shortlisted'] }}</h4>
+    </div>
+    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+        <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Hired</p>
+        <h4 class="text-2xl font-extrabold text-green-500 relative z-10">{{ $stats['hired'] }}</h4>
+    </div>
+    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+        <div class="absolute inset-0 bg-red-500/5 group-hover:bg-red-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Rejected</p>
+        <h4 class="text-2xl font-extrabold text-red-500 relative z-10">{{ $stats['rejected'] }}</h4>
+    </div>
+</div>
+
 <div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-4">
     <form action="{{ route('admin.applications.index') }}" method="GET" class="flex flex-col md:flex-row gap-4">
         <div class="flex-1 relative">

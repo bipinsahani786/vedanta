@@ -10,4 +10,9 @@ class ContactLead extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function followUps()
+    {
+        return $this->hasMany(LeadFollowUp::class, 'lead_id');
+    }
 }
