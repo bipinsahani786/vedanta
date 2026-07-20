@@ -161,9 +161,9 @@
                 </h2>
                 <div class="bg-card-bg rounded-2xl border border-card-border overflow-hidden shadow-xl">
                     <div class="divide-y divide-card-border">
-                        @if(isset($notifications) && count($notifications) > 0)
-                            @foreach($notifications as $notification)
-                                <div class="p-5 flex gap-4 hover:bg-secondary-bg/30 transition-colors">
+                        @if(auth()->user()->notifications()->count() > 0)
+                            @foreach(auth()->user()->notifications()->take(5)->get() as $notification)
+                                <div class="p-5 flex gap-4 hover:bg-secondary-bg/30 transition-colors {{ $notification->unread() ? 'bg-secondary-bg/10' : '' }}">
                                     <div class="w-10 h-10 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center flex-shrink-0 mt-1">
                                         <i class="fas fa-info-circle"></i>
                                     </div>
