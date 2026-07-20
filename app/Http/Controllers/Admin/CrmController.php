@@ -363,7 +363,7 @@ class CrmController extends Controller
         $rating = CandidateRating::where('candidate_id', $id)->first();
         $payments = \App\Models\PaymentTransaction::where('candidate_id', $id)->where('status', 'success')->get();
 
-        $availableJobs = \App\Models\JobPost::where('status', 'published')
+        $availableJobs = \App\Models\JobPost::where('status', 'approved')
             ->orderBy('created_at', 'desc')
             ->get();
 
