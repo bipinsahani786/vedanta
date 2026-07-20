@@ -55,6 +55,12 @@ Route::post('/resume-builder/download', [\App\Http\Controllers\ResumeBuilderCont
 Route::get('/login', [\App\Http\Controllers\AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('login.post');
 
+// Password Reset Routes
+Route::get('/password/reset', [\App\Http\Controllers\PasswordResetController::class, 'showLinkRequestForm'])->middleware('guest')->name('password.request');
+Route::post('/password/email', [\App\Http\Controllers\PasswordResetController::class, 'sendResetLinkEmail'])->middleware('guest')->name('password.email');
+Route::get('/password/reset/{token}', [\App\Http\Controllers\PasswordResetController::class, 'showResetForm'])->middleware('guest')->name('password.reset');
+Route::post('/password/reset', [\App\Http\Controllers\PasswordResetController::class, 'reset'])->middleware('guest')->name('password.update');
+
 // OTP Login Routes
 Route::get('/login/otp', [\App\Http\Controllers\AuthController::class, 'showOtpForm'])->name('login.otp');
 Route::post('/login/otp/send', [\App\Http\Controllers\AuthController::class, 'sendOtp'])->name('login.otp.send');

@@ -43,7 +43,7 @@
                                 <i class="fas fa-envelope text-text-dark/40"></i>
                             </div>
                             <input id="email" name="email" type="email" autocomplete="email" required 
-                                class="appearance-none rounded-xl relative block w-full px-4 py-3.5 pl-11 border border-card-border bg-primary-bg text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue focus:bg-white transition-all sm:text-sm" 
+                                class="appearance-none rounded-xl relative block w-full px-4 py-3.5 pl-11 border border-card-border bg-secondary-bg text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all sm:text-sm" 
                                 placeholder="john@example.com">
                         </div>
                     </div>
@@ -67,7 +67,7 @@
                         <label for="otp" class="block text-sm font-semibold text-text-main mb-2">Enter 6-Digit OTP</label>
                         <div class="relative">
                             <input id="otp" name="otp" type="text" maxlength="6" autocomplete="one-time-code" required 
-                                class="appearance-none rounded-xl relative block w-full px-4 py-3.5 border border-card-border bg-primary-bg text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow focus:bg-white transition-all sm:text-center text-2xl tracking-widest font-bold" 
+                                class="appearance-none rounded-xl relative block w-full px-4 py-3.5 border border-card-border bg-secondary-bg text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all sm:text-center text-2xl tracking-widest font-bold" 
                                 placeholder="------">
                         </div>
                     </div>
