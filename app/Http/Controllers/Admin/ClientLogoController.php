@@ -18,6 +18,16 @@ class ClientLogoController extends Controller
             $query->where('name', 'like', "%{$search}%");
         }
 
+        // Status Filter
+        if ($request->has('status')) {
+            $status = $request->input('status');
+            if ($status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
         // Sorting
         $sortField = $request->input('sort_by', 'created_at');
         $sortDirection = $request->input('order', 'desc');

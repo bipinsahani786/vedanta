@@ -181,35 +181,42 @@
     {{-- Right Column --}}
     <div class="flex flex-col gap-8">
         
-        {{-- System Status --}}
+        {{-- Plan Purchases --}}
         <div class="bg-gray-900 rounded-2xl p-6 shadow-md relative overflow-hidden">
             <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
             
             <div class="flex items-center gap-3 mb-6 relative z-10">
                 <div class="relative flex h-2.5 w-2.5">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00a8e8] opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00a8e8]"></span>
                 </div>
-                <h3 class="font-bold text-white text-lg tracking-tight">System Status</h3>
+                <h3 class="font-bold text-white text-lg tracking-tight">Plan Purchases</h3>
             </div>
             
             <div class="space-y-4 relative z-10">
-                <div class="flex justify-between items-center py-2 border-b border-gray-800">
-                    <span class="text-gray-400 text-sm">App Version</span>
-                    <span class="text-gray-100 font-semibold text-sm">2.0.1</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-gray-800">
-                    <span class="text-gray-400 text-sm">Laravel</span>
-                    <span class="text-gray-100 font-semibold text-sm">v{{ app()->version() }}</span>
-                </div>
-                <div class="flex justify-between items-center py-2">
-                    <span class="text-gray-400 text-sm">PHP Version</span>
-                    <span class="text-gray-100 font-semibold text-sm">{{ phpversion() }}</span>
-                </div>
+                <a href="{{ route('admin.crm.index', ['plan_amount' => 500]) }}" class="flex justify-between items-center py-3 border-b border-gray-800 hover:bg-gray-800/50 px-2 rounded-lg transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-[#00a8e8]/20 text-[#00a8e8] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <span class="font-bold">₹</span>
+                        </div>
+                        <span class="text-gray-300 text-sm font-medium group-hover:text-white transition-colors">₹500 Plans</span>
+                    </div>
+                    <span class="text-white font-bold text-lg group-hover:text-[#00a8e8] transition-colors">{{ number_format($plan500Count) }} <span class="text-xs text-gray-500 font-normal">users</span></span>
+                </a>
+                
+                <a href="{{ route('admin.crm.index', ['plan_amount' => 1000]) }}" class="flex justify-between items-center py-3 hover:bg-gray-800/50 px-2 rounded-lg transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-[#00a8e8]/20 text-[#00a8e8] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <span class="font-bold">₹</span>
+                        </div>
+                        <span class="text-gray-300 text-sm font-medium group-hover:text-white transition-colors">₹1000 Plans</span>
+                    </div>
+                    <span class="text-white font-bold text-lg group-hover:text-[#00a8e8] transition-colors">{{ number_format($plan1000Count) }} <span class="text-xs text-gray-500 font-normal">users</span></span>
+                </a>
             </div>
             
             <div class="mt-6 pt-5 border-t border-gray-800 relative z-10">
-                <p class="text-xs text-gray-500 italic text-center">"The Gold Standard in Education Recruitment"</p>
+                <p class="text-xs text-gray-500 italic text-center">"Empowering Education Professionals"</p>
             </div>
         </div>
 

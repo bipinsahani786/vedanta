@@ -45,6 +45,10 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Plan Purchases
+        $plan500Count = CandidateProfile::where('paid_amount', 500)->count();
+        $plan1000Count = CandidateProfile::where('paid_amount', 1000)->count();
+
         return view('admin.dashboard', compact(
             'registrationRevenue',
             'serviceChargeRevenue',
@@ -55,7 +59,9 @@ class DashboardController extends Controller
             'activeJobs',
             'placements',
             'recentCandidates',
-            'pendingJobs'
+            'pendingJobs',
+            'plan500Count',
+            'plan1000Count'
         ));
     }
 }
