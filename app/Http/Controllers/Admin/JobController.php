@@ -91,16 +91,14 @@ class JobController extends Controller
             'status' => 'approved'
         ]);
 
-        // Smart Job Matching: Notify Candidates with similar subject/location
-        $job->load(['subject', 'state', 'city']);
-        if ($job->subject) {
-            $matchingCandidates = \App\Models\User::where('role', 'candidate')
-                ->whereHas('profile', function($q) use ($job) {
-                    $q->where('subject_id', $job->subject_id)
-                      ->orWhere('preferred_state_id', $job->state_id);
-                })->get();
+        // Smart Job Matching: Notify Candidates with similar subject/location/category
+        $suggestedCandidates = $job->getSuggestedCandidates(50); // Get top 50 matching candidates
 
-            foreach ($matchingCandidates as $candidate) {
+        foreach ($suggestedCandidates as $candidateProfile) {
+            $candidate = $candidateProfile->user;
+            
+            if ($candidate) {
+                // Insert Database Notification
                 \Illuminate\Support\Facades\DB::table('notifications')->insert([
                     'id' => Str::uuid(),
                     'type' => 'App\Notifications\JobMatched',
@@ -108,12 +106,15 @@ class JobController extends Controller
                     'notifiable_id' => $candidate->id,
                     'data' => json_encode([
                         'title' => 'New Matching Job: ' . $job->title,
-                        'message' => 'A new job at ' . $job->school_name . ' matches your profile.',
+                        'message' => 'A new job at ' . $job->school_name . ' matches your profile (' . $candidateProfile->match_percentage . '% match).',
                         'job_id' => $job->id
                     ]),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+
+                // Send Email Notification
+                \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\CandidateJobMatchNotification($job, $candidateProfile->match_percentage));
             }
         }
 
