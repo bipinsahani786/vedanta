@@ -85,6 +85,12 @@ class CrmController extends Controller
             });
         }
 
+        if ($planAmount = $request->input('plan_amount')) {
+            $query->whereHas('profile', function($q) use ($planAmount) {
+                $q->where('paid_amount', $planAmount);
+            });
+        }
+
         // Sorting
         $sortField = $request->input('sort_by', 'created_at');
         $sortDirection = $request->input('order', 'desc');

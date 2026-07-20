@@ -195,10 +195,10 @@
 
                 <div class="text-[10px] uppercase font-bold tracking-widest text-white/30 mt-6 mb-2 px-4">CMS</div>
 
-                <a href="{{ route('admin.services.index') }}"
+                <!-- <a href="{{ route('admin.services.index') }}"
                     class="sidebar-link {{ request()->routeIs('admin.services.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-concierge-bell w-5 text-center"></i> Services
-                </a>
+                </a> -->
                 <a href="{{ route('admin.testimonials.index') }}"
                     class="sidebar-link {{ request()->routeIs('admin.testimonials.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-star w-5 text-center"></i> Testimonials

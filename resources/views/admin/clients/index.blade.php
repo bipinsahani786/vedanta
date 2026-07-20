@@ -14,7 +14,7 @@
 
 {{-- Analytics Cards --}}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.clients.index') }}" class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
         <div class="w-12 h-12 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xl">
             <i class="fas fa-building"></i>
         </div>
@@ -22,9 +22,9 @@
             <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Total Logos</p>
             <p class="text-2xl font-bold text-text-main">{{ \App\Models\ClientLogo::count() }}</p>
         </div>
-    </div>
+    </a>
     
-    <div class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.clients.index', ['status' => 'active']) }}" class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
         <div class="w-12 h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-xl">
             <i class="fas fa-check-circle"></i>
         </div>
@@ -32,9 +32,9 @@
             <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Active</p>
             <p class="text-2xl font-bold text-text-main">{{ \App\Models\ClientLogo::where('is_active', true)->count() }}</p>
         </div>
-    </div>
+    </a>
 
-    <div class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+    <a href="{{ route('admin.clients.index', ['status' => 'inactive']) }}" class="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
         <div class="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-xl">
             <i class="fas fa-times-circle"></i>
         </div>
@@ -42,7 +42,7 @@
             <p class="text-sm font-semibold text-text-dark/70 uppercase tracking-wider mb-1">Inactive</p>
             <p class="text-2xl font-bold text-text-main">{{ \App\Models\ClientLogo::where('is_active', false)->count() }}</p>
         </div>
-    </div>
+    </a>
 </div>
 
 {{-- Enhanced Filter/Search Bar --}}
