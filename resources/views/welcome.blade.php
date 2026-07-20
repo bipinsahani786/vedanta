@@ -704,7 +704,7 @@
             <div
                 class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-1 cert-step-1 cert-card-hover group">
                 <div class="h-16 mb-4 flex items-center justify-center">
-                    <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/msme.jpg" class="max-h-full max-w-full object-contain" alt="MSME">
+                    <img src="{{ asset('/certification/msme.jpg') }}" class="max-h-full max-w-full object-contain" alt="MSME">
                 </div>
                 <h3 class="font-bold text-sm mb-3 text-slate-800">MSME</h3>
                 <div
@@ -716,7 +716,7 @@
             <div
                 class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-2 cert-step-2 cert-card-hover group">
                 <div class="h-16 mb-4 flex items-center justify-center">
-                    <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/NCS.jpg" class="max-h-full max-w-full object-contain" alt="NCS">
+                    <img src="{{ asset('/certification/ncs.jpg') }}" class="max-h-full max-w-full object-contain" alt="NCS">
                 </div>
                 <h3 class="font-bold text-sm mb-3 text-slate-800">NCS</h3>
                 <div
@@ -728,7 +728,7 @@
             <div
                 class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-3 cert-step-3 cert-card-hover group">
                 <div class="h-16 mb-4 flex items-center justify-center">
-                    <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/ISO-Logo-e1773586209102.png" class="max-h-full max-w-full object-contain" alt="ISO">
+                    <img src="{{ asset('/certification/iso.png') }}" class="max-h-full max-w-full object-contain" alt="ISO">
                 </div>
                 <h3 class="font-bold text-sm mb-3 text-slate-800">ISO</h3>
                 <div
@@ -740,7 +740,7 @@
             <div
                 class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-4 cert-step-4 cert-card-hover group">
                 <div class="h-16 mb-4 flex items-center justify-center">
-                    <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/IEC.png" class="max-h-full max-w-full object-contain" alt="IEC">
+                    <img src="{{ asset('/certification/iec.png') }}" class="max-h-full max-w-full object-contain" alt="IEC">
                 </div>
                 <h3 class="font-bold text-sm mb-3 text-slate-800">IEC</h3>
                 <div
@@ -752,7 +752,7 @@
             <div
                 class="bg-white rounded-xl p-6 flex flex-col items-center shadow-md reveal reveal-delay-1 cert-step-5 cert-card-hover group col-span-2 md:col-span-1 w-[calc(50%-0.5rem)] md:w-full mx-auto">
                 <div class="h-16 mb-4 flex items-center justify-center">
-                    <img src="https://api.cookingbook.in/wp-content/uploads/2026/03/standup-india.jpg" class="max-h-full max-w-full object-contain" alt="START UP INDIA">
+                    <img src="{{ asset('/certification/startupindia.jpg') }}" class="max-h-full max-w-full object-contain" alt="START UP INDIA">
                 </div>
                 <h3 class="font-bold text-sm mb-3 text-slate-800">START UP INDIA</h3>
                 <div
