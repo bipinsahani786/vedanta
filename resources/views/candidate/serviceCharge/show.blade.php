@@ -16,65 +16,86 @@
                     <p class="text-sm text-text-dark/50 mt-0.5">View your service charge details and payment history.</p>
                 </div>
             </div>
-            @if(isset($invoice) && $invoice->status !== 'paid')
-                <form action="{{ route('candidate.serviceCharge.pay') }}" method="POST" class="inline m-0 p-0">
-                    @csrf
-                    <button type="submit" class="px-5 py-2.5 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 hover:-translate-y-0.5 transition-all shadow-lg flex items-center gap-2">
-                        <i class="fas fa-credit-card text-xs"></i> Pay Now
-                    </button>
-                </form>
+            @if($invoices->where('status', '!=', 'paid')->count() > 0)
+                <div class="px-4 py-2 bg-accent-yellow/20 text-accent-yellow rounded-xl text-sm font-semibold border border-accent-yellow/30">
+                    <i class="fas fa-exclamation-circle mr-1"></i> You have pending service charges
+                </div>
             @endif
         </div>
 
-        {{-- Main Details Card --}}
-        <div class="bg-card-bg rounded-2xl border border-card-border overflow-hidden shadow-xl reveal reveal-delay-1 mb-8">
-            <div class="p-6 md:p-8">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    
-                    {{-- Service Charge Amount --}}
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Service Charge Amount</p>
-                        <div class="text-2xl font-bold text-text-main">
-                            ₹{{ number_format($invoice->amount ?? 0, 2) }}
+        @forelse($invoices as $invoice)
+            <div class="bg-card-bg rounded-2xl border {{ $invoice->status === 'paid' ? 'border-green-500/30' : 'border-card-border' }} overflow-hidden shadow-xl reveal reveal-delay-1 mb-8 relative">
+                @if($invoice->status === 'paid')
+                    <div class="absolute top-0 right-0 px-4 py-1 bg-green-500 text-white text-xs font-bold rounded-bl-xl shadow-sm">
+                        <i class="fas fa-check-circle mr-1"></i> Paid
+                    </div>
+                @endif
+                <div class="p-6 md:p-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        
+                        {{-- Service Charge Amount --}}
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Service Charge Amount</p>
+                            <div class="text-2xl font-bold text-text-main">
+                                ₹{{ number_format($invoice->amount ?? 0, 2) }}
+                            </div>
+                        </div>
+
+                        {{-- Due Date --}}
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Due Date</p>
+                            <div class="text-lg font-semibold {{ (isset($invoice->due_date) && \Carbon\Carbon::parse($invoice->due_date)->isPast() && $invoice->status !== 'paid') ? 'text-red-500' : 'text-text-main' }}">
+                                {{ isset($invoice->due_date) ? \Carbon\Carbon::parse($invoice->due_date)->format('d M, Y') : 'N/A' }}
+                            </div>
+                        </div>
+
+                        {{-- Late Fee --}}
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Late Fee</p>
+                            <div class="text-lg font-semibold text-accent-yellow">
+                                ₹{{ number_format($invoice->late_fee ?? 0, 2) }}
+                            </div>
+                        </div>
+
+                        {{-- Pending Amount --}}
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Pending Amount</p>
+                            <div class="text-2xl font-bold text-accent-blue">
+                                @php
+                                    $pendingAmount = ($invoice->status === 'pending' || $invoice->status === 'overdue') ? ($invoice->amount + $invoice->late_fee) : 0;
+                                @endphp
+                                ₹{{ number_format($pendingAmount, 2) }}
+                            </div>
                         </div>
                     </div>
 
-                    {{-- Due Date --}}
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Due Date</p>
-                        <div class="text-lg font-semibold {{ (isset($invoice->due_date) && \Carbon\Carbon::parse($invoice->due_date)->isPast() && $invoice->status !== 'paid') ? 'text-red-500' : 'text-text-main' }}">
-                            {{ isset($invoice->due_date) ? \Carbon\Carbon::parse($invoice->due_date)->format('d M, Y') : 'N/A' }}
-                        </div>
+                    <div class="mt-8 pt-6 border-t border-card-border flex flex-wrap gap-4 items-center justify-between">
+                        {{-- Invoice PDF Button --}}
+                        <a href="#" class="inline-flex items-center gap-2 px-5 py-2.5 bg-secondary-bg text-text-main rounded-xl text-sm font-semibold hover:bg-card-border/50 transition-colors border border-card-border">
+                            <i class="fas fa-file-pdf text-red-400"></i> Download Invoice PDF
+                        </a>
+                        
+                        @if($invoice->status !== 'paid')
+                            <form action="{{ route('candidate.serviceCharge.pay') }}" method="POST" class="inline m-0 p-0">
+                                @csrf
+                                <input type="hidden" name="invoice_id" value="{{ $invoice->id }}">
+                                <button type="submit" class="px-5 py-2.5 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 hover:-translate-y-0.5 transition-all shadow-lg flex items-center gap-2">
+                                    <i class="fas fa-credit-card text-xs"></i> Pay ₹{{ number_format($pendingAmount, 2) }}
+                                </button>
+                            </form>
+                        @endif
                     </div>
-
-                    {{-- Late Fee --}}
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Late Fee</p>
-                        <div class="text-lg font-semibold text-accent-yellow">
-                            ₹{{ number_format($invoice->late_fee ?? 0, 2) }}
-                        </div>
-                    </div>
-
-                    {{-- Pending Amount --}}
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Pending Amount</p>
-                        <div class="text-2xl font-bold text-accent-blue">
-                            @php
-                                $pendingAmount = isset($invoice) ? (($invoice->status === 'pending' || $invoice->status === 'overdue') ? ($invoice->amount + $invoice->late_fee) : 0) : 0;
-                            @endphp
-                            ₹{{ number_format($pendingAmount, 2) }}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-card-border flex flex-wrap gap-4">
-                    {{-- Invoice PDF Button --}}
-                    <a href="#" class="inline-flex items-center gap-2 px-5 py-2.5 bg-secondary-bg text-text-main rounded-xl text-sm font-semibold hover:bg-card-border/50 transition-colors border border-card-border">
-                        <i class="fas fa-file-pdf text-red-400"></i> Download Invoice PDF
-                    </a>
                 </div>
             </div>
-        </div>
+        @empty
+            <div class="bg-card-bg rounded-2xl border border-card-border p-8 text-center text-text-dark/50 mb-8 shadow-sm">
+                <div class="w-16 h-16 bg-secondary-bg rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-green-500 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-text-main mb-1">No Service Charges</h3>
+                <p class="text-sm">You do not have any service charge invoices at the moment.</p>
+            </div>
+        @endforelse
 
         {{-- Payment History --}}
         <h2 class="text-lg font-bold text-text-main mb-4 reveal reveal-delay-2">Payment History</h2>

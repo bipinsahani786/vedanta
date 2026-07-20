@@ -13,29 +13,26 @@ class ServiceChargeController extends Controller
     {
         $candidateId = auth()->id();
         
-        $invoice = ServiceChargeInvoice::where('candidate_id', $candidateId)
-            ->whereIn('status', ['pending', 'overdue'])
+        $invoices = ServiceChargeInvoice::where('candidate_id', $candidateId)
             ->latest()
-            ->first();
-            
-        if (!$invoice) {
-            $invoice = ServiceChargeInvoice::where('candidate_id', $candidateId)->latest()->first();
-        }
+            ->get();
         
         $paymentHistory = PaymentTransaction::where('candidate_id', $candidateId)
             ->where('type', 'service_charge')
             ->latest()
             ->get();
             
-        return view('candidate.serviceCharge.show', compact('invoice', 'paymentHistory'));
+        return view('candidate.serviceCharge.show', compact('invoices', 'paymentHistory'));
     }
 
     public function process(Request $request)
     {
+        $request->validate(['invoice_id' => 'required|exists:service_charge_invoices,id']);
         $user = auth()->user();
-        $invoice = ServiceChargeInvoice::where('candidate_id', $user->id)
+        
+        $invoice = ServiceChargeInvoice::where('id', $request->invoice_id)
+            ->where('candidate_id', $user->id)
             ->whereIn('status', ['pending', 'overdue'])
-            ->latest()
             ->first();
 
         if (!$invoice) {
