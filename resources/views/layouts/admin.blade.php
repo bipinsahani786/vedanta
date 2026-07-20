@@ -139,6 +139,11 @@
                 <div class="text-[10px] uppercase font-bold tracking-widest text-white/30 mt-6 mb-2 px-4">Master Data
                 </div>
 
+                <a href="{{ route('admin.users.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-users w-5 text-center"></i> Users
+                </a>
+
                 <a href="{{ route('admin.categories.index') }}"
                     class="sidebar-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-layer-group w-5 text-center"></i> Categories

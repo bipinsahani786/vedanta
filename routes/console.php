@@ -9,3 +9,6 @@ Artisan::command('inspire', function () {
 
 use Illuminate\Support\Facades\Schedule;
 Schedule::command('invoices:calculate-late-fees')->daily();
+Schedule::command('reminders:abandoned-registration')->daily();
+Schedule::command('reminders:interview')->daily();
+Schedule::command('reminders:lead-follow-ups')->dailyAt('09:00');

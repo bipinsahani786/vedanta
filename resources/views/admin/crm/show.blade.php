@@ -11,6 +11,19 @@
     <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
         <a href="{{ route('admin.crm.index') }}" class="text-sm text-gray-600 hover:underline shrink-0">&larr; Back to List</a>
         
+        <form action="{{ route('admin.crm.candidate.verify', $candidate->id) }}" method="POST" class="inline">
+            @csrf
+            @if($candidate->profile && $candidate->profile->is_verified)
+                <button type="submit" class="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-xl hover:bg-red-200 transition-colors flex items-center shadow-sm">
+                    <i class="fas fa-times-circle mr-2"></i> Remove Verification
+                </button>
+            @else
+                <button type="submit" class="px-4 py-2 bg-green-100 text-green-700 text-sm font-semibold rounded-xl hover:bg-green-200 transition-colors flex items-center shadow-sm">
+                    <i class="fas fa-check-circle mr-2"></i> Verify Profile
+                </button>
+            @endif
+        </form>
+
         <a href="{{ route('admin.crm.edit', $candidate->id) }}" class="px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded-xl hover:bg-blue-200 transition-colors flex items-center shadow-sm">
             <i class="fas fa-edit mr-2"></i> Edit Profile
         </a>

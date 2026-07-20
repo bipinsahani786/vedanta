@@ -144,6 +144,9 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
     Route::get('/applicants', [\App\Http\Controllers\Employer\ApplicantController::class, 'index'])->name('applicants.index');
 });
 
+// Global Impersonation Leave Route
+Route::middleware(['auth'])->get('/admin/impersonate/leave', [\App\Http\Controllers\Admin\UserController::class, 'leaveImpersonate'])->name('admin.impersonate.leave');
+
 // Admin Routes (Protected)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
@@ -189,6 +192,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/leads/{id}/follow-up', [\App\Http\Controllers\Admin\ContactLeadController::class, 'storeFollowUp'])->name('leads.followup.store');
 
     // Frontend Management
+    
+    // User Management
+    Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::post('/users/{id}/toggle-status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::get('/users/{id}/impersonate', [\App\Http\Controllers\Admin\UserController::class, 'impersonate'])->name('users.impersonate');
 
     Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class)->except(['create', 'show', 'edit']);
     Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class)->except(['create', 'show', 'edit']);

@@ -65,6 +65,23 @@ class JobController extends Controller
             'status' => 'pending',
         ]);
 
+        // Notify Admin
+        $adminUser = \App\Models\User::where('role', 'admin')->first();
+        if ($adminUser) {
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\NewJobPosted',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $adminUser->id,
+                'data' => json_encode([
+                    'title' => 'New Job Posted',
+                    'message' => $request->school_name . ' has posted a new job vacancy: ' . $request->title . '.',
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Your job requirement has been submitted successfully. Our team will review and approve it shortly.');
     }
 }

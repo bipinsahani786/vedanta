@@ -205,8 +205,29 @@ class PaymentController extends Controller
                         'plan_started_at' => now()
                     ]);
                 }
-                return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Your profile is now active and live.');
+                $returnRedirect = redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Your profile is now active and live.');
             }
+
+            // Notify Admin of Payment Received
+            $adminUser = \App\Models\User::where('role', 'admin')->first();
+            if ($adminUser) {
+                \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                    'id' => \Illuminate\Support\Str::uuid(),
+                    'type' => 'App\Notifications\PaymentReceived',
+                    'notifiable_type' => 'App\Models\User',
+                    'notifiable_id' => $adminUser->id,
+                    'data' => json_encode([
+                        'title' => 'Payment Received',
+                        'message' => '₹' . $amountPaid . ' was received from ' . $user->name . ' for ' . (str_starts_with($transactionId, 'RENEW_') ? 'Renewal' : (str_starts_with($transactionId, 'UPGRADE_') ? 'Upgrade' : 'Registration')) . '.',
+                        'candidate_id' => $user->id,
+                        'amount' => $amountPaid
+                    ]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            return $returnRedirect ?? redirect()->route('candidate.dashboard')->with('success', 'Payment processed successfully.');
         }
 
         return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or cancelled.');

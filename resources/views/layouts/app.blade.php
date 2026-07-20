@@ -176,11 +176,18 @@
     </style>
 </head>
 
-<body class="bg-secondary-bg text-text-dark">
+<body class="bg-secondary-bg text-text-dark {{ session()->has('impersonate_admin_id') ? 'pt-10' : '' }}">
 
     <!-- Preloader removed per user request -->
 
-    <!-- Global Marquee Bar (Moving text left-to-right) -->
+    @if(session()->has('impersonate_admin_id'))
+        <div class="fixed top-0 left-0 w-full z-[9999] bg-gradient-to-r from-red-600 to-red-500 text-white text-center py-2 px-4 shadow-lg flex justify-center items-center gap-4 text-sm font-semibold">
+            <span><i class="fas fa-user-secret mr-2"></i> You are currently impersonating <strong>{{ auth()->user()->name }}</strong> ({{ ucfirst(auth()->user()->role) }}).</span>
+            <a href="{{ route('admin.impersonate.leave') }}" class="bg-white text-red-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-red-50 transition-colors shadow-sm">
+                Return to Admin <i class="fas fa-sign-out-alt ml-1"></i>
+            </a>
+        </div>
+    @endif    <!-- Global Marquee Bar (Moving text left-to-right) -->
     <div
         class="sticky top-0 w-full block bg-gradient-to-r from-[#040e2d] via-[#129aef] to-[#040e2d] text-white text-[11px] md:text-sm py-1.5 md:py-2 px-2 md:px-6 font-semibold tracking-wide shadow-md z-[105] border-b border-white/20">
         <marquee behavior="scroll" direction="left" scrollamount="6" class="flex items-center mt-0.5">

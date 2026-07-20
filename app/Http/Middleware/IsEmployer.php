@@ -16,6 +16,10 @@ class IsEmployer
     public function handle(Request $request, Closure $next): Response
     {
         if (auth()->check() && auth()->user()->role === 'employer') {
+            if (!auth()->user()->is_active) {
+                auth()->logout();
+                return redirect()->route('login')->with('error', 'Your account has been deactivated. Please contact support.');
+            }
             return $next($request);
         }
 

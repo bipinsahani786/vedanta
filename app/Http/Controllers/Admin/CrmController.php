@@ -560,6 +560,9 @@ class CrmController extends Controller
             'updated_at' => now(),
         ]);
 
+        // Send Email
+        \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\ServiceChargeInvoiceMail($invoice));
+
         return back()->with('success', 'Invoice created successfully.');
     }
 
@@ -591,8 +594,7 @@ class CrmController extends Controller
     public function adjustInvoice(Request $request, $invoiceId)
     {
         $invoice = ServiceChargeInvoice::findOrFail($invoiceId);
-        
-        $request->validate([
+         $request->validate([
             'deduction' => 'required|numeric|min:0|max:' . $invoice->late_fee
         ]);
 
@@ -605,13 +607,46 @@ class CrmController extends Controller
 
             $candidate = User::find($invoice->candidate_id);
             if ($candidate && $candidate->profile) {
-                // Ensure we don't drop pending amount below 0 artificially
-                $newPending = max(0, $candidate->profile->pending_amount - $deduction);
-                $candidate->profile->update(['pending_amount' => $newPending]);
+                $candidate->profile->decrement('pending_amount', $deduction);
             }
         }
 
-        return back()->with('success', 'Invoice adjusted successfully. ₹' . $deduction . ' waived from late fine.');
+        return back()->with('success', 'Late fee adjusted successfully.');
+    }
+
+    public function toggleVerification($id)
+    {
+        $candidate = User::where('role', 'candidate')->findOrFail($id);
+        $profile = $candidate->profile;
+
+        if (!$profile) {
+            return back()->with('error', 'Profile not found.');
+        }
+
+        $profile->is_verified = !$profile->is_verified;
+        $profile->save();
+
+        if ($profile->is_verified) {
+            // DB Notification
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\ProfileVerified',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $candidate->id,
+                'data' => json_encode([
+                    'title' => 'Profile Verified!',
+                    'message' => 'Congratulations! Your profile has been officially verified by our team. You now have the Verified Badge.',
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Email Notification
+            \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\ProfileApprovedMail($candidate));
+            return back()->with('success', 'Candidate profile has been verified and notified.');
+        }
+
+        return back()->with('success', 'Candidate verification removed.');
     }
 
     public function assignJob(Request $request, $id)
@@ -634,16 +669,6 @@ class CrmController extends Controller
         ]);
 
         return back()->with('success', 'Job application assigned successfully.');
-    }
-
-    public function toggleVerification($id)
-    {
-        $candidate = User::findOrFail($id);
-        if ($candidate->profile) {
-            $candidate->profile->is_verified = !$candidate->profile->is_verified;
-            $candidate->profile->save();
-        }
-        return back()->with('success', 'Candidate verification status updated.');
     }
 
     public function rateCandidate(Request $request, $id)
