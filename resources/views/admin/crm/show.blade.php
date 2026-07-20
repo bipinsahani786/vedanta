@@ -386,7 +386,7 @@
 
                         <div class="w-full md:w-auto flex-1">
                             <label class="block text-xs font-medium text-gray-700 mb-1">Select Hired Job Application</label>
-                            <select name="job_application_id" id="job_application_id" class="w-full rounded-md border-gray-300 shadow-sm text-sm" required>
+                            <select name="job_application_id" id="job_application_id" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" required>
                                 <option value="">-- Select Application --</option>
                                 @foreach($candidate->applications->where('status', 'hired') as $app)
                                     @if(!$app->invoice)
@@ -397,14 +397,14 @@
                         </div>
                         <div class="w-24">
                             <label class="block text-xs font-medium text-gray-700 mb-1">Amount (₹)</label>
-                            <input type="number" name="amount" class="w-full rounded-md border-gray-300 shadow-sm text-sm" required min="0">
+                            <input type="number" name="amount" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" required min="0">
                         </div>
                         <div class="w-36">
                             <label class="block text-xs font-medium text-gray-700 mb-1">Due Date</label>
-                            <input type="date" name="due_date" class="w-full rounded-md border-gray-300 shadow-sm text-sm" required>
+                            <input type="date" name="due_date" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" required>
                         </div>
                         <div>
-                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm">
                                 Create Invoice
                             </button>
                         </div>
@@ -423,23 +423,23 @@
                     @csrf
                     <div class="mb-3">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Notes / Call Summary</label>
-                        <textarea name="notes" rows="2" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" required placeholder="What was discussed?"></textarea>
+                        <textarea name="notes" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" required placeholder="What was discussed?"></textarea>
                     </div>
                     <div class="flex gap-4">
                         <div class="flex-1">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Next Follow-up Date</label>
-                            <input type="date" name="follow_up_date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                            <input type="date" name="follow_up_date" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                         <div class="flex-1">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select name="status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                            <select name="status" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="open">Open (Needs Action)</option>
                                 <option value="closed">Closed (Resolved)</option>
                             </select>
                         </div>
                     </div>
                     <div class="mt-4 text-right">
-                        <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm">
                             Add Follow-up
                         </button>
                     </div>
