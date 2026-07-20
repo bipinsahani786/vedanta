@@ -82,7 +82,10 @@ class AgreementController extends Controller
 
             $signatureData = '';
             $type = 'png';
-            if (Str::startsWith($signatureDataRaw, 'data:image')) {
+            if ($profile->signature_type === 'type') {
+                $signatureData = $signatureDataRaw;
+                $type = 'type';
+            } elseif (Str::startsWith($signatureDataRaw, 'data:image')) {
                 preg_match('/^data:image\/(\w+);base64,/', $signatureDataRaw, $matches);
                 $type = strtolower($matches[1] ?? 'png');
                 $signatureData = base64_decode(substr($signatureDataRaw, strpos($signatureDataRaw, ',') + 1));
@@ -109,33 +112,38 @@ class AgreementController extends Controller
 
     private function generateStampedPdf($user, $profile, $signatureData, $sigType)
     {
-        // Save signature to temporary file for FPDI
-        $tempSignaturePath = 'temp/sig_' . $user->id . '_' . time() . '.jpg';
+        $tempSignaturePath = null;
+        $absoluteSigPath = null;
         
-        // Convert any image to standard JPEG to avoid FPDF format errors (like alpha channel in PNG)
-        try {
-            $image = @imagecreatefromstring($signatureData);
-            if ($image !== false) {
-                // Create a white background for transparent images
-                $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
-                imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
-                imagealphablending($bg, TRUE);
-                imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
-                
-                // Save as JPEG to a temporary buffer
-                ob_start();
-                imagejpeg($bg, null, 90);
-                $signatureData = ob_get_clean();
-                
-                imagedestroy($image);
-                imagedestroy($bg);
+        if ($profile->signature_type !== 'type') {
+            // Save signature to temporary file for FPDI
+            $tempSignaturePath = 'temp/sig_' . $user->id . '_' . time() . '.jpg';
+            
+            // Convert any image to standard JPEG to avoid FPDF format errors (like alpha channel in PNG)
+            try {
+                $image = @imagecreatefromstring($signatureData);
+                if ($image !== false) {
+                    // Create a white background for transparent images
+                    $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
+                    imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
+                    imagealphablending($bg, TRUE);
+                    imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+                    
+                    // Save as JPEG to a temporary buffer
+                    ob_start();
+                    imagejpeg($bg, null, 90);
+                    $signatureData = ob_get_clean();
+                    
+                    imagedestroy($image);
+                    imagedestroy($bg);
+                }
+            } catch (\Exception $e) {
+                \Log::error("Failed to convert signature to JPEG: " . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            \Log::error("Failed to convert signature to JPEG: " . $e->getMessage());
-        }
 
-        Storage::disk('local')->put($tempSignaturePath, $signatureData);
-        $absoluteSigPath = Storage::disk('local')->path($tempSignaturePath);
+            Storage::disk('local')->put($tempSignaturePath, $signatureData);
+            $absoluteSigPath = Storage::disk('local')->path($tempSignaturePath);
+        }
 
         // Find candidate photo (live_photo or profile_photo)
         $photoPath = null;
@@ -209,11 +217,18 @@ class AgreementController extends Controller
                 }
 
                 // Signature in the box
-                try {
-                    // X: 78, Y: 272, Width: 60, Height: 15
-                    $pdf->Image($absoluteSigPath, 78, 272, 60, 15);
-                } catch (\Exception $e) {
-                    \Log::error("FPDF Image Error (Signature): " . $e->getMessage());
+                if ($profile->signature_type === 'type') {
+                    $pdf->SetFont('Helvetica', 'I', 18);
+                    $pdf->SetTextColor(10, 10, 100);
+                    $pdf->SetXY(78, 275);
+                    $pdf->Cell(60, 10, $profile->signature_data, 0, 0, 'C');
+                } else if ($absoluteSigPath && file_exists($absoluteSigPath)) {
+                    try {
+                        // X: 78, Y: 272, Width: 60, Height: 15
+                        $pdf->Image($absoluteSigPath, 78, 272, 60, 15);
+                    } catch (\Exception $e) {
+                        \Log::error("FPDF Image Error (Signature): " . $e->getMessage());
+                    }
                 }
             }
         }
@@ -224,7 +239,9 @@ class AgreementController extends Controller
         Storage::disk('public')->put($fileName, $pdf->Output('S'));
 
         // Clean up temp files
-        Storage::disk('local')->delete($tempSignaturePath);
+        if ($tempSignaturePath) {
+            Storage::disk('local')->delete($tempSignaturePath);
+        }
         if ($tempPhotoPath) {
             Storage::disk('local')->delete($tempPhotoPath);
         }
