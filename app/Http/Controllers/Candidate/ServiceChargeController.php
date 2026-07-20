@@ -13,7 +13,14 @@ class ServiceChargeController extends Controller
     {
         $candidateId = auth()->id();
         
-        $invoice = ServiceChargeInvoice::where('candidate_id', $candidateId)->latest()->first();
+        $invoice = ServiceChargeInvoice::where('candidate_id', $candidateId)
+            ->whereIn('status', ['pending', 'overdue'])
+            ->latest()
+            ->first();
+            
+        if (!$invoice) {
+            $invoice = ServiceChargeInvoice::where('candidate_id', $candidateId)->latest()->first();
+        }
         
         $paymentHistory = PaymentTransaction::where('candidate_id', $candidateId)
             ->where('type', 'service_charge')
