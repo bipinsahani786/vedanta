@@ -3,10 +3,10 @@
     <div class="pt-32 pb-12 px-6 lg:px-[5%] text-center border-b border-card-border bg-card-bg/30">
         <h4 class="text-accent-blue text-sm font-bold mb-3 uppercase tracking-wider">Legal</h4>
         <h1 class="text-4xl md:text-5xl font-extrabold text-text-main mb-6">Terms & Conditions</h1>
-        <p class="text-text-main opacity-70 max-w-2xl mx-auto">Last updated: October 2023</p>
+        <p class="text-text-main opacity-70 max-w-2xl mx-auto">Last updated: July 2026</p>
     </div>
 
-    <div class="py-16 px-6 lg:px-[5%] max-w-4xl mx-auto reveal">
+    <div class="py-16 px-6 lg:px-[5%] max-w-4xl mx-auto">
         <div
             class="prose prose-sm md:prose-base prose-headings:text-text-main prose-p:text-text-main prose-p:opacity-80 prose-a:text-accent-blue max-w-none">
             <h2 class="text-2xl font-bold text-text-main mt-8 mb-4"> Terms & Conditions</h2>
