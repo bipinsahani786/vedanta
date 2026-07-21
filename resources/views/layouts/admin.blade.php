@@ -270,9 +270,10 @@
                 <div class="flex items-center gap-3 sm:gap-5">
                     {{-- Notifications Dropdown --}}
                     @php
+                        $adminIds = \App\Models\User::where('role', 'admin')->pluck('id');
                         $adminNotifications = \Illuminate\Support\Facades\DB::table('notifications')
                             ->where('notifiable_type', 'App\Models\User')
-                            ->where('notifiable_id', auth()->id())
+                            ->whereIn('notifiable_id', $adminIds)
                             ->whereNull('read_at')
                             ->orderByDesc('created_at')
                             ->take(10)
