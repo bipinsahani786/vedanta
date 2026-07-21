@@ -44,14 +44,14 @@ class ServiceChargeController extends Controller
             return back()->with('error', 'Invalid invoice amount.');
         }
 
-        // --- LOCAL BYPASS ---
-        if (env('APP_ENV') === 'local') {
-            return redirect()->route('candidate.serviceCharge.callback', [
-                'transactionId' => 'BYPASS_' . time(),
-                'bypass' => true,
-                'amount' => $amount
-            ]);
-        }
+        // --- LOCAL BYPASS (Disabled for gateway testing) ---
+        // if (env('APP_ENV') === 'local') {
+        //     return redirect()->route('candidate.serviceCharge.callback', [
+        //         'transactionId' => 'BYPASS_' . time(),
+        //         'bypass' => true,
+        //         'amount' => $amount
+        //     ]);
+        // }
         // --------------------
 
         $merchantId = env('PHONEPE_MERCHANT_ID', 'PGTESTPAYUAT86');
@@ -118,7 +118,8 @@ class ServiceChargeController extends Controller
             if ($invoice) {
                 $invoice->update(['status' => 'paid', 'payment_date' => now()]);
                 if ($user->profile) {
-                    $user->profile->decrement('pending_amount', $invoice->amount);
+                    $user->profile->pending_amount = max(0, $user->profile->pending_amount - $invoice->amount);
+                    $user->profile->save();
                 }
                 PaymentTransaction::create([
                     'candidate_id' => $user->id,
@@ -181,7 +182,8 @@ class ServiceChargeController extends Controller
                 ]);
                 $inv = ServiceChargeInvoice::find($invoiceId);
                 if ($inv && $user->profile) {
-                    $user->profile->decrement('pending_amount', $inv->amount);
+                    $user->profile->pending_amount = max(0, $user->profile->pending_amount - $inv->amount);
+                    $user->profile->save();
                 }
             } else {
                 // Fallback to latest pending invoice
@@ -193,7 +195,8 @@ class ServiceChargeController extends Controller
                 // To be safe, let's just fetch the invoice before updating
                 $invs = ServiceChargeInvoice::where('candidate_id', $user->id)->where('status', 'paid')->latest()->first();
                 if ($invs && $user->profile) {
-                    $user->profile->decrement('pending_amount', $invs->amount);
+                    $user->profile->pending_amount = max(0, $user->profile->pending_amount - $invs->amount);
+                    $user->profile->save();
                 }
             }
             return redirect()->route('candidate.serviceCharge.show')->with('success', 'Service charge paid successfully!');
