@@ -117,6 +117,10 @@
                                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-500/10 text-green-400 border border-green-500/20">
                                                             <i class="fas fa-check-circle mr-1 text-[9px]"></i> Successful
                                                         </span>
+                                                    @elseif(strtolower($payment->status) === 'failed')
+                                                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-red-500/10 text-red-500 border border-red-500/20">
+                                                            <i class="fas fa-times-circle mr-1 text-[9px]"></i> Failed
+                                                        </span>
                                                     @else
                                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-accent-yellow/10 text-accent-yellow border border-accent-yellow/20">
                                                             <i class="fas fa-clock mr-1 text-[9px]"></i> {{ ucfirst(strtolower($payment->status)) }}

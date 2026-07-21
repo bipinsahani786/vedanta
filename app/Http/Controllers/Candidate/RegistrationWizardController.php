@@ -296,89 +296,108 @@ class RegistrationWizardController extends Controller
 
         $user = auth()->user();
 
-        if ($user) {
-            \App\Models\PaymentTransaction::create([
-                'candidate_id' => $user->id,
-                'amount' => isset($rData['data']['amount']) ? $rData['data']['amount'] / 100 : 0,
-                'transaction_id' => $transactionId,
-                'type' => 'registration_fee',
-                'status' => (isset($rData['success']) && $rData['success'] === true && $rData['data']['state'] === 'COMPLETED') ? 'success' : 'failed',
-                'gateway_response' => $rData
+        // Guard: If transactionId or user is missing, abort
+        if (!$transactionId || !$user) {
+            return redirect()->route('candidate.dashboard')->with('error', 'Payment session expired. Please try again.');
+        }
+
+        // Guard: Prevent duplicate processing for the same transaction
+        $existingTxn = \App\Models\PaymentTransaction::where('transaction_id', $transactionId)->first();
+        if ($existingTxn) {
+            if ($existingTxn->status === 'success') {
+                return redirect()->route('candidate.dashboard')->with('success', 'Payment already processed successfully.');
+            }
+            return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or was already processed.');
+        }
+
+        // Check gateway response — ONLY COMPLETED means success
+        $isSuccess = isset($rData['success']) 
+            && $rData['success'] === true 
+            && isset($rData['data']['state']) 
+            && $rData['data']['state'] === 'COMPLETED';
+
+        // Always record transaction
+        \App\Models\PaymentTransaction::create([
+            'candidate_id' => $user->id,
+            'amount' => isset($rData['data']['amount']) ? $rData['data']['amount'] / 100 : 0,
+            'transaction_id' => $transactionId,
+            'type' => 'registration_fee',
+            'status' => $isSuccess ? 'success' : 'failed',
+            'gateway_response' => $rData
+        ]);
+
+        // If payment failed, stop here — do NOT update the profile
+        if (!$isSuccess) {
+            return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or cancelled. Please try again.');
+        }
+
+        $profile = $user->profile;
+        $amountPaid = $rData['data']['amount'] / 100;
+
+        if ($pendingPlanType === 'standard') {
+            // Standard plan payment
+            $profile->update([
+                'plan_type' => 'standard',
+                'initial_fee_paid' => true,
+                'paid_amount' => $profile->paid_amount + $amountPaid,
+                'pending_amount' => 500, // Initial 500 paid, 500 pending
+                'payment_id' => $rData['data']['transactionId'],
+                'registration_completed_at' => now(),
+                'plan_started_at' => now(),
+            ]);
+        } else {
+            // Premium plan payment
+            $profile->update([
+                'plan_type' => 'premium',
+                'initial_fee_paid' => true,
+                'is_fee_paid' => true,
+                'paid_amount' => $profile->paid_amount + $amountPaid,
+                'pending_amount' => 0,
+                'payment_id' => $rData['data']['transactionId'],
+                'registration_completed_at' => now(),
+                'plan_started_at' => now(),
             ]);
         }
 
-        if (isset($rData['success']) && $rData['success'] === true && $rData['data']['state'] === 'COMPLETED') {
-            $profile = $user->profile;
-            
-            $amountPaid = $rData['data']['amount'] / 100;
+        // Clear session
+        $request->session()->forget(['registration_plan', 'payment_txn_id', 'pending_plan_type', 'last_txn_id']);
 
-            if ($pendingPlanType === 'standard') {
-                // Standard plan payment
-                $profile->update([
-                    'plan_type' => 'standard',
-                    'initial_fee_paid' => true,
-                    'paid_amount' => $profile->paid_amount + $amountPaid,
-                    'pending_amount' => 500, // Initial 500 paid, 500 pending
-                    'payment_id' => $rData['data']['transactionId'],
-                    'registration_completed_at' => now(),
-                    'plan_started_at' => now(),
-                ]);
-            } else {
-                // Premium plan payment
-                $profile->update([
-                    'plan_type' => 'premium',
-                    'initial_fee_paid' => true,
-                    'is_fee_paid' => true,
-                    'paid_amount' => $profile->paid_amount + $amountPaid,
-                    'pending_amount' => 0,
-                    'payment_id' => $rData['data']['transactionId'],
-                    'registration_completed_at' => now(),
-                    'plan_started_at' => now(),
-                ]);
-            }
+        // Insert Database Notification for Candidate
+        \Illuminate\Support\Facades\DB::table('notifications')->insert([
+            'id' => \Illuminate\Support\Str::uuid(),
+            'type' => 'App\Notifications\RegistrationSuccess',
+            'notifiable_type' => 'App\Models\User',
+            'notifiable_id' => $user->id,
+            'data' => json_encode([
+                'title' => 'Registration Successful',
+                'message' => 'Welcome to Vedanta! Your registration plan is now active.',
+                'plan' => $pendingPlanType
+            ]),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-            // Clear session
-            $request->session()->forget(['registration_plan', 'payment_txn_id']);
-
-            // Insert Database Notification for Candidate
+        // Notify Admin of new registration
+        $adminUser = \App\Models\User::where('role', 'admin')->first();
+        if ($adminUser) {
             \Illuminate\Support\Facades\DB::table('notifications')->insert([
                 'id' => \Illuminate\Support\Str::uuid(),
-                'type' => 'App\Notifications\RegistrationSuccess',
+                'type' => 'App\Notifications\NewRegistration',
                 'notifiable_type' => 'App\Models\User',
-                'notifiable_id' => $user->id,
+                'notifiable_id' => $adminUser->id,
                 'data' => json_encode([
-                    'title' => 'Registration Successful',
-                    'message' => 'Welcome to Vedanta! Your registration plan is now active.',
-                    'plan' => $pendingPlanType
+                    'title' => 'New Registration',
+                    'message' => $user->name . ' has successfully completed registration and signed the agreement.',
+                    'candidate_id' => $user->id
                 ]),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-
-            // Notify Admin of new registration
-            $adminUser = \App\Models\User::where('role', 'admin')->first();
-            if ($adminUser) {
-                \Illuminate\Support\Facades\DB::table('notifications')->insert([
-                    'id' => \Illuminate\Support\Str::uuid(),
-                    'type' => 'App\Notifications\NewRegistration',
-                    'notifiable_type' => 'App\Models\User',
-                    'notifiable_id' => $adminUser->id,
-                    'data' => json_encode([
-                        'title' => 'New Registration',
-                        'message' => $user->name . ' has successfully completed registration and signed the agreement.',
-                        'candidate_id' => $user->id
-                    ]),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-
-            // Send Email to Candidate (Queued)
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
-
-            return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Registration complete.');
         }
 
-        return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or cancelled.');
+        // Send Email to Candidate (Queued)
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
+
+        return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Registration complete.');
     }
 }
