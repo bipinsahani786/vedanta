@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Service;
 use App\Models\Testimonial;
 use App\Models\ClientLogo;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -36,7 +37,6 @@ class HomeController extends Controller
     public function categoryJobs($id)
     {
         $category = Category::findOrFail($id);
-        $subjects = $category->subjects()->where('is_active', true)->get();
         $jobs = JobPost::with([
                 'category',
                 'subject',
@@ -48,6 +48,9 @@ class HomeController extends Controller
             ->where('status', 'approved')
             ->latest()
             ->get();
+            
+        $activeSubjectIds = $jobs->pluck('subject_id')->filter()->unique()->toArray();
+        $subjects = Subject::whereIn('id', $activeSubjectIds)->where('is_active', true)->get();
         return view('category-jobs', compact('category', 'subjects', 'jobs'));
     }
 
