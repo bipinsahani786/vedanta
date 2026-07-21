@@ -24,45 +24,94 @@
             @endif
 
             @if($jobs->count()>0)
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="jobs-container">
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="jobs-container">
                     @foreach($jobs as $job)
-                    <div class="job-card bg-white border border-blue-100 rounded-2xl shadow-md p-6 hover:shadow-xl transition-shadow duration-300 text-left" data-subject-id="{{ $job->subject_id }}">
-                        <h3 class="text-xl font-bold mb-4 text-blue-700 border-b border-blue-50 pb-3">
-                            {{ $job->title }}
-                        </h3>
-                        <p class="mb-2 text-slate-800 text-sm">
-                            <b class="text-slate-900">Subject:</b>
-                            {{ $job->subject->name ?? '-' }}
-                        </p>
-                        <p class="mb-2 text-slate-800 text-sm">
-                            <b class="text-slate-900">Location:</b>
-                            {{ $job->city?->name ?? '-' }}, {{ $job->state?->name ?? '' }}
-                        </p>
-                        <p class="mb-2 text-slate-800 text-sm">
-                            <b class="text-slate-900">Qualification:</b>
-                            {{ $job->qualification->name ?? '-' }}
-                        </p>
-                        <p class="mb-5 text-slate-800 text-sm">
-                            <b class="text-slate-900">Salary:</b>
-                            <span class="font-semibold text-blue-600">{{ $job->salary }}</span>
-                        </p>
-                        <a href="{{ route('jobs.show', $job->id) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-lg block text-center transition-colors">
-                            View Details
-                        </a>
+                    <div class="job-card bg-white border border-gray-200 hover:border-blue-300 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full relative group overflow-hidden" data-subject-id="{{ $job->subject_id }}">
+                        
+                        <!-- Top decorative accent -->
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        <div class="p-6 flex-grow flex flex-col">
+                            <!-- Job Title & Badges -->
+                            <div class="flex justify-between items-start mb-4 gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
+                                    {{ $job->title }}
+                                </h3>
+                                @if($job->job_type)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 whitespace-nowrap">
+                                        {{ ucfirst($job->job_type) }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <!-- Key details with Icons -->
+                            <div class="space-y-3 mb-6 flex-grow text-sm text-gray-600">
+                                @if($job->subject)
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-blue-500 shrink-0">
+                                        <i class="fas fa-book-open"></i>
+                                    </div>
+                                    <span class="truncate" title="{{ $job->subject->name }}">
+                                        {{ $job->subject->name }}
+                                    </span>
+                                </div>
+                                @endif
+
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-red-400 shrink-0">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <span class="truncate">
+                                        {{ $job->city?->name ?? 'Anywhere' }}, {{ $job->state?->name ?? 'Any State' }}
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-amber-500 shrink-0">
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </div>
+                                    <span class="truncate" title="{{ $job->qualification->name ?? 'Not Specified' }}">
+                                        {{ $job->qualification->name ?? 'Not Specified' }}
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-green-500 shrink-0">
+                                        <i class="fas fa-rupee-sign"></i>
+                                    </div>
+                                    <span class="font-semibold text-gray-900 truncate">
+                                        {{ $job->salary_range ?? 'Not Disclosed' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Action -->
+                        <div class="p-6 pt-0 mt-auto border-t border-gray-100 bg-gray-50/50">
+                            <a href="{{ route('jobs.show', $job->id) }}" class="inline-flex items-center justify-center w-full bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-bold px-5 py-2.5 rounded-xl transition-colors duration-300 gap-2 mt-4">
+                                View Details <i class="fas fa-arrow-right text-sm"></i>
+                            </a>
+                        </div>
                     </div>
                     @endforeach
                 </div>
                 
-                <div id="no-filtered-jobs-msg" class="text-center py-10" style="display: none;">
-                    <h3 class="text-xl font-semibold text-gray-600">
-                        No jobs currently available for the selected role.
-                    </h3>
+                <div id="no-filtered-jobs-msg" class="text-center py-16" style="display: none;">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                        <i class="fas fa-search text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">No Roles Found</h3>
+                    <p class="text-gray-500">We couldn't find any active jobs for this specific role right now.</p>
                 </div>
             @else
-            <div class="text-center py-20">
-                <h2 class="text-2xl font-semibold">
+            <div class="text-center py-24 bg-white rounded-3xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
+                <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-500">
+                    <i class="fas fa-briefcase text-4xl"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-slate-800 mb-3">
                     No Active Jobs Found
                 </h2>
+                <p class="text-gray-500 max-w-md mx-auto">Check back soon! We regularly update our job listings with new opportunities.</p>
             </div>
             @endif
         </div>
@@ -101,7 +150,7 @@
                     let visibleCount = 0;
                     jobCards.forEach(card => {
                         if (!selectedSubject || card.getAttribute('data-subject-id') === selectedSubject) {
-                            card.style.display = 'block';
+                            card.style.display = 'flex';
                             visibleCount++;
                         } else {
                             card.style.display = 'none';
