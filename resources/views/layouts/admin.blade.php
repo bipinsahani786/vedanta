@@ -150,6 +150,11 @@
                     class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }} px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-th-large w-5 text-center text-lg"></i> Dashboard
                 </a>
+                
+                <a href="{{ route('admin.notifications.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }} px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-bell w-5 text-center text-lg"></i> Notifications
+                </a>
 
                 <div class="text-[10px] uppercase font-bold tracking-widest text-white/30 mt-6 mb-2 px-4">Master Data
                 </div>
