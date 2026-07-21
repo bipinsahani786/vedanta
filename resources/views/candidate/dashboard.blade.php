@@ -70,6 +70,7 @@
             @php
                 $isHired = \App\Models\JobApplication::where('candidate_id', auth()->id())
                     ->where('status', 'hired')
+                    ->where('updated_at', '>=', $profile->plan_started_at ?? $profile->created_at)
                     ->exists();
                 $limitReached = $actualUsedApplications >= $profile->total_allowed_applications;
                 $hasActiveApplications = \App\Models\JobApplication::where('candidate_id', auth()->id())
@@ -84,7 +85,7 @@
                                         class="{{ $isHired ? 'bg-green-500' : ($isExpired ? 'bg-red-500' : 'bg-accent-yellow text-slate-900') }} text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg mb-2">
                                         {{ $isHired ? 'Plan Completed' : ($isExpired ? 'Plan Expired' : 'Applications In Progress') }}
                                     </span>
-                                    @if($isExpired)
+                                    @if($isExpired || $isHired)
                                         <a href="{{ route('candidate.payment.show', ['type' => 'renewal']) }}"
                                             class="px-3 py-1 bg-white text-red-600 text-xs font-bold rounded shadow hover:bg-red-50 transition-colors">Renew
                                             Plan</a>
@@ -220,9 +221,13 @@
 
                             @if($isHired)
                                 <div class="pt-4 border-t border-card-border text-center">
-                                    <span class="inline-block px-4 py-2 bg-green-500/10 text-green-400 font-bold text-xs rounded-lg border border-green-500/20">
+                                    <span class="inline-block px-4 py-2 bg-green-500/10 text-green-400 font-bold text-xs rounded-lg border border-green-500/20 mb-3">
                                         <i class="fas fa-trophy mr-1"></i> Congratulations! You are placed.
                                     </span>
+                                    <a href="{{ route('candidate.payment.show', ['type' => 'renewal']) }}"
+                                        class="block w-full py-3 bg-red-50 text-red-600 font-bold text-sm text-center rounded-xl hover:bg-red-100 transition-all border border-red-200">
+                                        <i class="fas fa-sync-alt mr-1"></i> Renew for New Applications
+                                    </a>
                                 </div>
                             @elseif($isExpired)
                                 <div class="pt-4 border-t border-card-border">
