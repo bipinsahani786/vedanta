@@ -201,9 +201,7 @@
 
             <form :action="isEdit ? '{{ url('admin/subjects') }}/' + formData.id : '{{ route('admin.subjects.store') }}'" method="POST">
                 @csrf
-                <template x-if="isEdit">
-                    @method('PUT')
-                </template>
+                <input type="hidden" name="_method" value="PUT" x-bind:disabled="!isEdit">
 
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-slate-700 mb-2">Subject Name <span class="text-red-500">*</span></label>
