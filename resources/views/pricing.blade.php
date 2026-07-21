@@ -7,7 +7,7 @@
         <p class="text-text-main opacity-70 max-w-2xl mx-auto">Last updated: October 2023</p>
     </div>
 
-    <div class="py-16 px-6 lg:px-[5%] max-w-4xl mx-auto reveal">
+    <div class="py-16 px-6 lg:px-[5%] max-w-4xl mx-auto">
         <div
             class="prose prose-sm md:prose-base prose-headings:text-text-main prose-p:text-text-main prose-p:opacity-80 prose-a:text-accent-blue max-w-none">
             <h2 class="text-2xl font-bold text-text-main mt-8 mb-4"> Disclaimer</h2>

@@ -95,7 +95,7 @@
     <div class="header">
         <img src="{{ public_path('images/logo.png') }}" class="logo" alt="Vedanta Logo">
         <h1>PAYMENT INVOICE</h1>
-        <p>Vedanta Educational Services</p>
+        <p>Vedanta Placement Agency</p>
     </div>
 
     <table class="details-box">

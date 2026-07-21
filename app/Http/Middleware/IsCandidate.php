@@ -16,7 +16,8 @@ class IsCandidate
     public function handle(Request $request, Closure $next): Response
     {
         if (auth()->check() && auth()->user()->role === 'candidate') {
-            if (!auth()->user()->is_active) {
+            // Check if column exists before checking value (fallback for missing migration)
+            if (array_key_exists('is_active', auth()->user()->getAttributes()) && !auth()->user()->is_active) {
                 auth()->logout();
                 return redirect()->route('login')->with('error', 'Your account has been deactivated. Please contact support.');
             }
