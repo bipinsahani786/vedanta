@@ -33,6 +33,10 @@ class PaymentController extends Controller
             return redirect()->route('candidate.dashboard')->with('error', 'Please complete previous steps first.');
         }
 
+        if ($isRenewal && $profile->pending_amount > 0) {
+            return redirect()->route('candidate.serviceCharge.show')->with('error', 'You must clear your pending dues of ₹' . $profile->pending_amount . ' before renewing your plan.');
+        }
+
         // Removed the check that blocked paid users from viewing their plans
         return view('candidate.payment.show', compact('user', 'profile', 'isRenewal'));
     }
@@ -40,15 +44,15 @@ class PaymentController extends Controller
     public function process(Request $request)
     {
         $request->validate([
-            'plan' => 'required|in:basic,premium,renewal,upgrade'
+            'plan' => 'required|in:basic,premium,renewal_basic,renewal_premium,upgrade'
         ]);
 
         $user = auth()->user();
-        $isRenewal = $request->plan === 'renewal';
+        $isRenewal = str_starts_with($request->plan, 'renewal');
         $isUpgrade = $request->plan === 'upgrade';
         
         $amount = 500;
-        if ($request->plan === 'premium') $amount = 1000;
+        if ($request->plan === 'premium' || $request->plan === 'renewal_premium') $amount = 1000;
         if ($isUpgrade) $amount = 500;
         
         $profile = $user->profile;
@@ -58,10 +62,13 @@ class PaymentController extends Controller
             return back()->with('error', 'You have already paid for the Basic plan.');
         }
         if (($request->plan === 'premium' || $request->plan === 'upgrade') && $profile->plan_type === 'premium' && $profile->is_fee_paid) {
-            return back()->with('error', 'You are already on the Premium plan.');
+            return back()->with('error', 'You are already a Premium member.');
         }
 
-        $prefix = $isRenewal ? 'RENEW_' : ($isUpgrade ? 'UPGRADE_' : 'TXN_');
+        $prefix = 'TXN_';
+        if ($request->plan === 'renewal_basic') $prefix = 'RENEW_BASIC_';
+        if ($request->plan === 'renewal_premium') $prefix = 'RENEW_PREMIUM_';
+        if ($isUpgrade) $prefix = 'UPGRADE_';
         $transactionId = $prefix . $user->id . '_' . time();
 
         $isProd = $this->env === 'production';
@@ -163,14 +170,31 @@ class PaymentController extends Controller
             
             $amountPaid = $rData['data']['amount'] / 100;
 
-            if (str_starts_with($transactionId, 'RENEW_')) {
-                // Handle Renewal
+            if (str_starts_with($transactionId, 'RENEW_BASIC_')) {
+                // Handle Renewal to Basic/Standard
                 $user->profile->update([
+                    'plan_type' => 'standard',
+                    'initial_fee_paid' => true,
+                    'paid_amount' => $user->profile->paid_amount + $amountPaid,
+                    'pending_amount' => 500, // Basic plan rule
                     'used_applications' => 0, // Reset applications
                     'payment_id' => $rData['data']['transactionId'],
                     'plan_started_at' => now()
                 ]);
-                return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You have new application slots.');
+                return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You are now on the Standard Plan with new application slots.');
+            } elseif (str_starts_with($transactionId, 'RENEW_PREMIUM_')) {
+                // Handle Renewal to Premium
+                $user->profile->update([
+                    'plan_type' => 'premium',
+                    'initial_fee_paid' => true,
+                    'is_fee_paid' => true,
+                    'paid_amount' => $user->profile->paid_amount + $amountPaid,
+                    'pending_amount' => 0, // Premium plan rule
+                    'used_applications' => 0, // Reset applications
+                    'payment_id' => $rData['data']['transactionId'],
+                    'plan_started_at' => now()
+                ]);
+                return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You are now on the Premium Plan with new application slots.');
             } elseif (str_starts_with($transactionId, 'UPGRADE_')) {
                 // Handle Upgrade
                 $user->profile->update([

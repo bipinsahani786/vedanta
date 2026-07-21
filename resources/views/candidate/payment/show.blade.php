@@ -22,36 +22,9 @@
     @endif
 
     {{-- Plans Grid --}}
-    @if($isRenewal)
-    <div class="max-w-md mx-auto mb-10">
-        {{-- Renewal Plan --}}
-        <div class="bg-card-bg rounded-2xl border border-red-500/30 p-8 flex flex-col shadow-xl transition-all duration-300 relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-24 h-24 bg-red-500/5 rounded-full blur-2xl"></div>
 
-            <div class="relative z-10 text-center">
-                <div class="w-16 h-16 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center text-2xl mx-auto mb-5">
-                    <i class="fas fa-sync-alt"></i>
-                </div>
-                <h3 class="text-xl font-bold text-text-main mb-2">Plan Renewal</h3>
-                <p class="text-sm text-text-dark/60 mb-6">You have reached your 3 applications limit. Renew your plan to apply to 3 more schools.</p>
-
-                <div class="mb-6 pb-6 border-b border-card-border">
-                    <span class="text-4xl font-extrabold text-text-main">₹500</span>
-                    <span class="text-sm text-text-dark/40 ml-1">/ Renewal</span>
-                </div>
-
-                <form action="{{ route('candidate.payment.process') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="plan" value="renewal">
-                    <button type="submit" class="w-full py-3.5 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-all shadow-lg flex items-center justify-center gap-2">
-                        <i class="fas fa-bolt text-xs"></i> Pay & Renew Applications
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-    @elseif($profile->plan_type === 'premium' && ($profile->initial_fee_paid || $profile->is_fee_paid))
     {{-- Already on Premium — Best plan message --}}
+    @if(!$isRenewal && $profile->plan_type === 'premium' && ($profile->initial_fee_paid || $profile->is_fee_paid))
     <div class="max-w-md mx-auto mb-10">
         <div class="bg-card-bg rounded-2xl border-2 border-accent-yellow/40 p-8 text-center shadow-xl relative overflow-hidden">
             <div class="absolute -top-12 -right-12 w-24 h-24 bg-accent-yellow/10 rounded-full blur-2xl"></div>
@@ -137,16 +110,16 @@
                     </li>
                 </ul>
 
-                @if($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
+                @if(!$isRenewal && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
                     <button type="button" disabled class="w-full py-3.5 border border-green-500/50 text-green-500 font-semibold rounded-xl bg-green-500/10 flex items-center justify-center gap-2">
                         <i class="fas fa-check-circle"></i> Current Plan
                     </button>
                 @else
                     <form action="{{ route('candidate.payment.process') }}" method="POST">
                         @csrf
-                        <input type="hidden" name="plan" value="basic">
+                        <input type="hidden" name="plan" value="{{ $isRenewal ? 'renewal_basic' : 'basic' }}">
                         <button type="submit" class="w-full py-3.5 border border-card-border text-text-main font-semibold rounded-xl hover:bg-accent-blue/10 hover:border-accent-blue/30 transition-all flex items-center justify-center gap-2 group-hover:border-accent-blue/30">
-                            Select Standard Plan
+                            {{ $isRenewal ? 'Renew with Standard Plan' : 'Select Standard Plan' }}
                         </button>
                     </form>
                 @endif
@@ -196,23 +169,19 @@
                     </li>
                 </ul>
 
-                @if($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
-                    <form action="{{ route('candidate.payment.process') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="plan" value="upgrade">
-                        <button type="submit" class="w-full py-3.5 bg-accent-yellow text-[#031b4e] font-bold rounded-xl hover:brightness-110 hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-glow-yellow flex items-center justify-center gap-2">
-                            <i class="fas fa-arrow-up text-xs"></i> Upgrade to Premium (₹500)
-                        </button>
-                    </form>
-                @else
-                    <form action="{{ route('candidate.payment.process') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="plan" value="premium">
-                        <button type="submit" class="w-full py-3.5 bg-accent-yellow text-[#031b4e] font-bold rounded-xl hover:brightness-110 hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-glow-yellow flex items-center justify-center gap-2">
-                            <i class="fas fa-crown text-xs"></i> Select Premium Plan
-                        </button>
-                    </form>
-                @endif
+                <form action="{{ route('candidate.payment.process') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="plan" value="{{ $isRenewal ? 'renewal_premium' : ($profile->plan_type === 'standard' && $profile->initial_fee_paid ? 'upgrade' : 'premium') }}">
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-accent-yellow to-yellow-500 text-[#031b4e] font-bold rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                        @if($isRenewal)
+                            Renew with Premium Plan
+                        @elseif($profile->plan_type === 'standard' && $profile->initial_fee_paid)
+                            Upgrade to Premium
+                        @else
+                            Select Premium Plan
+                        @endif
+                    </button>
+                </form>
             </div>
         </div>
     </div>
