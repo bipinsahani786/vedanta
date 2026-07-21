@@ -38,7 +38,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
     <!-- Left Column: Profile & Applications -->
-    <div class="lg:col-span-1 space-y-6">
+    <div class="lg:col-span-1 space-y-6 min-w-0">
         <!-- Candidate Profile -->
         <div class="bg-white shadow-sm sm:rounded-2xl border border-gray-100 mb-6 overflow-hidden">
             <!-- Banner / Header -->
@@ -232,17 +232,17 @@
         <!-- Job Applications -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 border-b border-gray-200">
-                <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
-                    <h3 class="text-lg font-bold text-gray-900 shrink-0">Job Applications</h3>
-                    <form action="{{ route('admin.crm.application.assign', $candidate->id) }}" method="POST" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full xl:w-auto">
+                <div class="flex flex-col gap-3 mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Job Applications</h3>
+                    <form action="{{ route('admin.crm.application.assign', $candidate->id) }}" method="POST" class="flex flex-col gap-2 w-full">
                         @csrf
-                        <select name="job_post_id" required class="text-sm rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 w-full sm:w-64">
+                        <select name="job_post_id" required class="text-sm rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 w-full">
                             <option value="">-- Assign a Job to Candidate --</option>
                             @foreach($availableJobs as $job)
                                 <option value="{{ $job->id }}">{{ $job->title }} ({{ $job->school_name }})</option>
                             @endforeach
                         </select>
-                        <button type="submit" class="px-3 py-1.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition shadow-sm">Assign Job</button>
+                        <button type="submit" class="px-3 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition shadow-sm w-full text-center">Assign Job</button>
                     </form>
                 </div>
                 @forelse($candidate->applications as $app)
@@ -351,7 +351,7 @@
     </div>
 
     <!-- Right Column: CRM Follow-ups & Invoices -->
-    <div class="lg:col-span-2 space-y-6">
+    <div class="lg:col-span-2 space-y-6 min-w-0">
         
         <!-- Alerts -->
         @if(session('success'))
@@ -455,9 +455,7 @@
                             <select name="job_application_id" id="job_application_id" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" required>
                                 <option value="">-- Select Application --</option>
                                 @foreach($candidate->applications->where('status', 'hired') as $app)
-                                    @if(!$app->invoice)
-                                        <option value="{{ $app->id }}">{{ $app->jobPost->title }} ({{ $app->jobPost->school_name }})</option>
-                                    @endif
+                                    <option value="{{ $app->id }}">{{ $app->jobPost->title }} ({{ $app->jobPost->school_name }})</option>
                                 @endforeach
                             </select>
                         </div>
