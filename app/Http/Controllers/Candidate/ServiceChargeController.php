@@ -129,6 +129,25 @@ class ServiceChargeController extends Controller
                     'status' => 'success',
                     'gateway_response' => ['bypassed' => true]
                 ]);
+
+                // Notify Admin
+                $adminUser = \App\Models\User::where('role', 'admin')->first();
+                if ($adminUser) {
+                    \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                        'id' => \Illuminate\Support\Str::uuid(),
+                        'type' => 'App\Notifications\ServiceChargePaid',
+                        'notifiable_type' => 'App\Models\User',
+                        'notifiable_id' => $adminUser->id,
+                        'data' => json_encode([
+                            'title' => 'Service Charge Received',
+                            'message' => '₹' . $request->amount . ' was received from ' . $user->name . ' for Service Charge.',
+                            'candidate_id' => $user->id,
+                            'amount' => $request->amount
+                        ]),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
             }
             return redirect()->route('candidate.serviceCharge.show')->with('success', 'Service charge paid successfully! (Local Bypass)');
         }
@@ -136,6 +155,20 @@ class ServiceChargeController extends Controller
 
         $transactionId = $request->transactionId ?? session('last_txn_id');
         $invoiceId = session('sc_invoice_id');
+
+        // Guard: If transactionId or user is missing, abort
+        if (!$transactionId || !$user) {
+            return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment session expired. Please try again.');
+        }
+
+        // Guard: Prevent duplicate processing
+        $existingTxn = PaymentTransaction::where('transaction_id', $transactionId)->first();
+        if ($existingTxn) {
+            if ($existingTxn->status === 'success') {
+                return redirect()->route('candidate.serviceCharge.show')->with('success', 'Payment already processed successfully.');
+            }
+            return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment failed or was already processed.');
+        }
         
         $merchantId = env('PHONEPE_MERCHANT_ID', 'PGTESTPAYUAT86');
         $saltKey = env('PHONEPE_SALT_KEY', '96434309-7796-489d-8924-ab56988a6076');
@@ -163,45 +196,81 @@ class ServiceChargeController extends Controller
         $response = $http->get($url);
         $rData = $response->json();
 
-        if ($user) {
-            PaymentTransaction::create([
-                'candidate_id' => $user->id,
-                'amount' => isset($rData['data']['amount']) ? $rData['data']['amount'] / 100 : 0,
-                'transaction_id' => $transactionId,
-                'type' => 'service_charge',
-                'status' => (isset($rData['success']) && $rData['success'] === true && $rData['data']['state'] === 'COMPLETED') ? 'success' : 'failed',
-                'gateway_response' => $rData
-            ]);
+        // Log full response for debugging
+        \Illuminate\Support\Facades\Log::info('PhonePe Service Charge Callback', [
+            'txn' => $transactionId,
+            'invoice_id' => $invoiceId,
+            'gateway_response' => $rData
+        ]);
+
+        // Check gateway response — ONLY COMPLETED means success
+        $isSuccess = isset($rData['success']) 
+            && $rData['success'] === true 
+            && isset($rData['data']['state']) 
+            && $rData['data']['state'] === 'COMPLETED';
+
+        $amountPaid = isset($rData['data']['amount']) ? $rData['data']['amount'] / 100 : 0;
+
+        // Always record transaction
+        PaymentTransaction::create([
+            'candidate_id' => $user->id,
+            'amount' => $amountPaid,
+            'transaction_id' => $transactionId,
+            'type' => 'service_charge',
+            'status' => $isSuccess ? 'success' : 'failed',
+            'gateway_response' => $rData
+        ]);
+
+        // If payment failed, stop here — do NOT update invoice or profile
+        if (!$isSuccess) {
+            return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment failed or cancelled. Please try again.');
         }
 
-        if (isset($rData['success']) && $rData['success'] === true && $rData['data']['state'] === 'COMPLETED') {
-            if ($invoiceId) {
-                ServiceChargeInvoice::where('id', $invoiceId)->update([
-                    'status' => 'paid',
-                    'payment_date' => now()
-                ]);
-                $inv = ServiceChargeInvoice::find($invoiceId);
-                if ($inv && $user->profile) {
-                    $user->profile->pending_amount = max(0, $user->profile->pending_amount - $inv->amount);
-                    $user->profile->save();
-                }
-            } else {
-                // Fallback to latest pending invoice
-                ServiceChargeInvoice::where('candidate_id', $user->id)->whereIn('status', ['pending', 'overdue'])->update([
-                    'status' => 'paid',
-                    'payment_date' => now()
-                ]);
-                // We decrement pending_amount by the total paid here or just reset it
-                // To be safe, let's just fetch the invoice before updating
-                $invs = ServiceChargeInvoice::where('candidate_id', $user->id)->where('status', 'paid')->latest()->first();
-                if ($invs && $user->profile) {
-                    $user->profile->pending_amount = max(0, $user->profile->pending_amount - $invs->amount);
+        // Payment confirmed COMPLETED — update invoice and profile
+        if ($invoiceId) {
+            ServiceChargeInvoice::where('id', $invoiceId)->update([
+                'status' => 'paid',
+                'payment_date' => now()
+            ]);
+            $inv = ServiceChargeInvoice::find($invoiceId);
+            if ($inv && $user->profile) {
+                $user->profile->pending_amount = max(0, $user->profile->pending_amount - $inv->amount);
+                $user->profile->save();
+            }
+        } else {
+            // Fallback to latest pending invoice
+            $latestInvoice = ServiceChargeInvoice::where('candidate_id', $user->id)
+                ->whereIn('status', ['pending', 'overdue'])
+                ->latest()
+                ->first();
+            if ($latestInvoice) {
+                $latestInvoice->update(['status' => 'paid', 'payment_date' => now()]);
+                if ($user->profile) {
+                    $user->profile->pending_amount = max(0, $user->profile->pending_amount - $latestInvoice->amount);
                     $user->profile->save();
                 }
             }
-            return redirect()->route('candidate.serviceCharge.show')->with('success', 'Service charge paid successfully!');
         }
 
-        return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment failed or cancelled.');
+        // Notify Admin
+        $adminUser = \App\Models\User::where('role', 'admin')->first();
+        if ($adminUser) {
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\ServiceChargePaid',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $adminUser->id,
+                'data' => json_encode([
+                    'title' => 'Service Charge Received',
+                    'message' => '₹' . $amountPaid . ' was received from ' . $user->name . ' for Service Charge.',
+                    'candidate_id' => $user->id,
+                    'amount' => $amountPaid
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('candidate.serviceCharge.show')->with('success', 'Service charge paid successfully!');
     }
 }
