@@ -27,7 +27,11 @@ class HomeController extends Controller
         $testimonials = Testimonial::where('is_active', true)->latest()->get();
         $clients = ClientLogo::where('is_active', true)->latest()->get();
 
-        return view('welcome', compact('recentJobs', 'categories', 'services', 'testimonials', 'clients'));
+        $totalJobs = JobPost::where('status', 'approved')->count();
+        $totalApplications = \App\Models\JobApplication::count();
+        $totalEmployers = \App\Models\User::where('role', 'employer')->count();
+
+        return view('welcome', compact('recentJobs', 'categories', 'services', 'testimonials', 'clients', 'totalJobs', 'totalApplications', 'totalEmployers'));
     }
     public function categoryJobs($id)
     {
