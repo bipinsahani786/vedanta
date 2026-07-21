@@ -72,7 +72,7 @@ class AgreementController extends Controller
             return abort(404, 'Agreement not found.');
         }
 
-        if (!$profile->agreement_pdf_path || !Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+        if (true || !$profile->agreement_pdf_path || !Storage::disk('public')->exists($profile->agreement_pdf_path)) {
             $user = auth()->user();
             
             $signatureDataRaw = $profile->signature_data;
@@ -218,10 +218,12 @@ class AgreementController extends Controller
 
                 // Signature in the box
                 if ($profile->signature_type === 'type') {
+                    $pdf->SetAutoPageBreak(false);
                     $pdf->SetFont('Helvetica', 'I', 18);
                     $pdf->SetTextColor(10, 10, 100);
-                    $pdf->SetXY(78, 275);
-                    $pdf->Cell(60, 10, $profile->signature_data, 0, 0, 'C');
+                    $pdf->SetXY(78, 272);
+                    $pdf->Cell(60, 15, $profile->signature_data, 0, 0, 'C');
+                    $pdf->SetAutoPageBreak(true);
                 } else if ($absoluteSigPath && file_exists($absoluteSigPath)) {
                     try {
                         // X: 78, Y: 272, Width: 60, Height: 15
