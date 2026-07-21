@@ -184,9 +184,7 @@
 
             <form :action="isEdit ? '{{ url('admin/qualifications') }}/' + formData.id : '{{ route('admin.qualifications.store') }}'" method="POST">
                 @csrf
-                <template x-if="isEdit">
-                    @method('PUT')
-                </template>
+                <input type="hidden" name="_method" value="PUT" x-bind:disabled="!isEdit">
 
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-slate-700 mb-2">Qualification Name <span class="text-red-500">*</span></label>

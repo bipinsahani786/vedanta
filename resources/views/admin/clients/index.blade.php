@@ -4,7 +4,7 @@
 @section('subtitle', 'Manage the logos displayed in the "Our Trusted Clients" section.')
 
 @section('actions')
-    <button @click="$dispatch('open-modal', { isEdit: false, formData: { id: '', name: '', is_active: 1 } })" class="px-4 py-2 bg-accent-blue text-white rounded-xl text-sm font-semibold hover:bg-accent-blue-hover transition-all shadow-lg flex items-center gap-2">
+    <button x-data @click="$dispatch('open-modal', { isEdit: false, formData: { id: '', name: '', is_active: 1 } })" class="px-4 py-2 bg-accent-blue text-white rounded-xl text-sm font-semibold hover:bg-accent-blue-hover transition-all shadow-lg flex items-center gap-2">
         <i class="fas fa-plus"></i> Add Client Logo
     </button>
 @endsection
@@ -166,17 +166,14 @@
 </div>
 @endif
 
-</div>
-
 {{-- Alpine Modal Form --}}
-<template x-teleport="body">
     <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @click="showModal = false"></div>
 
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-            <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-card-bg rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full border border-card-border">
+            <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative inline-block align-bottom bg-card-bg rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full border border-card-border">
                 
                 <div class="px-6 py-4 border-b border-card-border flex justify-between items-center bg-secondary-bg/30">
                     <h3 class="font-bold text-text-main text-lg" x-text="isEdit ? 'Edit Client Logo' : 'Add Client Logo'"></h3>
@@ -185,11 +182,9 @@
                     </button>
                 </div>
 
-                <form :action="isEdit ? '/admin/clients/' + formData.id : '{{ route('admin.clients.store') }}'" method="POST" enctype="multipart/form-data" class="p-6">
+                <form :action="isEdit ? '{{ url('admin/clients') }}/' + formData.id : '{{ route('admin.clients.store') }}'" method="POST" enctype="multipart/form-data" class="p-6">
                     @csrf
-                    <template x-if="isEdit">
-                        @method('PUT')
-                    </template>
+                    <input type="hidden" name="_method" value="PUT" x-bind:disabled="!isEdit">
 
                     <div class="space-y-4 mb-6">
                         <div>
@@ -218,5 +213,6 @@
             </div>
         </div>
     </div>
-</template>
+</div>
 @endsection
+

@@ -184,9 +184,7 @@
 
             <form :action="isEdit ? '{{ url('admin/states') }}/' + formData.id : '{{ route('admin.states.store') }}'" method="POST">
                 @csrf
-                <template x-if="isEdit">
-                    @method('PUT')
-                </template>
+                <input type="hidden" name="_method" value="PUT" x-bind:disabled="!isEdit">
 
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-slate-700 mb-2">State Name <span class="text-red-500">*</span></label>
