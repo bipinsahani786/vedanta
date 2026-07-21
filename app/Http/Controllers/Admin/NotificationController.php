@@ -10,9 +10,10 @@ class NotificationController extends Controller
 {
     public function index()
     {
+        $adminIds = \App\Models\User::where('role', 'admin')->pluck('id');
         $notifications = DB::table('notifications')
             ->where('notifiable_type', 'App\Models\User')
-            ->where('notifiable_id', auth()->id())
+            ->whereIn('notifiable_id', $adminIds)
             ->orderByDesc('created_at')
             ->paginate(20)
             ->through(function($n) {
@@ -25,9 +26,10 @@ class NotificationController extends Controller
 
     public function markRead($id)
     {
+        $adminIds = \App\Models\User::where('role', 'admin')->pluck('id');
         DB::table('notifications')
             ->where('id', $id)
-            ->where('notifiable_id', auth()->id())
+            ->whereIn('notifiable_id', $adminIds)
             ->update(['read_at' => now()]);
 
         return back();
@@ -35,9 +37,10 @@ class NotificationController extends Controller
 
     public function markAllRead()
     {
+        $adminIds = \App\Models\User::where('role', 'admin')->pluck('id');
         DB::table('notifications')
             ->where('notifiable_type', 'App\Models\User')
-            ->where('notifiable_id', auth()->id())
+            ->whereIn('notifiable_id', $adminIds)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
