@@ -11,7 +11,7 @@
             class="prose prose-sm md:prose-base prose-headings:text-text-main prose-p:text-text-main prose-p:opacity-80 prose-a:text-accent-blue max-w-none">
             <h2 class="text-2xl font-bold text-text-main mt-8 mb-4"> Terms & Conditions</h2>
             <p class="mb-6 leading-relaxed">Welcome to Vedanta Placement Agency. These Terms and Conditions outline the
-                Welcome to Vedanta Placement Agency. These Terms & Conditions ("Terms") govern
+                Welcome to Vedanta Placement Agency (Owned By Aditya Rajveer). These Terms & Conditions ("Terms") govern
                 your
                 access to and use of our website and recruitment services. By accessing our website, creating
                 an account, registering as a candidate or employer, or using any of our services, you agree to
