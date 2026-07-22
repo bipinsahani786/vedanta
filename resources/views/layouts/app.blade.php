@@ -208,14 +208,14 @@
                 Patna, Bihar, India</span>
         </div>
         <div class="flex items-center gap-4">
-            <a href="#" class="text-white/80 hover:text-[#ffb800] transition-colors"><i
+            <a href="https://www.facebook.com/share/1Dmruc9Esx/" target="_blank" class="text-white/80 hover:text-[#ffb800] transition-colors"><i
                     class="fab fa-facebook-f"></i></a>
-            <a href="#" class="text-white/80 hover:text-[#ffb800] transition-colors"><i
+            <a href="https://www.instagram.com/vedantaplacementagency?igsh=MWUwczFoYzQ2eGUydQ==" target="_blank" class="text-white/80 hover:text-[#ffb800] transition-colors"><i
                     class="fab fa-instagram"></i></a>
-            <a href="#" class="text-white/80 hover:text-[#ffb800] transition-colors"><i
+            <a href="https://www.linkedin.com/company/vedanta-placement-agency-india/" target="_blank" class="text-white/80 hover:text-[#ffb800] transition-colors"><i
                     class="fab fa-linkedin-in"></i></a>
-            <a href="#" class="text-white/80 hover:text-[#ffb800] transition-colors"><i class="fab fa-youtube"></i></a>
-            <a href="#" class="text-white/80 hover:text-[#ffb800] transition-colors"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://youtube.com/@vedantaplacementagency?si=UZ0VPukRGknF4EhQ" target="_blank" class="text-white/80 hover:text-[#ffb800] transition-colors"><i class="fab fa-youtube"></i></a>
+            <a href="https://wa.me/917070938975" target="_blank" class="text-white/80 hover:text-[#ffb800] transition-colors"><i class="fab fa-whatsapp"></i></a>
         </div>
     </div>
 
@@ -418,7 +418,7 @@
                     <li><a href="https://youtube.com/@vedantaplacementagency?si=UZ0VPukRGknF4EhQ" target="blank"
                             class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
                                 class="fab fa-youtube text-sm w-4 text-center"></i> Youtube</a></li>
-                    <li><a href="https://www.whatsapp.com/"
+                    <li><a href="https://wa.me/917070938975" target="_blank"
                             class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
                                 class="fab fa-whatsapp text-sm w-4 text-center"></i> Whatsapp</a></li>
                     <li><a href="https://www.linkedin.com/company/vedanta-placement-agency-india/" target='blank'
@@ -454,13 +454,13 @@
 
     <!-- FABs -->
     <div class="fixed right-6 bottom-6 flex flex-col gap-3 z-[999]">
-        <a href="#"
+        <a href="tel:+917070938975" title="Call Us"
             class="w-12 h-12 rounded-full flex items-center justify-center text-text-main text-lg no-underline shadow-lg transition-all duration-300 hover:scale-110 hover:-translate-y-1 bg-accent-blue"><i
                 class="fas fa-phone-alt"></i></a>
-        <a href="#"
+        <a href="https://wa.me/917070938975" target="_blank" title="WhatsApp Us"
             class="w-12 h-12 rounded-full flex items-center justify-center text-text-main text-xl no-underline shadow-lg transition-all duration-300 hover:scale-110 hover:-translate-y-1 bg-[#25D366]"><i
                 class="fab fa-whatsapp"></i></a>
-        <a href="#"
+        <a href="#" title="Scroll to Top"
             class="w-12 h-12 rounded-full flex items-center justify-center text-text-main text-lg no-underline shadow-lg transition-all duration-300 hover:scale-110 hover:-translate-y-1 bg-accent-blue"
             onclick="window.scrollTo({top:0,behavior:'smooth'}); return false;"><i class="fas fa-chevron-up"></i></a>
     </div>
