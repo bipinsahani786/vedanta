@@ -49,9 +49,9 @@
                     </div>
                     <div>
                         <h3 class="text-xl font-extrabold text-gray-900">{{ $candidate->name }}</h3>
-                        <div class="text-xs text-gray-500 mt-1.5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4">
-                            <span class="flex items-center gap-1.5"><i class="fas fa-envelope text-gray-400"></i> {{ $candidate->email }}</span>
-                            <span class="flex items-center gap-1.5"><i class="fas fa-phone-alt text-gray-400"></i> {{ $candidate->phone }}</span>
+                        <div class="text-xs text-gray-500 mt-1.5 flex flex-wrap items-center gap-2 sm:gap-4">
+                            <span class="flex items-center gap-1.5 break-all"><i class="fas fa-envelope text-gray-400 shrink-0"></i> {{ $candidate->email }}</span>
+                            <span class="flex items-center gap-1.5 whitespace-nowrap"><i class="fas fa-phone-alt text-gray-400 shrink-0"></i> {{ $candidate->phone }}</span>
                         </div>
                     </div>
                 </div>
