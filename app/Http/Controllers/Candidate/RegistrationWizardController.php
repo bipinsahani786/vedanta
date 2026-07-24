@@ -6,20 +6,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use App\Services\PhonePeService;
 
 class RegistrationWizardController extends Controller
 {
-    private $merchantId;
-    private $saltKey;
-    private $saltIndex;
-    private $env;
+    private PhonePeService $phonePe;
 
     public function __construct()
     {
-        $this->merchantId = env('PHONEPE_MERCHANT_ID', 'PGTESTPAYUAT86');
-        $this->saltKey = env('PHONEPE_SALT_KEY', '96434309-7796-489d-8924-ab56988a6076');
-        $this->saltIndex = env('PHONEPE_SALT_INDEX', '1');
-        $this->env = env('PHONEPE_ENV', 'sandbox');
+        $this->phonePe = new PhonePeService();
     }
 
     public function show()
@@ -211,107 +206,33 @@ class RegistrationWizardController extends Controller
             'pending_plan_type' => $planType
         ]);
 
-        $isProd = $this->env === 'production';
-
         $redirectUrl = route('candidate.wizard.callback');
-        $callbackUrl = $isProd ? route('candidate.wizard.callback') : 'https://webhook.site/phonepe-dummy-callback';
 
-        if ($isProd) {
-            $redirectUrl = str_replace('http://', 'https://', $redirectUrl);
-            $callbackUrl = str_replace('http://', 'https://', $callbackUrl);
-        }
+        // Initiate payment via PhonePe V2
+        $result = $this->phonePe->initiatePay($transactionId, $amount, $redirectUrl);
 
-        $payload = [
-            'merchantId' => $this->merchantId,
-            'merchantTransactionId' => $transactionId,
-            'merchantUserId' => 'MUID_' . $user->id,
-            'amount' => $amount * 100, // Amount in paise
-            'redirectUrl' => $redirectUrl,
-            'redirectMode' => 'REDIRECT',
-            'callbackUrl' => $callbackUrl,
-            'mobileNumber' => $user->phone ?? '9999999999',
-            'paymentInstrument' => [
-                'type' => 'PAY_PAGE'
-            ]
-        ];
-
-        $encode = base64_encode(json_encode($payload));
-        $string = $encode . '/pg/v1/pay' . $this->saltKey;
-        $sha256 = hash('sha256', $string);
-        $finalXHeader = $sha256 . '###' . $this->saltIndex;
-
-        $url = $isProd 
-            ? 'https://api.phonepe.com/apis/pg/v1/pay'
-            : 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay';
-
-        $http = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'X-VERIFY' => $finalXHeader,
-            'X-MERCHANT-ID' => $this->merchantId
-        ]);
-
-        if (!$isProd) {
-            $http = $http->withoutVerifying();
-        }
-
-        $response = $http->post($url, [
-            'request' => $encode
-        ]);
-
-        $rData = $response->json();
-
-        if (isset($rData['success']) && $rData['success'] === true) {
+        if ($result['success']) {
             return response()->json([
                 'success' => true,
-                'redirect_url' => $rData['data']['instrumentResponse']['redirectInfo']['url']
+                'redirect_url' => $result['redirect_url']
             ]);
         }
 
         \Illuminate\Support\Facades\Log::error('PhonePe Wizard Pay Initiation Failed', [
-            'merchantId' => $this->merchantId,
-            'http_status' => $response->status(),
-            'response' => $rData,
-            'raw_body' => $response->body()
+            'error' => $result['error'],
+            'raw' => $result['raw'],
         ]);
 
-        $errorDetails = $rData['message'] ?? $rData['code'] ?? ('HTTP ' . $response->status() . ': ' . $response->body());
         return response()->json([
             'success' => false,
-            'message' => 'Failed to initiate payment: ' . $errorDetails
+            'message' => 'Failed to initiate payment: ' . $result['error']
         ], 400);
     }
 
     public function callback(Request $request)
     {
-        $code = $request->code;
-        $transactionId = $request->transactionId ?? session('last_txn_id');
+        $transactionId = $request->merchantOrderId ?? $request->transactionId ?? session('last_txn_id');
         $pendingPlanType = session('pending_plan_type', 'standard');
-
-        // Verify status with PhonePe
-        $string = "/pg/v1/status/{$this->merchantId}/{$transactionId}" . $this->saltKey;
-        $sha256 = hash('sha256', $string);
-        $finalXHeader = $sha256 . '###' . $this->saltIndex;
-
-        $isProd = $this->env === 'production';
-        $url = $isProd 
-            ? "https://api.phonepe.com/apis/pg/v1/status/{$this->merchantId}/{$transactionId}"
-            : "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/{$this->merchantId}/{$transactionId}";
-
-        $http = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'X-VERIFY' => $finalXHeader,
-            'X-MERCHANT-ID' => $this->merchantId
-        ]);
-
-        if (!$isProd) {
-            $http = $http->withoutVerifying();
-        }
-
-        $response = $http->get($url);
-
-        $rData = $response->json();
-        
-        \Illuminate\Support\Facades\Log::info('PhonePe Wizard Callback', ['response' => $rData, 'txn' => $transactionId, 'plan' => $pendingPlanType]);
 
         $user = auth()->user();
 
@@ -329,20 +250,26 @@ class RegistrationWizardController extends Controller
             return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or was already processed.');
         }
 
-        // Check gateway response — ONLY COMPLETED means success
-        $isSuccess = isset($rData['success']) 
-            && $rData['success'] === true 
-            && isset($rData['data']['state']) 
-            && $rData['data']['state'] === 'COMPLETED';
+        // Verify status with PhonePe V2
+        $statusResult = $this->phonePe->checkStatus($transactionId);
+        
+        \Illuminate\Support\Facades\Log::info('PhonePe V2 Wizard Callback', [
+            'result' => $statusResult, 
+            'txn' => $transactionId, 
+            'plan' => $pendingPlanType
+        ]);
+
+        $isSuccess = $statusResult['success'];
+        $amountPaid = $statusResult['amount'] / 100; // Convert paise to rupees
 
         // Always record transaction
         \App\Models\PaymentTransaction::create([
             'candidate_id' => $user->id,
-            'amount' => isset($rData['data']['amount']) ? $rData['data']['amount'] / 100 : 0,
+            'amount' => $amountPaid,
             'transaction_id' => $transactionId,
             'type' => 'registration_fee',
             'status' => $isSuccess ? 'success' : 'failed',
-            'gateway_response' => $rData
+            'gateway_response' => $statusResult['raw']
         ]);
 
         // If payment failed, stop here — do NOT update the profile
@@ -351,7 +278,6 @@ class RegistrationWizardController extends Controller
         }
 
         $profile = $user->profile;
-        $amountPaid = $rData['data']['amount'] / 100;
 
         if ($pendingPlanType === 'standard') {
             // Standard plan payment (2 job applications allowed)
@@ -361,7 +287,7 @@ class RegistrationWizardController extends Controller
                 'initial_fee_paid' => true,
                 'paid_amount' => $profile->paid_amount + $amountPaid,
                 'pending_amount' => 500, // Initial 500 paid, 500 pending
-                'payment_id' => $rData['data']['transactionId'],
+                'payment_id' => $statusResult['transactionId'],
                 'registration_completed_at' => now(),
                 'plan_started_at' => now(),
             ]);
@@ -374,7 +300,7 @@ class RegistrationWizardController extends Controller
                 'is_fee_paid' => true,
                 'paid_amount' => $profile->paid_amount + $amountPaid,
                 'pending_amount' => 0,
-                'payment_id' => $rData['data']['transactionId'],
+                'payment_id' => $statusResult['transactionId'],
                 'registration_completed_at' => now(),
                 'plan_started_at' => now(),
             ]);
