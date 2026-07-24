@@ -198,7 +198,8 @@
     <section class="bg-gradient-to-r from-[#129aef] to-[#031b4e] py-12 px-6 lg:px-[5%] text-white">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/20">
             <div>
-                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="{{ $totalJobs }}">0</span><span class="text-[#ffb800]">+</span></h3>
+                <!-- <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="{{ $totalJobs }}">0</span><span class="text-[#ffb800]">+</span></h3> -->
+                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="20000">20,000</span><span class="text-[#ffb800]">+</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Current Openings</p>
             </div>
             <div>
@@ -206,11 +207,12 @@
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Jobs Fulfillment Rate</p>
             </div>
             <div>
-                <h3 class="text-4xl lg:text-6xl font-bold mb-2 text-slate-200"><span class="stat-counter" data-count="{{ $totalApplications }}">0</span><span class="text-[#ffb800]">+</span></h3>
+                <!-- <h3 class="text-4xl lg:text-6xl font-bold mb-2 text-slate-200"><span class="stat-counter" data-count="{{ $totalApplications }}">0</span><span class="text-[#ffb800]">+</span></h3> -->
+                 <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="85000">85,000</span><span class="text-[#ffb800]">+</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Jobs Applied</p>
             </div>
             <div>
-                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="{{ $totalEmployers }}">0</span><span class="text-[#ffb800]">+</span></h3>
+                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="3500">3,500</span><span class="text-[#ffb800]">+</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Satisfied Schools</p>
             </div>
         </div>
