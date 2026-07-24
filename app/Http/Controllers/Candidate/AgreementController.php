@@ -64,7 +64,7 @@ class AgreementController extends Controller
         return redirect()->route('candidate.dashboard')->with('success', 'Agreement digitally signed successfully.');
     }
 
-    public function download()
+    public function download(Request $request)
     {
         try {
             $user = auth()->user();
