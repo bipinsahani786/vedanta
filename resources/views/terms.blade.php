@@ -124,7 +124,7 @@
             <div class="overflow-x-auto mb-6">
                 <table class="min-w-full border border-gray-300">
                     <thead>
-                        <tr class="bg-gray-100">
+                        <tr class="bg-primary-dark">
                             <th class="border px-4 py-2 text-left">Registration Plan</th>
                             <th class="border px-4 py-2 text-left">Fee</th>
                         </tr>

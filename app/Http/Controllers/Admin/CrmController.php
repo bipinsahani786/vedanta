@@ -112,6 +112,7 @@ class CrmController extends Controller
                 'is_profile_complete' => true,
                 'is_fee_paid' => true,
                 'plan_type' => $request->plan_type,
+                'total_allowed_applications' => $request->plan_type === 'standard' ? 2 : 3,
                 'plan_started_at' => now(),
                 'payment_id' => $paymentId,
                 'registration_completed_at' => now(),
@@ -221,6 +222,11 @@ class CrmController extends Controller
                 'availability_to_join' => $request->availability_to_join,
                 'current_school' => $request->current_school,
             ];
+
+            if ($request->has('plan_type')) {
+                $updates['plan_type'] = $request->plan_type;
+                $updates['total_allowed_applications'] = $request->plan_type === 'standard' ? 2 : 3;
+            }
 
             if ($request->hasFile('resume')) {
                 $updates['resume_path'] = $request->file('resume')->store('resumes', 'public');

@@ -383,8 +383,7 @@
             <div>
                 <h4 class="text-sm font-bold mb-5 tracking-wider uppercase">Quick Links</h4>
                 <div class="grid grid-cols-2 gap-y-2.5 text-xs text-gray-400">
-                    <a href="#" class="hover:text-accent-blue transition-colors">Home</a>
-                    <a href="{{ route('apply') }}" class="hover:text-accent-blue transition-colors">Apply for Job</a>
+                    <a href="{{ route('home') }}" class="hover:text-accent-blue transition-colors">Home</a>
                     <a href="{{ route('about') }}" class="hover:text-accent-blue transition-colors">About us</a>
                     <a href="{{ route('post-job') }}" class="hover:text-accent-blue transition-colors">Post your Job</a>
                     <a href="{{ route('contact') }}" class="hover:text-accent-blue transition-colors">Contact us</a>

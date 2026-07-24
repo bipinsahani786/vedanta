@@ -335,9 +335,10 @@ class RegistrationWizardController extends Controller
         $amountPaid = $rData['data']['amount'] / 100;
 
         if ($pendingPlanType === 'standard') {
-            // Standard plan payment
+            // Standard plan payment (2 job applications allowed)
             $profile->update([
                 'plan_type' => 'standard',
+                'total_allowed_applications' => 2,
                 'initial_fee_paid' => true,
                 'paid_amount' => $profile->paid_amount + $amountPaid,
                 'pending_amount' => 500, // Initial 500 paid, 500 pending
@@ -346,9 +347,10 @@ class RegistrationWizardController extends Controller
                 'plan_started_at' => now(),
             ]);
         } else {
-            // Premium plan payment
+            // Premium plan payment (3 job applications allowed)
             $profile->update([
                 'plan_type' => 'premium',
+                'total_allowed_applications' => 3,
                 'initial_fee_paid' => true,
                 'is_fee_paid' => true,
                 'paid_amount' => $profile->paid_amount + $amountPaid,

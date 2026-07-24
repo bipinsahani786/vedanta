@@ -24,34 +24,60 @@ class ResumeBuilderController extends Controller
                 }
             }
 
+            $subjectName = $profile->subject?->name ?? (is_string($profile->subject) ? $profile->subject : '');
+            $qualificationName = $profile->highestQualification?->name ?? (is_string($profile->highest_qualification) ? $profile->highest_qualification : '');
+            $specializationName = $profile->specialization?->name ?? '';
+            $categoryName = $profile->category?->name ?? 'Teacher';
+
+            $skills = [];
+            if ($subjectName) {
+                $skills[] = $subjectName;
+            }
+            if ($specializationName) {
+                $skills[] = $specializationName;
+            }
+            if ($qualificationName) {
+                $skills[] = $qualificationName;
+            }
+            if (!empty($profile->skills)) {
+                if (is_array($profile->skills)) {
+                    $skills = array_merge($skills, $profile->skills);
+                } elseif (is_string($profile->skills)) {
+                    $skills = array_merge($skills, array_map('trim', explode(',', $profile->skills)));
+                }
+            }
+            if (empty($skills)) {
+                $skills = ['Lesson Planning', 'Classroom Management', 'Curriculum Development', 'Student Assessment'];
+            }
+
             $prefillData = [
                 'personal' => [
                     'name' => $user->name,
                     'email' => $user->email,
-                    'phone' => $user->phone,
-                    'location' => $profile->address,
-                    'title' => 'Teacher',
+                    'phone' => $user->phone ?? $profile->phone ?? '',
+                    'location' => $profile->address ?? implode(', ', array_filter([$profile->preferredCity?->name, $profile->preferredState?->name])),
+                    'title' => $subjectName ? $subjectName . ' Teacher' : ($categoryName ?: 'Educator'),
                     'photo' => $photoBase64
                 ],
-                'summary' => 'Experienced educator.',
+                'summary' => $profile->bio ?? 'Dedicated and passionate educator committed to fostering student success, developing engaging lesson plans, and creating an interactive learning environment.',
                 'experience' => [
                     [
-                        'title' => 'Teacher',
-                        'company' => 'Previous School',
+                        'title' => $subjectName ? $subjectName . ' Teacher' : 'Teacher',
+                        'company' => $profile->school_name ?? 'Previous Institution',
                         'startDate' => 'Previous Years',
                         'endDate' => 'Present',
-                        'description' => 'Taught ' . $profile->subject . '.'
+                        'description' => '• Specialized in teaching ' . ($subjectName ?: 'assigned curriculum') . ' with interactive methodologies.\n• Designed comprehensive lesson plans and evaluated student academic progress.'
                     ]
                 ],
                 'education' => [
                     [
-                        'degree' => $profile->highest_qualification,
-                        'institution' => 'University/College',
+                        'degree' => $qualificationName ?: 'Bachelor of Education (B.Ed)',
+                        'institution' => 'University / College',
                         'year' => 'Graduated',
                         'grade' => ''
                     ]
                 ],
-                'skills' => array_filter(array_map('trim', explode(',', $profile->subject ?? '')))
+                'skills' => array_values(array_unique($skills))
             ];
         }
         return view('resume-builder.index', compact('prefillData'));

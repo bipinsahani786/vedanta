@@ -113,7 +113,7 @@
                         
                         <div>
                             <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Job Description <span class="text-red-500">*</span></label>
-                            <textarea name="description" required rows="6" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors resize-none">{{ old('description', $job->description) }}</textarea>
+                            <textarea name="description" id="editor" rows="6" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors resize-none">{{ old('description', $job->description) }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -129,7 +129,32 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<style>
+    .ck-editor__editable_inline {
+        min-height: 200px;
+        color: #1e293b !important;
+        background-color: #ffffff !important;
+        border-radius: 0 0 0.75rem 0.75rem !important;
+    }
+    .ck-toolbar {
+        border-radius: 0.75rem 0.75rem 0 0 !important;
+        border-color: #cbd5e1 !important;
+        background-color: #f8fafc !important;
+    }
+</style>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const editorEl = document.querySelector('#editor');
+        if (editorEl) {
+            ClassicEditor
+                .create(editorEl, {
+                    toolbar: ['heading', '|', 'bold', 'italic', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo']
+                })
+                .catch(error => console.error('CKEditor init error:', error));
+        }
+    });
+
     document.getElementById('state_id').addEventListener('change', function() {
         let stateId = this.value;
         let citySelect = document.getElementById('city_id');

@@ -132,7 +132,7 @@
                 <!-- Description -->
                 <div class="md:col-span-2">
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Job Description & Requirements</label>
-                    <textarea name="description" rows="5" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">{{ old('description', $job->description) }}</textarea>
+                    <textarea name="description" id="editor" rows="5" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">{{ old('description', $job->description) }}</textarea>
                     @error('description') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -148,7 +148,32 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<style>
+    .ck-editor__editable_inline {
+        min-height: 200px;
+        color: #1e293b !important;
+        background-color: #ffffff !important;
+        border-radius: 0 0 0.75rem 0.75rem !important;
+    }
+    .ck-toolbar {
+        border-radius: 0.75rem 0.75rem 0 0 !important;
+        border-color: #cbd5e1 !important;
+        background-color: #f8fafc !important;
+    }
+</style>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const editorEl = document.querySelector('#editor');
+        if (editorEl) {
+            ClassicEditor
+                .create(editorEl, {
+                    toolbar: ['heading', '|', 'bold', 'italic', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo']
+                })
+                .catch(error => console.error('CKEditor init error:', error));
+        }
+    });
+
     document.getElementById('state_id').addEventListener('change', function() {
         let stateId = this.value;
         let citySelect = document.getElementById('city_id');

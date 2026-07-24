@@ -193,9 +193,10 @@ class PaymentController extends Controller
         $amountPaid = $rData['data']['amount'] / 100;
 
         if (str_starts_with($transactionId, 'RENEW_BASIC_')) {
-            // Handle Renewal to Basic/Standard
+            // Handle Renewal to Basic/Standard (2 applications)
             $user->profile->update([
                 'plan_type' => 'standard',
+                'total_allowed_applications' => 2,
                 'initial_fee_paid' => true,
                 'paid_amount' => $user->profile->paid_amount + $amountPaid,
                 'pending_amount' => 500, // Basic plan rule
@@ -203,11 +204,12 @@ class PaymentController extends Controller
                 'payment_id' => $rData['data']['transactionId'],
                 'plan_started_at' => now()
             ]);
-            return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You are now on the Standard Plan with new application slots.');
+            return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You are now on the Standard Plan with 2 application slots.');
         } elseif (str_starts_with($transactionId, 'RENEW_PREMIUM_')) {
-            // Handle Renewal to Premium
+            // Handle Renewal to Premium (3 applications)
             $user->profile->update([
                 'plan_type' => 'premium',
+                'total_allowed_applications' => 3,
                 'initial_fee_paid' => true,
                 'is_fee_paid' => true,
                 'paid_amount' => $user->profile->paid_amount + $amountPaid,
@@ -216,11 +218,12 @@ class PaymentController extends Controller
                 'payment_id' => $rData['data']['transactionId'],
                 'plan_started_at' => now()
             ]);
-            return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You are now on the Premium Plan with new application slots.');
+            return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You are now on the Premium Plan with 3 application slots.');
         } elseif (str_starts_with($transactionId, 'UPGRADE_')) {
-            // Handle Upgrade
+            // Handle Upgrade to Premium (3 applications)
             $user->profile->update([
                 'plan_type' => 'premium',
+                'total_allowed_applications' => 3,
                 'is_fee_paid' => true,
                 'paid_amount' => $user->profile->paid_amount + $amountPaid,
                 'pending_amount' => 0, // Cleared upon upgrade
@@ -233,6 +236,7 @@ class PaymentController extends Controller
             if ($amountPaid == 500) {
                 $user->profile->update([
                     'plan_type' => 'standard',
+                    'total_allowed_applications' => 2,
                     'initial_fee_paid' => true,
                     'paid_amount' => $user->profile->paid_amount + $amountPaid,
                     'pending_amount' => 500, // Initial 500 paid, 500 pending
@@ -243,6 +247,7 @@ class PaymentController extends Controller
             } else {
                 $user->profile->update([
                     'plan_type' => 'premium',
+                    'total_allowed_applications' => 3,
                     'initial_fee_paid' => true,
                     'is_fee_paid' => true,
                     'paid_amount' => $user->profile->paid_amount + $amountPaid,

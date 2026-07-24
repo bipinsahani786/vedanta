@@ -12,6 +12,29 @@ class ServiceChargeController extends Controller
     public function show()
     {
         $candidateId = auth()->id();
+        $user = auth()->user();
+        $profile = $user->profile;
+
+        // Auto-create pending service charge invoice for standard plan remaining balance
+        if ($profile && $profile->pending_amount > 0) {
+            $hasPending = ServiceChargeInvoice::where('candidate_id', $candidateId)
+                ->whereIn('status', ['pending', 'overdue'])
+                ->exists();
+
+            if (!$hasPending) {
+                $latestApp = \App\Models\JobApplication::where('candidate_id', $candidateId)->latest()->first();
+
+                ServiceChargeInvoice::create([
+                    'candidate_id' => $candidateId,
+                    'job_application_id' => $latestApp?->id,
+                    'amount' => $profile->pending_amount,
+                    'late_fee' => 0,
+                    'due_date' => now()->addDays(7),
+                    'status' => 'pending',
+                    'description' => 'Standard Plan Remaining Placement Balance'
+                ]);
+            }
+        }
         
         $invoices = ServiceChargeInvoice::where('candidate_id', $candidateId)
             ->latest()
@@ -22,7 +45,7 @@ class ServiceChargeController extends Controller
             ->latest()
             ->get();
             
-        return view('candidate.serviceCharge.show', compact('invoices', 'paymentHistory'));
+        return view('candidate.serviceCharge.show', compact('invoices', 'paymentHistory', 'profile'));
     }
 
     public function process(Request $request)
@@ -235,6 +258,9 @@ class ServiceChargeController extends Controller
             $inv = ServiceChargeInvoice::find($invoiceId);
             if ($inv && $user->profile) {
                 $user->profile->pending_amount = max(0, $user->profile->pending_amount - $inv->amount);
+                if ($user->profile->pending_amount <= 0) {
+                    $user->profile->is_fee_paid = true;
+                }
                 $user->profile->save();
             }
         } else {
@@ -247,6 +273,9 @@ class ServiceChargeController extends Controller
                 $latestInvoice->update(['status' => 'paid', 'payment_date' => now()]);
                 if ($user->profile) {
                     $user->profile->pending_amount = max(0, $user->profile->pending_amount - $latestInvoice->amount);
+                    if ($user->profile->pending_amount <= 0) {
+                        $user->profile->is_fee_paid = true;
+                    }
                     $user->profile->save();
                 }
             }
@@ -272,5 +301,23 @@ class ServiceChargeController extends Controller
         }
 
         return redirect()->route('candidate.serviceCharge.show')->with('success', 'Service charge paid successfully!');
+    }
+
+    public function downloadInvoicePdf($id)
+    {
+        $candidateId = auth()->id();
+        $invoice = ServiceChargeInvoice::where('id', $id)
+            ->where('candidate_id', $candidateId)
+            ->with(['jobApplication.jobPost', 'candidate'])
+            ->firstOrFail();
+
+        $user = auth()->user();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('candidate.serviceCharge.invoice_pdf', [
+            'invoice' => $invoice,
+            'user' => $user
+        ]);
+
+        return $pdf->download('Service-Charge-Invoice-' . $invoice->id . '.pdf');
     }
 }

@@ -31,6 +31,11 @@
                     </div>
                 @endif
                 <div class="p-6 md:p-8">
+                    @if(!empty($invoice->description))
+                        <div class="mb-4 text-xs font-bold text-accent-blue bg-accent-blue/10 px-3 py-1.5 rounded-lg border border-accent-blue/20 w-max">
+                            <i class="fas fa-info-circle mr-1"></i> {{ $invoice->description }}
+                        </div>
+                    @endif
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         
                         {{-- Service Charge Amount --}}
@@ -71,7 +76,7 @@
 
                     <div class="mt-8 pt-6 border-t border-card-border flex flex-wrap gap-4 items-center justify-between">
                         {{-- Invoice PDF Button --}}
-                        <a href="#" class="inline-flex items-center gap-2 px-5 py-2.5 bg-secondary-bg text-text-main rounded-xl text-sm font-semibold hover:bg-card-border/50 transition-colors border border-card-border">
+                        <a href="{{ route('candidate.serviceCharge.invoicePdf', $invoice->id) }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-secondary-bg text-text-main rounded-xl text-sm font-semibold hover:bg-card-border/50 transition-colors border border-card-border">
                             <i class="fas fa-file-pdf text-red-400"></i> Download Invoice PDF
                         </a>
                         
