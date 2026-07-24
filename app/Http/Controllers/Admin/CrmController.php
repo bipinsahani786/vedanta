@@ -111,6 +111,7 @@ class CrmController extends Controller
 
                 'is_profile_complete' => true,
                 'is_fee_paid' => true,
+                'paid_amount' => $request->payment_amount,
                 'plan_type' => $request->plan_type,
                 'total_allowed_applications' => $request->plan_type === 'standard' ? 2 : 3,
                 'plan_started_at' => now(),
