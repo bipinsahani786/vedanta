@@ -85,14 +85,22 @@ class ServiceChargeController extends Controller
         $transactionId = 'SC_' . $invoice->id . '_' . time();
         session(['sc_invoice_id' => $invoice->id, 'last_txn_id' => $transactionId]);
 
+        $redirectUrl = route('candidate.serviceCharge.callback');
+        $callbackUrl = $isProd ? route('candidate.serviceCharge.callback') : 'https://webhook.site/phonepe-dummy-callback';
+
+        if ($isProd) {
+            $redirectUrl = str_replace('http://', 'https://', $redirectUrl);
+            $callbackUrl = str_replace('http://', 'https://', $callbackUrl);
+        }
+
         $payload = [
             'merchantId' => $merchantId,
             'merchantTransactionId' => $transactionId,
             'merchantUserId' => 'MUID_' . $user->id,
             'amount' => $amount * 100, // Amount in paise
-            'redirectUrl' => route('candidate.serviceCharge.callback'),
+            'redirectUrl' => $redirectUrl,
             'redirectMode' => 'REDIRECT',
-            'callbackUrl' => $isProd ? route('candidate.serviceCharge.callback') : 'https://webhook.site/phonepe-dummy-callback',
+            'callbackUrl' => $callbackUrl,
             'mobileNumber' => $user->phone ?? '9999999999',
             'paymentInstrument' => [
                 'type' => 'PAY_PAGE'
@@ -128,7 +136,15 @@ class ServiceChargeController extends Controller
             return redirect()->away($rData['data']['instrumentResponse']['redirectInfo']['url']);
         }
 
-        return back()->with('error', 'Failed to initiate payment. ' . ($rData['message'] ?? ''));
+        \Illuminate\Support\Facades\Log::error('PhonePe ServiceCharge Pay Initiation Failed', [
+            'merchantId' => $merchantId,
+            'http_status' => $response->status(),
+            'response' => $rData,
+            'raw_body' => $response->body()
+        ]);
+
+        $errorDetails = $rData['message'] ?? $rData['code'] ?? ('HTTP ' . $response->status() . ': ' . $response->body());
+        return back()->with('error', 'Failed to initiate payment: ' . $errorDetails);
     }
 
     public function callback(Request $request)

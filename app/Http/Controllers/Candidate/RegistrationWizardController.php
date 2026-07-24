@@ -213,14 +213,22 @@ class RegistrationWizardController extends Controller
 
         $isProd = $this->env === 'production';
 
+        $redirectUrl = route('candidate.wizard.callback');
+        $callbackUrl = $isProd ? route('candidate.wizard.callback') : 'https://webhook.site/phonepe-dummy-callback';
+
+        if ($isProd) {
+            $redirectUrl = str_replace('http://', 'https://', $redirectUrl);
+            $callbackUrl = str_replace('http://', 'https://', $callbackUrl);
+        }
+
         $payload = [
             'merchantId' => $this->merchantId,
             'merchantTransactionId' => $transactionId,
             'merchantUserId' => 'MUID_' . $user->id,
             'amount' => $amount * 100, // Amount in paise
-            'redirectUrl' => route('candidate.wizard.callback'),
+            'redirectUrl' => $redirectUrl,
             'redirectMode' => 'REDIRECT',
-            'callbackUrl' => $isProd ? route('candidate.wizard.callback') : 'https://webhook.site/phonepe-dummy-callback',
+            'callbackUrl' => $callbackUrl,
             'mobileNumber' => $user->phone ?? '9999999999',
             'paymentInstrument' => [
                 'type' => 'PAY_PAGE'
@@ -259,7 +267,18 @@ class RegistrationWizardController extends Controller
             ]);
         }
 
-        return response()->json(['success' => false, 'message' => $rData['message'] ?? 'Failed to initiate payment.']);
+        \Illuminate\Support\Facades\Log::error('PhonePe Wizard Pay Initiation Failed', [
+            'merchantId' => $this->merchantId,
+            'http_status' => $response->status(),
+            'response' => $rData,
+            'raw_body' => $response->body()
+        ]);
+
+        $errorDetails = $rData['message'] ?? $rData['code'] ?? ('HTTP ' . $response->status() . ': ' . $response->body());
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to initiate payment: ' . $errorDetails
+        ], 400);
     }
 
     public function callback(Request $request)

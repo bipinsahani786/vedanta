@@ -73,14 +73,23 @@ class PaymentController extends Controller
 
         $isProd = $this->env === 'production';
 
+        $redirectUrl = route('candidate.payment.callback');
+        $callbackUrl = $isProd ? route('candidate.payment.callback') : 'https://webhook.site/phonepe-dummy-callback';
+
+        // PhonePe Production strictly requires HTTPS URLs
+        if ($isProd) {
+            $redirectUrl = str_replace('http://', 'https://', $redirectUrl);
+            $callbackUrl = str_replace('http://', 'https://', $callbackUrl);
+        }
+
         $payload = [
             'merchantId' => $this->merchantId,
             'merchantTransactionId' => $transactionId,
             'merchantUserId' => 'MUID_' . $user->id,
             'amount' => $amount * 100, // Amount in paise
-            'redirectUrl' => route('candidate.payment.callback'),
+            'redirectUrl' => $redirectUrl,
             'redirectMode' => 'REDIRECT',
-            'callbackUrl' => $isProd ? route('candidate.payment.callback') : 'https://webhook.site/phonepe-dummy-callback',
+            'callbackUrl' => $callbackUrl,
             'mobileNumber' => $user->phone ?? '9999999999',
             'paymentInstrument' => [
                 'type' => 'PAY_PAGE'
@@ -118,7 +127,15 @@ class PaymentController extends Controller
             return redirect()->away($rData['data']['instrumentResponse']['redirectInfo']['url']);
         }
 
-        return back()->with('error', 'Failed to initiate payment. ' . ($rData['message'] ?? ''));
+        \Illuminate\Support\Facades\Log::error('PhonePe Pay Initiation Failed', [
+            'merchantId' => $this->merchantId,
+            'http_status' => $response->status(),
+            'response' => $rData,
+            'raw_body' => $response->body()
+        ]);
+
+        $errorDetails = $rData['message'] ?? $rData['code'] ?? ('HTTP ' . $response->status() . ': ' . $response->body());
+        return back()->with('error', 'Failed to initiate payment: ' . $errorDetails);
     }
 
     public function callback(Request $request)
