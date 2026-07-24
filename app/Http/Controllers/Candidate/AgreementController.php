@@ -107,6 +107,11 @@ class AgreementController extends Controller
                 $profile->update(['agreement_pdf_path' => $fileName]);
             }
 
+            if ($request->has('regenerate') && $request->regenerate == '1') {
+                $fileName = $this->generateStampedPdf($user, $profile, $signatureData, $type);
+                $profile->update(['agreement_pdf_path' => $fileName]);
+            }
+
             $fullFilePath = Storage::disk('public')->path($profile->agreement_pdf_path);
             if (!file_exists($fullFilePath)) {
                 return redirect()->route('candidate.dashboard')->with('error', 'Agreement PDF file not found on server.');
@@ -212,8 +217,8 @@ class AgreementController extends Controller
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $pdf->useTemplate($templateId);
             
-            // On page 2, add the signature and photo
-            if ($pageNo == 2) {
+            // On the last page (e.g., page 3), add the signature and photo
+            if ($pageNo == $pageCount) {
                 // Photo on the right side
                 if ($absolutePhotoPath && file_exists($absolutePhotoPath)) {
                     // Try to catch any exception with unsupported image types
