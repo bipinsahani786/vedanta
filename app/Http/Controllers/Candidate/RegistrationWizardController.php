@@ -241,7 +241,7 @@ class RegistrationWizardController extends Controller
         $finalXHeader = $sha256 . '###' . $this->saltIndex;
 
         $url = $isProd 
-            ? 'https://api.phonepe.com/apis/hermes/pg/v1/pay'
+            ? 'https://api.phonepe.com/apis/pg/v1/pay'
             : 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay';
 
         $http = Http::withHeaders([
@@ -294,7 +294,7 @@ class RegistrationWizardController extends Controller
 
         $isProd = $this->env === 'production';
         $url = $isProd 
-            ? "https://api.phonepe.com/apis/hermes/pg/v1/status/{$this->merchantId}/{$transactionId}"
+            ? "https://api.phonepe.com/apis/pg/v1/status/{$this->merchantId}/{$transactionId}"
             : "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/{$this->merchantId}/{$transactionId}";
 
         $http = Http::withHeaders([

@@ -113,7 +113,7 @@ class ServiceChargeController extends Controller
         $finalXHeader = $sha256 . '###' . $saltIndex;
 
         $url = $isProd 
-            ? 'https://api.phonepe.com/apis/hermes/pg/v1/pay'
+            ? 'https://api.phonepe.com/apis/pg/v1/pay'
             : 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay';
 
         $http = \Illuminate\Support\Facades\Http::withHeaders([
@@ -219,7 +219,7 @@ class ServiceChargeController extends Controller
         $finalXHeader = $sha256 . '###' . $saltIndex;
 
         $url = $isProd 
-            ? "https://api.phonepe.com/apis/hermes/pg/v1/status/{$merchantId}/{$transactionId}"
+            ? "https://api.phonepe.com/apis/pg/v1/status/{$merchantId}/{$transactionId}"
             : "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/{$merchantId}/{$transactionId}";
 
         $http = \Illuminate\Support\Facades\Http::withHeaders([
