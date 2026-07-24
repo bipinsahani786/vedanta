@@ -146,8 +146,13 @@
                 </div>
 
                 <div class="mb-6 pb-6 border-b border-card-border">
-                    <span class="text-4xl font-extrabold text-accent-yellow">₹1000</span>
-                    <span class="text-sm text-text-dark/40 ml-1">/ One Time</span>
+                    @if(!$isRenewal && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
+                        <span class="text-4xl font-extrabold text-accent-yellow">₹500</span>
+                        <span class="text-sm text-text-dark/40 ml-1">/ Upgrade (₹1000 - ₹500 paid)</span>
+                    @else
+                        <span class="text-4xl font-extrabold text-accent-yellow">₹1000</span>
+                        <span class="text-sm text-text-dark/40 ml-1">/ One Time</span>
+                    @endif
                 </div>
 
                 <ul class="space-y-4 mb-8 flex-grow">
@@ -171,14 +176,14 @@
 
                 <form action="{{ route('candidate.payment.process') }}" method="POST">
                     @csrf
-                    <input type="hidden" name="plan" value="{{ $isRenewal ? 'renewal_premium' : ($profile->plan_type === 'standard' && $profile->initial_fee_paid ? 'upgrade' : 'premium') }}">
+                    <input type="hidden" name="plan" value="{{ $isRenewal ? 'renewal_premium' : ($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid) ? 'upgrade' : 'premium') }}">
                     <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-accent-yellow to-yellow-500 text-[#031b4e] font-bold rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
                         @if($isRenewal)
-                            Renew with Premium Plan
-                        @elseif($profile->plan_type === 'standard' && $profile->initial_fee_paid)
-                            Upgrade to Premium
+                            Renew with Premium Plan (₹1000)
+                        @elseif($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
+                            Upgrade to Premium (Pay ₹500)
                         @else
-                            Select Premium Plan
+                            Select Premium Plan (₹1000)
                         @endif
                     </button>
                 </form>

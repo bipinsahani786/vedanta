@@ -171,11 +171,15 @@
                                     <i class="fas fa-camera"></i> Live Photo
                                 </a>
                             @endif
-                            @if($candidate->profile->agreement_pdf_path)
-                                <a href="{{ Storage::url($candidate->profile->agreement_pdf_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-100 text-teal-700 rounded-lg text-xs font-bold transition-colors">
-                                    <i class="fas fa-file-signature"></i> Signed Agreement
-                                </a>
-                            @endif
+                             @if($candidate->profile->agreement_pdf_path)
+                                 <a href="{{ Storage::url($candidate->profile->agreement_pdf_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-100 text-teal-700 rounded-lg text-xs font-bold transition-colors">
+                                     <i class="fas fa-file-signature"></i> Signed Agreement (PDF)
+                                 </a>
+                             @elseif($candidate->profile->is_agreement_signed)
+                                 <span class="inline-flex items-center gap-2 px-3 py-2 bg-teal-50 border border-teal-100 text-teal-700 rounded-lg text-xs font-bold">
+                                     <i class="fas fa-file-signature"></i> Signed Digitally ({{ $candidate->profile->signature_date_time ? $candidate->profile->signature_date_time->format('d M, Y') : 'Active' }})
+                                 </span>
+                             @endif
                         </div>
                     </div>
 
@@ -183,10 +187,16 @@
                     <div class="mt-6 pt-6 border-t border-gray-100">
                         <div class="flex items-center justify-between mb-4">
                             <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agreement Status</h4>
-                            @if($candidate->profile->is_agreement_signed && $candidate->profile->agreement_pdf_path)
-                                <a href="{{ Storage::url($candidate->profile->agreement_pdf_path) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
-                                    <i class="fas fa-check-circle"></i> Signed & Valid
-                                </a>
+                            @if($candidate->profile && ($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_date_time))
+                                @if($candidate->profile->agreement_pdf_path)
+                                    <a href="{{ Storage::url($candidate->profile->agreement_pdf_path) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200 hover:bg-green-100 transition-colors">
+                                        <i class="fas fa-check-circle"></i> Signed & Valid (PDF)
+                                    </a>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
+                                        <i class="fas fa-check-circle"></i> Signed (Digitally)
+                                    </span>
+                                @endif
                             @else
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200">
                                     <i class="fas fa-clock"></i> Not Signed
