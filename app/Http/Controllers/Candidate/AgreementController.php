@@ -72,7 +72,7 @@ class AgreementController extends Controller
             return abort(404, 'Agreement not found.');
         }
 
-        if (true || !$profile->agreement_pdf_path || !Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+        if (!$profile->agreement_pdf_path || !Storage::disk('public')->exists($profile->agreement_pdf_path)) {
             $user = auth()->user();
             
             $signatureDataRaw = $profile->signature_data;
