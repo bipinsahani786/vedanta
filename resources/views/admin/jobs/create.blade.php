@@ -54,6 +54,13 @@
             <div class="h-px w-full bg-card-border my-8"></div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Title -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Job Title *</label>
+                    <input type="text" name="title" value="{{ old('title') }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Senior Physics Teacher">
+                    @error('title') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <!-- Category -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Job Category *</label>

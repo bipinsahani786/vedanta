@@ -174,7 +174,7 @@ class JobController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
+            'title' => 'required|string|max:255',
             'school_name' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -210,7 +210,7 @@ class JobController extends Controller
     public function update(Request $request, JobPost $job)
     {
         $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
+            'title' => 'required|string|max:255',
             'school_name' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
