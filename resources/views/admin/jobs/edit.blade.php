@@ -57,8 +57,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- Title -->
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Job Title</label>
-                    <input type="text" name="title" value="{{ old('title', $job->title) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Job Title *</label>
+                    <input type="text" name="title" value="{{ old('title', $job->title) }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                     @error('title') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
