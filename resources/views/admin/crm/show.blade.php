@@ -44,25 +44,14 @@
             <!-- Banner / Header -->
             <div class="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-white flex flex-col sm:flex-row justify-between items-start relative gap-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative z-10 w-full">
-                    @if($candidate->profile && $candidate->profile->profile_photo_path)
-                        <img src="{{ asset('storage/' . $candidate->profile->profile_photo_path) }}" alt="{{ $candidate->name }}" class="w-16 h-16 shrink-0 rounded-full object-cover shadow-sm border-4 border-white">
-                    @elseif($candidate->profile && $candidate->profile->live_photo_path)
-                        <img src="{{ asset('storage/' . $candidate->profile->live_photo_path) }}" alt="{{ $candidate->name }}" class="w-16 h-16 shrink-0 rounded-full object-cover shadow-sm border-4 border-white">
-                    @else
-                        <div class="w-16 h-16 shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-extrabold shadow-sm border-4 border-white">
-                            {{ strtoupper(substr($candidate->name, 0, 1)) }}
-                        </div>
-                    @endif
-                    <div class="min-w-0">
-                        <h3 class="text-xl font-extrabold text-gray-900 break-words">{{ $candidate->name }}</h3>
-                        <div class="text-xs text-gray-500 mt-1.5 flex flex-wrap items-center gap-1.5 sm:gap-4">
-                            <span class="flex items-center gap-1.5"><i class="fas fa-envelope text-gray-400"></i> {{ $candidate->email }}</span>
-                            <span class="flex items-center gap-1.5"><i class="fas fa-phone-alt text-gray-400"></i> {{ $candidate->phone }}</span>
-                            @if($candidate->profile && $candidate->profile->latitude && $candidate->profile->longitude)
-                                <a href="https://www.google.com/maps/search/?api=1&query={{ $candidate->profile->latitude }},{{ $candidate->profile->longitude }}" target="_blank" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
-                                    <i class="fas fa-map-marker-alt text-gray-400"></i> {{ $candidate->profile->latitude }}, {{ $candidate->profile->longitude }}
-                                </a>
-                            @endif
+                    <div class="w-16 h-16 shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-extrabold shadow-sm border-4 border-white">
+                        {{ strtoupper(substr($candidate->name, 0, 1)) }}
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-extrabold text-gray-900">{{ $candidate->name }}</h3>
+                        <div class="text-xs text-gray-500 mt-1.5 flex flex-wrap items-center gap-2 sm:gap-4">
+                            <span class="flex items-center gap-1.5 break-all"><i class="fas fa-envelope text-gray-400 shrink-0"></i> {{ $candidate->email }}</span>
+                            <span class="flex items-center gap-1.5 whitespace-nowrap"><i class="fas fa-phone-alt text-gray-400 shrink-0"></i> {{ $candidate->phone }}</span>
                         </div>
                     </div>
                 </div>
@@ -182,11 +171,15 @@
                                     <i class="fas fa-camera"></i> Live Photo
                                 </a>
                             @endif
-                            @if($candidate->profile->agreement_pdf_path)
-                                <a href="{{ Storage::url($candidate->profile->agreement_pdf_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-100 text-teal-700 rounded-lg text-xs font-bold transition-colors">
-                                    <i class="fas fa-file-signature"></i> Signed Agreement
-                                </a>
-                            @endif
+                             @if($candidate->profile->agreement_pdf_path)
+                                 <a href="{{ Storage::url($candidate->profile->agreement_pdf_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-100 text-teal-700 rounded-lg text-xs font-bold transition-colors">
+                                     <i class="fas fa-file-signature"></i> Signed Agreement (PDF)
+                                 </a>
+                             @elseif($candidate->profile->is_agreement_signed)
+                                 <span class="inline-flex items-center gap-2 px-3 py-2 bg-teal-50 border border-teal-100 text-teal-700 rounded-lg text-xs font-bold">
+                                     <i class="fas fa-file-signature"></i> Signed Digitally ({{ $candidate->profile->signature_date_time ? $candidate->profile->signature_date_time->format('d M, Y') : 'Active' }})
+                                 </span>
+                             @endif
                         </div>
                     </div>
 
@@ -194,10 +187,16 @@
                     <div class="mt-6 pt-6 border-t border-gray-100">
                         <div class="flex items-center justify-between mb-4">
                             <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agreement Status</h4>
-                            @if($candidate->profile->is_agreement_signed && $candidate->profile->agreement_pdf_path)
-                                <a href="{{ Storage::url($candidate->profile->agreement_pdf_path) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
-                                    <i class="fas fa-check-circle"></i> Signed & Valid
-                                </a>
+                            @if($candidate->profile && ($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_date_time))
+                                @if($candidate->profile->agreement_pdf_path)
+                                    <a href="{{ Storage::url($candidate->profile->agreement_pdf_path) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200 hover:bg-green-100 transition-colors">
+                                        <i class="fas fa-check-circle"></i> Signed & Valid (PDF)
+                                    </a>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
+                                        <i class="fas fa-check-circle"></i> Signed (Digitally)
+                                    </span>
+                                @endif
                             @else
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200">
                                     <i class="fas fa-clock"></i> Not Signed

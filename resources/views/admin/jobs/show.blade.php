@@ -68,9 +68,74 @@
                 </div>
 
                 <div class="col-span-2 mt-4">
-                    <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Description</div>
-                    <div class="text-gray-700 bg-gray-50 p-4 rounded-lg text-sm border border-gray-100">
-                        {!! nl2br(e($job->description ?? 'No description provided.')) !!}
+                    <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Description & Requirements</div>
+                    <div class="text-gray-700 bg-gray-50/80 p-5 rounded-xl text-sm border border-gray-200/80 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_ul]:my-3 [&_li]:text-gray-700 [&_li]:marker:text-blue-600 [&_p]:mb-3 [&_h4]:font-bold [&_h4]:text-gray-900 [&_h4]:text-xs [&_h4]:mt-4 [&_h4]:mb-2 [&_h4]:border-b [&_h4]:border-gray-200 [&_h4]:pb-1 [&_h4]:uppercase [&_h4]:tracking-wider">
+                        @php
+                            $rawDesc = $job->description ?? '';
+
+                            if (empty(trim($rawDesc))) {
+                                $formattedDescription = '<p class="text-gray-400 italic text-sm">No description provided.</p>';
+                            } else {
+                                $hasHtml = preg_match('/<[a-z][\s\S]*>/i', $rawDesc);
+
+                                if ($hasHtml) {
+                                    $formattedDescription = $rawDesc;
+                                } else {
+                                    $normalized = str_replace(['•', '·', '►', '▪', '⁃', '●'], '•', $rawDesc);
+
+                                    $sectionKeywords = [
+                                        'Key Responsibilities:', 'Responsibilities:', 'Job Responsibilities:',
+                                        'Requirements:', 'Key Requirements:', 'Eligibility:', 'Qualifications:',
+                                        'Job Details:', 'Job Overview:', 'Key Details:', 'About the Role:',
+                                        'Job Type:', 'Location:', 'Salary:', 'Perks & Benefits:', 'Perks:'
+                                    ];
+
+                                    foreach ($sectionKeywords as $keyword) {
+                                        $normalized = preg_replace('/(?i)' . preg_quote($keyword, '/') . '/', "\n\n<h4>" . trim($keyword, ':') . "</h4>\n", $normalized);
+                                    }
+
+                                    $normalized = preg_replace('/(?<!^|\n)•/', "\n•", $normalized);
+                                    $rawLines = explode("\n", $normalized);
+                                    $outputHtml = '';
+                                    $inList = false;
+
+                                    foreach ($rawLines as $line) {
+                                        $trimmed = trim($line);
+                                        if (empty($trimmed)) continue;
+
+                                        if (strpos($trimmed, '<h4>') === 0) {
+                                            if ($inList) {
+                                                $outputHtml .= '</ul>';
+                                                $inList = false;
+                                            }
+                                            $outputHtml .= $trimmed;
+                                        }
+                                        elseif (strpos($trimmed, '•') === 0 || strpos($trimmed, '-') === 0 || strpos($trimmed, '*') === 0) {
+                                            if (!$inList) {
+                                                $outputHtml .= '<ul>';
+                                                $inList = true;
+                                            }
+                                            $cleanItem = e(trim(ltrim($trimmed, '•-* ')));
+                                            $outputHtml .= '<li>' . $cleanItem . '</li>';
+                                        }
+                                        else {
+                                            if ($inList) {
+                                                $outputHtml .= '</ul>';
+                                                $inList = false;
+                                            }
+                                            $outputHtml .= '<p>' . e($trimmed) . '</p>';
+                                        }
+                                    }
+
+                                    if ($inList) {
+                                        $outputHtml .= '</ul>';
+                                    }
+
+                                    $formattedDescription = $outputHtml;
+                                }
+                            }
+                        @endphp
+                        {!! $formattedDescription !!}
                     </div>
                 </div>
             </div>

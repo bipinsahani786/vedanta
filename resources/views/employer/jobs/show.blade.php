@@ -57,8 +57,73 @@
             <h3 class="text-lg font-bold text-text-main mb-4 flex items-center gap-2">
                 <i class="fas fa-info-circle text-accent-blue"></i> Job Description & Requirements
             </h3>
-            <div class="prose prose-sm max-w-none text-text-main opacity-80 leading-relaxed space-y-4">
-                {!! nl2br(e($job->description ?? 'No detailed description provided for this job role.')) !!}
+            <div class="bg-secondary-bg/50 border border-card-border rounded-xl p-6 text-text-main leading-relaxed shadow-inner [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_ul]:my-3 [&_li]:text-text-main [&_li]:marker:text-accent-blue [&_p]:mb-3 [&_h4]:font-extrabold [&_h4]:text-text-main [&_h4]:text-xs [&_h4]:mt-5 [&_h4]:mb-2 [&_h4]:border-b [&_h4]:border-card-border [&_h4]:pb-1.5 [&_h4]:uppercase [&_h4]:tracking-wider">
+                @php
+                    $rawDesc = $job->description ?? '';
+
+                    if (empty(trim($rawDesc))) {
+                        $formattedDescription = '<p class="text-text-dark/50 italic text-sm">No detailed description provided for this job role.</p>';
+                    } else {
+                        $hasHtml = preg_match('/<[a-z][\s\S]*>/i', $rawDesc);
+
+                        if ($hasHtml) {
+                            $formattedDescription = $rawDesc;
+                        } else {
+                            $normalized = str_replace(['•', '·', '►', '▪', '⁃', '●'], '•', $rawDesc);
+
+                            $sectionKeywords = [
+                                'Key Responsibilities:', 'Responsibilities:', 'Job Responsibilities:',
+                                'Requirements:', 'Key Requirements:', 'Eligibility:', 'Qualifications:',
+                                'Job Details:', 'Job Overview:', 'Key Details:', 'About the Role:',
+                                'Job Type:', 'Location:', 'Salary:', 'Perks & Benefits:', 'Perks:'
+                            ];
+
+                            foreach ($sectionKeywords as $keyword) {
+                                $normalized = preg_replace('/(?i)' . preg_quote($keyword, '/') . '/', "\n\n<h4>" . trim($keyword, ':') . "</h4>\n", $normalized);
+                            }
+
+                            $normalized = preg_replace('/(?<!^|\n)•/', "\n•", $normalized);
+                            $rawLines = explode("\n", $normalized);
+                            $outputHtml = '';
+                            $inList = false;
+
+                            foreach ($rawLines as $line) {
+                                $trimmed = trim($line);
+                                if (empty($trimmed)) continue;
+
+                                if (strpos($trimmed, '<h4>') === 0) {
+                                    if ($inList) {
+                                        $outputHtml .= '</ul>';
+                                        $inList = false;
+                                    }
+                                    $outputHtml .= $trimmed;
+                                }
+                                elseif (strpos($trimmed, '•') === 0 || strpos($trimmed, '-') === 0 || strpos($trimmed, '*') === 0) {
+                                    if (!$inList) {
+                                        $outputHtml .= '<ul>';
+                                        $inList = true;
+                                    }
+                                    $cleanItem = e(trim(ltrim($trimmed, '•-* ')));
+                                    $outputHtml .= '<li>' . $cleanItem . '</li>';
+                                }
+                                else {
+                                    if ($inList) {
+                                        $outputHtml .= '</ul>';
+                                        $inList = false;
+                                    }
+                                    $outputHtml .= '<p>' . e($trimmed) . '</p>';
+                                }
+                            }
+
+                            if ($inList) {
+                                $outputHtml .= '</ul>';
+                            }
+
+                            $formattedDescription = $outputHtml;
+                        }
+                    }
+                @endphp
+                {!! $formattedDescription !!}
             </div>
 
             <div class="mt-10 pt-6 border-t border-card-border flex justify-between items-center">

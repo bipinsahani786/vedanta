@@ -64,50 +64,64 @@ class AgreementController extends Controller
         return redirect()->route('candidate.dashboard')->with('success', 'Agreement digitally signed successfully.');
     }
 
-    public function download()
+    public function download(Request $request)
     {
-        $profile = auth()->user()->profile;
-
-        if (!$profile->is_agreement_signed) {
-            return abort(404, 'Agreement not found.');
-        }
-
-        if (true || !$profile->agreement_pdf_path || !Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+        try {
             $user = auth()->user();
-            
-            $signatureDataRaw = $profile->signature_data;
-            if (!$signatureDataRaw) {
-                return abort(404, 'Signature data missing, cannot regenerate agreement.');
+            $profile = $user->profile;
+
+            if (!$profile || !$profile->is_agreement_signed) {
+                return redirect()->route('candidate.dashboard')->with('error', 'Agreement not signed yet.');
             }
 
-            $signatureData = '';
-            $type = 'png';
-            if ($profile->signature_type === 'type') {
-                $signatureData = $signatureDataRaw;
-                $type = 'type';
-            } elseif (Str::startsWith($signatureDataRaw, 'data:image')) {
-                preg_match('/^data:image\/(\w+);base64,/', $signatureDataRaw, $matches);
-                $type = strtolower($matches[1] ?? 'png');
-                $signatureData = base64_decode(substr($signatureDataRaw, strpos($signatureDataRaw, ',') + 1));
-            } elseif ($profile->signature_type === 'upload') {
-                $path = Storage::disk('public')->path($signatureDataRaw);
-                if (file_exists($path)) {
-                    $type = pathinfo($path, PATHINFO_EXTENSION);
-                    $signatureData = file_get_contents($path);
+            if (!$profile->agreement_pdf_path || !Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+                $signatureDataRaw = $profile->signature_data;
+                if (!$signatureDataRaw) {
+                    return redirect()->route('candidate.dashboard')->with('error', 'Signature data is missing. Please sign the agreement again.');
                 }
-            } else {
-                $signatureData = base64_decode($signatureDataRaw);
+
+                $signatureData = '';
+                $type = 'png';
+                if ($profile->signature_type === 'type') {
+                    $signatureData = $signatureDataRaw;
+                    $type = 'type';
+                } elseif (Str::startsWith($signatureDataRaw, 'data:image')) {
+                    preg_match('/^data:image\/(\w+);base64,/', $signatureDataRaw, $matches);
+                    $type = strtolower($matches[1] ?? 'png');
+                    $signatureData = base64_decode(substr($signatureDataRaw, strpos($signatureDataRaw, ',') + 1));
+                } elseif ($profile->signature_type === 'upload') {
+                    $path = Storage::disk('public')->path($signatureDataRaw);
+                    if (file_exists($path)) {
+                        $type = pathinfo($path, PATHINFO_EXTENSION);
+                        $signatureData = file_get_contents($path);
+                    }
+                } else {
+                    $signatureData = base64_decode($signatureDataRaw);
+                }
+
+                if (!$signatureData) {
+                    return redirect()->route('candidate.dashboard')->with('error', 'Signature data invalid.');
+                }
+
+                $fileName = $this->generateStampedPdf($user, $profile, $signatureData, $type);
+                $profile->update(['agreement_pdf_path' => $fileName]);
             }
 
-            if (!$signatureData) {
-                return abort(404, 'Signature data invalid.');
+            if ($request->has('regenerate') && $request->regenerate == '1') {
+                $fileName = $this->generateStampedPdf($user, $profile, $signatureData, $type);
+                $profile->update(['agreement_pdf_path' => $fileName]);
             }
 
-            $fileName = $this->generateStampedPdf($user, $profile, $signatureData, $type);
-            $profile->update(['agreement_pdf_path' => $fileName]);
+            $fullFilePath = Storage::disk('public')->path($profile->agreement_pdf_path);
+            if (!file_exists($fullFilePath)) {
+                return redirect()->route('candidate.dashboard')->with('error', 'Agreement PDF file not found on server.');
+            }
+
+            return response()->download($fullFilePath, 'Candidate_Agreement_' . str_replace(' ', '_', $user->name ?? 'Candidate') . '.pdf');
+        } catch (\Throwable $e) {
+            \Log::error("Agreement download failed for User ID " . (auth()->id() ?? 'guest') . ": " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
+            return redirect()->route('candidate.dashboard')->with('error', 'Could not generate or download agreement PDF: ' . $e->getMessage());
         }
-
-        return Storage::disk('public')->download($profile->agreement_pdf_path, 'Candidate_Agreement_' . str_replace(' ', '_', $profile->user->name) . '.pdf');
     }
 
     private function generateStampedPdf($user, $profile, $signatureData, $sigType)
@@ -191,7 +205,7 @@ class AgreementController extends Controller
         $templatePath = Storage::disk('public')->path('template/candidate_agreement.pdf');
         
         if (!file_exists($templatePath)) {
-            abort(500, 'Agreement template not found.');
+            throw new \Exception('Agreement template PDF missing on server at: ' . $templatePath);
         }
 
         $pageCount = $pdf->setSourceFile($templatePath);
@@ -203,8 +217,8 @@ class AgreementController extends Controller
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $pdf->useTemplate($templateId);
             
-            // On page 2, add the signature and photo
-            if ($pageNo == 2) {
+            // On the last page (e.g., page 3), add the signature and photo
+            if ($pageNo == $pageCount) {
                 // Photo on the right side
                 if ($absolutePhotoPath && file_exists($absolutePhotoPath)) {
                     // Try to catch any exception with unsupported image types
