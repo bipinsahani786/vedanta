@@ -52,11 +52,23 @@
     <!-- Filters & Table -->
     <div class="bg-white shadow-sm sm:rounded-2xl border border-gray-100 overflow-hidden">
         <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex gap-2">
-                <a href="{{ route('admin.users.index') }}" class="px-4 py-2 text-sm font-semibold rounded-xl transition-colors {{ !request('role') ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">All</a>
-                <a href="{{ route('admin.users.index', ['role' => 'candidate']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl transition-colors {{ request('role') === 'candidate' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">Candidates</a>
-                <a href="{{ route('admin.users.index', ['role' => 'employer']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl transition-colors {{ request('role') === 'employer' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">Employers</a>
+            <div class="flex gap-2 w-full sm:w-auto overflow-x-auto">
+                <a href="{{ route('admin.users.index') }}" class="px-4 py-2 text-sm font-semibold rounded-xl transition-colors shrink-0 {{ !request('role') ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">All</a>
+                <a href="{{ route('admin.users.index', ['role' => 'candidate']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl transition-colors shrink-0 {{ request('role') === 'candidate' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">Candidates</a>
+                <a href="{{ route('admin.users.index', ['role' => 'employer']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl transition-colors shrink-0 {{ request('role') === 'employer' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">Employers</a>
             </div>
+            
+            <form action="{{ route('admin.users.index') }}" method="GET" class="w-full sm:w-auto">
+                @if(request('role'))
+                    <input type="hidden" name="role" value="{{ request('role') }}">
+                @endif
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-blue-500"></i>
+                    </div>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, phone..." class="block w-full sm:w-72 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-all duration-200 shadow-sm" style="padding-left: 2.5rem;">
+                </div>
+            </form>
         </div>
 
         <div class="overflow-x-auto">

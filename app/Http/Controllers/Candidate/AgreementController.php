@@ -235,10 +235,18 @@ class AgreementController extends Controller
             }
         }
         
-        $fileName = 'agreements/agreement_' . $user->id . '_' . time() . '.pdf';
+        $tempPdfPath = 'temp/agreement_' . $user->id . '_' . time() . '.pdf';
         
-        // Save PDF to storage
-        Storage::disk('public')->put($fileName, $pdf->Output('S'));
+        // Save PDF to temp local storage first
+        Storage::disk('local')->put($tempPdfPath, $pdf->Output('S'));
+        
+        // Then use putFile to ensure the correct MIME type (application/pdf) is set, especially for S3
+        $absoluteTempPdfPath = Storage::disk('local')->path($tempPdfPath);
+        $file = new \Illuminate\Http\File($absoluteTempPdfPath);
+        $fileName = Storage::disk('public')->putFileAs('agreements', $file, 'agreement_' . $user->id . '_' . time() . '.pdf');
+        
+        // Clean up temp PDF
+        Storage::disk('local')->delete($tempPdfPath);
 
         // Clean up temp files
         if ($tempSignaturePath) {

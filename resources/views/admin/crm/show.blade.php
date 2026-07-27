@@ -44,14 +44,25 @@
             <!-- Banner / Header -->
             <div class="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-white flex flex-col sm:flex-row justify-between items-start relative gap-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative z-10 w-full">
-                    <div class="w-16 h-16 shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-extrabold shadow-sm border-4 border-white">
-                        {{ strtoupper(substr($candidate->name, 0, 1)) }}
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-extrabold text-gray-900">{{ $candidate->name }}</h3>
-                        <div class="text-xs text-gray-500 mt-1.5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4">
+                    @if($candidate->profile && $candidate->profile->profile_photo_path)
+                        <img src="{{ asset('storage/' . $candidate->profile->profile_photo_path) }}" alt="{{ $candidate->name }}" class="w-16 h-16 shrink-0 rounded-full object-cover shadow-sm border-4 border-white">
+                    @elseif($candidate->profile && $candidate->profile->live_photo_path)
+                        <img src="{{ asset('storage/' . $candidate->profile->live_photo_path) }}" alt="{{ $candidate->name }}" class="w-16 h-16 shrink-0 rounded-full object-cover shadow-sm border-4 border-white">
+                    @else
+                        <div class="w-16 h-16 shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-extrabold shadow-sm border-4 border-white">
+                            {{ strtoupper(substr($candidate->name, 0, 1)) }}
+                        </div>
+                    @endif
+                    <div class="min-w-0">
+                        <h3 class="text-xl font-extrabold text-gray-900 break-words">{{ $candidate->name }}</h3>
+                        <div class="text-xs text-gray-500 mt-1.5 flex flex-wrap items-center gap-1.5 sm:gap-4">
                             <span class="flex items-center gap-1.5"><i class="fas fa-envelope text-gray-400"></i> {{ $candidate->email }}</span>
                             <span class="flex items-center gap-1.5"><i class="fas fa-phone-alt text-gray-400"></i> {{ $candidate->phone }}</span>
+                            @if($candidate->profile && $candidate->profile->latitude && $candidate->profile->longitude)
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ $candidate->profile->latitude }},{{ $candidate->profile->longitude }}" target="_blank" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
+                                    <i class="fas fa-map-marker-alt text-gray-400"></i> {{ $candidate->profile->latitude }}, {{ $candidate->profile->longitude }}
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
