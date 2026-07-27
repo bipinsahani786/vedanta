@@ -91,6 +91,8 @@ class RegistrationWizardController extends Controller
                 $profile->offer_letter_path = $path;
             }
 
+            $isFirstTime = !$profile->is_profile_complete;
+
             $profile->update([
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => $request->gender,
@@ -109,6 +111,25 @@ class RegistrationWizardController extends Controller
                 'availability_to_join' => $request->availability_to_join,
                 'is_profile_complete' => true,
             ]);
+
+            if ($isFirstTime) {
+                $adminUser = \App\Models\User::where('role', 'admin')->first();
+                if ($adminUser) {
+                    \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                        'id' => \Illuminate\Support\Str::uuid(),
+                        'type' => 'App\Notifications\NewRegistrationStep1',
+                        'notifiable_type' => 'App\Models\User',
+                        'notifiable_id' => $adminUser->id,
+                        'data' => json_encode([
+                            'title' => 'Candidate Completed Form 1',
+                            'message' => auth()->user()->name . ' has just filled the first registration form.',
+                            'candidate_id' => auth()->id()
+                        ]),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
 
             return response()->json(['success' => true]);
 
