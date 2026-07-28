@@ -186,6 +186,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/candidate/{id}/rate', [\App\Http\Controllers\Admin\CrmController::class, 'rateCandidate'])->name('crm.candidate.rate');
     Route::get('/crm/candidate/{id}/magic-login', [\App\Http\Controllers\Admin\CrmController::class, 'magicLogin'])->name('crm.candidate.magic-login');
     Route::post('/crm/candidate/{id}/upload-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'uploadAgreement'])->name('crm.candidate.upload-agreement');
+    Route::get('/crm/candidate/{id}/download-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'downloadAgreement'])->name('crm.candidate.download-agreement');
 
     // Applications & Transactions
     Route::get('/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');

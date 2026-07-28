@@ -513,6 +513,32 @@ class CrmController extends Controller
         return back()->with('error', 'Failed to upload agreement.');
     }
 
+    public function downloadAgreement(Request $request, $id)
+    {
+        try {
+            $candidate = User::findOrFail($id);
+            $profile = $candidate->profile;
+
+            if (!$profile) {
+                return back()->with('error', 'Candidate profile not found.');
+            }
+
+            $forceRegenerate = $request->has('regenerate') && $request->regenerate == '1';
+            
+            $filePath = \App\Http\Controllers\Candidate\AgreementController::ensureAgreementPdfExists($profile, $forceRegenerate);
+
+            if (!$filePath || !\Illuminate\Support\Facades\Storage::disk('public')->exists($filePath)) {
+                return back()->with('error', 'Could not generate agreement PDF. Please verify candidate details.');
+            }
+
+            $fullFilePath = \Illuminate\Support\Facades\Storage::disk('public')->path($filePath);
+            return response()->download($fullFilePath, 'Candidate_Agreement_' . str_replace(' ', '_', $candidate->name ?? 'Candidate') . '.pdf');
+        } catch (\Throwable $e) {
+            \Log::error("Admin agreement download failed for Candidate ID {$id}: " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
+            return back()->with('error', 'Could not generate or download agreement PDF: ' . $e->getMessage());
+        }
+    }
+
     public function storeFollowUp(Request $request, $id)
     {
         $request->validate([
