@@ -181,6 +181,17 @@
                             <i class="fas fa-exclamation-circle"></i> Incomplete
                         </span>
                     @endif
+                    @if($candidate->profile)
+                        @if($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_data || $candidate->profile->is_fee_paid)
+                            <a href="{{ route('admin.crm.candidate.download-agreement', $candidate->id) }}" target="_blank" class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500/10 text-teal-500 hover:bg-teal-500/20 rounded text-[10px] font-bold border border-teal-500/20 transition-colors w-max" title="Download Signed Agreement (Auto-generates if missing)">
+                                <i class="fas fa-file-download"></i> Agreement PDF
+                            </a>
+                        @else
+                            <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 rounded text-[10px] font-bold border border-indigo-500/20 transition-colors w-max" title="Generate Agreement PDF on-the-fly">
+                                <i class="fas fa-file-pdf"></i> Generate PDF
+                            </a>
+                        @endif
+                    @endif
                 </td>
                 <td>
                     @php

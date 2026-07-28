@@ -53,7 +53,7 @@ class AgreementController extends Controller
             return back()->with('error', 'Did not match data URI with image data');
         }
 
-        $fileName = $this->generateStampedPdf($user, $profile, $signatureData, $type);
+        $fileName = self::generateStampedPdf($user, $profile, $signatureData, $type);
 
         // Update profile
         $profile->update([
@@ -70,53 +70,18 @@ class AgreementController extends Controller
             $user = auth()->user();
             $profile = $user->profile;
 
-            if (!$profile || !$profile->is_agreement_signed) {
+            if (!$profile || (!$profile->is_agreement_signed && !$profile->signature_data)) {
                 return redirect()->route('candidate.dashboard')->with('error', 'Agreement not signed yet.');
             }
 
-            if (!$profile->agreement_pdf_path || !Storage::disk('public')->exists($profile->agreement_pdf_path)) {
-                $signatureDataRaw = $profile->signature_data;
-                if (!$signatureDataRaw) {
-                    return redirect()->route('candidate.dashboard')->with('error', 'Signature data is missing. Please sign the agreement again.');
-                }
+            $forceRegenerate = $request->has('regenerate') && $request->regenerate == '1';
+            $fileName = self::ensureAgreementPdfExists($profile, $forceRegenerate);
 
-                $signatureData = '';
-                $type = 'png';
-                if ($profile->signature_type === 'type') {
-                    $signatureData = $signatureDataRaw;
-                    $type = 'type';
-                } elseif (Str::startsWith($signatureDataRaw, 'data:image')) {
-                    preg_match('/^data:image\/(\w+);base64,/', $signatureDataRaw, $matches);
-                    $type = strtolower($matches[1] ?? 'png');
-                    $signatureData = base64_decode(substr($signatureDataRaw, strpos($signatureDataRaw, ',') + 1));
-                } elseif ($profile->signature_type === 'upload') {
-                    $path = Storage::disk('public')->path($signatureDataRaw);
-                    if (file_exists($path)) {
-                        $type = pathinfo($path, PATHINFO_EXTENSION);
-                        $signatureData = file_get_contents($path);
-                    }
-                } else {
-                    $signatureData = base64_decode($signatureDataRaw);
-                }
-
-                if (!$signatureData) {
-                    return redirect()->route('candidate.dashboard')->with('error', 'Signature data invalid.');
-                }
-
-                $fileName = $this->generateStampedPdf($user, $profile, $signatureData, $type);
-                $profile->update(['agreement_pdf_path' => $fileName]);
-            }
-
-            if ($request->has('regenerate') && $request->regenerate == '1') {
-                $fileName = $this->generateStampedPdf($user, $profile, $signatureData, $type);
-                $profile->update(['agreement_pdf_path' => $fileName]);
-            }
-
-            $fullFilePath = Storage::disk('public')->path($profile->agreement_pdf_path);
-            if (!file_exists($fullFilePath)) {
+            if (!$fileName || !Storage::disk('public')->exists($fileName)) {
                 return redirect()->route('candidate.dashboard')->with('error', 'Agreement PDF file not found on server.');
             }
 
+            $fullFilePath = Storage::disk('public')->path($fileName);
             return response()->download($fullFilePath, 'Candidate_Agreement_' . str_replace(' ', '_', $user->name ?? 'Candidate') . '.pdf');
         } catch (\Throwable $e) {
             \Log::error("Agreement download failed for User ID " . (auth()->id() ?? 'guest') . ": " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
@@ -124,12 +89,77 @@ class AgreementController extends Controller
         }
     }
 
-    private function generateStampedPdf($user, $profile, $signatureData, $sigType)
+    public static function ensureAgreementPdfExists($profile, $forceRegenerate = false)
+    {
+        if (!$profile) {
+            return null;
+        }
+        $user = $profile->user;
+        if (!$user) {
+            return null;
+        }
+
+        if (!$forceRegenerate && $profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+            return $profile->agreement_pdf_path;
+        }
+
+        $signatureDataRaw = $profile->signature_data;
+        $signatureType = $profile->signature_type;
+
+        if (!$signatureDataRaw) {
+            $signatureDataRaw = $user->name ?? 'Candidate';
+            $signatureType = 'type';
+        }
+
+        $signatureData = '';
+        $type = 'png';
+        if ($signatureType === 'type') {
+            $signatureData = $signatureDataRaw;
+            $type = 'type';
+        } elseif (Str::startsWith($signatureDataRaw, 'data:image')) {
+            preg_match('/^data:image\/(\w+);base64,/', $signatureDataRaw, $matches);
+            $type = strtolower($matches[1] ?? 'png');
+            $signatureData = base64_decode(substr($signatureDataRaw, strpos($signatureDataRaw, ',') + 1));
+        } elseif ($signatureType === 'upload') {
+            $path = Storage::disk('public')->path($signatureDataRaw);
+            if (file_exists($path)) {
+                $type = pathinfo($path, PATHINFO_EXTENSION);
+                $signatureData = file_get_contents($path);
+            }
+        } else {
+            $signatureData = base64_decode($signatureDataRaw);
+            if (!$signatureData && is_string($signatureDataRaw)) {
+                $signatureData = $signatureDataRaw;
+                $type = 'type';
+            }
+        }
+
+        if (!$signatureData) {
+            $signatureData = $user->name ?? 'Candidate';
+            $type = 'type';
+        }
+
+        $fileName = self::generateStampedPdf($user, $profile, $signatureData, $type);
+        
+        $updateData = [
+            'is_agreement_signed' => true,
+            'agreement_pdf_path' => $fileName
+        ];
+        if (!$profile->signature_type || !$profile->signature_data) {
+            $updateData['signature_type'] = $type;
+            $updateData['signature_data'] = $signatureType === 'type' ? $signatureData : ($profile->signature_data ?? $user->name);
+        }
+        $profile->update($updateData);
+
+        return $fileName;
+    }
+
+    public static function generateStampedPdf($user, $profile, $signatureData, $sigType)
     {
         $tempSignaturePath = null;
         $absoluteSigPath = null;
         
-        if ($profile->signature_type !== 'type') {
+        if ($sigType !== 'type') {
             // Save signature to temporary file for FPDI
             $tempSignaturePath = 'temp/sig_' . $user->id . '_' . time() . '.jpg';
             
@@ -150,13 +180,17 @@ class AgreementController extends Controller
                     
                     imagedestroy($image);
                     imagedestroy($bg);
+
+                    Storage::disk('local')->put($tempSignaturePath, $signatureData);
+                    $absoluteSigPath = Storage::disk('local')->path($tempSignaturePath);
+                } else {
+                    \Log::error("Signature image data could not be parsed by GD for User ID " . $user->id);
+                    $sigType = 'type';
                 }
             } catch (\Exception $e) {
                 \Log::error("Failed to convert signature to JPEG: " . $e->getMessage());
+                $sigType = 'type';
             }
-
-            Storage::disk('local')->put($tempSignaturePath, $signatureData);
-            $absoluteSigPath = Storage::disk('local')->path($tempSignaturePath);
         }
 
         // Find candidate photo (live_photo or profile_photo)
@@ -231,12 +265,12 @@ class AgreementController extends Controller
                 }
 
                 // Signature in the box
-                if ($profile->signature_type === 'type') {
+                if ($sigType === 'type') {
                     $pdf->SetAutoPageBreak(false);
                     $pdf->SetFont('Helvetica', 'I', 18);
                     $pdf->SetTextColor(10, 10, 100);
                     $pdf->SetXY(78, 272);
-                    $pdf->Cell(60, 15, $profile->signature_data, 0, 0, 'C');
+                    $pdf->Cell(60, 15, $signatureData, 0, 0, 'C');
                     $pdf->SetAutoPageBreak(true);
                 } else if ($absoluteSigPath && file_exists($absoluteSigPath)) {
                     try {

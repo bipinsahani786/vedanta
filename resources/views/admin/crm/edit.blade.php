@@ -247,8 +247,8 @@
                 <div class="file-upload-wrapper">
                     <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center justify-between">
                         <span>Manually Signed Agreement (PDF)</span>
-                        @if($profile->agreement_pdf_path)
-                            <a href="{{ Storage::url($profile->agreement_pdf_path) }}" target="_blank" class="text-blue-600 text-xs hover:underline"><i class="fas fa-external-link-alt"></i> View Current</a>
+                        @if($profile->agreement_pdf_path || $profile->is_agreement_signed || $profile->signature_data)
+                            <a href="{{ route('admin.crm.candidate.download-agreement', $profile->user_id) }}" target="_blank" class="text-blue-600 text-xs hover:underline font-semibold" title="Click to view/download agreement PDF (auto-generates if missing)"><i class="fas fa-external-link-alt"></i> View Current (PDF)</a>
                         @endif
                     </label>
                     <div class="relative border-2 border-dashed border-green-300 rounded-xl p-4 text-center hover:bg-green-50 transition-colors bg-green-50/30">
