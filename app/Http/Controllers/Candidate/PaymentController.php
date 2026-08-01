@@ -109,15 +109,24 @@ class PaymentController extends Controller
         $isSuccess = $statusResult['success'];
         $amountPaid = $statusResult['amount'] / 100; // Convert paise to rupees
 
-        // Always record the transaction
-        \App\Models\PaymentTransaction::create([
-            'candidate_id' => $user->id,
-            'amount' => $amountPaid,
-            'transaction_id' => $transactionId,
-            'type' => 'registration_fee',
-            'status' => $isSuccess ? 'success' : 'failed',
-            'gateway_response' => $statusResult['raw']
-        ]);
+        // Check if webhook already processed it
+        $existingTxn = \App\Models\PaymentTransaction::where('transaction_id', $transactionId)->first();
+        $needsEmail = false;
+
+        if (!$existingTxn) {
+            \App\Models\PaymentTransaction::create([
+                'candidate_id' => $user->id,
+                'amount' => $amountPaid,
+                'transaction_id' => $transactionId,
+                'type' => 'registration_fee',
+                'status' => $isSuccess ? 'success' : 'failed',
+                'gateway_response' => $statusResult['raw']
+            ]);
+            $needsEmail = $isSuccess;
+        } else if ($isSuccess && $existingTxn->status !== 'success') {
+            $existingTxn->update(['status' => 'success', 'gateway_response' => $statusResult['raw']]);
+            $needsEmail = true;
+        }
 
         // If payment failed, stop here — do NOT update the profile
         if (!$isSuccess) {
@@ -207,6 +216,18 @@ class PaymentController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+        }
+
+        if ($needsEmail) {
+            $desc = 'Profile Renewal / Upgrade';
+            if (str_starts_with($transactionId, 'UPGRADE_')) {
+                $desc = 'Upgrade to Premium Plan';
+            } elseif (str_starts_with($transactionId, 'RENEW_BASIC_')) {
+                $desc = 'Basic Plan Renewal';
+            } elseif (str_starts_with($transactionId, 'RENEW_PREMIUM_')) {
+                $desc = 'Premium Plan Renewal';
+            }
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\PaymentReceiptMail($user, $transactionId, $amountPaid, $desc));
         }
 
         return redirect()->route('candidate.dashboard')->with('success', 'Payment processed successfully.');

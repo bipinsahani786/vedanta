@@ -412,7 +412,7 @@
                         <tbody class="divide-y divide-gray-100">
                             @forelse($invoices as $invoice)
                             <tr>
-                                <td class="py-2 px-4">{{ $invoice->jobApplication->jobPost->title }}</td>
+                                <td class="py-2 px-4">{{ $invoice->jobApplication?->jobPost?->title ?? 'N/A' }}</td>
                                 <td class="py-2 px-4">₹{{ number_format($invoice->amount, 2) }}</td>
                                 <td class="py-2 px-4 text-red-600">₹{{ number_format($invoice->late_fee, 2) }}</td>
                                 <td class="py-2 px-4">{{ \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y') }}</td>
@@ -429,6 +429,11 @@
                                         @method('PUT')
                                         <input type="hidden" name="status" value="paid">
                                         <button type="submit" class="text-xs text-green-600 hover:text-green-900 font-bold" onclick="return confirm('Mark this invoice as Paid?')">Mark Paid</button>
+                                    </form>
+
+                                    <form action="{{ route('admin.crm.invoice.remind', $invoice->id) }}" method="POST" class="inline ml-2">
+                                        @csrf
+                                        <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-900 font-bold" onclick="return confirm('Send payment reminder email to candidate?')">Send Reminder</button>
                                     </form>
                                     
                                     @if($invoice->late_fee > 0)

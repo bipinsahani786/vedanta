@@ -175,15 +175,24 @@ class ServiceChargeController extends Controller
         $isSuccess = $statusResult['success'];
         $amountPaid = $statusResult['amount'] / 100; // Convert paise to rupees
 
-        // Always record transaction
-        PaymentTransaction::create([
-            'candidate_id' => $user->id,
-            'amount' => $amountPaid,
-            'transaction_id' => $transactionId,
-            'type' => 'service_charge',
-            'status' => $isSuccess ? 'success' : 'failed',
-            'gateway_response' => $statusResult['raw']
-        ]);
+        // Check if webhook already processed it
+        $existingTxn = PaymentTransaction::where('transaction_id', $transactionId)->first();
+        $needsEmail = false;
+
+        if (!$existingTxn) {
+            PaymentTransaction::create([
+                'candidate_id' => $user->id,
+                'amount' => $amountPaid,
+                'transaction_id' => $transactionId,
+                'type' => 'service_charge',
+                'status' => $isSuccess ? 'success' : 'failed',
+                'gateway_response' => $statusResult['raw']
+            ]);
+            $needsEmail = $isSuccess;
+        } else if ($isSuccess && $existingTxn->status !== 'success') {
+            $existingTxn->update(['status' => 'success', 'gateway_response' => $statusResult['raw']]);
+            $needsEmail = true;
+        }
 
         // If payment failed, stop here — do NOT update invoice or profile
         if (!$isSuccess) {

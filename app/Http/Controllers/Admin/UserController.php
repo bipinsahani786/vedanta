@@ -13,10 +13,6 @@ class UserController extends Controller
     {
         $query = User::with('profile')->whereIn('role', ['candidate', 'employer']);
 
-        if ($request->has('role') && in_array($request->role, ['candidate', 'employer'])) {
-            $query->where('role', $request->role);
-        }
-
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -26,15 +22,24 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->latest()->paginate(20)->withQueryString();
-
+        $baseQuery = clone $query;
         $stats = [
-            'total' => User::whereIn('role', ['candidate', 'employer'])->count(),
-            'candidates' => User::where('role', 'candidate')->count(),
-            'employers' => User::where('role', 'employer')->count(),
-            'active' => User::whereIn('role', ['candidate', 'employer'])->where('is_active', true)->count(),
-            'inactive' => User::whereIn('role', ['candidate', 'employer'])->where('is_active', false)->count(),
+            'total' => (clone $baseQuery)->count(),
+            'candidates' => (clone $baseQuery)->where('role', 'candidate')->count(),
+            'employers' => (clone $baseQuery)->where('role', 'employer')->count(),
+            'active' => (clone $baseQuery)->where('is_active', true)->count(),
+            'inactive' => (clone $baseQuery)->where('is_active', false)->count(),
         ];
+
+        if ($request->has('role') && in_array($request->role, ['candidate', 'employer'])) {
+            $query->where('role', $request->role);
+        }
+
+        if ($request->has('status') && $request->status === 'active') {
+            $query->where('is_active', true);
+        }
+
+        $users = $query->latest()->paginate(20)->withQueryString();
 
         return view('admin.users.index', compact('users', 'stats'));
     }

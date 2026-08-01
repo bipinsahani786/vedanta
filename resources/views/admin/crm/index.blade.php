@@ -14,26 +14,26 @@
 
 {{-- Analytics Cards --}}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+    <a href="{{ request()->fullUrlWithQuery(['status' => null, 'page' => null]) }}" class="bg-card-bg border {{ request('status') === null ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-blue-500 transition-all">
         <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Total Candidates</p>
         <h4 class="text-2xl font-extrabold text-blue-500 relative z-10">{{ $stats['total'] }}</h4>
-    </div>
-    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'active_paid', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'active_paid' ? 'border-green-500 shadow-md ring-1 ring-green-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-green-500 transition-all">
         <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Active / Paid</p>
         <h4 class="text-2xl font-extrabold text-green-500 relative z-10">{{ $stats['active_paid'] }}</h4>
-    </div>
-    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'signed', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'signed' ? 'border-accent-blue shadow-md ring-1 ring-accent-blue' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-accent-blue transition-all">
         <div class="absolute inset-0 bg-accent-blue/5 group-hover:bg-accent-blue/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Signed Agreement</p>
         <h4 class="text-2xl font-extrabold text-accent-blue relative z-10">{{ $stats['signed'] }}</h4>
-    </div>
-    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'incomplete', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'incomplete' ? 'border-red-500 shadow-md ring-1 ring-red-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-red-500 transition-all">
         <div class="absolute inset-0 bg-red-500/5 group-hover:bg-red-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Incomplete</p>
         <h4 class="text-2xl font-extrabold text-red-500 relative z-10">{{ $stats['incomplete'] }}</h4>
-    </div>
+    </a>
 </div>
 
 {{-- Filter/Search Bar --}}
@@ -177,9 +177,18 @@
                             <i class="fas fa-signature"></i> Signed
                         </span>
                     @else
-                        <span class="bg-card-border/50 text-text-dark/60 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-card-border uppercase tracking-wider flex items-center gap-1 w-max">
+                        <span class="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-red-500/20 uppercase tracking-wider flex items-center gap-1 w-max">
                             <i class="fas fa-exclamation-circle"></i> Incomplete
                         </span>
+                        @if($candidate->profile)
+                            <div class="mt-1 text-[10px] text-red-400 font-semibold max-w-[150px] leading-tight">
+                                {{ $candidate->profile->pending_reason }}
+                            </div>
+                        @else
+                            <div class="mt-1 text-[10px] text-red-400 font-semibold max-w-[150px] leading-tight">
+                                Pending Profile Completion
+                            </div>
+                        @endif
                     @endif
                     @if($candidate->profile)
                         @if($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_data || $candidate->profile->is_fee_paid)
@@ -221,6 +230,21 @@
                 </td>
                 <td>
                     <div class="flex items-center justify-end gap-2">
+                        @if(!$candidate->profile)
+                            <form action="{{ route('admin.crm.candidate.remind', $candidate->id) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" onclick="return confirm('Send an email reminder to candidate about: Pending Profile Completion?')" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white border border-indigo-100 hover:border-indigo-600 text-xs font-semibold transition-colors flex items-center gap-1" title="Send Reminder for: Pending Profile Completion">
+                                    <i class="fas fa-bell"></i>
+                                </button>
+                            </form>
+                        @elseif($candidate->profile->pending_reason !== 'Completed')
+                            <form action="{{ route('admin.crm.candidate.remind', $candidate->id) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" onclick="return confirm('Send an email reminder to candidate about: {{ $candidate->profile->pending_reason }}?')" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white border border-indigo-100 hover:border-indigo-600 text-xs font-semibold transition-colors flex items-center gap-1" title="Send Reminder for: {{ $candidate->profile->pending_reason }}">
+                                    <i class="fas fa-bell"></i>
+                                </button>
+                            </form>
+                        @endif
                         <a href="{{ route('admin.crm.show', $candidate->id) }}" class="px-3 py-1.5 rounded-lg bg-accent-blue/10 text-accent-blue hover:bg-accent-blue hover:text-white text-xs font-semibold transition-colors flex items-center gap-1">
                             Manage CRM <i class="fas fa-arrow-right text-[10px]"></i>
                         </a>

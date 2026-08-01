@@ -2,28 +2,26 @@
 
 namespace App\Mail;
 
-use App\Models\JobPost;
+use App\Models\JobApplication;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class CandidateJobMatchNotification extends Mailable implements ShouldQueue
+class InterviewReviewMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public $job;
-    public $matchScore;
+    public $application;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(JobPost $job, $matchScore)
+    public function __construct(JobApplication $application)
     {
-        $this->job = $job;
-        $this->matchScore = $matchScore;
+        $this->application = $application;
     }
 
     /**
@@ -32,7 +30,7 @@ class CandidateJobMatchNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Job Match Found: ' . $this->job->title,
+            subject: 'Interview Feedback - ' . ($this->application->jobPost->title ?? 'Vedanta Placement Agency'),
         );
     }
 
@@ -42,10 +40,9 @@ class CandidateJobMatchNotification extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.candidate.job_match',
+            view: 'emails.candidate.interview_review',
             with: [
-                'job' => $this->job,
-                'matchScore' => $this->matchScore,
+                'application' => $this->application,
             ]
         );
     }

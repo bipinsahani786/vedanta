@@ -2,28 +2,29 @@
 
 namespace App\Mail;
 
-use App\Models\JobPost;
+use App\Models\User;
+use App\Models\ServiceChargeInvoice;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class CandidateJobMatchNotification extends Mailable implements ShouldQueue
+class PaymentReminderMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public $job;
-    public $matchScore;
+    public $user;
+    public $invoice;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(JobPost $job, $matchScore)
+    public function __construct(User $user, ServiceChargeInvoice $invoice)
     {
-        $this->job = $job;
-        $this->matchScore = $matchScore;
+        $this->user = $user;
+        $this->invoice = $invoice;
     }
 
     /**
@@ -32,7 +33,7 @@ class CandidateJobMatchNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Job Match Found: ' . $this->job->title,
+            subject: 'Action Required: Pending Payment Reminder - Vedanta Placement Agency',
         );
     }
 
@@ -42,10 +43,10 @@ class CandidateJobMatchNotification extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.candidate.job_match',
+            view: 'emails.candidate.payment_reminder',
             with: [
-                'job' => $this->job,
-                'matchScore' => $this->matchScore,
+                'user' => $this->user,
+                'invoice' => $this->invoice,
             ]
         );
     }

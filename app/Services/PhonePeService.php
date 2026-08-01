@@ -94,6 +94,11 @@ class PhonePeService
             ? 'https://api.phonepe.com/apis/pg/checkout/v2/pay'
             : 'https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/pay';
 
+        $s2sUrl = url('/webhook/phonepe');
+        if ($this->isProd) {
+            $s2sUrl = str_replace('http://', 'https://', $s2sUrl);
+        }
+
         $payload = [
             'merchantOrderId' => $orderId,
             'amount' => $amount * 100, // Convert to paise
@@ -103,6 +108,7 @@ class PhonePeService
                 'message' => 'Payment for Vedanta Placement Agency',
                 'merchantUrls' => [
                     'redirectUrl' => $redirectUrl,
+                    's2sCallbackUrl' => $s2sUrl,
                 ],
             ],
         ];
