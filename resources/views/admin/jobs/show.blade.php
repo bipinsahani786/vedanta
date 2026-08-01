@@ -286,10 +286,274 @@
                 </button>
             </form>
         </div>
+        </div>
         @endif
+
+        <!-- Communication Panel -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mt-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Communications</h3>
+            <button type="button" onclick="openMessageModal()" class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                <i class="fas fa-paper-plane mr-2"></i> Send Notification
+            </button>
+        </div>
 
 
 
     </div>
 </div>
+
+<!-- Send Message Modal -->
+<div id="sendMessageModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeMessageModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl border border-gray-200 transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full relative z-10">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <i class="fas fa-paper-plane text-indigo-600"></i>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                            Send Job Notification
+                        </h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500">Select candidates to notify about this job opening.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form action="{{ route('admin.jobs.send-message', $job->id) }}" method="POST" id="sendMessageForm">
+                @csrf
+                <div class="px-4 py-5 sm:p-6 bg-gray-50/50">
+                    <!-- Target Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Audience</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <label class="audience-label relative flex cursor-pointer rounded-lg border border-gray-200 bg-white p-4 shadow-sm focus:outline-none transition-colors">
+                                <input type="radio" name="audience" value="all" class="sr-only" onchange="toggleManualSelect()">
+                                <span class="flex flex-1">
+                                    <span class="flex flex-col">
+                                        <span class="block text-sm font-medium text-gray-900">All Candidates</span>
+                                        <span class="mt-1 flex items-center text-sm text-gray-500">Send to everyone</span>
+                                    </span>
+                                </span>
+                                <i class="fas fa-check-circle absolute right-4 top-4 text-indigo-600 opacity-0 transition-opacity check-icon"></i>
+                            </label>
+                            
+                            <label class="audience-label relative flex cursor-pointer rounded-lg border border-gray-200 bg-white p-4 shadow-sm focus:outline-none transition-colors">
+                                <input type="radio" name="audience" value="matched" class="sr-only" checked onchange="toggleManualSelect()">
+                                <span class="flex flex-1">
+                                    <span class="flex flex-col">
+                                        <span class="block text-sm font-medium text-gray-900">Matched Candidates</span>
+                                        <span class="mt-1 flex items-center text-sm text-gray-500">AI Suggested (Top 50)</span>
+                                    </span>
+                                </span>
+                                <i class="fas fa-check-circle absolute right-4 top-4 text-indigo-600 opacity-0 transition-opacity check-icon"></i>
+                            </label>
+                            
+                            <label class="audience-label relative flex cursor-pointer rounded-lg border border-gray-200 bg-white p-4 shadow-sm focus:outline-none transition-colors">
+                                <input type="radio" name="audience" value="manual" class="sr-only" onchange="toggleManualSelect()">
+                                <span class="flex flex-1">
+                                    <span class="flex flex-col">
+                                        <span class="block text-sm font-medium text-gray-900">Manual Select</span>
+                                        <span class="mt-1 flex items-center text-sm text-gray-500">Filter and choose</span>
+                                    </span>
+                                </span>
+                                <i class="fas fa-check-circle absolute right-4 top-4 text-indigo-600 opacity-0 transition-opacity check-icon"></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Manual Selection Section -->
+                    <div id="manualSelectSection" class="hidden space-y-4">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                            <h4 class="text-sm font-bold text-gray-700 mb-3">Filters</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                                <div>
+                                    <select id="filterCategory" class="block w-full rounded-md border border-gray-300 py-2 px-3 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-700">
+                                        <option value="">Category</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <select id="filterSubject" class="block w-full rounded-md border border-gray-300 py-2 px-3 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-700">
+                                        <option value="">Subject</option>
+                                        @foreach($subjects as $subject)
+                                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <select id="filterQualification" class="block w-full rounded-md border border-gray-300 py-2 px-3 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-700">
+                                        <option value="">Qualification</option>
+                                        @foreach($qualifications as $qualification)
+                                            <option value="{{ $qualification->id }}">{{ $qualification->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <select id="filterState" class="block w-full rounded-md border border-gray-300 py-2 px-3 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-700">
+                                        <option value="">State</option>
+                                        @foreach($states as $state)
+                                            <option value="{{ $state->id }}">{{ $state->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <button type="button" onclick="searchCandidates()" class="w-full inline-flex justify-center rounded-md border border-transparent bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden max-h-64 overflow-y-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50 sticky top-0">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <input type="checkbox" id="selectAllCandidates" onchange="toggleAllCandidates(this)" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Candidate</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="candidatesTableBody" class="bg-white divide-y divide-gray-200 text-sm">
+                                    <!-- Populated via AJAX -->
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">Search for candidates using filters above.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                    <button type="button" onclick="submitNotificationForm()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                        Send Notifications
+                    </button>
+                    <button type="button" onclick="closeMessageModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openMessageModal() {
+        document.getElementById('sendMessageModal').classList.remove('hidden');
+        toggleManualSelect();
+    }
+
+    function closeMessageModal() {
+        document.getElementById('sendMessageModal').classList.add('hidden');
+    }
+
+    function toggleManualSelect() {
+        const manualSelectChecked = document.querySelector('input[name="audience"][value="manual"]').checked;
+        const manualSelectSection = document.getElementById('manualSelectSection');
+        
+        updateRadioStyles();
+        
+        if (manualSelectChecked) {
+            manualSelectSection.classList.remove('hidden');
+            searchCandidates();
+        } else {
+            manualSelectSection.classList.add('hidden');
+        }
+    }
+
+    function updateRadioStyles() {
+        const labels = document.querySelectorAll('.audience-label');
+        labels.forEach(label => {
+            const radio = label.querySelector('input[type="radio"]');
+            const icon = label.querySelector('.check-icon');
+            
+            if (radio.checked) {
+                label.classList.remove('border-gray-200');
+                label.classList.add('border-indigo-600', 'bg-indigo-50');
+                icon.classList.remove('opacity-0');
+                icon.classList.add('opacity-100');
+            } else {
+                label.classList.remove('border-indigo-600', 'bg-indigo-50');
+                label.classList.add('border-gray-200');
+                icon.classList.remove('opacity-100');
+                icon.classList.add('opacity-0');
+            }
+        });
+    }
+
+    function searchCandidates() {
+        const btn = document.querySelector('button[onclick="searchCandidates()"]');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        const params = new URLSearchParams({
+            category_id: document.getElementById('filterCategory').value,
+            subject_id: document.getElementById('filterSubject').value,
+            qualification_id: document.getElementById('filterQualification').value,
+            state_id: document.getElementById('filterState').value,
+        });
+
+        fetch(`{{ route('admin.jobs.candidates.search', $job->id) }}?${params.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('candidatesTableBody');
+                tbody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No candidates found.</td></tr>';
+                } else {
+                    data.forEach(candidate => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="checkbox" name="candidate_ids[]" value="${candidate.id}" class="candidate-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-medium text-gray-900">${candidate.name}</div>
+                                    <div class="text-xs text-gray-500">${candidate.email}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">${candidate.subject}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">${candidate.city}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            })
+            .finally(() => {
+                btn.innerHTML = 'Search';
+            });
+    }
+
+    function toggleAllCandidates(source) {
+        const checkboxes = document.querySelectorAll('.candidate-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = source.checked;
+        });
+    }
+
+    function submitNotificationForm() {
+        const form = document.getElementById('sendMessageForm');
+        const audience = document.querySelector('input[name="audience"]:checked').value;
+        
+        if (audience === 'manual') {
+            const checked = document.querySelectorAll('.candidate-checkbox:checked');
+            if (checked.length === 0) {
+                alert('Please select at least one candidate to send notifications.');
+                return;
+            }
+        }
+        
+        form.submit();
+    }
+</script>
 @endsection

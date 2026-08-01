@@ -20,7 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'candidate/payment/callback',
             'candidate/wizard/callback',
-            'candidate/service-charge/callback'
+            'candidate/service-charge/callback',
+            'webhook/phonepe'
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

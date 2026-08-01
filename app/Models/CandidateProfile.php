@@ -56,4 +56,38 @@ class CandidateProfile extends Model
     {
         return $this->belongsTo(City::class, 'preferred_city_id');
     }
+
+    public function getPendingReasonAttribute()
+    {
+        if ($this->is_fee_paid) {
+            return 'Completed';
+        }
+        if (!$this->is_profile_complete) {
+            return 'Pending Profile Completion';
+        }
+        if (!$this->is_terms_agreed) {
+            return 'Pending Terms & Conditions';
+        }
+        if (!$this->is_agreement_signed) {
+            return 'Pending Agreement Upload';
+        }
+        return 'Completed';
+    }
+
+    public function getPendingActionUrlAttribute()
+    {
+        if (!$this->is_profile_complete) {
+            return route('candidate.wizard');
+        }
+        if (!$this->is_terms_agreed) {
+            return route('candidate.wizard', ['step' => 2]); // Usually wizard redirects to the correct step automatically
+        }
+        if (!$this->is_agreement_signed) {
+            return route('candidate.wizard', ['step' => 3]);
+        }
+        if (!$this->is_fee_paid) {
+            return route('candidate.wizard', ['step' => 4]);
+        }
+        return route('candidate.dashboard');
+    }
 }

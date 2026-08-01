@@ -23,20 +23,21 @@ class ApplicationController extends Controller
             });
         }
 
+        // Analytics based on base query (before status filter)
+        $baseQuery = clone $query;
+        $stats = [
+            'total' => (clone $baseQuery)->count(),
+            'applied' => (clone $baseQuery)->where('status', 'applied')->count(),
+            'shortlisted' => (clone $baseQuery)->where('status', 'shortlisted')->count(),
+            'hired' => (clone $baseQuery)->where('status', 'hired')->count(),
+            'rejected' => (clone $baseQuery)->where('status', 'rejected')->count(),
+        ];
+
         if ($status = $request->input('status')) {
             $query->where('status', $status);
         }
 
         $applications = $query->latest()->paginate(15)->withQueryString();
-
-        // Analytics based on current filtered query
-        $stats = [
-            'total' => (clone $query)->count(),
-            'applied' => (clone $query)->where('status', 'applied')->count(),
-            'shortlisted' => (clone $query)->where('status', 'shortlisted')->count(),
-            'hired' => (clone $query)->where('status', 'hired')->count(),
-            'rejected' => (clone $query)->where('status', 'rejected')->count(),
-        ];
 
         return view('admin.applications.index', compact('applications', 'stats'));
     }
@@ -103,5 +104,26 @@ class ApplicationController extends Controller
         $application->save();
 
         return back()->with('success', 'Application status updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        $application = JobApplication::findOrFail($id);
+        $application->delete();
+
+        return redirect()->route('admin.applications.index')->with('success', 'Application deleted successfully.');
+    }
+
+    public function shareReview($id)
+    {
+        $application = JobApplication::with(['candidate', 'jobPost'])->findOrFail($id);
+
+        if (!$application->remarks) {
+            return back()->with('error', 'Cannot share review because there are no remarks for this application.');
+        }
+
+        \Illuminate\Support\Facades\Mail::to($application->candidate->email)->send(new \App\Mail\InterviewReviewMail($application));
+
+        return back()->with('success', 'Interview review shared successfully with the candidate.');
     }
 }

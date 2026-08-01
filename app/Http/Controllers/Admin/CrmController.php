@@ -337,6 +337,41 @@ class CrmController extends Controller
             });
         }
 
+        // Base query for stats (before status filter)
+        $baseQuery = clone $query;
+
+        // Analytics based on base query
+        $stats = [
+            'total' => (clone $baseQuery)->count(),
+            'active_paid' => (clone $baseQuery)->whereHas('profile', function($q) {
+                $q->where('is_fee_paid', true);
+            })->count(),
+            'signed' => (clone $baseQuery)->whereHas('profile', function($q) {
+                $q->where('is_fee_paid', false)->where('is_agreement_signed', true);
+            })->count(),
+        ];
+        $stats['incomplete'] = $stats['total'] - $stats['active_paid'] - $stats['signed'];
+
+        // Status Filter
+        if ($status = $request->input('status')) {
+            if ($status === 'active_paid') {
+                $query->whereHas('profile', function($q) {
+                    $q->where('is_fee_paid', true);
+                });
+            } elseif ($status === 'signed') {
+                $query->whereHas('profile', function($q) {
+                    $q->where('is_fee_paid', false)->where('is_agreement_signed', true);
+                });
+            } elseif ($status === 'incomplete') {
+                $query->whereDoesntHave('profile', function($pq) {
+                    $pq->where('is_fee_paid', true)
+                       ->orWhere(function($q2) {
+                           $q2->where('is_fee_paid', false)->where('is_agreement_signed', true);
+                       });
+                });
+            }
+        }
+
         // Sorting
         $sortField = $request->input('sort_by', 'created_at');
         $sortDirection = $request->input('order', 'desc');
@@ -349,18 +384,6 @@ class CrmController extends Controller
         }
 
         $candidates = $query->with('rating')->paginate(15)->withQueryString();
-
-        // Analytics based on current filtered query
-        $stats = [
-            'total' => (clone $query)->count(),
-            'active_paid' => (clone $query)->whereHas('profile', function($q) {
-                $q->where('is_fee_paid', true);
-            })->count(),
-            'signed' => (clone $query)->whereHas('profile', function($q) {
-                $q->where('is_fee_paid', false)->where('is_agreement_signed', true);
-            })->count(),
-        ];
-        $stats['incomplete'] = $stats['total'] - $stats['active_paid'] - $stats['signed'];
 
         // Pass master data for filters
         $subjects = \App\Models\Subject::all();
@@ -617,11 +640,32 @@ class CrmController extends Controller
             if ($candidate && $candidate->profile) {
                 $candidate->profile->decrement('pending_amount', $invoice->amount);
                 $candidate->profile->increment('paid_amount', $invoice->amount);
+                
+                // Dispatch Invoice Email
+                \Illuminate\Support\Facades\Mail::to($candidate->email)->send(
+                    new \App\Mail\PaymentReceiptMail($candidate, 'MANUAL_SC_' . $invoice->id, $invoice->amount, 'Service Charge Invoice Payment (Manual)')
+                );
             }
         }
         $invoice->save();
 
         return back()->with('success', 'Invoice status updated.');
+    }
+
+    public function sendInvoiceReminder(Request $request, $invoiceId)
+    {
+        $invoice = ServiceChargeInvoice::with(['candidate'])->findOrFail($invoiceId);
+        
+        if ($invoice->status === 'paid') {
+            return back()->with('error', 'Cannot send reminder for a paid invoice.');
+        }
+
+        $candidate = $invoice->candidate;
+        if ($candidate) {
+            \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\PaymentReminderMail($candidate, $invoice));
+        }
+
+        return back()->with('success', 'Payment reminder sent successfully to the candidate.');
     }
 
     public function adjustInvoice(Request $request, $invoiceId)
@@ -743,5 +787,22 @@ class CrmController extends Controller
         
         Auth::login($candidate);
         return redirect()->route('candidate.dashboard');
+    }
+
+    public function sendOnboardingReminder($id)
+    {
+        $user = User::where('role', 'candidate')->findOrFail($id);
+        $profile = $user->profile;
+
+        $reason = $profile ? $profile->pending_reason : 'Pending Profile Completion';
+        $actionUrl = $profile ? $profile->pending_action_url : route('candidate.wizard');
+
+        if ($reason === 'Completed') {
+            return back()->with('error', 'Candidate onboarding is already completed.');
+        }
+
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\CandidateReminderMail($user, $reason, $actionUrl));
+
+        return back()->with('success', 'Reminder email sent successfully for: ' . $reason);
     }
 }

@@ -7,31 +7,31 @@
 
 {{-- Analytics Cards --}}
 <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+    <a href="{{ request()->fullUrlWithQuery(['status' => null, 'page' => null]) }}" class="bg-card-bg border {{ request('status') === null ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-blue-500 transition-all">
         <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Total Apps</p>
         <h4 class="text-2xl font-extrabold text-blue-500 relative z-10">{{ $stats['total'] }}</h4>
-    </div>
-    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'applied', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'applied' ? 'border-gray-500 shadow-md ring-1 ring-gray-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-gray-500 transition-all">
         <div class="absolute inset-0 bg-gray-500/5 group-hover:bg-gray-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">New (Applied)</p>
         <h4 class="text-2xl font-extrabold text-gray-500 relative z-10">{{ $stats['applied'] }}</h4>
-    </div>
-    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'shortlisted', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'shortlisted' ? 'border-purple-500 shadow-md ring-1 ring-purple-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-purple-500 transition-all">
         <div class="absolute inset-0 bg-purple-500/5 group-hover:bg-purple-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Forwarded</p>
         <h4 class="text-2xl font-extrabold text-purple-500 relative z-10">{{ $stats['shortlisted'] }}</h4>
-    </div>
-    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'hired', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'hired' ? 'border-green-500 shadow-md ring-1 ring-green-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-green-500 transition-all">
         <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Hired</p>
         <h4 class="text-2xl font-extrabold text-green-500 relative z-10">{{ $stats['hired'] }}</h4>
-    </div>
-    <div class="bg-card-bg border border-card-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'rejected', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'rejected' ? 'border-red-500 shadow-md ring-1 ring-red-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-red-500 transition-all">
         <div class="absolute inset-0 bg-red-500/5 group-hover:bg-red-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Rejected</p>
         <h4 class="text-2xl font-extrabold text-red-500 relative z-10">{{ $stats['rejected'] }}</h4>
-    </div>
+    </a>
 </div>
 
 <div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-4">
@@ -108,10 +108,20 @@
                 <td class="text-text-dark/60 text-sm">
                     {{ $app->created_at->format('M d, Y') }}
                 </td>
-                <td class="text-right">
-                    <button type="button" onclick="openStatusModal({{ $app->id }}, '{{ $app->status }}', '{{ addslashes($app->remarks ?? '') }}', '{{ $app->interview_date ? $app->interview_date->format('Y-m-d\TH:i') : '' }}', '{{ addslashes($app->interview_link ?? '') }}')" class="px-3 py-1.5 rounded-lg bg-secondary-bg text-text-main border border-card-border hover:border-accent-blue hover:text-accent-blue text-xs font-semibold transition-colors">
-                        Update Status
-                    </button>
+                <td class="text-right py-3 pr-4">
+                    <div class="flex items-center justify-end gap-2">
+                        @if($app->remarks)
+                            <form action="{{ route('admin.applications.share-review', $app->id) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" onclick="return confirm('Share this review/remarks with the candidate via email?')" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 hover:border-indigo-300 hover:bg-indigo-100 text-[10px] font-bold uppercase tracking-wider transition-colors" title="Share Review with Candidate">
+                                    <i class="fas fa-share mr-1"></i> Share Review
+                                </button>
+                            </form>
+                        @endif
+                        <button type="button" onclick="openStatusModal({{ $app->id }}, '{{ $app->status }}', '{{ addslashes($app->remarks ?? '') }}', '{{ $app->interview_date ? $app->interview_date->format('Y-m-d\TH:i') : '' }}', '{{ addslashes($app->interview_link ?? '') }}')" class="px-3 py-1.5 rounded-lg bg-secondary-bg text-text-main border border-card-border hover:border-accent-blue hover:text-accent-blue text-xs font-semibold transition-colors">
+                            Update Status
+                        </button>
+                    </div>
                 </td>
             </tr>
             @empty

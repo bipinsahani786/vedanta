@@ -5,7 +5,7 @@
 @section('content')
     <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Total Users -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4">
+        <a href="{{ request()->fullUrlWithQuery(['role' => null, 'status' => null, 'page' => null]) }}" class="bg-white rounded-2xl p-6 shadow-sm border {{ (!request('role') && !request('status')) ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-100' }} flex items-center gap-4 hover:border-blue-500 transition-all">
             <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
                 <i class="fas fa-users"></i>
             </div>
@@ -13,10 +13,10 @@
                 <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Total Users</p>
                 <h3 class="text-2xl font-black text-gray-800">{{ $stats['total'] }}</h3>
             </div>
-        </div>
+        </a>
 
         <!-- Active Users -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4">
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'active', 'role' => null, 'page' => null]) }}" class="bg-white rounded-2xl p-6 shadow-sm border {{ request('status') === 'active' ? 'border-green-500 ring-1 ring-green-500' : 'border-gray-100' }} flex items-center gap-4 hover:border-green-500 transition-all">
             <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl">
                 <i class="fas fa-user-check"></i>
             </div>
@@ -24,10 +24,10 @@
                 <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Active Users</p>
                 <h3 class="text-2xl font-black text-gray-800">{{ $stats['active'] }}</h3>
             </div>
-        </div>
+        </a>
 
         <!-- Candidates -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4">
+        <a href="{{ request()->fullUrlWithQuery(['role' => 'candidate', 'status' => null, 'page' => null]) }}" class="bg-white rounded-2xl p-6 shadow-sm border {{ request('role') === 'candidate' ? 'border-purple-500 ring-1 ring-purple-500' : 'border-gray-100' }} flex items-center gap-4 hover:border-purple-500 transition-all">
             <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xl">
                 <i class="fas fa-user-graduate"></i>
             </div>
@@ -35,10 +35,10 @@
                 <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Candidates</p>
                 <h3 class="text-2xl font-black text-gray-800">{{ $stats['candidates'] }}</h3>
             </div>
-        </div>
+        </a>
 
         <!-- Employers -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4">
+        <a href="{{ request()->fullUrlWithQuery(['role' => 'employer', 'status' => null, 'page' => null]) }}" class="bg-white rounded-2xl p-6 shadow-sm border {{ request('role') === 'employer' ? 'border-orange-500 ring-1 ring-orange-500' : 'border-gray-100' }} flex items-center gap-4 hover:border-orange-500 transition-all">
             <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xl">
                 <i class="fas fa-building"></i>
             </div>
@@ -46,7 +46,7 @@
                 <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Employers</p>
                 <h3 class="text-2xl font-black text-gray-800">{{ $stats['employers'] }}</h3>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Filters & Table -->

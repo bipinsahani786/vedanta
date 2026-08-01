@@ -3,19 +3,19 @@
     <img src="{{ url('/images/logo.png') }}" alt="Vedanta Placement Agency" style="height: 60px; max-width: 100%;">
 </div>
 
-# Profile Verified
+# Payment Successful
 
 Dear {{ $user->name }},
 
-We are pleased to inform you that our team has successfully reviewed your submitted documents, and your profile is now officially verified.
+Thank you for your payment! We have successfully received your payment of **₹{{ number_format($amount, 2) }}** for **{{ $description }}**.
 
-You will now display the **Verified Badge** on your profile when schools review your application. This significantly increases your chances of being shortlisted for teaching positions.
+Your payment receipt and invoice have been attached to this email as a PDF document for your records.
 
 <x-mail::button :url="route('candidate.dashboard')" color="success">
-View Your Dashboard
+Go to Dashboard
 </x-mail::button>
 
-We encourage you to keep applying to jobs that match your profile. If you have any questions, feel free to reach out to us.
+If you have any questions regarding this transaction, please do not hesitate to contact us.
 
 <x-mail::panel>
 ### Contact Us

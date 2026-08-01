@@ -283,15 +283,24 @@ class RegistrationWizardController extends Controller
         $isSuccess = $statusResult['success'];
         $amountPaid = $statusResult['amount'] / 100; // Convert paise to rupees
 
-        // Always record transaction
-        \App\Models\PaymentTransaction::create([
-            'candidate_id' => $user->id,
-            'amount' => $amountPaid,
-            'transaction_id' => $transactionId,
-            'type' => 'registration_fee',
-            'status' => $isSuccess ? 'success' : 'failed',
-            'gateway_response' => $statusResult['raw']
-        ]);
+        // Check if webhook already processed it
+        $existingTxn = \App\Models\PaymentTransaction::where('transaction_id', $transactionId)->first();
+        $needsEmail = false;
+
+        if (!$existingTxn) {
+            \App\Models\PaymentTransaction::create([
+                'candidate_id' => $user->id,
+                'amount' => $amountPaid,
+                'transaction_id' => $transactionId,
+                'type' => 'registration_fee',
+                'status' => $isSuccess ? 'success' : 'failed',
+                'gateway_response' => $statusResult['raw']
+            ]);
+            $needsEmail = $isSuccess;
+        } else if ($isSuccess && $existingTxn->status !== 'success') {
+            $existingTxn->update(['status' => 'success', 'gateway_response' => $statusResult['raw']]);
+            $needsEmail = true;
+        }
 
         // If payment failed, stop here — do NOT update the profile
         if (!$isSuccess) {
@@ -363,8 +372,10 @@ class RegistrationWizardController extends Controller
             ]);
         }
 
-        // Send Email to Candidate (Queued)
-        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
+        if ($needsEmail) {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\PaymentReceiptMail($user, $transactionId, $amountPaid, 'Candidate Profile Registration Fee'));
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
+        }
 
         return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Registration complete.');
     }
