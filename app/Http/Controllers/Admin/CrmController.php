@@ -147,7 +147,7 @@ class CrmController extends Controller
     public function edit($id)
     {
         $user = User::where('role', 'candidate')->findOrFail($id);
-        $profile = $user->profile;
+        $profile = $user->profile ?? new \App\Models\CandidateProfile();
 
         $categories = \App\Models\Category::all();
         $subjects = \App\Models\Subject::all();
@@ -189,6 +189,10 @@ class CrmController extends Controller
             'salary_slip' => 'nullable|mimes:pdf,jpg,png,jpeg|max:5120',
             'offer_letter' => 'nullable|mimes:pdf,jpg,png,jpeg|max:5120',
             'agreement_pdf' => 'nullable|mimes:pdf|max:5120',
+            'plan_type' => 'nullable|in:standard,premium',
+            'payment_method' => 'nullable|in:CASH,ONLINE_TRANSFER,CHEQUE,SPLIT_PAYMENT',
+            'payment_amount' => 'nullable|numeric|min:0',
+            'payment_notes' => 'nullable|string',
         ]);
 
         try {
@@ -249,7 +253,50 @@ class CrmController extends Controller
                 $updates['is_agreement_signed'] = true;
             }
 
-            $profile->update($updates);
+            if ($profile && !$profile->is_fee_paid && $request->filled('payment_amount') && $request->filled('payment_method') && $request->filled('plan_type')) {
+                // Also allow payment if profile doesn't exist? Wait, if they don't have a profile, is_fee_paid is false by default.
+            }
+
+            // Handle Manual Payment Collection
+            $isFeePaid = $profile ? $profile->is_fee_paid : false;
+            
+            if (!$isFeePaid && $request->filled('payment_amount') && $request->filled('payment_method') && $request->filled('plan_type')) {
+                $paymentId = $request->payment_method . '-ADMIN-' . strtoupper(uniqid());
+                
+                $updates['is_fee_paid'] = true;
+                $updates['paid_amount'] = $request->payment_amount;
+                $updates['plan_type'] = $request->plan_type;
+                $updates['total_allowed_applications'] = $request->plan_type === 'standard' ? 2 : 3;
+                $updates['plan_started_at'] = now();
+                $updates['payment_id'] = $paymentId;
+                
+                if (!$profile || !$profile->is_profile_complete) {
+                     $updates['is_profile_complete'] = true;
+                     $updates['registration_completed_at'] = now();
+                }
+
+                \App\Models\PaymentTransaction::create([
+                    'candidate_id' => $user->id,
+                    'transaction_id' => $paymentId,
+                    'amount' => $request->payment_amount,
+                    'type' => 'registration_fee',
+                    'status' => 'success',
+                    'gateway_response' => [
+                        'note' => 'Manually collected by Admin', 
+                        'admin_notes' => $request->payment_notes,
+                        'payment_method' => $request->payment_method
+                    ],
+                ]);
+            }
+
+            if ($profile) {
+                $profile->update($updates);
+            } else {
+                $updates['user_id'] = $user->id;
+                $updates['is_profile_complete'] = $updates['is_profile_complete'] ?? true;
+                $updates['is_fee_paid'] = $updates['is_fee_paid'] ?? false;
+                \App\Models\CandidateProfile::create($updates);
+            }
 
             return redirect()->route('admin.crm.show', $user->id)->with('success', 'Candidate profile updated successfully.');
             

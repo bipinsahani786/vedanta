@@ -449,6 +449,9 @@
 </div>
 
 <script>
+    let selectedCandidates = new Set();
+    let currentPage = 1;
+
     function openMessageModal() {
         document.getElementById('sendMessageModal').classList.remove('hidden');
         toggleManualSelect();
@@ -466,7 +469,7 @@
         
         if (manualSelectChecked) {
             manualSelectSection.classList.remove('hidden');
-            searchCandidates();
+            searchCandidates(1);
         } else {
             manualSelectSection.classList.add('hidden');
         }
@@ -492,15 +495,17 @@
         });
     }
 
-    function searchCandidates() {
+    function searchCandidates(page = 1) {
+        currentPage = page;
         const btn = document.querySelector('button[onclick="searchCandidates()"]');
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         
         const params = new URLSearchParams({
             category_id: document.getElementById('filterCategory').value,
             subject_id: document.getElementById('filterSubject').value,
             qualification_id: document.getElementById('filterQualification').value,
             state_id: document.getElementById('filterState').value,
+            page: page
         });
 
         fetch(`{{ route('admin.jobs.candidates.search', $job->id) }}?${params.toString()}`)
@@ -509,14 +514,17 @@
                 const tbody = document.getElementById('candidatesTableBody');
                 tbody.innerHTML = '';
                 
-                if (data.length === 0) {
+                const candidates = data.data;
+                
+                if (candidates.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No candidates found.</td></tr>';
                 } else {
-                    data.forEach(candidate => {
+                    candidates.forEach(candidate => {
+                        const isChecked = selectedCandidates.has(candidate.id.toString()) ? 'checked' : '';
                         tbody.innerHTML += `
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <input type="checkbox" name="candidate_ids[]" value="${candidate.id}" class="candidate-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    <input type="checkbox" onchange="toggleCandidate(this)" value="${candidate.id}" class="candidate-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" ${isChecked}>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="font-medium text-gray-900">${candidate.name}</div>
@@ -528,17 +536,70 @@
                         `;
                     });
                 }
+                
+                renderPagination(data);
+                updateSelectAllState();
             })
             .finally(() => {
-                btn.innerHTML = 'Search';
+                if (btn) btn.innerHTML = 'Search';
             });
     }
 
+    function toggleCandidate(checkbox) {
+        if (checkbox.checked) {
+            selectedCandidates.add(checkbox.value.toString());
+        } else {
+            selectedCandidates.delete(checkbox.value.toString());
+        }
+        updateSelectAllState();
+    }
+
     function toggleAllCandidates(source) {
+        const isChecked = source.checked;
         const checkboxes = document.querySelectorAll('.candidate-checkbox');
         checkboxes.forEach(cb => {
-            cb.checked = source.checked;
+            cb.checked = isChecked;
+            if (isChecked) {
+                selectedCandidates.add(cb.value.toString());
+            } else {
+                selectedCandidates.delete(cb.value.toString());
+            }
         });
+        updateSelectAllState();
+    }
+
+    function updateSelectAllState() {
+        const checkboxes = document.querySelectorAll('.candidate-checkbox');
+        const selectAll = document.getElementById('selectAllCandidates');
+        if (checkboxes.length === 0) {
+            selectAll.checked = false;
+            return;
+        }
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        selectAll.checked = allChecked;
+    }
+
+    function renderPagination(data) {
+        let container = document.getElementById('paginationControls');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'paginationControls';
+            container.className = 'px-6 py-3 border-t border-gray-200 flex items-center justify-between bg-gray-50 sticky bottom-0';
+            document.querySelector('#manualSelectSection .bg-white.rounded-lg.shadow-sm').appendChild(container);
+        }
+        
+        const prevDisabled = data.current_page <= 1 ? 'disabled class="px-3 py-1 border rounded text-gray-400 bg-gray-100 cursor-not-allowed"' : 'class="px-3 py-1 border rounded text-indigo-600 hover:bg-indigo-50 bg-white shadow-sm"';
+        const nextDisabled = data.current_page >= data.last_page ? 'disabled class="px-3 py-1 border rounded text-gray-400 bg-gray-100 cursor-not-allowed"' : 'class="px-3 py-1 border rounded text-indigo-600 hover:bg-indigo-50 bg-white shadow-sm"';
+        
+        container.innerHTML = `
+            <div class="text-sm text-gray-500">
+                Showing <span class="font-medium">${data.from || 0}</span> to <span class="font-medium">${data.to || 0}</span> of <span class="font-medium">${data.total}</span> candidates
+            </div>
+            <div class="flex gap-2">
+                <button type="button" onclick="searchCandidates(${data.current_page - 1})" ${prevDisabled}>Previous</button>
+                <button type="button" onclick="searchCandidates(${data.current_page + 1})" ${nextDisabled}>Next</button>
+            </div>
+        `;
     }
 
     function submitNotificationForm() {
@@ -546,11 +607,23 @@
         const audience = document.querySelector('input[name="audience"]:checked').value;
         
         if (audience === 'manual') {
-            const checked = document.querySelectorAll('.candidate-checkbox:checked');
-            if (checked.length === 0) {
+            if (selectedCandidates.size === 0) {
                 alert('Please select at least one candidate to send notifications.');
                 return;
             }
+            
+            document.querySelectorAll('.hidden-candidate-id').forEach(el => el.remove());
+            
+            selectedCandidates.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'candidate_ids[]';
+                input.value = id;
+                input.className = 'hidden-candidate-id';
+                form.appendChild(input);
+            });
+            
+            document.querySelectorAll('.candidate-checkbox').forEach(cb => cb.disabled = true);
         }
         
         form.submit();

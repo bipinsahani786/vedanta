@@ -198,6 +198,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Applications & Transactions
     Route::get('/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
     Route::post('/applications/{id}/status', [\App\Http\Controllers\Admin\ApplicationController::class, 'updateStatus'])->name('applications.status.update');
+
+    // Email Templates
+    Route::resource('email-templates', \App\Http\Controllers\Admin\EmailTemplateController::class);
+    Route::get('email-templates/api/{id}', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'getTemplate'])->name('email-templates.api');
+
+    // Bulk Email
+    Route::get('/bulk-email', [\App\Http\Controllers\Admin\BulkEmailController::class, 'index'])->name('bulk-email.index');
+    Route::post('/bulk-email/send', [\App\Http\Controllers\Admin\BulkEmailController::class, 'send'])->name('bulk-email.send');
+    Route::get('/bulk-email/search-users', [\App\Http\Controllers\Admin\BulkEmailController::class, 'searchUsers'])->name('bulk-email.search-users');
     Route::post('/applications/{id}/share-review', [\App\Http\Controllers\Admin\ApplicationController::class, 'shareReview'])->name('applications.share-review');
     Route::get('/transactions', [\App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('transactions.index');
 
