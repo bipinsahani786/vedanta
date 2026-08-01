@@ -232,6 +232,17 @@
                     class="sidebar-link {{ request()->routeIs('admin.clients.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-building w-5 text-center"></i> Client Logos
                 </a>
+
+                <div class="text-[10px] uppercase font-bold tracking-widest text-white/30 mt-6 mb-2 px-4">Communication</div>
+                
+                <a href="{{ route('admin.bulk-email.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.bulk-email.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm text-yellow-400">
+                    <i class="fas fa-paper-plane w-5 text-center"></i> Bulk Emailer
+                </a>
+                <a href="{{ route('admin.email-templates.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.email-templates.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-envelope-open-text w-5 text-center"></i> Email Templates
+                </a>
             </div>
 
             <!-- User Section -->

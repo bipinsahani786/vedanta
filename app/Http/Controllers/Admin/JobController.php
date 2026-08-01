@@ -272,9 +272,9 @@ class JobController extends Controller
             });
         }
 
-        $candidates = $query->take(100)->get(); // Limit to 100 for safety
+        $candidates = $query->paginate(20);
 
-        $formatted = $candidates->map(function($user) {
+        $formatted = $candidates->getCollection()->map(function($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -286,7 +286,9 @@ class JobController extends Controller
             ];
         });
 
-        return response()->json($formatted);
+        $candidates->setCollection($formatted);
+
+        return response()->json($candidates);
     }
 
     public function sendMessage(Request $request, JobPost $job)

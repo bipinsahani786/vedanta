@@ -262,6 +262,42 @@
             </div>
         </div>
 
+        @if(!$profile->is_fee_paid)
+        <!-- Section 5: Plan & Payment Collection -->
+        <div>
+            <h3 class="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2 mb-4">5. Collect Payment (Optional)</h3>
+            <p class="text-sm text-gray-500 mb-4">Fill this section only if you are collecting the registration fee manually now.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-blue-50/30 p-6 rounded-xl border border-blue-100">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Subscription Plan</label>
+                    <select name="plan_type" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Plan</option>
+                        <option value="standard" {{ old('plan_type') == 'standard' ? 'selected' : '' }}>Standard Plan (₹500)</option>
+                        <option value="premium" {{ old('plan_type') == 'premium' ? 'selected' : '' }}>Premium Plan (₹1000)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Payment Mode</label>
+                    <select name="payment_method" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Mode</option>
+                        <option value="CASH" {{ old('payment_method') == 'CASH' ? 'selected' : '' }}>Cash</option>
+                        <option value="ONLINE_TRANSFER" {{ old('payment_method') == 'ONLINE_TRANSFER' ? 'selected' : '' }}>Online Transfer (UPI/NEFT)</option>
+                        <option value="CHEQUE" {{ old('payment_method') == 'CHEQUE' ? 'selected' : '' }}>Cheque</option>
+                        <option value="SPLIT_PAYMENT" {{ old('payment_method') == 'SPLIT_PAYMENT' ? 'selected' : '' }}>Split Payment</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Amount Collected (₹)</label>
+                    <input type="number" name="payment_amount" value="{{ old('payment_amount') }}" min="0" placeholder="e.g. 500" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Payment Notes (Optional)</label>
+                    <input type="text" name="payment_notes" value="{{ old('payment_notes') }}" placeholder="e.g. Received via GPay, Transaction ID XXXXX..." class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+        </div>
+        @endif
+
         <div class="pt-6 border-t border-gray-100 flex justify-end">
             <button type="submit" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2">
                 <i class="fas fa-save"></i> Update Profile
