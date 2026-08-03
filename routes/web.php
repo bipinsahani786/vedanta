@@ -186,12 +186,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/candidate/{id}/invoice', [\App\Http\Controllers\Admin\CrmController::class, 'storeInvoice'])->name('crm.invoice.store');
     Route::post('/crm/candidate/{id}/assign-job', [\App\Http\Controllers\Admin\CrmController::class, 'assignJob'])->name('crm.application.assign');
     Route::put('/crm/invoice/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'updateInvoiceStatus'])->name('crm.invoice.update');
+    Route::put('/crm/invoice/{id}/edit-details', [\App\Http\Controllers\Admin\CrmController::class, 'updateInvoiceDetails'])->name('crm.invoice.update-details');
     Route::post('/crm/invoice/{id}/remind', [\App\Http\Controllers\Admin\CrmController::class, 'sendInvoiceReminder'])->name('crm.invoice.remind');
     Route::post('/crm/invoice/{id}/adjust', [\App\Http\Controllers\Admin\CrmController::class, 'adjustInvoice'])->name('crm.invoice.adjust');
     Route::post('/crm/candidate/{id}/toggle-verification', [\App\Http\Controllers\Admin\CrmController::class, 'toggleVerification'])->name('crm.candidate.verify');
     Route::post('/crm/candidate/{id}/rate', [\App\Http\Controllers\Admin\CrmController::class, 'rateCandidate'])->name('crm.candidate.rate');
     Route::get('/crm/candidate/{id}/magic-login', [\App\Http\Controllers\Admin\CrmController::class, 'magicLogin'])->name('crm.candidate.magic-login');
     Route::post('/crm/candidate/{id}/remind', [\App\Http\Controllers\Admin\CrmController::class, 'sendOnboardingReminder'])->name('crm.candidate.remind');
+    Route::post('/crm/candidates/bulk-remind', [\App\Http\Controllers\Admin\CrmController::class, 'sendBulkOnboardingReminder'])->name('crm.candidate.bulk-remind');
     Route::post('/crm/candidate/{id}/upload-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'uploadAgreement'])->name('crm.candidate.upload-agreement');
     Route::get('/crm/candidate/{id}/download-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'downloadAgreement'])->name('crm.candidate.download-agreement');
 
@@ -215,6 +217,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/leads/{id}', [\App\Http\Controllers\Admin\ContactLeadController::class, 'show'])->name('leads.show');
     Route::put('/leads/{id}/status', [\App\Http\Controllers\Admin\ContactLeadController::class, 'updateStatus'])->name('leads.status.update');
     Route::post('/leads/{id}/follow-up', [\App\Http\Controllers\Admin\ContactLeadController::class, 'storeFollowUp'])->name('leads.followup.store');
+    Route::delete('/leads/{id}', [\App\Http\Controllers\Admin\ContactLeadController::class, 'destroy'])->name('leads.destroy');
+    Route::post('/leads/bulk-delete', [\App\Http\Controllers\Admin\ContactLeadController::class, 'bulkDestroy'])->name('leads.bulk-delete');
 
     // Frontend Management
     

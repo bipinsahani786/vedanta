@@ -1,7 +1,7 @@
 {{-- Candidate Dashboard Navigation --}}
 <div class="bg-card-bg/80 backdrop-blur-md border-b border-card-border sticky top-[60px] z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex overflow-x-auto py-0 gap-1 text-sm font-medium hide-scrollbar items-center">
+        <div id="candidateNavContainer" class="flex overflow-x-auto py-0 gap-1 text-sm font-medium candidate-nav-scroll items-center scroll-smooth">
             @php
                 $appCount = auth()->user()->applications()->count();
                 $navItems = [
@@ -17,20 +17,19 @@
             @endphp
 
             @foreach($navItems as $item)
-                    <a href="{{ route($item['route']) }}" class="relative px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2
-                                   {{ request()->routeIs($item['routeIs'])
-                ? 'text-accent-blue after:absolute after:bottom-0 after:left-2 after:right-2 after:h-[2px] after:bg-accent-blue after:rounded-full'
-                : 'text-text-dark/50 hover:text-text-main' }}">
+                @php $isActive = request()->routeIs($item['routeIs']); @endphp
+                <a href="{{ route($item['route']) }}" 
+                   class="relative px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2 {{ $isActive ? 'nav-active-link text-accent-blue after:absolute after:bottom-0 after:left-2 after:right-2 after:h-[2px] after:bg-accent-blue after:rounded-full font-bold' : 'text-text-dark/50 hover:text-text-main' }}">
 
-                        @if($item['route'] === 'candidate.profile.edit' && auth()->user()->profile?->profile_photo_path)
-                            <img src="{{ asset('storage/' . auth()->user()->profile->profile_photo_path) }}" alt="Profile"
-                                class="w-5 h-5 rounded-full object-cover border border-accent-blue/30">
-                        @else
-                            <i class="fas {{ $item['icon'] }} text-xs"></i>
-                        @endif
+                    @if($item['route'] === 'candidate.profile.edit' && auth()->user()->profile?->profile_photo_path)
+                        <img src="{{ asset('storage/' . auth()->user()->profile->profile_photo_path) }}" alt="Profile"
+                            class="w-5 h-5 rounded-full object-cover border border-accent-blue/30">
+                    @else
+                        <i class="fas {{ $item['icon'] }} text-xs"></i>
+                    @endif
 
-                        {{ $item['label'] }}
-                    </a>
+                    {{ $item['label'] }}
+                </a>
             @endforeach
 
             <form action="{{ route('logout') }}" method="POST" class="ml-auto">
@@ -42,14 +41,71 @@
             </form>
         </div>
     </div>
-</div>
-<style>
-    .hide-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
 
-    .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    <!-- Dedicated Mobile Scroll Indicator Sub-Bar (Below Navbar Tabs) -->
+    <div id="candidateNavScrollHint" class="sm:hidden flex items-center justify-between px-4 py-1.5 bg-secondary-bg/80 border-t border-card-border/40 text-xs transition-opacity duration-300">
+        <span class="flex items-center gap-1.5 text-accent-blue font-semibold text-[11px]">
+            <i class="fas fa-hand-pointer text-xs animate-bounce"></i> Swipe left or right for more tabs
+        </span>
+        <span class="inline-flex items-center gap-1 bg-accent-blue/15 text-accent-blue font-bold px-2 py-0.5 rounded-full border border-accent-blue/30 text-[10px]">
+            <span>Scroll</span>
+            <i class="fas fa-chevron-right text-[8px] animate-pulse"></i>
+        </span>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 640px) {
+        .candidate-nav-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+        .candidate-nav-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        .candidate-nav-scroll::-webkit-scrollbar-thumb {
+            background: rgba(18, 154, 239, 0.6);
+            border-radius: 4px;
+        }
+    }
+    @media (min-width: 641px) {
+        .candidate-nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .candidate-nav-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const navContainer = document.getElementById('candidateNavContainer');
+    const scrollHint = document.getElementById('candidateNavScrollHint');
+    const activeLink = navContainer ? navContainer.querySelector('.nav-active-link') : null;
+
+    if (navContainer) {
+        // Auto scroll active tab into view
+        if (activeLink) {
+            setTimeout(() => {
+                activeLink.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+            }, 100);
+        }
+
+        // Toggle right scroll hint on mobile
+        function updateScrollHint() {
+            if (!scrollHint) return;
+            const maxScroll = navContainer.scrollWidth - navContainer.clientWidth;
+            if (navContainer.scrollLeft >= maxScroll - 15) {
+                scrollHint.style.opacity = '0';
+            } else {
+                scrollHint.style.opacity = '1';
+            }
+        }
+
+        navContainer.addEventListener('scroll', updateScrollHint);
+        updateScrollHint();
+    }
+});
+</script>

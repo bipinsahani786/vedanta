@@ -9,13 +9,23 @@ Hi there,
 
 We have a new open position that aligns with your profile preferences. Please review the details below:
 
+@php
+    $institutionName = !empty(trim($job->school_name ?? '')) 
+        ? $job->school_name 
+        : ($job->user?->employerProfile?->school_name 
+            ?: ($job->user?->name ?: 'Vedanta Partner School'));
+
+    $locationParts = array_filter([$job->city?->name ?? null, $job->state?->name ?? null]);
+    $locationStr = !empty($locationParts) ? implode(', ', $locationParts) : 'Location Not Specified';
+@endphp
+
 <x-mail::panel>
 ### Job Details
 
-**Position:** {{ $job->title ?? 'Teacher' }}  
-**Institution:** {{ $job->school_name }}  
-**Subject:** {{ $job->subject->name ?? 'N/A' }}  
-**Location:** {{ $job->city?->name ?? 'N/A' }}
+**Position:** {{ $job->title ?? 'Teacher / Faculty' }}  
+**Institution:** {{ $institutionName }}  
+**Subject:** {{ $job->subject?->name ?? 'General / All Subjects' }}  
+**Location:** {{ $locationStr }}
 </x-mail::panel>
 
 <x-mail::button :url="route('candidate.applications.available')" color="success">

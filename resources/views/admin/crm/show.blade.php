@@ -102,13 +102,25 @@
                                 <div class="text-sm font-bold text-blue-900">{{ $candidate->profile->subject?->name ?? 'N/A' }}</div>
                             </div>
                             <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-50">
-                                <div class="text-[10px] text-orange-400 uppercase font-bold mb-0.5 flex items-center gap-1"><i class="fas fa-graduation-cap"></i> Qualification</div>
+                                <div class="text-[10px] text-orange-400 uppercase font-bold mb-0.5 flex items-center gap-1"><i class="fas fa-graduation-cap"></i> Highest Qualification</div>
                                 <div class="text-sm font-bold text-orange-900">{{ $candidate->profile->highestQualification?->name ?? 'N/A' }}</div>
                             </div>
                             <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-50">
                                 <div class="text-[10px] text-emerald-500 uppercase font-bold mb-0.5 flex items-center gap-1"><i class="fas fa-briefcase"></i> Experience</div>
                                 <div class="text-sm font-bold text-emerald-900">{{ $candidate->profile->experience_years ?? 0 }} Years</div>
                             </div>
+
+                            @if($candidate->profile->other_qualifications)
+                                <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100 col-span-2">
+                                    <div class="text-[10px] text-amber-600 uppercase font-bold mb-1 flex items-center gap-1"><i class="fas fa-certificate"></i> Other Qualifications & Certifications</div>
+                                    <div class="flex flex-wrap gap-1.5">
+                                        @foreach(array_filter(array_map('trim', explode(',', $candidate->profile->other_qualifications))) as $qualItem)
+                                            <span class="inline-block px-2 py-0.5 bg-amber-100/80 text-amber-900 text-xs font-semibold rounded-md border border-amber-200">{{ $qualItem }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
                                 <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Current Salary</div>
                                 <div class="text-sm font-medium text-gray-800">{{ $candidate->profile->current_salary ?? 'N/A' }}</div>
@@ -116,6 +128,14 @@
                             <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
                                 <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Expected Salary</div>
                                 <div class="text-sm font-medium text-gray-800">{{ $candidate->profile->expected_salary ?? 'N/A' }}</div>
+                            </div>
+                            <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                                <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">School Type Preference</div>
+                                <div class="text-sm font-medium text-gray-800 capitalize">{{ $candidate->profile->residential_preference ?? 'N/A' }}</div>
+                            </div>
+                            <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                                <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Availability to Join</div>
+                                <div class="text-sm font-medium text-gray-800">{{ $candidate->profile->availability_to_join ?? 'N/A' }}</div>
                             </div>
                             <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100 col-span-2">
                                 <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5 flex items-center gap-1"><i class="fas fa-map-marker-alt"></i> Preferred Location</div>
@@ -423,20 +443,31 @@
                                     </span>
                                 </td>
                                 <td class="py-2 px-4 space-y-2">
-                                    @if($invoice->status !== 'paid')
-                                    <form action="{{ route('admin.crm.invoice.update', $invoice->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="status" value="paid">
-                                        <button type="submit" class="text-xs text-green-600 hover:text-green-900 font-bold" onclick="return confirm('Mark this invoice as Paid?')">Mark Paid</button>
-                                    </form>
+                                    <div class="flex items-center flex-wrap gap-2">
+                                        <button type="button" 
+                                                class="text-xs text-amber-600 hover:text-amber-900 font-bold bg-amber-50 px-2 py-1 rounded transition-colors" 
+                                                onclick="openEditInvoiceModal({{ $invoice->id }}, {{ $invoice->amount }}, {{ $invoice->late_fee }}, '{{ \Carbon\Carbon::parse($invoice->due_date)->format('Y-m-d') }}', '{{ $invoice->status }}')">
+                                            <i class="fas fa-edit mr-0.5"></i> Edit
+                                        </button>
 
-                                    <form action="{{ route('admin.crm.invoice.remind', $invoice->id) }}" method="POST" class="inline ml-2">
-                                        @csrf
-                                        <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-900 font-bold" onclick="return confirm('Send payment reminder email to candidate?')">Send Reminder</button>
-                                    </form>
-                                    
-                                    @if($invoice->late_fee > 0)
+                                        @if($invoice->status !== 'paid')
+                                        <form action="{{ route('admin.crm.invoice.update', $invoice->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="status" value="paid">
+                                            <button type="submit" class="text-xs text-green-600 hover:text-green-900 font-bold" onclick="return confirm('Mark this invoice as Paid?')">Mark Paid</button>
+                                        </form>
+
+                                        <form action="{{ route('admin.crm.invoice.remind', $invoice->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-900 font-bold" onclick="return confirm('Send payment reminder email to candidate?')">Send Reminder</button>
+                                        </form>
+                                        @else
+                                            <span class="text-xs text-gray-400 font-medium">Settled</span>
+                                        @endif
+                                    </div>
+
+                                    @if($invoice->status !== 'paid' && $invoice->late_fee > 0)
                                     <div class="mt-2 border-t border-gray-100 pt-2">
                                         <form action="{{ route('admin.crm.invoice.adjust', $invoice->id) }}" method="POST" class="flex items-center gap-2">
                                             @csrf
@@ -444,10 +475,6 @@
                                             <button type="submit" class="text-xs text-blue-600 hover:text-blue-900 font-bold bg-blue-50 px-2 py-1 rounded">Waive</button>
                                         </form>
                                     </div>
-                                    @endif
-
-                                    @else
-                                        <span class="text-xs text-gray-400">Settled</span>
                                     @endif
                                 </td>
                             </tr>
@@ -590,6 +617,58 @@
 
     </div>
 </div>
+
+<!-- Edit Invoice Modal -->
+<div id="editInvoiceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-gray-100 relative mx-4">
+        <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+            <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
+                <i class="fas fa-file-invoice text-blue-600"></i> Edit Service Charge Invoice
+            </h3>
+            <button type="button" onclick="closeEditInvoiceModal()" class="text-gray-400 hover:text-gray-600 text-lg font-bold">
+                &times;
+            </button>
+        </div>
+
+        <form id="editInvoiceForm" method="POST" class="space-y-4">
+            @csrf
+            @method('PUT')
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Base Amount (₹)</label>
+                <input type="number" step="0.01" min="0" id="edit_invoice_amount" name="amount" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Late Fee (₹)</label>
+                <input type="number" step="0.01" min="0" id="edit_invoice_late_fee" name="late_fee" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Due Date</label>
+                <input type="date" id="edit_invoice_due_date" name="due_date" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Status</label>
+                <select id="edit_invoice_status" name="status" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="pending">Pending</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="paid">Paid</option>
+                </select>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                <button type="button" onclick="closeEditInvoiceModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-200 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -613,6 +692,23 @@
                 amountInput.focus();
             }
         }
+    }
+
+    function openEditInvoiceModal(id, amount, lateFee, dueDate, status) {
+        const modal = document.getElementById('editInvoiceModal');
+        const form = document.getElementById('editInvoiceForm');
+        
+        form.action = `/crm/invoice/${id}/edit-details`;
+        document.getElementById('edit_invoice_amount').value = amount;
+        document.getElementById('edit_invoice_late_fee').value = lateFee;
+        document.getElementById('edit_invoice_due_date').value = dueDate;
+        document.getElementById('edit_invoice_status').value = status;
+        
+        modal.classList.remove('hidden');
+    }
+
+    function closeEditInvoiceModal() {
+        document.getElementById('editInvoiceModal').classList.add('hidden');
     }
 </script>
 @endpush

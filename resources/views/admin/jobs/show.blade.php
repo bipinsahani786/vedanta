@@ -308,7 +308,7 @@
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeMessageModal()"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         
-        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl border border-gray-200 transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full relative z-10">
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl border border-gray-200 transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full relative z-10">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
                 <div class="sm:flex sm:items-start">
                     <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -371,7 +371,7 @@
                     <div id="manualSelectSection" class="hidden space-y-4">
                         <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                             <h4 class="text-sm font-bold text-gray-700 mb-3">Filters</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3">
                                 <div>
                                     <select id="filterCategory" class="block w-full rounded-md border border-gray-300 py-2 px-3 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-700">
                                         <option value="">Category</option>
@@ -402,6 +402,14 @@
                                         @foreach($states as $state)
                                             <option value="{{ $state->id }}">{{ $state->name }}</option>
                                         @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <select id="filterGender" class="block w-full rounded-md border border-gray-300 py-2 px-3 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-700">
+                                        <option value="">Gender</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
                                 <div>
@@ -505,6 +513,7 @@
             subject_id: document.getElementById('filterSubject').value,
             qualification_id: document.getElementById('filterQualification').value,
             state_id: document.getElementById('filterState').value,
+            gender: document.getElementById('filterGender').value,
             page: page
         });
 
@@ -521,13 +530,16 @@
                 } else {
                     candidates.forEach(candidate => {
                         const isChecked = selectedCandidates.has(candidate.id.toString()) ? 'checked' : '';
+                        const genderBadge = candidate.gender && candidate.gender !== 'N/A' 
+                            ? `<span class="inline-block text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-semibold ml-1.5">${candidate.gender}</span>` 
+                            : '';
                         tbody.innerHTML += `
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <input type="checkbox" onchange="toggleCandidate(this)" value="${candidate.id}" class="candidate-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" ${isChecked}>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="font-medium text-gray-900">${candidate.name}</div>
+                                    <div class="font-medium text-gray-900">${candidate.name} ${genderBadge}</div>
                                     <div class="text-xs text-gray-500">${candidate.email}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-500">${candidate.subject}</td>

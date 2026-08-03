@@ -14,9 +14,15 @@ use App\Models\City;
 
 class JobController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $jobs = JobPost::where('user_id', auth()->id())->latest()->paginate(10);
+        $query = JobPost::where('user_id', auth()->id());
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $jobs = $query->latest()->paginate(10)->withQueryString();
         return view('employer.jobs.index', compact('jobs'));
     }
 

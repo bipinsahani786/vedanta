@@ -24,49 +24,61 @@
 
     {{-- Stats Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 reveal">
-        <div class="bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group">
+        <a href="{{ route('employer.jobs.index') }}" class="block bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group hover:border-accent-yellow/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
             <div class="absolute -right-6 -top-6 w-24 h-24 bg-accent-yellow/10 rounded-full blur-xl group-hover:bg-accent-yellow/20 transition-all duration-500"></div>
             <div class="flex items-center justify-between mb-4 relative z-10">
-                <div class="w-12 h-12 rounded-xl bg-accent-yellow/10 text-accent-yellow flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-accent-yellow/10 text-accent-yellow flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
                     <i class="fas fa-briefcase"></i>
                 </div>
+                <span class="text-xs font-bold text-accent-yellow opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    View <i class="fas fa-arrow-right text-[10px]"></i>
+                </span>
             </div>
-            <h3 class="text-3xl font-bold text-text-main relative z-10">{{ $stats['total_jobs'] }}</h3>
+            <h3 class="text-3xl font-bold text-text-main relative z-10 group-hover:text-accent-yellow transition-colors">{{ $stats['total_jobs'] }}</h3>
             <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1 relative z-10">Total Jobs Posted</p>
-        </div>
+        </a>
 
-        <div class="bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group">
+        <a href="{{ route('employer.jobs.index', ['status' => 'approved']) }}" class="block bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group hover:border-green-500/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
             <div class="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 rounded-full blur-xl group-hover:bg-green-500/20 transition-all duration-500"></div>
             <div class="flex items-center justify-between mb-4 relative z-10">
-                <div class="w-12 h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
                     <i class="fas fa-check-circle"></i>
                 </div>
+                <span class="text-xs font-bold text-green-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    View <i class="fas fa-arrow-right text-[10px]"></i>
+                </span>
             </div>
-            <h3 class="text-3xl font-bold text-text-main relative z-10">{{ $stats['active_jobs'] }}</h3>
+            <h3 class="text-3xl font-bold text-text-main relative z-10 group-hover:text-green-500 transition-colors">{{ $stats['active_jobs'] }}</h3>
             <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1 relative z-10">Active Jobs</p>
-        </div>
+        </a>
 
-        <div class="bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group">
+        <a href="{{ route('employer.jobs.index', ['status' => 'pending']) }}" class="block bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group hover:border-blue-500/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
             <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition-all duration-500"></div>
             <div class="flex items-center justify-between mb-4 relative z-10">
-                <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
                     <i class="fas fa-clock"></i>
                 </div>
+                <span class="text-xs font-bold text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    View <i class="fas fa-arrow-right text-[10px]"></i>
+                </span>
             </div>
-            <h3 class="text-3xl font-bold text-text-main relative z-10">{{ $stats['pending_jobs'] }}</h3>
+            <h3 class="text-3xl font-bold text-text-main relative z-10 group-hover:text-blue-500 transition-colors">{{ $stats['pending_jobs'] }}</h3>
             <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1 relative z-10">Pending Approval</p>
-        </div>
+        </a>
 
-        <div class="bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group">
+        <a href="{{ route('employer.applicants.index') }}" class="block bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group hover:border-purple-500/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
             <div class="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition-all duration-500"></div>
             <div class="flex items-center justify-between mb-4 relative z-10">
-                <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
                     <i class="fas fa-users"></i>
                 </div>
+                <span class="text-xs font-bold text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    View <i class="fas fa-arrow-right text-[10px]"></i>
+                </span>
             </div>
-            <h3 class="text-3xl font-bold text-text-main relative z-10">{{ $stats['total_candidates'] }}</h3>
+            <h3 class="text-3xl font-bold text-text-main relative z-10 group-hover:text-purple-500 transition-colors">{{ $stats['total_candidates'] }}</h3>
             <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1 relative z-10">Shortlisted/Hired Candidates</p>
-        </div>
+        </a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

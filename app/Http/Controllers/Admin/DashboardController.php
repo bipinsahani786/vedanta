@@ -9,6 +9,7 @@ use App\Models\JobPost;
 use App\Models\JobApplication;
 use App\Models\CandidateProfile;
 use App\Models\ServiceChargeInvoice;
+use App\Models\PaymentTransaction;
 
 class DashboardController extends Controller
 {
@@ -18,16 +19,22 @@ class DashboardController extends Controller
         $fromDate = $request->input('from_date');
         $toDate = $request->input('to_date');
 
-        // Registration Revenue (Paid amounts from candidate profiles)
-        $registrationRevenue = CandidateProfile::sum('paid_amount');
+        // Registration Revenue (Paid registration fees)
+        $registrationTxnRevenue = PaymentTransaction::where('status', 'success')
+            ->where('type', 'registration_fee')
+            ->sum('amount');
+        $registrationProfileRevenue = CandidateProfile::where('is_fee_paid', true)->sum('paid_amount');
+        $registrationRevenue = $registrationTxnRevenue > 0 ? $registrationTxnRevenue : $registrationProfileRevenue;
         
         // Service Charge Revenue (Paid service charges)
         $serviceChargeRevenue = ServiceChargeInvoice::where('status', 'paid')->sum('amount');
         
-        // Pending Collections
+        // Pending Collections & Dues Breakdown
         $pendingCollections = CandidateProfile::sum('pending_amount');
+        $overdueInvoicesAmount = ServiceChargeInvoice::where('status', 'overdue')->selectRaw('SUM(amount + late_fee) as total')->value('total') ?? 0;
+        $totalLateFees = ServiceChargeInvoice::sum('late_fee');
 
-        // Total Collections
+        // Total Collections (Registration Revenue + Paid Service Charges)
         $totalCollections = $registrationRevenue + $serviceChargeRevenue;
 
         // Statistics
@@ -49,9 +56,9 @@ class DashboardController extends Controller
         $rejectedApplications = (clone $appQuery)->where('status', 'rejected')->count();
         $transferredApplications = (clone $appQuery)->where('is_forwarded', true)->count();
 
-        // Revenue Chart Data Generation
-        $profiles = CandidateProfile::where('paid_amount', '>', 0)->get(['paid_amount', 'updated_at']);
-        $invoices = ServiceChargeInvoice::where('status', 'paid')->get(['amount', 'updated_at']);
+        // Revenue Chart Data Generation (Combines Registration Payments & Service Charge Invoices cleanly)
+        $registrationTxns = PaymentTransaction::where('status', 'success')->get(['amount', 'created_at']);
+        $paidInvoices = ServiceChargeInvoice::where('status', 'paid')->get(['amount', 'updated_at', 'payment_date']);
         
         $chartData = ['days' => ['labels' => [], 'data' => []], 'months' => ['labels' => [], 'data' => []], 'years' => ['labels' => [], 'data' => []]];
         
@@ -61,8 +68,9 @@ class DashboardController extends Controller
             $dateStr = $date->format('Y-m-d');
             $chartData['days']['labels'][] = $date->format('M d');
             
-            $reg = $profiles->filter(fn($p) => $p->updated_at && $p->updated_at->format('Y-m-d') === $dateStr)->sum('paid_amount');
-            $srv = $invoices->filter(fn($i) => $i->updated_at && $i->updated_at->format('Y-m-d') === $dateStr)->sum('amount');
+            $reg = $registrationTxns->filter(fn($t) => $t->created_at && $t->created_at->format('Y-m-d') === $dateStr)->sum('amount');
+            $srv = $paidInvoices->filter(fn($inv) => ($inv->payment_date ? \Carbon\Carbon::parse($inv->payment_date)->format('Y-m-d') : ($inv->updated_at ? $inv->updated_at->format('Y-m-d') : null)) === $dateStr)->sum('amount');
+            
             $chartData['days']['data'][] = $reg + $srv;
         }
         
@@ -72,8 +80,9 @@ class DashboardController extends Controller
             $dateStr = $date->format('Y-m');
             $chartData['months']['labels'][] = $date->format('M Y');
             
-            $reg = $profiles->filter(fn($p) => $p->updated_at && $p->updated_at->format('Y-m') === $dateStr)->sum('paid_amount');
-            $srv = $invoices->filter(fn($i) => $i->updated_at && $i->updated_at->format('Y-m') === $dateStr)->sum('amount');
+            $reg = $registrationTxns->filter(fn($t) => $t->created_at && $t->created_at->format('Y-m') === $dateStr)->sum('amount');
+            $srv = $paidInvoices->filter(fn($inv) => ($inv->payment_date ? \Carbon\Carbon::parse($inv->payment_date)->format('Y-m') : ($inv->updated_at ? $inv->updated_at->format('Y-m') : null)) === $dateStr)->sum('amount');
+            
             $chartData['months']['data'][] = $reg + $srv;
         }
 
@@ -83,8 +92,9 @@ class DashboardController extends Controller
             $dateStr = $date->format('Y');
             $chartData['years']['labels'][] = $dateStr;
             
-            $reg = $profiles->filter(fn($p) => $p->updated_at && $p->updated_at->format('Y') === $dateStr)->sum('paid_amount');
-            $srv = $invoices->filter(fn($i) => $i->updated_at && $i->updated_at->format('Y') === $dateStr)->sum('amount');
+            $reg = $registrationTxns->filter(fn($t) => $t->created_at && $t->created_at->format('Y') === $dateStr)->sum('amount');
+            $srv = $paidInvoices->filter(fn($inv) => ($inv->payment_date ? \Carbon\Carbon::parse($inv->payment_date)->format('Y') : ($inv->updated_at ? $inv->updated_at->format('Y') : null)) === $dateStr)->sum('amount');
+            
             $chartData['years']['data'][] = $reg + $srv;
         }
 
@@ -116,6 +126,8 @@ class DashboardController extends Controller
             'registrationRevenue',
             'serviceChargeRevenue',
             'pendingCollections',
+            'overdueInvoicesAmount',
+            'totalLateFees',
             'totalCollections',
             'totalCandidates',
             'totalSchools',

@@ -103,6 +103,32 @@
                         @endforeach
                     </select>
                 </div>
+
+                <!-- Additional Qualifications -->
+                @php
+                    $dbQualNames = $qualifications->pluck('name')->toArray();
+                    $allUserQuals = array_filter(array_map('trim', explode(',', $profile->other_qualifications ?? '')));
+                    $checkedQuals = array_intersect($allUserQuals, $dbQualNames);
+                    $customQuals = array_diff($allUserQuals, $dbQualNames);
+                    $customQualString = implode(', ', $customQuals);
+                @endphp
+                <div class="md:col-span-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Other / Additional Qualifications & Certifications</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-h-40 overflow-y-auto mb-3">
+                        @foreach($qualifications as $qual)
+                            <label class="flex items-center space-x-2 text-xs text-gray-700 cursor-pointer">
+                                <input type="checkbox" name="other_qualifications[]" value="{{ $qual->name }}"
+                                    {{ in_array($qual->name, $allUserQuals) ? 'checked' : '' }}
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span>{{ $qual->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Other Custom Qualification (If not in list):</label>
+                        <input type="text" name="custom_qualification" value="{{ old('custom_qualification', $customQualString) }}" placeholder="E.g. CTET Paper 2, P.G. Diploma" class="w-full rounded-lg border-gray-300 shadow-sm text-xs py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Years of Experience <span class="text-red-500">*</span></label>
                     <input type="number" name="experience_years" value="{{ old('experience_years', $profile->experience_years) }}" required min="0" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">

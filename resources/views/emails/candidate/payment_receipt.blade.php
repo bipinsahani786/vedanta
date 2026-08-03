@@ -7,7 +7,7 @@
 
 Dear {{ $user->name }},
 
-Thank you for your payment! We have successfully received your payment of **₹{{ number_format($amount, 2) }}** for **{{ $description }}**.
+Thank you for your payment! We have successfully received your payment of **&#8377;{{ number_format($amount, 2) }}** for **{{ $description }}**.
 
 Your payment receipt and invoice have been attached to this email as a PDF document for your records.
 

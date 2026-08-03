@@ -57,14 +57,21 @@
                 <p class="mt-4 text-sm font-semibold text-text-main animate-pulse" x-text="loadingMessage"></p>
             </div>
 
-            <!-- Error Message -->
-            <div x-show="error" class="bg-red-500/10 border-l-4 border-red-500 p-4 mb-4 mx-8 mt-8 rounded-r-xl" x-transition>
-                <div class="flex">
-                    <div class="flex-shrink-0">
+            <!-- Error Message Summary -->
+            <div x-show="error || Object.keys(fieldErrors).length > 0" class="bg-red-500/10 border-l-4 border-red-500 p-4 mb-4 mx-8 mt-8 rounded-r-xl" x-transition>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 mt-0.5">
                         <i class="fas fa-exclamation-circle text-red-400"></i>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-400 font-medium" x-text="error"></p>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm text-red-400 font-bold" x-text="error || 'Please correct the errors below:'"></p>
+                        <ul class="mt-2 text-xs text-red-300 list-disc list-inside space-y-1" x-show="Object.keys(fieldErrors).length > 0">
+                            <template x-for="(errArr, field) in fieldErrors" :key="field">
+                                <template x-for="(msg, i) in errArr" :key="i">
+                                    <li x-text="msg"></li>
+                                </template>
+                            </template>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -107,30 +114,30 @@
                                 <template x-if="fieldErrors.gender"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.gender[0]"></p></template>
                             </div>
 
-                            <!-- Profile Photo -->
+                            <!-- Profile Photo (Required) -->
                             <div class="md:col-span-2">
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Profile Photo (Optional)</label>
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Profile Photo *</label>
                                 <input type="file" accept="image/*" @change="handleProfilePhotoUpload"
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent-blue file:text-white hover:file:bg-accent-blue-hover cursor-pointer">
                                 <template x-if="fieldErrors.profile_photo"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.profile_photo[0]"></p></template>
                                 <p class="text-xs text-text-dark/40 mt-1">Format: JPG, PNG. Max size: 2MB.</p>
-                                <div x-show="profilePhotoPreview" class="mt-3">
-                                    <img :src="profilePhotoPreview" class="h-20 w-20 object-cover rounded-full border-2 border-accent-blue shadow-lg">
+                                <div x-show="profilePhotoPreview || '{{ $profile->profile_photo_path ? Storage::url($profile->profile_photo_path) : '' }}'" class="mt-3">
+                                    <img :src="profilePhotoPreview || '{{ $profile->profile_photo_path ? Storage::url($profile->profile_photo_path) : '' }}'" class="h-20 w-20 object-cover rounded-full border-2 border-accent-blue shadow-lg">
                                 </div>
                             </div>
 
                             <!-- Resume Upload (Required) -->
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Resume / CV *</label>
-                                <input type="file" accept=".pdf,.doc,.docx" @change="handleResumeUpload" required
+                                <input type="file" accept=".pdf,.doc,.docx" @change="handleResumeUpload"
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent-blue file:text-white hover:file:bg-accent-blue-hover cursor-pointer">
                                 <template x-if="fieldErrors.resume"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.resume[0]"></p></template>
                                 <p class="text-xs text-text-dark/40 mt-1">Format: PDF, DOC, DOCX. Max size: 2MB.</p>
                             </div>
 
-                            <!-- Salary Slip (Optional) -->
+                            <!-- Salary Slip (Required) -->
                             <div class="md:col-span-1">
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Salary Slip (Optional)</label>
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Salary Slip *</label>
                                 <input type="file" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" @change="handleSalarySlipUpload"
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent-blue file:text-white hover:file:bg-accent-blue-hover cursor-pointer">
                                 <template x-if="fieldErrors.salary_slip"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.salary_slip[0]"></p></template>
@@ -192,7 +199,7 @@
                                 <template x-if="fieldErrors.specialization_id"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.specialization_id[0]"></p></template>
                             </div>
 
-                            <!-- Qualification -->
+                            <!-- Primary / Highest Qualification -->
                             <div>
                                 <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Highest Qualification *</label>
                                 <select x-model="formData.highest_qualification_id" required
@@ -203,6 +210,32 @@
                                     @endforeach
                                 </select>
                                 <template x-if="fieldErrors.highest_qualification_id"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.highest_qualification_id[0]"></p></template>
+                            </div>
+
+                            <!-- Additional Qualifications (Multi-Select) -->
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">
+                                    Other / Additional Qualifications & Certifications
+                                    <span class="text-text-dark/40 font-normal lowercase">(select all that apply or type below)</span>
+                                </label>
+                                
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-secondary-bg/50 p-4 rounded-xl border border-card-border max-h-48 overflow-y-auto">
+                                    @foreach($qualifications as $qual)
+                                        <label class="flex items-center space-x-2 text-xs text-text-main cursor-pointer hover:text-accent-blue transition-colors">
+                                            <input type="checkbox" value="{{ $qual->name }}" x-model="formData.other_qualifications"
+                                                class="rounded border-card-border bg-secondary-bg text-accent-blue focus:ring-accent-blue">
+                                            <span>{{ $qual->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+
+                                <!-- Custom qualification type-in field -->
+                                <div class="mt-3">
+                                    <label class="block text-[11px] font-semibold text-text-main/60 mb-1">Other Qualification (If not listed above, type here):</label>
+                                    <input type="text" x-model="formData.custom_qualification"
+                                        placeholder="E.g., CTET Paper 2, P.G. Diploma, Ph.D, DCA, etc."
+                                        class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2.5 text-xs text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                                </div>
                             </div>
 
                             <!-- Experience -->
@@ -260,10 +293,10 @@
                                 <template x-if="fieldErrors.english_fluency"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.english_fluency[0]"></p></template>
                             </div>
 
-                            <!-- Residential Preference -->
+                            <!-- Residential Preference (Required) -->
                             <div>
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">School Type Preference (Optional)</label>
-                                <select x-model="formData.residential_preference"
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">School Type Preference *</label>
+                                <select x-model="formData.residential_preference" required
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                                     <option value="">Select Preference</option>
                                     <option value="day">Day School</option>
@@ -273,24 +306,24 @@
                                 <template x-if="fieldErrors.residential_preference"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.residential_preference[0]"></p></template>
                             </div>
 
-                            <!-- Salaries (Optional) -->
+                            <!-- Salaries (Required) -->
                             <div>
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current Salary (Optional)</label>
-                                <input type="text" x-model="formData.current_salary" placeholder="E.g., ₹25,000/month"
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current Salary *</label>
+                                <input type="text" x-model="formData.current_salary" required placeholder="E.g., ₹25,000/month"
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                                 <template x-if="fieldErrors.current_salary"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.current_salary[0]"></p></template>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Expected Salary (Optional)</label>
-                                <input type="text" x-model="formData.expected_salary" placeholder="E.g., ₹35,000/month"
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Expected Salary *</label>
+                                <input type="text" x-model="formData.expected_salary" required placeholder="E.g., ₹35,000/month"
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                                 <template x-if="fieldErrors.expected_salary"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.expected_salary[0]"></p></template>
                             </div>
                             
-                            <!-- Availability -->
+                            <!-- Availability (Required) -->
                             <div class="md:col-span-2">
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Availability to Join (Optional)</label>
-                                <input type="text" x-model="formData.availability_to_join" placeholder="E.g., Immediate, 15 Days, 1 Month"
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Availability to Join *</label>
+                                <input type="text" x-model="formData.availability_to_join" required placeholder="E.g., Immediate, 15 Days, 1 Month"
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                                 <template x-if="fieldErrors.availability_to_join"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.availability_to_join[0]"></p></template>
                             </div>
@@ -610,7 +643,16 @@
                 religion: '{{ $profile->religion }}',
                 english_fluency: '{{ $profile->english_fluency }}',
                 residential_preference: '{{ $profile->residential_preference }}',
-                availability_to_join: '{{ $profile->availability_to_join }}'
+                availability_to_join: '{{ $profile->availability_to_join }}',
+                @php
+                    $dbQualNames = $qualifications->pluck('name')->toArray();
+                    $allUserQuals = array_filter(array_map('trim', explode(',', $profile->other_qualifications ?? '')));
+                    $checkedQuals = array_values(array_intersect($allUserQuals, $dbQualNames));
+                    $customQuals = array_values(array_diff($allUserQuals, $dbQualNames));
+                    $customQualString = implode(', ', $customQuals);
+                @endphp
+                other_qualifications: {!! json_encode($checkedQuals) !!},
+                custom_qualification: '{{ addslashes($customQualString) }}'
             },
 
             availableSubjects: {!! json_encode($subjects) !!},
@@ -745,6 +787,10 @@
                 this.error = '';
                 this.fieldErrors = {};
 
+                const hasExistingPhoto = {{ $profile->profile_photo_path ? 'true' : 'false' }};
+                const hasExistingSalarySlip = {{ $profile->salary_slip_path ? 'true' : 'false' }};
+                const hasExistingResume = {{ $profile->resume_path ? 'true' : 'false' }};
+
                 // Client-side validation — check required fields before calling server
                 const requiredFields = {
                     'date_of_birth': 'Date of Birth is required.',
@@ -755,7 +801,11 @@
                     'highest_qualification_id': 'Highest Qualification is required.',
                     'preferred_state_id': 'Preferred State is required.',
                     'preferred_city_id': 'Preferred City is required.',
-                    'experience_years': 'Experience (Years) is required.'
+                    'experience_years': 'Experience (Years) is required.',
+                    'residential_preference': 'School Type Preference is required.',
+                    'current_salary': 'Current Salary is required.',
+                    'expected_salary': 'Expected Salary is required.',
+                    'availability_to_join': 'Availability to Join is required.'
                 };
 
                 let hasError = false;
@@ -766,9 +816,21 @@
                     }
                 }
 
+                // Check profile photo
+                if (!this.profilePhotoFile && !hasExistingPhoto) {
+                    this.fieldErrors['profile_photo'] = ['Profile Photo is required.'];
+                    hasError = true;
+                }
+
                 // Check resume file
-                if (!this.resumeFile) {
+                if (!this.resumeFile && !hasExistingResume) {
                     this.fieldErrors['resume'] = ['Resume / CV is required.'];
+                    hasError = true;
+                }
+
+                // Check salary slip file
+                if (!this.salarySlipFile && !hasExistingSalarySlip) {
+                    this.fieldErrors['salary_slip'] = ['Salary Slip is required.'];
                     hasError = true;
                 }
 
@@ -791,7 +853,11 @@
                     const fd = new FormData();
                     fd.append('_token', '{{ csrf_token() }}');
                     for (const key in this.formData) {
-                        if (this.formData[key] !== null && this.formData[key] !== undefined && this.formData[key] !== '') {
+                        if (Array.isArray(this.formData[key])) {
+                            this.formData[key].forEach(val => {
+                                if (val) fd.append(`${key}[]`, val);
+                            });
+                        } else if (this.formData[key] !== null && this.formData[key] !== undefined && this.formData[key] !== '') {
                             fd.append(key, this.formData[key]);
                         }
                     }
@@ -817,19 +883,27 @@
                         body: fd
                     });
 
+                    if (response.status === 413) {
+                        this.error = 'Uploaded files are too large for the server limit. Please select files under 5MB each.';
+                        this.loading = false;
+                        return;
+                    }
+                    if (response.status === 419) {
+                        this.error = 'Your session has expired due to inactivity. Please refresh the page and try again.';
+                        this.loading = false;
+                        return;
+                    }
+
                     const text = await response.text();
-                    let data;
+                    let data = {};
                     try {
                         const jsonStart = text.indexOf('{');
                         const jsonEnd = text.lastIndexOf('}');
                         if (jsonStart !== -1 && jsonEnd !== -1) {
                             data = JSON.parse(text.substring(jsonStart, jsonEnd + 1));
-                        } else {
-                            throw new Error("No JSON object found");
                         }
                     } catch (parseError) {
                         console.error('Non-JSON response:', text);
-                        throw new Error('Server returned an invalid response. Please try again.');
                     }
                     
                     if (response.ok && (data.success || !data.errors)) {
@@ -841,11 +915,15 @@
                         this.loading = false;
                         return;
                     } else {
-                        this.error = data.message || 'An error occurred on the server.';
+                        this.error = data.message || 'Server error occurred. Please try again.';
                     }
                 } catch (e) {
                     console.error("Submit Step 1 Error:", e);
-                    this.error = e.message || 'Something went wrong. Please try again.';
+                    if (e.name === 'TypeError' || (e.message && (e.message.toLowerCase().includes('fetch') || e.message.toLowerCase().includes('network')))) {
+                        this.error = 'Network error or connection lost. Please check your internet connection or file size (Max 5MB) and try again.';
+                    } else {
+                        this.error = e.message || 'Something went wrong. Please try again.';
+                    }
                 } finally {
                     this.loading = false;
                 }

@@ -198,7 +198,7 @@
                 <td>
                     {{ $invoice->jobApplication->jobPost->title ?? 'Educational Institution Placement' }}
                 </td>
-                <td class="amount-col">₹{{ number_format($invoice->amount, 2) }}</td>
+                <td class="amount-col">&#8377;{{ number_format($invoice->amount, 2) }}</td>
             </tr>
             @if(($invoice->late_fee ?? 0) > 0)
             <tr>
@@ -207,12 +207,12 @@
                     <small style="color: #ef4444;">Accrued late payment fee charges.</small>
                 </td>
                 <td>-</td>
-                <td class="amount-col" style="color: #dc2626;">₹{{ number_format($invoice->late_fee, 2) }}</td>
+                <td class="amount-col" style="color: #dc2626;">&#8377;{{ number_format($invoice->late_fee, 2) }}</td>
             </tr>
             @endif
             <tr class="total-row">
                 <td colspan="2" style="text-align: right;">Total Amount {{ $invoice->status === 'paid' ? 'Paid' : 'Due' }}</td>
-                <td class="amount-col" style="color: #031b4e;">₹{{ number_format($invoice->amount + ($invoice->late_fee ?? 0), 2) }}</td>
+                <td class="amount-col" style="color: #031b4e;">&#8377;{{ number_format($invoice->amount + ($invoice->late_fee ?? 0), 2) }}</td>
             </tr>
         </tbody>
     </table>

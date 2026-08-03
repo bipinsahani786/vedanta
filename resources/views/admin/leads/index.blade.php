@@ -38,6 +38,9 @@
     <table class="w-full text-left border-collapse admin-table">
         <thead>
             <tr>
+                <th class="w-10 text-center">
+                    <input type="checkbox" id="selectAllLeads" onclick="toggleSelectAllLeads(this)" class="rounded border-card-border text-accent-blue focus:ring-accent-blue cursor-pointer" title="Select All Queries">
+                </th>
                 @php
                     $route = 'admin.leads.index';
                     $order = request('order') === 'asc' ? 'desc' : 'asc';
@@ -79,6 +82,9 @@
         <tbody class="divide-y divide-card-border">
             @forelse($leads as $lead)
             <tr class="group">
+                <td class="text-center align-top">
+                    <input type="checkbox" name="lead_ids[]" value="{{ $lead->id }}" class="lead-checkbox rounded border-card-border text-accent-blue focus:ring-accent-blue cursor-pointer mt-1" onchange="updateLeadBulkActionState()">
+                </td>
                 <td class="align-top">
                     <div class="font-bold text-text-main group-hover:text-accent-blue transition-colors">{{ $lead->name }}</div>
                     <div class="text-xs text-text-dark/60 mt-1 flex flex-col gap-0.5">
@@ -110,16 +116,23 @@
                     <div class="text-[10px] text-text-dark/40 mt-1">{{ $lead->created_at->diffForHumans() }}</div>
                 </td>
                 <td class="align-top">
-                    <div class="flex justify-end">
+                    <div class="flex items-center justify-end gap-2">
                         <a href="{{ route('admin.leads.show', $lead->id) }}" class="flex items-center gap-1.5 px-3 py-1.5 bg-accent-blue/10 text-accent-blue hover:bg-accent-blue hover:text-white rounded-lg text-xs font-bold transition-colors whitespace-nowrap">
                             Manage Lead <i class="fas fa-arrow-right"></i>
                         </a>
+                        <form action="{{ route('admin.leads.destroy', $lead->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this query from {{ addslashes($lead->name) }}?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20" title="Delete Query">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
+                        </form>
                     </div>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="py-16 text-center">
+                <td colspan="6" class="py-16 text-center">
                     <div class="w-16 h-16 bg-secondary-bg rounded-2xl flex items-center justify-center text-text-dark/20 text-3xl mx-auto mb-4 border border-card-border">
                         <i class="fas fa-envelope-open-text"></i>
                     </div>
@@ -132,6 +145,25 @@
     </table>
 </div>
 
+<!-- Floating Bulk Action Bar for Leads -->
+<form action="{{ route('admin.leads.bulk-delete') }}" method="POST" id="leadBulkDeleteForm">
+    @csrf
+    <div id="leadBulkCandidateInputs"></div>
+    <div id="leadBulkActionBar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden bg-card-bg border border-red-500/50 rounded-2xl shadow-2xl p-4 flex items-center gap-4 backdrop-blur-xl">
+        <div class="flex items-center gap-2 text-sm font-bold text-text-main">
+            <span class="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center text-xs" id="leadSelectedCount">0</span>
+            <span>Queries Selected</span>
+        </div>
+        <div class="h-6 w-px bg-card-border"></div>
+        <button type="button" onclick="submitLeadBulkDelete()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-md">
+            <i class="fas fa-trash-alt"></i> Delete Selected Queries
+        </button>
+        <button type="button" onclick="deselectAllLeads()" class="text-xs text-text-dark/50 hover:text-text-main font-semibold px-2">
+            Cancel
+        </button>
+    </div>
+</form>
+
 {{-- Pagination --}}
 @if($leads->hasPages())
 <div class="mt-6 flex justify-end">
@@ -140,3 +172,63 @@
 @endif
 
 @endsection
+
+@push('scripts')
+<script>
+    function toggleSelectAllLeads(master) {
+        const checkboxes = document.querySelectorAll('.lead-checkbox');
+        checkboxes.forEach(cb => cb.checked = master.checked);
+        updateLeadBulkActionState();
+    }
+
+    function deselectAllLeads() {
+        const master = document.getElementById('selectAllLeads');
+        if (master) master.checked = false;
+        const checkboxes = document.querySelectorAll('.lead-checkbox');
+        checkboxes.forEach(cb => cb.checked = false);
+        updateLeadBulkActionState();
+    }
+
+    function updateLeadBulkActionState() {
+        const checked = document.querySelectorAll('.lead-checkbox:checked');
+        const count = checked.length;
+        const bar = document.getElementById('leadBulkActionBar');
+        const countSpan = document.getElementById('leadSelectedCount');
+        const master = document.getElementById('selectAllLeads');
+        const allCheckboxes = document.querySelectorAll('.lead-checkbox');
+
+        if (countSpan) countSpan.textContent = count;
+
+        if (master && allCheckboxes.length > 0) {
+            master.checked = (count === allCheckboxes.length);
+        }
+
+        if (count > 0) {
+            bar.classList.remove('hidden');
+        } else {
+            bar.classList.add('hidden');
+        }
+    }
+
+    function submitLeadBulkDelete() {
+        const checked = document.querySelectorAll('.lead-checkbox:checked');
+        if (checked.length === 0) return;
+
+        if (!confirm(`Are you sure you want to delete ${checked.length} selected contact query(ies)?`)) {
+            return;
+        }
+
+        const container = document.getElementById('leadBulkCandidateInputs');
+        container.innerHTML = '';
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'lead_ids[]';
+            input.value = cb.value;
+            container.appendChild(input);
+        });
+
+        document.getElementById('leadBulkDeleteForm').submit();
+    }
+</script>
+@endpush

@@ -271,6 +271,11 @@ class JobController extends Controller
                 $q->where('preferred_city_id', $cityId);
             });
         }
+        if ($gender = $request->input('gender')) {
+            $query->whereHas('profile', function($q) use ($gender) {
+                $q->where('gender', $gender);
+            });
+        }
 
         $candidates = $query->paginate(20);
 
@@ -280,6 +285,7 @@ class JobController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
+                'gender' => $user->profile?->gender ?? 'N/A',
                 'category' => $user->profile?->category?->name ?? 'N/A',
                 'subject' => $user->profile?->subject?->name ?? 'N/A',
                 'city' => $user->profile?->preferredCity?->name ?? 'N/A',

@@ -35,11 +35,11 @@
                     <div id="template-preview" class="hidden space-y-4">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Subject</label>
-                            <input type="text" id="preview_subject" name="subject" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                            <input type="text" id="preview_subject" name="subject" class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 bg-white">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Body (You can modify this for this specific send)</label>
-                            <textarea id="preview_body" name="body" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 bg-white min-h-[200px]"></textarea>
+                            <textarea id="preview_body" name="body" class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 bg-white min-h-[200px]"></textarea>
                         </div>
                     </div>
                 </div>
@@ -151,15 +151,52 @@
             fetch(`/admin/email-templates/api/${templateId}`)
                 .then(res => res.json())
                 .then(data => {
-                    previewSubject.value = data.subject;
+                    previewSubject.value = data.subject || '';
                     if (editorInstance) {
-                        editorInstance.setData(data.body);
+                        editorInstance.setData(data.body || '');
                     } else {
-                        document.getElementById('preview_body').value = data.body;
+                        document.getElementById('preview_body').value = data.body || '';
                     }
                     previewContainer.classList.remove('hidden');
                 });
         });
+
+        // Form Submit Handler & Validation
+        const bulkEmailForm = document.getElementById('bulk-email-form');
+        if (bulkEmailForm) {
+            bulkEmailForm.addEventListener('submit', function(e) {
+                if (editorInstance) {
+                    document.getElementById('preview_body').value = editorInstance.getData();
+                }
+
+                const templateId = templateSelect.value;
+                const subject = previewSubject.value.trim();
+                const body = document.getElementById('preview_body').value.trim();
+
+                if (!templateId) {
+                    e.preventDefault();
+                    alert('Please select an email template.');
+                    templateSelect.focus();
+                    return false;
+                }
+
+                if (!subject) {
+                    e.preventDefault();
+                    alert('Please enter a subject for the email.');
+                    previewSubject.focus();
+                    return false;
+                }
+
+                if (!body || body === '<p></p>') {
+                    e.preventDefault();
+                    alert('Please enter body text for the email.');
+                    if (editorInstance) {
+                        editorInstance.editing.view.focus();
+                    }
+                    return false;
+                }
+            });
+        }
 
         // User Search and Selection
         const btnSearch = document.getElementById('btn_search');
