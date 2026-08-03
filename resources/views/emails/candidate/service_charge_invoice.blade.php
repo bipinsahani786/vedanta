@@ -13,7 +13,7 @@ An invoice for your service charge has been generated. Please review the details
 
 <x-mail::panel>
 ### Invoice Details
-**Amount Due:** ₹{{ number_format($invoice->amount, 2) }}  
+**Amount Due:** &#8377;{{ number_format($invoice->amount, 2) }}  
 **Due Date:** {{ \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y') }}  
 **Status:** {{ ucfirst($invoice->status) }}  
 </x-mail::panel>

@@ -11,11 +11,16 @@ class ApplicantController extends Controller
     public function index(Request $request)
     {
         // Only show applications that are shortlisted or hired for this employer's jobs
-        $query = JobApplication::with(['candidate.profile', 'jobPost'])
-            ->whereHas('jobPost', function ($q) {
-                $q->where('user_id', auth()->id());
-            })
-            ->whereIn('status', ['shortlisted', 'hired']);
+        $query = JobApplication::with([
+            'candidate.profile.category',
+            'candidate.profile.subject',
+            'candidate.profile.highestQualification',
+            'jobPost'
+        ])
+        ->whereHas('jobPost', function ($q) {
+            $q->where('user_id', auth()->id());
+        })
+        ->whereIn('status', ['shortlisted', 'hired']);
 
         if ($jobId = $request->input('job_post_id')) {
             $query->where('job_post_id', $jobId);

@@ -28,6 +28,9 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        $user = auth()->user();
+        $profile = $user->profile;
+
         $request->validate([
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:Male,Female,Other',
@@ -35,21 +38,23 @@ class ProfileController extends Controller
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
             'highest_qualification_id' => 'required|exists:qualifications,id',
+            'other_qualifications' => 'nullable',
+            'custom_qualification' => 'nullable|string',
             'preferred_state_id' => 'required|exists:states,id',
             'preferred_city_id' => 'required|exists:cities,id',
             'experience_years' => 'required|integer|min:0',
-            'current_salary' => 'nullable|string',
+            'current_salary' => 'required|string',
             'expected_salary' => 'required|string',
             'current_school' => 'nullable|string',
             'english_fluency' => 'nullable|in:beginner,intermediate,fluent',
-            'residential_preference' => 'nullable|in:residential,day,both',
-            'availability_to_join' => 'nullable|string',
-            'resume' => 'nullable|mimes:pdf,doc,docx|max:2048',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'residential_preference' => 'required|in:residential,day,both',
+            'availability_to_join' => 'required|string',
+            'resume' => ($profile && $profile->resume_path) ? 'nullable|mimes:pdf,doc,docx|max:5120' : 'required|mimes:pdf,doc,docx|max:5120',
+            'profile_photo' => ($profile && $profile->profile_photo_path) ? 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120' : 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'salary_slip' => ($profile && $profile->salary_slip_path) ? 'nullable|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120' : 'required|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120',
+            'offer_letter' => 'nullable|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120',
+            'agreement_pdf' => 'nullable|mimes:pdf|max:5120',
         ]);
-
-        $user = auth()->user();
-        $profile = $user->profile;
 
         if ($request->hasFile('resume')) {
             $path = $request->file('resume')->store('resumes', 'public');
@@ -61,6 +66,28 @@ class ProfileController extends Controller
             $profile->profile_photo_path = $path;
         }
 
+        if ($request->hasFile('salary_slip')) {
+            $path = $request->file('salary_slip')->store('salary_slips', 'public');
+            $profile->salary_slip_path = $path;
+        }
+
+        if ($request->hasFile('offer_letter')) {
+            $path = $request->file('offer_letter')->store('offer_letters', 'public');
+            $profile->offer_letter_path = $path;
+        }
+
+        if ($request->hasFile('agreement_pdf')) {
+            $path = $request->file('agreement_pdf')->store('agreements', 'public');
+            $profile->agreement_pdf_path = $path;
+            $profile->is_agreement_signed = true;
+        }
+
+        $otherQualsArray = is_array($request->other_qualifications) ? $request->other_qualifications : ($request->other_qualifications ? explode(',', $request->other_qualifications) : []);
+        if ($request->filled('custom_qualification')) {
+            $otherQualsArray[] = trim($request->custom_qualification);
+        }
+        $otherQualsStr = implode(', ', array_unique(array_filter(array_map('trim', $otherQualsArray))));
+
         $profile->update([
             'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender,
@@ -68,6 +95,7 @@ class ProfileController extends Controller
             'category_id' => $request->category_id,
             'subject_id' => $request->subject_id,
             'highest_qualification_id' => $request->highest_qualification_id,
+            'other_qualifications' => $otherQualsStr,
             'preferred_state_id' => $request->preferred_state_id,
             'preferred_city_id' => $request->preferred_city_id,
             'experience_years' => $request->experience_years,

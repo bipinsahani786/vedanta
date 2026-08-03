@@ -52,8 +52,8 @@
             <div>&copy; {{ date('Y') }} Vedanta. All rights reserved.</div>
             <div class="contact">
                 <strong>Contact Us</strong><br>
-                Email: support@vedanta.com<br>
-                Phone: +91 98765 43210
+                Email: info@vedantaplacementagency.in<br>
+                Phone: +91-7070938975
             </div>
         </div>
     </div>

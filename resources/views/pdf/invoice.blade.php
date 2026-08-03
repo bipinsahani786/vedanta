@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Invoice</title>
     <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 0; padding: 20px; font-size: 14px; }
+        body { font-family: 'DejaVu Sans', sans-serif; color: #333; margin: 0; padding: 20px; font-size: 13px; }
         .invoice-box { max-width: 800px; margin: auto; padding: 30px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }
         .header { width: 100%; text-align: center; margin-bottom: 40px; border-bottom: 2px solid #031b4e; padding-bottom: 20px; }
         .header img { max-height: 60px; }
@@ -16,7 +16,7 @@
         .details-table td.title { font-weight: bold; color: #555; }
         .item-table tr.heading td { background: #f8fafc; border-bottom: 2px solid #ddd; font-weight: bold; }
         .item-table tr.item td { border-bottom: 1px solid #eee; }
-        .item-table tr.total td:nth-child(2) { border-top: 2px solid #ddd; font-weight: bold; font-size: 18px; color: #031b4e; }
+        .item-table tr.total td:nth-child(2) { border-top: 2px solid #ddd; font-weight: bold; font-size: 16px; color: #031b4e; }
         .footer { margin-top: 50px; text-align: center; color: #777; font-size: 12px; border-top: 1px solid #eee; padding-top: 20px; }
     </style>
 </head>
@@ -51,11 +51,11 @@
             </tr>
             <tr class="item">
                 <td>{{ $description }}</td>
-                <td style="text-align: right;">₹{{ number_format($amount, 2) }}</td>
+                <td style="text-align: right;">&#8377;{{ number_format($amount, 2) }}</td>
             </tr>
             <tr class="total">
                 <td style="text-align: right;">Total Paid:</td>
-                <td style="text-align: right;">₹{{ number_format($amount, 2) }}</td>
+                <td style="text-align: right;">&#8377;{{ number_format($amount, 2) }}</td>
             </tr>
         </table>
 

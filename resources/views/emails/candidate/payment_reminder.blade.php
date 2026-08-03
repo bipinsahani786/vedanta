@@ -46,12 +46,12 @@
                 </div>
                 <div class="invoice-row">
                     <span class="label">Base Amount:</span>
-                    <span class="value">₹{{ number_format($invoice->amount, 2) }}</span>
+                    <span class="value">&#8377;{{ number_format($invoice->amount, 2) }}</span>
                 </div>
                 @if($invoice->late_fee > 0)
                 <div class="invoice-row">
                     <span class="label">Late Fee:</span>
-                    <span class="value overdue">₹{{ number_format($invoice->late_fee, 2) }}</span>
+                    <span class="value overdue">&#8377;{{ number_format($invoice->late_fee, 2) }}</span>
                 </div>
                 @endif
                 <div class="invoice-row">
@@ -60,7 +60,7 @@
                 </div>
                 <div class="invoice-row">
                     <span class="label">Total Amount Due:</span>
-                    <span class="value">₹{{ number_format($invoice->amount + $invoice->late_fee, 2) }}</span>
+                    <span class="value">&#8377;{{ number_format($invoice->amount + $invoice->late_fee, 2) }}</span>
                 </div>
             </div>
 

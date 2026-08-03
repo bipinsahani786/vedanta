@@ -22,6 +22,7 @@ class CandidateJobMatchNotification extends Mailable implements ShouldQueue
      */
     public function __construct(JobPost $job, $matchScore)
     {
+        $job->loadMissing(['city', 'state', 'subject', 'user.employerProfile']);
         $this->job = $job;
         $this->matchScore = $matchScore;
     }
@@ -32,7 +33,7 @@ class CandidateJobMatchNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Job Match Found: ' . $this->job->title,
+            subject: 'New Job Match Found: ' . ($this->job->title ?? 'Job Opportunity'),
         );
     }
 
@@ -41,6 +42,8 @@ class CandidateJobMatchNotification extends Mailable implements ShouldQueue
      */
     public function content(): Content
     {
+        $this->job->loadMissing(['city', 'state', 'subject', 'user.employerProfile']);
+
         return new Content(
             markdown: 'emails.candidate.job_match',
             with: [

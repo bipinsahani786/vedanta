@@ -40,6 +40,8 @@ class RegistrationWizardController extends Controller
     public function saveStep1(Request $request)
     {
         try {
+            $profile = auth()->user()->profile;
+
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
                 'date_of_birth' => 'required|date',
                 'gender' => 'required|in:Male,Female,Other',
@@ -47,29 +49,45 @@ class RegistrationWizardController extends Controller
                 'category_id' => 'required|exists:categories,id',
                 'subject_id' => 'required|exists:subjects,id',
                 'highest_qualification_id' => 'required|exists:qualifications,id',
+                'other_qualifications' => 'nullable',
                 'preferred_state_id' => 'required|exists:states,id',
                 'preferred_city_id' => 'required|exists:cities,id',
                 'experience_years' => 'required|integer|min:0',
-                'current_salary' => 'nullable|string',
-                'expected_salary' => 'nullable|string',
+                'current_salary' => 'required|string',
+                'expected_salary' => 'required|string',
                 'current_school' => 'nullable|string',
                 'english_fluency' => 'nullable|in:beginner,intermediate,fluent',
-                'residential_preference' => 'nullable|in:residential,day,both',
-                'availability_to_join' => 'nullable|string',
-                'resume' => 'nullable|mimes:pdf,doc,docx|max:2048',
-                'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-                'salary_slip' => 'nullable|mimes:pdf,doc,docx,jpg,png,jpeg|max:2048',
-                'offer_letter' => 'nullable|mimes:pdf,doc,docx,jpg,png,jpeg|max:2048',
+                'residential_preference' => 'required|in:residential,day,both',
+                'availability_to_join' => 'required|string',
+                'resume' => ($profile && $profile->resume_path) ? 'nullable|file|mimes:pdf,doc,docx|max:5120' : 'required|file|mimes:pdf,doc,docx|max:5120',
+                'profile_photo' => ($profile && $profile->profile_photo_path) ? 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:5120' : 'required|file|image|mimes:jpeg,png,jpg,webp|max:5120',
+                'salary_slip' => ($profile && $profile->salary_slip_path) ? 'nullable|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120' : 'required|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120',
+                'offer_letter' => 'nullable|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120',
+            ], [
+                'resume.required' => 'Resume / CV file is required.',
+                'resume.mimes' => 'Resume must be a PDF, DOC, or DOCX document.',
+                'resume.max' => 'Resume file size cannot exceed 5MB.',
+                'resume.uploaded' => 'Resume failed to upload. Please select a valid PDF/DOC file under 5MB.',
+                'profile_photo.required' => 'Profile Photo is required.',
+                'profile_photo.image' => 'Profile Photo must be a valid image (JPG, PNG, WEBP).',
+                'profile_photo.max' => 'Profile Photo size cannot exceed 5MB.',
+                'profile_photo.uploaded' => 'Profile Photo failed to upload. Please select an image under 5MB.',
+                'salary_slip.required' => 'Salary Slip is required.',
+                'salary_slip.mimes' => 'Salary Slip must be a PDF, DOC, DOCX, JPG, or PNG file.',
+                'salary_slip.max' => 'Salary Slip size cannot exceed 5MB.',
+                'salary_slip.uploaded' => 'Salary Slip failed to upload. Please select a file under 5MB.',
+                'residential_preference.required' => 'School Type Preference is required.',
+                'current_salary.required' => 'Current Salary is required.',
+                'expected_salary.required' => 'Expected Salary is required.',
+                'availability_to_join.required' => 'Availability to Join is required.',
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
                     'errors' => $validator->errors()->toArray(),
-                    'message' => 'Validation failed.'
+                    'message' => 'Validation failed. Please correct the errors below.'
                 ], 422);
             }
-
-            $profile = auth()->user()->profile;
 
             if ($request->hasFile('resume')) {
                 $path = $request->file('resume')->store('resumes', 'public');
@@ -93,6 +111,12 @@ class RegistrationWizardController extends Controller
 
             $isFirstTime = !$profile->is_profile_complete;
 
+            $otherQualsArray = is_array($request->other_qualifications) ? $request->other_qualifications : ($request->other_qualifications ? explode(',', $request->other_qualifications) : []);
+            if ($request->filled('custom_qualification')) {
+                $otherQualsArray[] = trim($request->custom_qualification);
+            }
+            $otherQualsStr = implode(', ', array_unique(array_filter(array_map('trim', $otherQualsArray))));
+
             $profile->update([
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => $request->gender,
@@ -100,6 +124,7 @@ class RegistrationWizardController extends Controller
                 'category_id' => $request->category_id,
                 'subject_id' => $request->subject_id,
                 'highest_qualification_id' => $request->highest_qualification_id,
+                'other_qualifications' => $otherQualsStr,
                 'preferred_state_id' => $request->preferred_state_id,
                 'preferred_city_id' => $request->preferred_city_id,
                 'experience_years' => $request->experience_years,

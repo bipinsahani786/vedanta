@@ -87,7 +87,7 @@
 @endif
 
 {{-- Stats Grid --}}
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6 mb-8">
     <!-- Candidates Stat -->
     <a href="{{ route('admin.crm.index') }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
@@ -138,7 +138,7 @@
         </div>
     </a>
 
-    <!-- Revenue Stat -->
+    <!-- Total Revenue Stat -->
     <a href="{{ route('admin.transactions.index') }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-purple-200 hover:-translate-y-1 transition-all group">
         <div class="flex items-start justify-between">
             <div>
@@ -152,6 +152,23 @@
         <div class="mt-4 flex items-center text-xs text-gray-500 justify-between w-full">
             <span>Reg: ₹{{ number_format($registrationRevenue) }}</span>
             <span>Services: ₹{{ number_format($serviceChargeRevenue) }}</span>
+        </div>
+    </a>
+
+    <!-- Pending Collections & Dues Stat (CLICKABLE) -->
+    <a href="{{ route('admin.crm.index', ['status' => 'pending_dues']) }}" class="block bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-rose-200 hover:-translate-y-1 transition-all group">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pending Dues</p>
+                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-rose-600 transition-colors">₹{{ number_format($pendingCollections) }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-xs text-gray-500 justify-between w-full">
+            <span>Overdue: <strong class="text-rose-600">₹{{ number_format($overdueInvoicesAmount) }}</strong></span>
+            <span>Late Fees: <strong class="text-amber-600">₹{{ number_format($totalLateFees) }}</strong></span>
         </div>
     </a>
 </div>

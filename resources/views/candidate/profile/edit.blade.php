@@ -159,6 +159,40 @@
                         </div>
                     </div>
 
+                    {{-- Additional Qualifications (Multi-select) --}}
+                    @php
+                        $dbQualNames = $qualifications->pluck('name')->toArray();
+                        $allUserQuals = array_filter(array_map('trim', explode(',', $profile->other_qualifications ?? '')));
+                        $checkedQuals = array_intersect($allUserQuals, $dbQualNames);
+                        $customQuals = array_diff($allUserQuals, $dbQualNames);
+                        $customQualString = implode(', ', $customQuals);
+                    @endphp
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">
+                            Other / Additional Qualifications & Certifications
+                            <span class="text-text-dark/40 font-normal lowercase">(select all that apply or type below)</span>
+                        </label>
+                        
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-secondary-bg/50 p-4 rounded-xl border border-card-border max-h-48 overflow-y-auto">
+                            @foreach($qualifications as $qual)
+                                <label class="flex items-center space-x-2 text-xs text-text-main cursor-pointer hover:text-accent-blue transition-colors">
+                                    <input type="checkbox" name="other_qualifications[]" value="{{ $qual->name }}"
+                                        {{ in_array($qual->name, $allUserQuals) ? 'checked' : '' }}
+                                        class="rounded border-card-border bg-secondary-bg text-accent-blue focus:ring-accent-blue">
+                                    <span>{{ $qual->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+
+                        <!-- Custom qualification input -->
+                        <div class="mt-3">
+                            <label class="block text-[11px] font-semibold text-text-main/60 mb-1">Other Qualification (If not listed above, type here):</label>
+                            <input type="text" name="custom_qualification" value="{{ old('custom_qualification', $customQualString) }}"
+                                placeholder="E.g., CTET Paper 2, P.G. Diploma, Ph.D, DCA, etc."
+                                class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2.5 text-xs text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Job Category <span class="text-red-400">*</span></label>
                         <div class="relative">
@@ -222,9 +256,9 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Upload Resume <span class="text-text-dark/30 text-[10px] normal-case">(PDF, DOC)</span></label>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Upload Resume <span class="text-red-400">*</span></label>
                         <div class="relative">
-                            <input type="file" name="resume" accept=".pdf,.doc,.docx"
+                            <input type="file" name="resume" accept=".pdf,.doc,.docx" {{ $profile->resume_path ? '' : 'required' }}
                                 class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue/10 file:text-accent-blue hover:file:bg-accent-blue/20">
                         </div>
                         @if($profile->resume_path)
@@ -233,10 +267,32 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current Salary <span class="text-text-dark/30 text-[10px] normal-case">(Optional)</span></label>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Upload Salary Slip <span class="text-red-400">*</span></label>
+                        <div class="relative">
+                            <input type="file" name="salary_slip" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" {{ $profile->salary_slip_path ? '' : 'required' }}
+                                class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue/10 file:text-accent-blue hover:file:bg-accent-blue/20">
+                        </div>
+                        @if($profile->salary_slip_path)
+                            <p class="text-[11px] text-green-400 mt-1.5 flex items-center gap-1"><i class="fas fa-check-circle"></i> Salary Slip uploaded. Select new file to replace.</p>
+                        @endif
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Upload Offer Letter <span class="text-text-dark/30 text-[10px] normal-case">(Optional)</span></label>
+                        <div class="relative">
+                            <input type="file" name="offer_letter" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg"
+                                class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue/10 file:text-accent-blue hover:file:bg-accent-blue/20">
+                        </div>
+                        @if($profile->offer_letter_path)
+                            <p class="text-[11px] text-green-400 mt-1.5 flex items-center gap-1"><i class="fas fa-check-circle"></i> Offer Letter uploaded. Select new file to replace.</p>
+                        @endif
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current Salary <span class="text-red-400">*</span></label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-rupee-sign text-sm"></i></span>
-                            <input type="text" name="current_salary" value="{{ old('current_salary', $profile->current_salary) }}" placeholder="e.g. 25,000 / month"
+                            <input type="text" name="current_salary" required value="{{ old('current_salary', $profile->current_salary) }}" placeholder="e.g. 25,000 / month"
                                 class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                         </div>
                     </div>
@@ -273,10 +329,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Residential Preference</label>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">School Type Preference <span class="text-red-400">*</span></label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-home text-sm"></i></span>
-                            <select name="residential_preference" class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none">
+                            <select name="residential_preference" required class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none">
                                 <option value="">Select Preference</option>
                                 <option value="residential" {{ old('residential_preference', $profile->residential_preference) == 'residential' ? 'selected' : '' }}>Residential (Need Accommodation)</option>
                                 <option value="day" {{ old('residential_preference', $profile->residential_preference) == 'day' ? 'selected' : '' }}>Day Boarding (No Accommodation)</option>
@@ -286,10 +342,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Availability to Join</label>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Availability to Join <span class="text-red-400">*</span></label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-clock text-sm"></i></span>
-                            <input type="text" name="availability_to_join" value="{{ old('availability_to_join', $profile->availability_to_join) }}" placeholder="e.g. Immediate, 1 Month"
+                            <input type="text" name="availability_to_join" required value="{{ old('availability_to_join', $profile->availability_to_join) }}" placeholder="e.g. Immediate, 1 Month"
                                 class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                         </div>
                     </div>

@@ -13,7 +13,7 @@
 @section('content')
 
 {{-- Analytics Cards --}}
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
     <a href="{{ request()->fullUrlWithQuery(['status' => null, 'page' => null]) }}" class="bg-card-bg border {{ request('status') === null ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-blue-500 transition-all">
         <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Total Candidates</p>
@@ -23,6 +23,11 @@
         <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Active / Paid</p>
         <h4 class="text-2xl font-extrabold text-green-500 relative z-10">{{ $stats['active_paid'] }}</h4>
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'pending_dues', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'pending_dues' ? 'border-rose-500 shadow-md ring-1 ring-rose-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-rose-500 transition-all">
+        <div class="absolute inset-0 bg-rose-500/5 group-hover:bg-rose-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Pending Dues</p>
+        <h4 class="text-2xl font-extrabold text-rose-500 relative z-10">{{ $stats['pending_dues'] }}</h4>
     </a>
     <a href="{{ request()->fullUrlWithQuery(['status' => 'signed', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'signed' ? 'border-accent-blue shadow-md ring-1 ring-accent-blue' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-accent-blue transition-all">
         <div class="absolute inset-0 bg-accent-blue/5 group-hover:bg-accent-blue/10 transition-colors"></div>
@@ -120,6 +125,9 @@
     <table class="w-full text-left border-collapse admin-table">
         <thead>
             <tr>
+                <th class="w-10 text-center">
+                    <input type="checkbox" id="selectAllCandidates" onclick="toggleSelectAllCandidates(this)" class="rounded border-card-border text-accent-blue focus:ring-accent-blue cursor-pointer" title="Select All Candidates">
+                </th>
                 @php
                     $route = 'admin.crm.index';
                     $order = request('order') === 'asc' ? 'desc' : 'asc';
@@ -153,6 +161,9 @@
         <tbody class="divide-y divide-card-border">
             @forelse($candidates as $candidate)
             <tr class="group">
+                <td class="text-center">
+                    <input type="checkbox" name="candidate_ids[]" value="{{ $candidate->id }}" class="candidate-checkbox rounded border-card-border text-accent-blue focus:ring-accent-blue cursor-pointer" onchange="updateBulkActionState()">
+                </td>
                 <td>
                     <div class="font-semibold text-text-main group-hover:text-accent-blue transition-colors">{{ $candidate->name }}</div>
                     <div class="text-xs text-text-dark/50 flex flex-col gap-0.5 mt-1">
@@ -324,16 +335,91 @@
     </div>
 </div>
 
+<!-- Floating Bulk Action Bar -->
+<div id="bulkActionBar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden bg-card-bg border border-accent-blue/50 rounded-2xl shadow-2xl p-4 flex items-center gap-4 backdrop-blur-xl animate-bounce-short">
+    <div class="flex items-center gap-2 text-sm font-bold text-text-main">
+        <span class="w-7 h-7 rounded-full bg-accent-blue text-white flex items-center justify-center text-xs" id="selectedCount">0</span>
+        <span>Candidates Selected</span>
+    </div>
+    <div class="h-6 w-px bg-card-border"></div>
+    <button type="button" onclick="openBulkNotificationModal()" class="px-4 py-2 bg-accent-blue hover:bg-accent-blue-hover text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-md">
+        <i class="fas fa-paper-plane"></i> Send Bulk Notification / Email
+    </button>
+    <button type="button" onclick="deselectAllCandidates()" class="text-xs text-text-dark/50 hover:text-red-400 font-semibold px-2">
+        Cancel
+    </button>
+</div>
+
+<!-- Bulk Notification Modal -->
+<div id="bulkNotificationModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-card-bg border border-card-border rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+        <button type="button" onclick="closeBulkNotificationModal()" class="absolute top-4 right-4 text-text-dark/50 hover:text-text-main">
+            <i class="fas fa-times text-lg"></i>
+        </button>
+        
+        <h3 class="text-lg font-bold text-text-main mb-1 flex items-center gap-2">
+            <i class="fas fa-bullhorn text-accent-blue"></i> Send Bulk Notification
+        </h3>
+        <p class="text-xs text-text-dark/60 mb-4">Send email notifications to <span id="modalSelectedCount" class="font-bold text-accent-blue">0</span> selected candidate(s).</p>
+        
+        <form action="{{ route('admin.crm.candidate.bulk-remind') }}" method="POST" id="bulkNotificationForm">
+            @csrf
+            <!-- Hidden input containers for selected candidate IDs -->
+            <div id="bulkCandidateInputs"></div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wider mb-2">Notification Type</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-2 p-3 bg-secondary-bg rounded-xl border border-card-border cursor-pointer hover:border-accent-blue transition-all">
+                            <input type="radio" name="notification_type" value="status_reminder" checked onclick="toggleNotificationFields('status_reminder')" class="text-accent-blue focus:ring-accent-blue">
+                            <div class="text-xs">
+                                <div class="font-bold text-text-main">Status Reminders</div>
+                                <div class="text-[10px] text-text-dark/50">Auto-send pending step email</div>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 bg-secondary-bg rounded-xl border border-card-border cursor-pointer hover:border-accent-blue transition-all">
+                            <input type="radio" name="notification_type" value="custom_email" onclick="toggleNotificationFields('custom_email')" class="text-accent-blue focus:ring-accent-blue">
+                            <div class="text-xs">
+                                <div class="font-bold text-text-main">Custom Email</div>
+                                <div class="text-[10px] text-text-dark/50">Write custom email content</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="customEmailFields" class="hidden space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-text-dark/70 mb-1">Email Subject <span class="text-red-500">*</span></label>
+                        <input type="text" name="custom_subject" placeholder="E.g., Important Update Regarding Your Vedanta Profile" class="w-full bg-secondary-bg border border-card-border rounded-xl px-3 py-2 text-xs text-text-main focus:outline-none focus:border-accent-blue">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-text-dark/70 mb-1">Email Message <span class="text-red-500">*</span></label>
+                        <textarea name="custom_message" rows="4" placeholder="Type your custom notification message here..." class="w-full bg-secondary-bg border border-card-border rounded-xl p-3 text-xs text-text-main focus:outline-none focus:border-accent-blue"></textarea>
+                    </div>
+                </div>
+
+                <div class="pt-3 flex justify-end gap-2">
+                    <button type="button" onclick="closeBulkNotificationModal()" class="px-4 py-2 bg-secondary-bg text-text-dark/70 text-xs font-bold rounded-xl hover:bg-card-border transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-accent-blue text-white text-xs font-bold rounded-xl hover:bg-accent-blue-hover shadow-md flex items-center gap-2 transition-all">
+                        <i class="fas fa-paper-plane"></i> Send Now
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
     function openRatingModal(candidateId, comm, subj, demo, eng, disc, rem) {
-        // Update form action
         const form = document.getElementById('ratingForm');
         form.action = `/admin/crm/candidate/${candidateId}/rate`;
 
-        // Populate selects
         document.getElementById('rating_communication').value = comm;
         document.getElementById('rating_subject_knowledge').value = subj;
         document.getElementById('rating_demo_performance').value = demo;
@@ -341,8 +427,73 @@
         document.getElementById('rating_discipline').value = disc;
         document.getElementById('rating_remarks').value = rem;
 
-        // Show modal
         document.getElementById('ratingModal').classList.remove('hidden');
+    }
+
+    function toggleSelectAllCandidates(master) {
+        const checkboxes = document.querySelectorAll('.candidate-checkbox');
+        checkboxes.forEach(cb => cb.checked = master.checked);
+        updateBulkActionState();
+    }
+
+    function deselectAllCandidates() {
+        const master = document.getElementById('selectAllCandidates');
+        if (master) master.checked = false;
+        const checkboxes = document.querySelectorAll('.candidate-checkbox');
+        checkboxes.forEach(cb => cb.checked = false);
+        updateBulkActionState();
+    }
+
+    function updateBulkActionState() {
+        const checked = document.querySelectorAll('.candidate-checkbox:checked');
+        const count = checked.length;
+        const bar = document.getElementById('bulkActionBar');
+        const countSpan = document.getElementById('selectedCount');
+        const master = document.getElementById('selectAllCandidates');
+        const allCheckboxes = document.querySelectorAll('.candidate-checkbox');
+
+        if (countSpan) countSpan.textContent = count;
+
+        if (master && allCheckboxes.length > 0) {
+            master.checked = (count === allCheckboxes.length);
+        }
+
+        if (count > 0) {
+            bar.classList.remove('hidden');
+        } else {
+            bar.classList.add('hidden');
+        }
+    }
+
+    function openBulkNotificationModal() {
+        const checked = document.querySelectorAll('.candidate-checkbox:checked');
+        if (checked.length === 0) return;
+
+        const inputsContainer = document.getElementById('bulkCandidateInputs');
+        inputsContainer.innerHTML = '';
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'candidate_ids[]';
+            input.value = cb.value;
+            inputsContainer.appendChild(input);
+        });
+
+        document.getElementById('modalSelectedCount').textContent = checked.length;
+        document.getElementById('bulkNotificationModal').classList.remove('hidden');
+    }
+
+    function closeBulkNotificationModal() {
+        document.getElementById('bulkNotificationModal').classList.add('hidden');
+    }
+
+    function toggleNotificationFields(type) {
+        const customFields = document.getElementById('customEmailFields');
+        if (type === 'custom_email') {
+            customFields.classList.remove('hidden');
+        } else {
+            customFields.classList.add('hidden');
+        }
     }
 </script>
 @endpush
