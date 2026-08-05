@@ -31,7 +31,17 @@
             <div class="greeting">Hi {{ $user->name }},</div>
             
             <div class="message">
-                We noticed that your registration process with Vedanta is currently incomplete. To finalize your onboarding and unlock access to premium job opportunities, please complete the following pending action.
+                @if($reason === 'Pending Profile Completion')
+                    We noticed that your professional profile with Vedanta is still incomplete. A complete profile helps us match you with the best teaching opportunities faster. Please take a few minutes to fill in your qualifications, experience, and preferences.
+                @elseif($reason === 'Pending Terms & Conditions')
+                    You are just a step away from completing your registration! We need you to review and accept our Terms & Conditions to proceed. This ensures a transparent and smooth recruitment process for you.
+                @elseif($reason === 'Pending Agreement Upload')
+                    Your profile is looking great! To finalize your registration, we need your digitally signed Registration Agreement. This agreement formally registers you with our agency so we can start referring you to top schools.
+                @elseif($reason === 'Pending Registration Fee')
+                    You are almost there! We noticed that your Registration Fee is pending. Once this fee is cleared, your profile will be immediately activated, unlocking priority access to premium job opportunities.
+                @else
+                    We noticed that your registration process with Vedanta is currently incomplete. To finalize your onboarding and unlock access to premium job opportunities, please complete the following pending action.
+                @endif
             </div>
 
             <div class="alert-box">
