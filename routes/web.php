@@ -193,6 +193,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/candidate/{id}/rate', [\App\Http\Controllers\Admin\CrmController::class, 'rateCandidate'])->name('crm.candidate.rate');
     Route::get('/crm/candidate/{id}/magic-login', [\App\Http\Controllers\Admin\CrmController::class, 'magicLogin'])->name('crm.candidate.magic-login');
     Route::post('/crm/candidate/{id}/remind', [\App\Http\Controllers\Admin\CrmController::class, 'sendOnboardingReminder'])->name('crm.candidate.remind');
+    Route::post('/crm/candidates/bulk-remind', [\App\Http\Controllers\Admin\CrmController::class, 'sendBulkOnboardingReminder'])->name('crm.candidate.bulk-remind');
     Route::post('/crm/candidate/{id}/upload-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'uploadAgreement'])->name('crm.candidate.upload-agreement');
     Route::post('/crm/candidate/{id}/send-agreement-link', [\App\Http\Controllers\Admin\CrmController::class, 'sendAgreementLink'])->name('crm.candidate.send-agreement-link');
     Route::get('/crm/candidate/{id}/download-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'downloadAgreement'])->name('crm.candidate.download-agreement');
