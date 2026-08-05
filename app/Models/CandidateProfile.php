@@ -71,6 +71,9 @@ class CandidateProfile extends Model
         if (!$this->is_agreement_signed) {
             return 'Pending Agreement Upload';
         }
+        if (!$this->is_fee_paid) {
+            return 'Pending Registration Fee';
+        }
         return 'Completed';
     }
 

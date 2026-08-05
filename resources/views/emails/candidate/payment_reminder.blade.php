@@ -54,10 +54,7 @@
                     <span class="value overdue">&#8377;{{ number_format($invoice->late_fee, 2) }}</span>
                 </div>
                 @endif
-                <div class="invoice-row">
-                    <span class="label">Due Date:</span>
-                    <span class="value {{ $invoice->status === 'overdue' ? 'overdue' : '' }}">{{ \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y') }}</span>
-                </div>
+
                 <div class="invoice-row">
                     <span class="label">Total Amount Due:</span>
                     <span class="value">&#8377;{{ number_format($invoice->amount + $invoice->late_fee, 2) }}</span>
@@ -67,7 +64,7 @@
             <p class="text">To avoid further late fees or temporary suspension of your profile, please complete the payment at your earliest convenience.</p>
 
             <div class="btn-container">
-                <a href="{{ route('candidate.serviceCharge.show') }}" class="btn">Pay Now</a>
+                <a href="{{ route('candidate.serviceCharge.show') }}" class="btn" style="color: #ffffff !important; text-decoration: none; font-weight: bold;">Pay Now</a>
             </div>
             
             <p class="text" style="font-size: 14px; margin-top: 30px;">If you have already made the payment, please ignore this email or contact our support team.</p>
