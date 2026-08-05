@@ -50,7 +50,7 @@
                     <td class="px-6 py-4 text-right">
                         <form action="{{ route('admin.anomalies.fix', $candidate->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to upgrade this candidate to Premium and fix their transaction history?');">
                             @csrf
-                            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-sm font-bold rounded-lg shadow-sm transition-all hover:-translate-y-0.5">
+                            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg shadow-sm transition-all hover:-translate-y-0.5" style="background-color: #10b981; color: #ffffff; font-weight: bold; font-size: 0.875rem;">
                                 <i class="fas fa-wrench"></i> Fix Profile
                             </button>
                         </form>
