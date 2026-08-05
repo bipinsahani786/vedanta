@@ -143,7 +143,15 @@ class CrmController extends Controller
                 ],
             ]);
 
-            return redirect()->route('admin.crm.show', $user->id)->with('success', 'Candidate manually onboarded successfully.');
+            // 5. Send Welcome Email with Invoice & Agreement
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
+            } catch (\Exception $mailException) {
+                \Log::error('Manual Onboard Mail Error: ' . $mailException->getMessage());
+                // Proceed without breaking if email fails
+            }
+
+            return redirect()->route('admin.crm.show', $user->id)->with('success', 'Candidate manually onboarded successfully and welcome email sent.');
             
         } catch (\Exception $e) {
             \Log::error('Manual Onboard Error: ' . $e->getMessage());
@@ -601,6 +609,34 @@ class CrmController extends Controller
         }
 
         return back()->with('error', 'Failed to upload agreement.');
+    }
+
+    public function sendAgreementLink($id)
+    {
+        $candidate = User::where('role', 'candidate')->findOrFail($id);
+        
+        $signUrl = route('agreement.show');
+        
+        $emailBody = "
+            <h3>Dear {$candidate->name},</h3>
+            <p>Your registration profile has been created.</p>
+            <p>Please log in to your account and <strong>sign the Registration Agreement</strong> to finalize your onboarding.</p>
+            <br>
+            <a href='{$signUrl}' style='display:inline-block; padding: 10px 20px; background-color: #00a8e8; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;'>Log In to Sign Agreement</a>
+            <br><br>
+            <p>If you have any questions, feel free to reply to this email.</p>
+            <p>Regards,<br>Vedanta Placement Agency</p>
+        ";
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($candidate->email)->send(
+                new \App\Mail\DynamicTemplateMail('Action Required: Sign Your Registration Agreement', $emailBody)
+            );
+            return back()->with('success', 'Agreement signature link has been emailed to the candidate.');
+        } catch (\Exception $e) {
+            \Log::error('Send Agreement Link Error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to send email. Please check your email configuration.');
+        }
     }
 
     public function downloadAgreement(Request $request, $id)

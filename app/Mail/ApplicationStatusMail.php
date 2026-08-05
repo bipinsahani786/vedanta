@@ -25,13 +25,18 @@ class ApplicationStatusMail extends Mailable implements ShouldQueue
         $this->application = $application;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
+        $subject = 'Update on Your Application: ' . $this->application->jobPost->title;
+        
+        if ($this->application->status === 'hired') {
+            $subject = 'Congratulations! You are Hired: ' . $this->application->jobPost->title;
+        } elseif ($this->application->status === 'rejected') {
+            $subject = 'Application Status Update: ' . $this->application->jobPost->title;
+        }
+
         return new Envelope(
-            subject: 'Update on Your Application: ' . $this->application->jobPost->title,
+            subject: $subject,
         );
     }
 

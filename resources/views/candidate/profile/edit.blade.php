@@ -267,9 +267,9 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Upload Salary Slip <span class="text-red-400">*</span></label>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Upload Salary Slip (Optional)</label>
                         <div class="relative">
-                            <input type="file" name="salary_slip" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg" {{ $profile->salary_slip_path ? '' : 'required' }}
+                            <input type="file" name="salary_slip" accept=".pdf,.doc,.docx,.jpg,.png,.jpeg"
                                 class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue/10 file:text-accent-blue hover:file:bg-accent-blue/20">
                         </div>
                         @if($profile->salary_slip_path)

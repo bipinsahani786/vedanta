@@ -4,6 +4,10 @@
 @section('subtitle', 'Welcome back! Here\'s what\'s happening today.')
 
 @section('actions')
+    <a href="{{ route('admin.anomalies.index') }}" class="px-5 py-2.5 bg-amber-500 text-white hover:bg-amber-600 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 shadow-sm">
+        <i class="fas fa-exclamation-triangle text-xs"></i>
+        <span>Upgrade Anomalies</span>
+    </a>
     <a href="{{ route('admin.jobs.index', ['status' => 'pending']) }}" class="px-5 py-2.5 bg-[#00a8e8] text-white hover:bg-[#008ecc] rounded-xl text-sm font-semibold transition-all flex items-center gap-2 shadow-sm">
         <i class="fas fa-clipboard-check text-xs"></i>
         <span>Review Pending Jobs</span>

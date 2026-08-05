@@ -58,6 +58,26 @@ class RegistrationSuccessMail extends Mailable implements ShouldQueue
                                 ->as('Registration_Agreement.pdf')
                                 ->withMime('application/pdf');
         }
+
+        // Fetch latest successful registration transaction to generate and attach invoice
+        $transaction = $this->user->paymentTransactions()
+            ->where('type', 'registration_fee')
+            ->where('status', 'success')
+            ->latest()
+            ->first();
+
+        if ($transaction) {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.invoice', [
+                'user' => $this->user,
+                'transactionId' => $transaction->transaction_id,
+                'amount' => $transaction->amount,
+                'description' => 'Registration / Upgrade Fee',
+            ]);
+
+            $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromData(fn () => $pdf->output(), "Invoice_{$transaction->transaction_id}.pdf")
+                ->withMime('application/pdf');
+        }
+
         return $attachments;
     }
 }
