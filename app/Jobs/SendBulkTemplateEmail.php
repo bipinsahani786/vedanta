@@ -35,19 +35,34 @@ class SendBulkTemplateEmail implements ShouldQueue
             try {
                 $replacements = [
                     '{name}' => $user->name,
+                    '[name]' => $user->name,
                     '{email}' => $user->email,
+                    '[email]' => $user->email,
                     '{phone}' => $user->phone ?? '',
+                    '[phone]' => $user->phone ?? '',
                 ];
 
                 if ($user->role === 'candidate') {
                     $replacements['{category}'] = $user->profile?->category?->name ?? '';
+                    $replacements['[category]'] = $user->profile?->category?->name ?? '';
+                    
                     $replacements['{subject}'] = $user->profile?->subject?->name ?? '';
+                    $replacements['[subject]'] = $user->profile?->subject?->name ?? '';
+                    
                     $replacements['{plan_type}'] = $user->profile?->plan_type ?? '';
+                    $replacements['[plan_type]'] = $user->profile?->plan_type ?? '';
+                    
                     $replacements['{invoice_number}'] = $user->profile?->payment_id ?? '';
+                    $replacements['[invoice_number]'] = $user->profile?->payment_id ?? '';
+                    
                     $replacements['{payment_amount}'] = $user->profile?->payment_amount ?? '';
+                    $replacements['[payment_amount]'] = $user->profile?->payment_amount ?? '';
                 } elseif ($user->role === 'employer') {
                     $replacements['{company_name}'] = $user->employerProfile?->company_name ?? '';
-                    $replacements['{job_title}'] = ''; // Depends on context, leave empty for general
+                    $replacements['[company_name]'] = $user->employerProfile?->company_name ?? '';
+                    
+                    $replacements['{job_title}'] = '';
+                    $replacements['[job_title]'] = '';
                 }
 
                 $subject = str_replace(array_keys($replacements), array_values($replacements), $this->subjectTemplate);
