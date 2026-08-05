@@ -213,6 +213,10 @@
                     class="sidebar-link {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-receipt w-5 text-center"></i> Transactions
                 </a>
+                <a href="{{ route('admin.anomalies.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.anomalies.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm text-amber-400">
+                    <i class="fas fa-exclamation-triangle w-5 text-center"></i> Upgrade Anomalies
+                </a>
                 <a href="{{ route('admin.leads.index') }}"
                     class="sidebar-link {{ request()->routeIs('admin.leads.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-headset w-5 text-center"></i> Support Leads
