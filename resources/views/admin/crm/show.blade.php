@@ -228,6 +228,12 @@
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200">
                                         <i class="fas fa-clock"></i> Not Signed
                                     </span>
+                                    <form action="{{ route('crm.candidate.send-agreement-link', $candidate->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full text-[11px] font-bold border border-blue-200 transition-colors" title="Send email link to candidate to sign agreement">
+                                            <i class="fas fa-envelope"></i> Send Link
+                                        </button>
+                                    </form>
                                     <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-full text-[11px] font-bold border border-indigo-200 transition-colors" title="Force generate Agreement PDF">
                                         <i class="fas fa-file-pdf"></i> Generate PDF
                                     </a>

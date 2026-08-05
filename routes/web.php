@@ -193,8 +193,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/candidate/{id}/rate', [\App\Http\Controllers\Admin\CrmController::class, 'rateCandidate'])->name('crm.candidate.rate');
     Route::get('/crm/candidate/{id}/magic-login', [\App\Http\Controllers\Admin\CrmController::class, 'magicLogin'])->name('crm.candidate.magic-login');
     Route::post('/crm/candidate/{id}/remind', [\App\Http\Controllers\Admin\CrmController::class, 'sendOnboardingReminder'])->name('crm.candidate.remind');
-    Route::post('/crm/candidates/bulk-remind', [\App\Http\Controllers\Admin\CrmController::class, 'sendBulkOnboardingReminder'])->name('crm.candidate.bulk-remind');
     Route::post('/crm/candidate/{id}/upload-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'uploadAgreement'])->name('crm.candidate.upload-agreement');
+    Route::post('/crm/candidate/{id}/send-agreement-link', [\App\Http\Controllers\Admin\CrmController::class, 'sendAgreementLink'])->name('crm.candidate.send-agreement-link');
     Route::get('/crm/candidate/{id}/download-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'downloadAgreement'])->name('crm.candidate.download-agreement');
 
     // Applications & Transactions
@@ -231,6 +231,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{id}/mark-read', [\App\Http\Controllers\Admin\NotificationController::class, 'markRead'])->name('notifications.mark-read');
     Route::get('/notifications/mark-all-read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+
+    // System Anomalies Tool
+    Route::get('/upgrade-anomalies', [\App\Http\Controllers\Admin\SystemAnomalyController::class, 'index'])->name('anomalies.index');
+    Route::post('/upgrade-anomalies/fix/{id}', [\App\Http\Controllers\Admin\SystemAnomalyController::class, 'fix'])->name('anomalies.fix');
 
     Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class)->except(['create', 'show', 'edit']);
     Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class)->except(['create', 'show', 'edit']);

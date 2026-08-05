@@ -223,8 +223,9 @@
                         <span class="text-text-dark/30 text-xs font-semibold">None</span>
                     @endif
                 </td>
-                <td class="text-text-dark/60 text-sm">
-                    {{ $candidate->created_at->format('M d, Y') }}
+                <td class="text-text-dark/60 text-sm leading-tight">
+                    {{ $candidate->created_at->format('M d, Y') }}<br>
+                    <span class="text-[10px] text-text-dark/40">{{ $candidate->created_at->format('h:i A') }}</span>
                 </td>
                 <td>
                     @if($candidate->rating)

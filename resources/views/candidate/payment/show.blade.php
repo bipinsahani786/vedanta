@@ -176,12 +176,12 @@
 
                 <form action="{{ route('candidate.payment.process') }}" method="POST">
                     @csrf
-                    <input type="hidden" name="plan" value="{{ $isRenewal ? 'renewal_premium' : ($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid) ? 'upgrade' : 'premium') }}">
+                    <input type="hidden" name="plan" value="{{ ($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid)) ? 'upgrade' : ($isRenewal ? 'renewal_premium' : 'premium') }}">
                     <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-accent-yellow to-yellow-500 text-[#031b4e] font-bold rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
-                        @if($isRenewal)
-                            Renew with Premium Plan (₹1000)
-                        @elseif($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
+                        @if($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
                             Upgrade to Premium (Pay ₹500)
+                        @elseif($isRenewal)
+                            Renew with Premium Plan (₹1000)
                         @else
                             Select Premium Plan (₹1000)
                         @endif

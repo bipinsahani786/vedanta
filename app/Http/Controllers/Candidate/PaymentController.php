@@ -27,7 +27,8 @@ class PaymentController extends Controller
             return redirect()->route('candidate.dashboard')->with('error', 'Please complete previous steps first.');
         }
 
-        if ($isRenewal && $profile->pending_amount > 0) {
+        // Allow standard plan users to upgrade by paying their pending amount as an upgrade fee
+        if ($isRenewal && $profile->pending_amount > 0 && $profile->plan_type !== 'standard') {
             return redirect()->route('candidate.serviceCharge.show')->with('error', 'You must clear your pending dues of ₹' . $profile->pending_amount . ' before renewing your plan.');
         }
 
@@ -219,13 +220,14 @@ class PaymentController extends Controller
         }
 
         if ($needsEmail) {
-            $desc = 'Profile Renewal / Upgrade';
             if (str_starts_with($transactionId, 'UPGRADE_')) {
                 $desc = 'Upgrade to Premium Plan';
             } elseif (str_starts_with($transactionId, 'RENEW_BASIC_')) {
                 $desc = 'Basic Plan Renewal';
             } elseif (str_starts_with($transactionId, 'RENEW_PREMIUM_')) {
                 $desc = 'Premium Plan Renewal';
+            } else {
+                $desc = 'Candidate Profile Registration Fee';
             }
             \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\PaymentReceiptMail($user, $transactionId, $amountPaid, $desc));
         }

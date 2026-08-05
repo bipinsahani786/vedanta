@@ -61,7 +61,7 @@ class RegistrationWizardController extends Controller
                 'availability_to_join' => 'required|string',
                 'resume' => ($profile && $profile->resume_path) ? 'nullable|file|mimes:pdf,doc,docx|max:5120' : 'required|file|mimes:pdf,doc,docx|max:5120',
                 'profile_photo' => ($profile && $profile->profile_photo_path) ? 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:5120' : 'required|file|image|mimes:jpeg,png,jpg,webp|max:5120',
-                'salary_slip' => ($profile && $profile->salary_slip_path) ? 'nullable|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120' : 'required|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120',
+                'salary_slip' => 'nullable|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120',
                 'offer_letter' => 'nullable|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120',
             ], [
                 'resume.required' => 'Resume / CV file is required.',

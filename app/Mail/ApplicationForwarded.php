@@ -40,7 +40,7 @@ class ApplicationForwarded extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.application_forwarded',
+            markdown: 'emails.application_forwarded',
         );
     }
 
