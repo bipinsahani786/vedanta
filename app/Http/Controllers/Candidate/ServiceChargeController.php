@@ -144,110 +144,43 @@ class ServiceChargeController extends Controller
         }
         // --------------------
 
-        $transactionId = $request->merchantOrderId ?? $request->transactionId ?? session('last_txn_id');
-        $invoiceId = session('sc_invoice_id');
+        $transactionId = $request->merchantOrderId ?? $request->transactionId ?? $request->orderId ?? session('last_txn_id');
 
-        // Guard: If transactionId or user is missing, abort
-        if (!$transactionId || !$user) {
+        if (!$transactionId) {
             return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment session expired. Please try again.');
         }
 
-        // Guard: Prevent duplicate processing
-        $existingTxn = PaymentTransaction::where('transaction_id', $transactionId)->first();
-        if ($existingTxn) {
-            if ($existingTxn->status === 'success') {
-                return redirect()->route('candidate.serviceCharge.show')->with('success', 'Payment already processed successfully.');
+        // Auto-login user if session was lost on cross-site redirect
+        if (!auth()->check()) {
+            $candidateId = \App\Services\PaymentFulfillmentService::extractCandidateId($transactionId);
+            if ($candidateId) {
+                $u = \App\Models\User::find($candidateId);
+                if ($u) auth()->login($u);
             }
-            return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment failed or was already processed.');
         }
 
         // Verify status with PhonePe V2
         $phonePe = new PhonePeService();
         $statusResult = $phonePe->checkStatus($transactionId);
 
-        // Log full response for debugging
         \Illuminate\Support\Facades\Log::info('PhonePe V2 Service Charge Callback', [
             'txn' => $transactionId,
-            'invoice_id' => $invoiceId,
             'result' => $statusResult,
         ]);
 
         $isSuccess = $statusResult['success'];
-        $amountPaid = $statusResult['amount'] / 100; // Convert paise to rupees
+        $amountPaid = ($statusResult['amount'] ?? 0) / 100;
 
-        // Check if webhook already processed it
-        $existingTxn = PaymentTransaction::where('transaction_id', $transactionId)->first();
-        $needsEmail = false;
+        $fulfillment = \App\Services\PaymentFulfillmentService::fulfill(
+            $transactionId,
+            $isSuccess,
+            $amountPaid,
+            $statusResult['raw'] ?? [],
+            $statusResult['transactionId'] ?? null
+        );
 
-        if (!$existingTxn) {
-            PaymentTransaction::create([
-                'candidate_id' => $user->id,
-                'amount' => $amountPaid,
-                'transaction_id' => $transactionId,
-                'type' => 'service_charge',
-                'status' => $isSuccess ? 'success' : 'failed',
-                'gateway_response' => $statusResult['raw']
-            ]);
-            $needsEmail = $isSuccess;
-        } else if ($isSuccess && $existingTxn->status !== 'success') {
-            $existingTxn->update(['status' => 'success', 'gateway_response' => $statusResult['raw']]);
-            $needsEmail = true;
-        }
-
-        // If payment failed, stop here — do NOT update invoice or profile
         if (!$isSuccess) {
-            return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment failed or cancelled. Please try again.');
-        }
-
-        // Payment confirmed COMPLETED — update invoice and profile
-        if ($invoiceId) {
-            ServiceChargeInvoice::where('id', $invoiceId)->update([
-                'status' => 'paid',
-                'payment_date' => now()
-            ]);
-            $inv = ServiceChargeInvoice::find($invoiceId);
-            if ($inv && $user->profile) {
-                $user->profile->pending_amount = max(0, $user->profile->pending_amount - $inv->amount);
-                if ($user->profile->pending_amount <= 0) {
-                    $user->profile->is_fee_paid = true;
-                }
-                $user->profile->save();
-            }
-        } else {
-            // Fallback to latest pending invoice
-            $latestInvoice = ServiceChargeInvoice::where('candidate_id', $user->id)
-                ->whereIn('status', ['pending', 'overdue'])
-                ->latest()
-                ->first();
-            if ($latestInvoice) {
-                $latestInvoice->update(['status' => 'paid', 'payment_date' => now()]);
-                if ($user->profile) {
-                    $user->profile->pending_amount = max(0, $user->profile->pending_amount - $latestInvoice->amount);
-                    if ($user->profile->pending_amount <= 0) {
-                        $user->profile->is_fee_paid = true;
-                    }
-                    $user->profile->save();
-                }
-            }
-        }
-
-        // Notify Admin
-        $adminUser = \App\Models\User::where('role', 'admin')->first();
-        if ($adminUser) {
-            \Illuminate\Support\Facades\DB::table('notifications')->insert([
-                'id' => \Illuminate\Support\Str::uuid(),
-                'type' => 'App\Notifications\ServiceChargePaid',
-                'notifiable_type' => 'App\Models\User',
-                'notifiable_id' => $adminUser->id,
-                'data' => json_encode([
-                    'title' => 'Service Charge Received',
-                    'message' => '₹' . $amountPaid . ' was received from ' . $user->name . ' for Service Charge.',
-                    'candidate_id' => $user->id,
-                    'amount' => $amountPaid
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment failed or was cancelled. Please try again.');
         }
 
         return redirect()->route('candidate.serviceCharge.show')->with('success', 'Service charge paid successfully!');

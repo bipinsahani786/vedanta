@@ -228,8 +228,8 @@ class PhonePeService
             'response' => $rData,
         ]);
 
-        $state = $rData['state'] ?? ($rData['data']['state'] ?? null);
-        $isCompleted = $state === 'COMPLETED';
+        $state = strtoupper($rData['state'] ?? ($rData['data']['state'] ?? ($rData['code'] ?? '')));
+        $isCompleted = in_array($state, ['COMPLETED', 'SUCCESS', 'PAYMENT_SUCCESS']);
         $amountPaise = $rData['amount'] ?? ($rData['data']['amount'] ?? 0);
         $txnId = $rData['orderId'] ?? ($rData['data']['transactionId'] ?? $orderId);
 
