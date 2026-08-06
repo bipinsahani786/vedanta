@@ -23,7 +23,7 @@ We are excited to have you on board. You are now one step closer to finding your
 @endif
 </x-mail::panel>
 
-We have attached your digitally signed **Registration Agreement** and your **Payment Invoice** to this email for your records. You can also view them anytime from your dashboard.
+We have attached your digitally signed **Registration Agreement** to this email for your records. You can also view it anytime from your dashboard.
 
 <x-mail::button :url="route('candidate.dashboard')" color="success">
 Go to Dashboard
