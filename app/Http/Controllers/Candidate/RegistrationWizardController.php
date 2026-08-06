@@ -277,23 +277,20 @@ class RegistrationWizardController extends Controller
 
     public function callback(Request $request)
     {
-        $transactionId = $request->merchantOrderId ?? $request->transactionId ?? session('last_txn_id');
+        $transactionId = $request->merchantOrderId ?? $request->transactionId ?? $request->orderId ?? session('last_txn_id');
         $pendingPlanType = session('pending_plan_type', 'standard');
 
-        $user = auth()->user();
-
-        // Guard: If transactionId or user is missing, abort
-        if (!$transactionId || !$user) {
+        if (!$transactionId) {
             return redirect()->route('candidate.dashboard')->with('error', 'Payment session expired. Please try again.');
         }
 
-        // Guard: Prevent duplicate processing for the same transaction
-        $existingTxn = \App\Models\PaymentTransaction::where('transaction_id', $transactionId)->first();
-        if ($existingTxn) {
-            if ($existingTxn->status === 'success') {
-                return redirect()->route('candidate.dashboard')->with('success', 'Payment already processed successfully.');
+        // Auto-login user if session was lost on cross-site redirect
+        if (!auth()->check()) {
+            $candidateId = \App\Services\PaymentFulfillmentService::extractCandidateId($transactionId);
+            if ($candidateId) {
+                $u = \App\Models\User::find($candidateId);
+                if ($u) auth()->login($u);
             }
-            return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or was already processed.');
         }
 
         // Verify status with PhonePe V2
@@ -306,100 +303,22 @@ class RegistrationWizardController extends Controller
         ]);
 
         $isSuccess = $statusResult['success'];
-        $amountPaid = $statusResult['amount'] / 100; // Convert paise to rupees
+        $amountPaid = ($statusResult['amount'] ?? 0) / 100; // Convert paise to rupees
 
-        // Check if webhook already processed it
-        $existingTxn = \App\Models\PaymentTransaction::where('transaction_id', $transactionId)->first();
-        $needsEmail = false;
-
-        if (!$existingTxn) {
-            \App\Models\PaymentTransaction::create([
-                'candidate_id' => $user->id,
-                'amount' => $amountPaid,
-                'transaction_id' => $transactionId,
-                'type' => 'registration_fee',
-                'status' => $isSuccess ? 'success' : 'failed',
-                'gateway_response' => $statusResult['raw']
-            ]);
-            $needsEmail = $isSuccess;
-        } else if ($isSuccess && $existingTxn->status !== 'success') {
-            $existingTxn->update(['status' => 'success', 'gateway_response' => $statusResult['raw']]);
-            $needsEmail = true;
-        }
-
-        // If payment failed, stop here — do NOT update the profile
-        if (!$isSuccess) {
-            return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or cancelled. Please try again.');
-        }
-
-        $profile = $user->profile;
-
-        if ($pendingPlanType === 'standard') {
-            // Standard plan payment (2 job applications allowed)
-            $profile->update([
-                'plan_type' => 'standard',
-                'total_allowed_applications' => 2,
-                'initial_fee_paid' => true,
-                'paid_amount' => $profile->paid_amount + $amountPaid,
-                'pending_amount' => 500, // Initial 500 paid, 500 pending
-                'payment_id' => $statusResult['transactionId'],
-                'registration_completed_at' => now(),
-                'plan_started_at' => now(),
-            ]);
-        } else {
-            // Premium plan payment (3 job applications allowed)
-            $profile->update([
-                'plan_type' => 'premium',
-                'total_allowed_applications' => 3,
-                'initial_fee_paid' => true,
-                'is_fee_paid' => true,
-                'paid_amount' => $profile->paid_amount + $amountPaid,
-                'pending_amount' => 0,
-                'payment_id' => $statusResult['transactionId'],
-                'registration_completed_at' => now(),
-                'plan_started_at' => now(),
-            ]);
-        }
+        $fulfillment = \App\Services\PaymentFulfillmentService::fulfill(
+            $transactionId,
+            $isSuccess,
+            $amountPaid,
+            $statusResult['raw'] ?? [],
+            $statusResult['transactionId'] ?? null,
+            $pendingPlanType
+        );
 
         // Clear session
         $request->session()->forget(['registration_plan', 'payment_txn_id', 'pending_plan_type', 'last_txn_id']);
 
-        // Insert Database Notification for Candidate
-        \Illuminate\Support\Facades\DB::table('notifications')->insert([
-            'id' => \Illuminate\Support\Str::uuid(),
-            'type' => 'App\Notifications\RegistrationSuccess',
-            'notifiable_type' => 'App\Models\User',
-            'notifiable_id' => $user->id,
-            'data' => json_encode([
-                'title' => 'Registration Successful',
-                'message' => 'Welcome to Vedanta! Your registration plan is now active.',
-                'plan' => $pendingPlanType
-            ]),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        // Notify Admin of new registration
-        $adminUser = \App\Models\User::where('role', 'admin')->first();
-        if ($adminUser) {
-            \Illuminate\Support\Facades\DB::table('notifications')->insert([
-                'id' => \Illuminate\Support\Str::uuid(),
-                'type' => 'App\Notifications\NewRegistration',
-                'notifiable_type' => 'App\Models\User',
-                'notifiable_id' => $adminUser->id,
-                'data' => json_encode([
-                    'title' => 'New Registration',
-                    'message' => $user->name . ' has successfully completed registration and signed the agreement.',
-                    'candidate_id' => $user->id
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($needsEmail) {
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\PaymentReceiptMail($user, $transactionId, $amountPaid, 'Candidate Profile Registration Fee'));
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
+        if (!$isSuccess) {
+            return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or was cancelled. Please try again.');
         }
 
         return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Registration complete.');

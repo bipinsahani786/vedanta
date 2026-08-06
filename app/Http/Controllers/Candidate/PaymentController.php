@@ -81,155 +81,42 @@ class PaymentController extends Controller
 
     public function callback(Request $request)
     {
-        $transactionId = $request->merchantOrderId ?? $request->transactionId ?? session('last_txn_id');
+        $transactionId = $request->merchantOrderId ?? $request->transactionId ?? $request->orderId ?? session('last_txn_id');
 
-        $user = auth()->user();
-
-        // Guard: If transactionId is missing, abort
-        if (!$transactionId || !$user) {
+        if (!$transactionId) {
             return redirect()->route('candidate.dashboard')->with('error', 'Payment session expired. Please try again.');
         }
 
-        // Guard: Prevent duplicate processing for the same transaction
-        $existingTxn = \App\Models\PaymentTransaction::where('transaction_id', $transactionId)->first();
-        if ($existingTxn) {
-            if ($existingTxn->status === 'success') {
-                return redirect()->route('candidate.dashboard')->with('success', 'Payment already processed successfully.');
+        // Auto-login user if session was lost on cross-site redirect
+        if (!auth()->check()) {
+            $candidateId = \App\Services\PaymentFulfillmentService::extractCandidateId($transactionId);
+            if ($candidateId) {
+                $u = \App\Models\User::find($candidateId);
+                if ($u) auth()->login($u);
             }
-            return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or was already processed.');
         }
 
         // Verify status with PhonePe V2
         $statusResult = $this->phonePe->checkStatus($transactionId);
-        
-        \Illuminate\Support\Facades\Log::info('PhonePe V2 Upgrade/Renewal Callback Status', [
+
+        \Illuminate\Support\Facades\Log::info('PhonePe V2 Payment Callback Status', [
             'result' => $statusResult, 
             'txn' => $transactionId
         ]);
 
         $isSuccess = $statusResult['success'];
-        $amountPaid = $statusResult['amount'] / 100; // Convert paise to rupees
+        $amountPaid = ($statusResult['amount'] ?? 0) / 100; // Convert paise to rupees
 
-        // Check if webhook already processed it
-        $existingTxn = \App\Models\PaymentTransaction::where('transaction_id', $transactionId)->first();
-        $needsEmail = false;
+        $fulfillment = \App\Services\PaymentFulfillmentService::fulfill(
+            $transactionId,
+            $isSuccess,
+            $amountPaid,
+            $statusResult['raw'] ?? [],
+            $statusResult['transactionId'] ?? null
+        );
 
-        if (!$existingTxn) {
-            \App\Models\PaymentTransaction::create([
-                'candidate_id' => $user->id,
-                'amount' => $amountPaid,
-                'transaction_id' => $transactionId,
-                'type' => 'registration_fee',
-                'status' => $isSuccess ? 'success' : 'failed',
-                'gateway_response' => $statusResult['raw']
-            ]);
-            $needsEmail = $isSuccess;
-        } else if ($isSuccess && $existingTxn->status !== 'success') {
-            $existingTxn->update(['status' => 'success', 'gateway_response' => $statusResult['raw']]);
-            $needsEmail = true;
-        }
-
-        // If payment failed, stop here — do NOT update the profile
         if (!$isSuccess) {
-            return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or cancelled. Please try again.');
-        }
-
-        if (str_starts_with($transactionId, 'RENEW_BASIC_')) {
-            // Handle Renewal to Basic/Standard (2 applications)
-            $user->profile->update([
-                'plan_type' => 'standard',
-                'total_allowed_applications' => 2,
-                'initial_fee_paid' => true,
-                'paid_amount' => $user->profile->paid_amount + $amountPaid,
-                'pending_amount' => 500, // Basic plan rule
-                'used_applications' => 0, // Reset applications
-                'payment_id' => $statusResult['transactionId'],
-                'plan_started_at' => now()
-            ]);
-            return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You are now on the Standard Plan with 2 application slots.');
-        } elseif (str_starts_with($transactionId, 'RENEW_PREMIUM_')) {
-            // Handle Renewal to Premium (3 applications)
-            $user->profile->update([
-                'plan_type' => 'premium',
-                'total_allowed_applications' => 3,
-                'initial_fee_paid' => true,
-                'is_fee_paid' => true,
-                'paid_amount' => $user->profile->paid_amount + $amountPaid,
-                'pending_amount' => 0, // Premium plan rule
-                'used_applications' => 0, // Reset applications
-                'payment_id' => $statusResult['transactionId'],
-                'plan_started_at' => now()
-            ]);
-            return redirect()->route('candidate.dashboard')->with('success', 'Plan Renewed Successfully! You are now on the Premium Plan with 3 application slots.');
-        } elseif (str_starts_with($transactionId, 'UPGRADE_')) {
-            // Handle Upgrade to Premium (3 applications)
-            $user->profile->update([
-                'plan_type' => 'premium',
-                'total_allowed_applications' => 3,
-                'is_fee_paid' => true,
-                'paid_amount' => $user->profile->paid_amount + $amountPaid,
-                'pending_amount' => 0, // Cleared upon upgrade
-                'payment_id' => $statusResult['transactionId'],
-                'plan_started_at' => now()
-            ]);
-            return redirect()->route('candidate.dashboard')->with('success', 'Plan Upgraded to Premium Successfully!');
-        } else {
-            // Handle Initial Registration
-            if ($amountPaid == 500) {
-                $user->profile->update([
-                    'plan_type' => 'standard',
-                    'total_allowed_applications' => 2,
-                    'initial_fee_paid' => true,
-                    'paid_amount' => $user->profile->paid_amount + $amountPaid,
-                    'pending_amount' => 500, // Initial 500 paid, 500 pending
-                    'payment_id' => $statusResult['transactionId'],
-                    'registration_completed_at' => now(),
-                    'plan_started_at' => now()
-                ]);
-            } else {
-                $user->profile->update([
-                    'plan_type' => 'premium',
-                    'total_allowed_applications' => 3,
-                    'initial_fee_paid' => true,
-                    'is_fee_paid' => true,
-                    'paid_amount' => $user->profile->paid_amount + $amountPaid,
-                    'payment_id' => $statusResult['transactionId'],
-                    'registration_completed_at' => now(),
-                    'plan_started_at' => now()
-                ]);
-            }
-        }
-
-        // Notify Admin of Payment Received
-        $adminUser = \App\Models\User::where('role', 'admin')->first();
-        if ($adminUser) {
-            \Illuminate\Support\Facades\DB::table('notifications')->insert([
-                'id' => \Illuminate\Support\Str::uuid(),
-                'type' => 'App\Notifications\PaymentReceived',
-                'notifiable_type' => 'App\Models\User',
-                'notifiable_id' => $adminUser->id,
-                'data' => json_encode([
-                    'title' => 'Payment Received',
-                    'message' => '₹' . $amountPaid . ' was received from ' . $user->name . ' for ' . (str_starts_with($transactionId, 'RENEW_') ? 'Renewal' : (str_starts_with($transactionId, 'UPGRADE_') ? 'Upgrade' : 'Registration')) . '.',
-                    'candidate_id' => $user->id,
-                    'amount' => $amountPaid
-                ]),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($needsEmail) {
-            if (str_starts_with($transactionId, 'UPGRADE_')) {
-                $desc = 'Upgrade to Premium Plan';
-            } elseif (str_starts_with($transactionId, 'RENEW_BASIC_')) {
-                $desc = 'Basic Plan Renewal';
-            } elseif (str_starts_with($transactionId, 'RENEW_PREMIUM_')) {
-                $desc = 'Premium Plan Renewal';
-            } else {
-                $desc = 'Candidate Profile Registration Fee';
-            }
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\PaymentReceiptMail($user, $transactionId, $amountPaid, $desc));
+            return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or was cancelled. Please try again.');
         }
 
         return redirect()->route('candidate.dashboard')->with('success', 'Payment processed successfully.');

@@ -95,6 +95,13 @@ Route::post('/email/verification-notification', function (Request $request) {
 Route::get('/register', [\App\Http\Controllers\CandidateAuthController::class, 'showRegistrationForm'])->name('candidate.register');
 Route::post('/register', [\App\Http\Controllers\CandidateAuthController::class, 'register'])->name('candidate.register.post');
 
+// Payment Callback Routes (OUTSIDE auth middleware — PhonePe redirect can lose session)
+Route::prefix('candidate')->name('candidate.')->group(function () {
+    Route::match(['get', 'post'], '/wizard/callback', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'callback'])->name('wizard.callback');
+    Route::match(['get', 'post'], '/payment/callback', [\App\Http\Controllers\Candidate\PaymentController::class, 'callback'])->name('payment.callback');
+    Route::match(['get', 'post'], '/service-charge/callback', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'callback'])->name('serviceCharge.callback');
+});
+
 // Candidate Routes (Unverified but Auth Required)
 Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.')->group(function () {
     // Registration Wizard
@@ -103,7 +110,6 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
     Route::post('/wizard/step2', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'saveStep2'])->name('wizard.step2');
     Route::post('/wizard/step3', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'saveStep3'])->name('wizard.step3');
     Route::post('/wizard/payment', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'initiatePayment'])->name('wizard.payment');
-    Route::match(['get', 'post'], '/wizard/callback', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'callback'])->name('wizard.callback');
 
     Route::get('/dashboard', function () {
         $profile = auth()->user()->profile;
@@ -123,7 +129,6 @@ Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name(
 
     Route::get('/payment', [\App\Http\Controllers\Candidate\PaymentController::class, 'show'])->name('payment.show');
     Route::post('/payment/process', [\App\Http\Controllers\Candidate\PaymentController::class, 'process'])->name('payment.process');
-    Route::match(['get', 'post'], '/payment/callback', [\App\Http\Controllers\Candidate\PaymentController::class, 'callback'])->name('payment.callback');
     Route::get('/payment/invoice/{id}', [\App\Http\Controllers\Candidate\PaymentController::class, 'invoice'])->name('payment.invoice');
 
     Route::get('/applications', [\App\Http\Controllers\Candidate\ApplicationController::class, 'index'])->name('applications.index');
@@ -134,7 +139,7 @@ Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name(
     Route::get('/service-charge', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'show'])->name('serviceCharge.show');
     Route::get('/service-charge/invoice/{id}/pdf', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'downloadInvoicePdf'])->name('serviceCharge.invoicePdf');
     Route::post('/service-charge/pay', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'process'])->name('serviceCharge.pay');
-    Route::match(['get', 'post'], '/service-charge/callback', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'callback'])->name('serviceCharge.callback');
+    // Service Charge callback moved outside auth middleware group (see top of file)
     Route::view('/additional-feature', 'candidate.aditionalFeature.show')->name('aditionalFeature.show');
 });
 
