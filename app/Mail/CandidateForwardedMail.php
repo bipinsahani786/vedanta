@@ -53,11 +53,20 @@ class CandidateForwardedMail extends Mailable implements ShouldQueue
     public function attachments(): array
     {
         $attachments = [];
-        $profile = $this->application->candidate->profile;
-        if ($profile && $profile->resume_path) {
-            $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromStorageDisk('public', $profile->resume_path)
-                                ->as('Resume_' . str_replace(' ', '_', $this->application->candidate->name) . '.' . pathinfo($profile->resume_path, PATHINFO_EXTENSION));
+        try {
+            $profile = $this->application->candidate->profile;
+            if ($profile && !empty($profile->resume_path)) {
+                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($profile->resume_path)) {
+                    $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromStorageDisk('public', $profile->resume_path)
+                                        ->as('Resume_' . str_replace(' ', '_', $this->application->candidate->name) . '.' . pathinfo($profile->resume_path, PATHINFO_EXTENSION));
+                } else {
+                    \Illuminate\Support\Facades\Log::warning("Resume missing on disk for candidate {$this->application->candidate->id}");
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to attach resume for candidate {$this->application->candidate->id}: " . $e->getMessage());
         }
+
         return $attachments;
     }
 }

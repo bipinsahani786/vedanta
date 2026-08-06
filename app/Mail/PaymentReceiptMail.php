@@ -65,17 +65,22 @@ class PaymentReceiptMail extends Mailable implements ShouldQueue
      */
     public function attachments(): array
     {
-        // Generate PDF on the fly
-        $pdf = Pdf::loadView('pdf.invoice', [
-            'user' => $this->user,
-            'transactionId' => $this->transactionId,
-            'amount' => $this->amount,
-            'description' => $this->description,
-        ]);
+        try {
+            // Generate PDF on the fly
+            $pdf = Pdf::loadView('pdf.invoice', [
+                'user' => $this->user,
+                'transactionId' => $this->transactionId,
+                'amount' => $this->amount,
+                'description' => $this->description,
+            ]);
 
-        return [
-            Attachment::fromData(fn () => $pdf->output(), "Invoice_{$this->transactionId}.pdf")
-                ->withMime('application/pdf'),
-        ];
+            return [
+                Attachment::fromData(fn () => $pdf->output(), "Invoice_{$this->transactionId}.pdf")
+                    ->withMime('application/pdf'),
+            ];
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to generate/attach PDF receipt for transaction {$this->transactionId}: " . $e->getMessage());
+            return [];
+        }
     }
 }

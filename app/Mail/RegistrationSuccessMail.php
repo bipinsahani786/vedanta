@@ -53,29 +53,18 @@ class RegistrationSuccessMail extends Mailable implements ShouldQueue
     public function attachments(): array
     {
         $attachments = [];
-        if ($this->user->profile && $this->user->profile->agreement_pdf_path) {
-            $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromStorageDisk('public', $this->user->profile->agreement_pdf_path)
-                                ->as('Registration_Agreement.pdf')
-                                ->withMime('application/pdf');
-        }
-
-        // Fetch latest successful registration transaction to generate and attach invoice
-        $transaction = $this->user->paymentTransactions()
-            ->where('type', 'registration_fee')
-            ->where('status', 'success')
-            ->latest()
-            ->first();
-
-        if ($transaction) {
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.invoice', [
-                'user' => $this->user,
-                'transactionId' => $transaction->transaction_id,
-                'amount' => $transaction->amount,
-                'description' => 'Registration / Upgrade Fee',
-            ]);
-
-            $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromData(fn () => $pdf->output(), "Invoice_{$transaction->transaction_id}.pdf")
-                ->withMime('application/pdf');
+        try {
+            if ($this->user->profile && !empty($this->user->profile->agreement_pdf_path)) {
+                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->user->profile->agreement_pdf_path)) {
+                    $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromStorageDisk('public', $this->user->profile->agreement_pdf_path)
+                                        ->as('Registration_Agreement.pdf')
+                                        ->withMime('application/pdf');
+                } else {
+                    \Illuminate\Support\Facades\Log::warning("Agreement PDF missing on disk for user {$this->user->id}");
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to attach agreement for user {$this->user->id}: " . $e->getMessage());
         }
 
         return $attachments;
