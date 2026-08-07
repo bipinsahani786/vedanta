@@ -615,7 +615,7 @@ class CrmController extends Controller
     {
         $candidate = User::where('role', 'candidate')->findOrFail($id);
         
-        $signUrl = route('agreement.show');
+        $signUrl = route('candidate.agreement.show');
         
         $emailBody = "
             <h3>Dear {$candidate->name},</h3>
@@ -1023,5 +1023,37 @@ class CrmController extends Controller
         }
 
         return back()->with('success', "Bulk notifications successfully sent to {$sentCount} candidate(s).");
+    }
+
+    public function manualPaymentFulfill(Request $request, $id)
+    {
+        $request->validate([
+            'plan_type' => 'required|in:standard,premium',
+            'amount' => 'required|numeric|min:0',
+            'payment_method' => 'required|string',
+            'admin_notes' => 'nullable|string'
+        ]);
+
+        $user = User::findOrFail($id);
+        $transactionId = 'MANUAL_' . strtoupper($request->payment_method) . '_' . $user->id . '_' . time();
+
+        $result = \App\Services\PaymentFulfillmentService::fulfill(
+            $transactionId,
+            true,
+            (float) $request->amount,
+            [
+                'note' => 'Manually processed by Admin from CRM',
+                'admin_notes' => $request->admin_notes,
+                'payment_method' => $request->payment_method
+            ],
+            $transactionId,
+            $request->plan_type
+        );
+
+        if ($result['success']) {
+            return back()->with('success', 'Plan upgraded and payment marked successfully for candidate: ' . $user->name);
+        }
+
+        return back()->with('error', 'Failed to process payment fulfillment.');
     }
 }
