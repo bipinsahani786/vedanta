@@ -57,7 +57,7 @@ class JobController extends Controller
         ]);
 
         foreach ($request->jobs as $jobData) {
-            JobPost::create([
+            $job = JobPost::create([
                 'user_id' => auth()->id(),
                 'school_name' => $request->school_name,
                 'contact_person' => $request->contact_person,
@@ -73,6 +73,21 @@ class JobController extends Controller
                 'salary_range' => $jobData['salary_range'] ?? null,
                 'status' => 'pending',
             ]);
+
+            // Send Email to Employer
+            if ($job->email) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($job->email)->send(new \App\Mail\JobSubmittedForApprovalMail($job));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send job submitted email to employer: ' . $e->getMessage());
+                }
+            } elseif (auth()->user()->email) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to(auth()->user()->email)->send(new \App\Mail\JobSubmittedForApprovalMail($job));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send job submitted email to employer: ' . $e->getMessage());
+                }
+            }
         }
 
         // Notify Admin

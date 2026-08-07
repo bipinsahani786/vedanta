@@ -52,6 +52,11 @@
                                 </span>
                             @endif
                         </h1>
+                        @if($profile->vpa_id)
+                            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg text-white font-mono text-sm tracking-widest border border-white/20 mb-2 shadow-inner">
+                                <i class="fas fa-id-badge opacity-70"></i> {{ $profile->vpa_id }}
+                            </div>
+                        @endif
                         <p class="text-white/80 text-lg">Your profile is active and visible to top schools.</p>
                     </div>
                     <div class="mt-4 md:mt-0 flex gap-3">
@@ -293,7 +298,12 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-text-main">Welcome, {{ auth()->user()->name }}</h1>
-                        <p class="text-sm text-text-dark/50 mt-0.5">Complete your registration to unlock job applications.</p>
+                        @if(auth()->user()->profile && auth()->user()->profile->vpa_id)
+                            <div class="inline-flex items-center gap-2 mt-1 px-2.5 py-1 bg-gray-100 rounded text-gray-600 font-mono text-xs font-semibold tracking-wider border border-gray-200">
+                                <i class="fas fa-id-badge text-gray-400"></i> {{ auth()->user()->profile->vpa_id }}
+                            </div>
+                        @endif
+                        <p class="text-sm text-text-dark/50 mt-1">Complete your registration to unlock job applications.</p>
                     </div>
                 </div>
                 <div>

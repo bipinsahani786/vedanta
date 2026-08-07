@@ -618,20 +618,9 @@ class CrmController extends Controller
         
         $signUrl = route('candidate.agreement.show');
         
-        $emailBody = "
-            <h3>Dear {$candidate->name},</h3>
-            <p>Your registration profile has been created.</p>
-            <p>Please log in to your account and <strong>sign the Registration Agreement</strong> to finalize your onboarding.</p>
-            <br>
-            <a href='{$signUrl}' style='display:inline-block; padding: 10px 20px; background-color: #00a8e8; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;'>Log In to Sign Agreement</a>
-            <br><br>
-            <p>If you have any questions, feel free to reply to this email.</p>
-            <p>Regards,<br>Vedanta Placement Agency</p>
-        ";
-
         try {
             \Illuminate\Support\Facades\Mail::to($candidate->email)->send(
-                new \App\Mail\DynamicTemplateMail('Action Required: Sign Your Registration Agreement', $emailBody)
+                new \App\Mail\AgreementLinkMail($candidate, $signUrl)
             );
             return back()->with('success', 'Agreement signature link has been emailed to the candidate.');
         } catch (\Exception $e) {
@@ -836,7 +825,16 @@ class CrmController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Invoice details updated successfully.');
+        $invoice->load('candidate');
+        try {
+            \Illuminate\Support\Facades\Mail::to($invoice->candidate->email)->send(
+                new \App\Mail\InvoiceUpdatedMail($invoice)
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to send Invoice Updated mail: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Invoice details updated successfully and candidate notified.');
     }
 
     public function sendInvoiceReminder(Request $request, $invoiceId)

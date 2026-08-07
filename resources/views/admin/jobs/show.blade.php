@@ -286,7 +286,6 @@
                 </button>
             </form>
         </div>
-        </div>
         @endif
 
         <!-- Communication Panel -->

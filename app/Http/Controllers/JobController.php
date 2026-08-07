@@ -49,7 +49,7 @@ class JobController extends Controller
             'salary_range' => 'nullable|string|max:255',
         ]);
 
-        JobPost::create([
+        $job = JobPost::create([
             'user_id' => auth()->check() && auth()->user()->role === 'employer' ? auth()->id() : null,
             'school_name' => $request->school_name,
             'contact_person' => $request->contact_person,
@@ -66,6 +66,15 @@ class JobController extends Controller
             'salary_range' => $request->salary_range,
             'status' => 'pending',
         ]);
+
+        // Send Email to Employer
+        if ($job->email) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($job->email)->send(new \App\Mail\JobSubmittedForApprovalMail($job));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send job submitted email to employer: ' . $e->getMessage());
+            }
+        }
 
         // Notify Admin
         $adminUser = \App\Models\User::where('role', 'admin')->first();

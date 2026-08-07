@@ -15,11 +15,11 @@ We are excited to have you on board. You are now one step closer to finding your
 ### Your Plan Details
 **Plan:** {{ ucfirst($user->profile->plan_type ?? 'Standard') }} Plan
 @if($user->profile->plan_type === 'standard')
-**Paid Amount:** &#8377;{{ $user->profile->paid_amount ?? 500 }}  
-**Pending Amount:** &#8377;{{ $user->profile->pending_amount ?? 500 }}  
+**Paid Amount:** &#8377;500  
+**Pending Amount:** &#8377;500  
 *(Pending amount will be collected during the final stage of registration)*
 @else
-**Paid Amount:** &#8377;{{ $user->profile->paid_amount ?? 1000 }} (Fully Paid)
+**Paid Amount:** &#8377;1000 (Fully Paid)
 @endif
 </x-mail::panel>
 

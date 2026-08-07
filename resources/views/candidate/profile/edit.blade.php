@@ -307,19 +307,19 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current School/Organization <span class="text-text-dark/30 text-[10px] normal-case">(Optional)</span></label>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current School/Organization <span class="text-red-400">*</span></label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-building text-sm"></i></span>
-                            <input type="text" name="current_school" value="{{ old('current_school', $profile->current_school) }}" placeholder="e.g. XYZ Public School"
+                            <input type="text" name="current_school" required value="{{ old('current_school', $profile->current_school) }}" placeholder="e.g. DPS Patna (or write 'Fresher')"
                                 class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">English Fluency</label>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">English Fluency <span class="text-red-400">*</span></label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-language text-sm"></i></span>
-                            <select name="english_fluency" class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none">
+                            <select name="english_fluency" required class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none">
                                 <option value="">Select Fluency</option>
                                 <option value="beginner" {{ old('english_fluency', $profile->english_fluency) == 'beginner' ? 'selected' : '' }}>Beginner</option>
                                 <option value="intermediate" {{ old('english_fluency', $profile->english_fluency) == 'intermediate' ? 'selected' : '' }}>Intermediate</option>
