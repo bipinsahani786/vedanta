@@ -6,7 +6,23 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         @if($profile->initial_fee_paid || $profile->is_fee_paid)
-            {{-- ================= FULLY REGISTERED DASHBOARD ================= --}}
+            @if(!$profile->is_agreement_signed)
+                {{-- Agreement Pending Alert Banner --}}
+                <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm reveal">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
+                            <i class="fas fa-file-signature"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-amber-300 text-sm">Agreement Signature Pending</h4>
+                            <p class="text-xs text-amber-200/80">Please review and digitally sign your placement agreement to finalize your account setup.</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('candidate.agreement.show') }}" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2">
+                        <i class="fas fa-pen-nib"></i> Sign Agreement Now
+                    </a>
+                </div>
+            @endif
 
             {{-- Welcome Banner --}}
             <div

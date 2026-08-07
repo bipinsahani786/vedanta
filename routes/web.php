@@ -202,6 +202,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/candidate/{id}/upload-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'uploadAgreement'])->name('crm.candidate.upload-agreement');
     Route::post('/crm/candidate/{id}/send-agreement-link', [\App\Http\Controllers\Admin\CrmController::class, 'sendAgreementLink'])->name('crm.candidate.send-agreement-link');
     Route::get('/crm/candidate/{id}/download-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'downloadAgreement'])->name('crm.candidate.download-agreement');
+    Route::post('/crm/candidate/{id}/fulfill-payment', [\App\Http\Controllers\Admin\CrmController::class, 'manualPaymentFulfill'])->name('crm.candidate.fulfill-payment');
 
     // Applications & Transactions
     Route::get('/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');

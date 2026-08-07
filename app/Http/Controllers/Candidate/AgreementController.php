@@ -21,12 +21,12 @@ class AgreementController extends Controller
             return redirect()->route('candidate.profile.edit')->with('error', 'Please complete your profile first before signing the agreement.');
         }
 
-        // If not signed, redirect to the wizard to ensure the live photo process is followed
+        // If agreement is not signed, redirect to the wizard to capture Live Photo, Geolocation & Signature
         if (!$profile->is_agreement_signed) {
-            return redirect()->route('candidate.wizard')->with('info', 'Please sign the agreement here.');
+            return redirect()->route('candidate.wizard')->with('info', 'Please complete your live camera photo and agreement signature.');
         }
 
-        // If already signed, we will just show the signed state in the view.
+        // Show agreement page if already signed
         return view('candidate.agreement.show', compact('user', 'profile'));
     }
 

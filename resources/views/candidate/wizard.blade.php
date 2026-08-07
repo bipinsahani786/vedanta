@@ -1110,7 +1110,12 @@
                     const result = await response.json();
                     
                     if (response.ok) {
-                        this.step = 4;
+                        const isFeePaid = {{ ($profile->initial_fee_paid || $profile->is_fee_paid) ? 'true' : 'false' }};
+                        if (isFeePaid) {
+                            window.location.href = '{{ route("candidate.dashboard") }}';
+                        } else {
+                            this.step = 4;
+                        }
                     } else {
                         this.error = result.message || 'An error occurred while verifying identity.';
                     }

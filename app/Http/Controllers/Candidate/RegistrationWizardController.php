@@ -22,7 +22,8 @@ class RegistrationWizardController extends Controller
         $user = auth()->user();
         $profile = $user->profile;
         
-        if ($profile->initial_fee_paid || $profile->is_fee_paid) {
+        // Redirect to dashboard only if fee is paid AND agreement is signed
+        if (($profile->initial_fee_paid || $profile->is_fee_paid) && $profile->is_agreement_signed) {
             return redirect()->route('candidate.dashboard');
         }
 
