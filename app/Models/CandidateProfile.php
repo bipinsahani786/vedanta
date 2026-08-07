@@ -12,6 +12,24 @@ class CandidateProfile extends Model
 
     protected $guarded = [];
 
+    protected static function booted()
+    {
+        static::creating(function ($profile) {
+            if (empty($profile->vpa_id)) {
+                $year = date('Y');
+                $lastProfile = self::where('vpa_id', 'like', "VPA-{$year}-%")->orderBy('id', 'desc')->first();
+                $nextSequence = 1;
+                if ($lastProfile && $lastProfile->vpa_id) {
+                    $parts = explode('-', $lastProfile->vpa_id);
+                    if (count($parts) === 3) {
+                        $nextSequence = intval($parts[2]) + 1;
+                    }
+                }
+                $profile->vpa_id = sprintf("VPA-%s-%03d", $year, $nextSequence);
+            }
+        });
+    }
+
     protected $casts = [
         'date_of_birth' => 'date',
         'is_profile_complete' => 'boolean',

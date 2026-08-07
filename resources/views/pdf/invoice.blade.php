@@ -34,7 +34,7 @@
                     <strong style="color: #031b4e; font-size: 16px;">Billed To:</strong><br>
                     {{ $user->name }}<br>
                     {{ $user->email }}<br>
-                    Phone: {{ $user->profile->phone ?? 'N/A' }}
+                    Phone: {{ $user->phone ?? 'N/A' }}
                 </td>
                 <td style="width: 50%; text-align: right;">
                     <strong>Invoice Date:</strong> {{ now()->format('F j, Y') }}<br>

@@ -98,6 +98,16 @@ class JobController extends Controller
             'status' => 'approved'
         ]);
 
+        // Send Job Approved Email to Employer
+        $employerEmail = $job->email ?? ($job->user ? $job->user->email : null);
+        if ($employerEmail) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($employerEmail)->queue(new \App\Mail\JobApprovedMail($job));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send Job Approved email to: ' . $employerEmail . '. Error: ' . $e->getMessage());
+            }
+        }
+
         // Smart Job Matching: Notify Candidates with similar subject/location/category
         $suggestedCandidates = $job->getSuggestedCandidates(50); // Get top 50 matching candidates
 
@@ -198,7 +208,11 @@ class JobController extends Controller
 
         $validated['user_id'] = auth()->id();
 
-        JobPost::create($validated);
+        $job = JobPost::create($validated);
+
+        if (!empty($job->email)) {
+            \Illuminate\Support\Facades\Mail::to($job->email)->send(new \App\Mail\JobApprovedMail($job));
+        }
 
         return redirect()->route('admin.jobs.index')->with('success', 'Job posted successfully.');
     }

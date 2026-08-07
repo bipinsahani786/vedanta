@@ -54,7 +54,14 @@
                         </div>
                     @endif
                     <div class="min-w-0">
-                        <h3 class="text-xl font-extrabold text-gray-900 break-words">{{ $candidate->name }}</h3>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <h3 class="text-xl font-extrabold text-gray-900 break-words">{{ $candidate->name }}</h3>
+                            @if($candidate->profile && $candidate->profile->vpa_id)
+                                <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-mono font-bold border border-gray-200 shadow-sm flex items-center gap-1.5" title="Vedanta Candidate ID">
+                                    <i class="fas fa-id-badge text-gray-400"></i> {{ $candidate->profile->vpa_id }}
+                                </span>
+                            @endif
+                        </div>
                         <div class="text-xs text-gray-500 mt-1.5 flex flex-wrap items-center gap-1.5 sm:gap-4">
                             <span class="flex items-center gap-1.5"><i class="fas fa-envelope text-gray-400"></i> {{ $candidate->email }}</span>
                             <span class="flex items-center gap-1.5"><i class="fas fa-phone-alt text-gray-400"></i> {{ $candidate->phone }}</span>
@@ -763,7 +770,7 @@
         const modal = document.getElementById('editInvoiceModal');
         const form = document.getElementById('editInvoiceForm');
         
-        form.action = `/crm/invoice/${id}/edit-details`;
+        form.action = `/admin/crm/invoice/${id}/edit-details`;
         document.getElementById('edit_invoice_amount').value = amount;
         document.getElementById('edit_invoice_late_fee').value = lateFee;
         document.getElementById('edit_invoice_due_date').value = dueDate;

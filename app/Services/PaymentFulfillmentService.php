@@ -237,6 +237,11 @@ class PaymentFulfillmentService
             }
 
             self::sendNotification($user, 'Registration Successful', 'Welcome to Vedanta! Your registration plan is now active.');
+            
+            // Ensure the agreement PDF is generated before sending the welcome email
+            \App\Http\Controllers\Candidate\AgreementController::ensureAgreementPdfExists($profile);
+            $user->refresh();
+
             self::sendEmailOnce($transactionId, 'welcome_emails', function() use ($user, $transactionId, $amountPaid) {
                 Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Candidate Profile Registration Fee'));
                 Mail::to($user->email)->send(new RegistrationSuccessMail($user));

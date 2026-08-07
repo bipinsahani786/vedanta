@@ -166,6 +166,11 @@
                 </td>
                 <td>
                     <div class="font-semibold text-text-main group-hover:text-accent-blue transition-colors">{{ $candidate->name }}</div>
+                    @if($candidate->profile && $candidate->profile->vpa_id)
+                        <div class="text-[10px] font-mono text-text-dark/60 bg-secondary-bg px-1.5 py-0.5 rounded border border-card-border w-max mt-0.5" title="Vedanta Candidate ID">
+                            <i class="fas fa-id-badge w-3"></i> {{ $candidate->profile->vpa_id }}
+                        </div>
+                    @endif
                     <div class="text-xs text-text-dark/50 flex flex-col gap-0.5 mt-1">
                         <span><i class="fas fa-envelope text-[10px] w-3"></i> {{ $candidate->email }}</span>
                         <span><i class="fas fa-phone-alt text-[10px] w-3"></i> {{ $candidate->phone }}</span>

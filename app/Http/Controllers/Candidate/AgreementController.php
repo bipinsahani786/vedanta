@@ -267,19 +267,39 @@ class AgreementController extends Controller
                 // Signature in the box
                 if ($sigType === 'type') {
                     $pdf->SetAutoPageBreak(false);
-                    $pdf->SetFont('Helvetica', 'I', 18);
+                    $pdf->SetFont('Helvetica', 'I', 16);
                     $pdf->SetTextColor(10, 10, 100);
-                    $pdf->SetXY(78, 272);
-                    $pdf->Cell(60, 15, $signatureData, 0, 0, 'C');
+                    $pdf->SetXY(78, 266);
+                    $pdf->Cell(60, 10, $signatureData, 0, 0, 'C');
                     $pdf->SetAutoPageBreak(true);
                 } else if ($absoluteSigPath && file_exists($absoluteSigPath)) {
                     try {
-                        // X: 78, Y: 272, Width: 60, Height: 15
-                        $pdf->Image($absoluteSigPath, 78, 272, 60, 15);
+                        // Adjusted position and size to make room for text below
+                        $pdf->Image($absoluteSigPath, 78, 266, 50, 12);
                     } catch (\Exception $e) {
                         \Log::error("FPDF Image Error (Signature): " . $e->getMessage());
                     }
                 }
+
+                // Add text below signature
+                $pdf->SetAutoPageBreak(false);
+                $pdf->SetFont('Helvetica', '', 9);
+                $pdf->SetTextColor(0, 0, 0);
+                
+                $detailsY = 278; 
+                
+                $pdf->SetXY(78, $detailsY);
+                $pdf->Cell(60, 4, 'Signed By: ' . $user->name, 0, 1, 'L');
+                
+                $pdf->SetXY(78, $detailsY + 4);
+                $pdf->Cell(60, 4, 'Date : ' . date('d/m/Y H:i:s') . ' IST', 0, 1, 'L');
+
+                if ($profile->vpa_id) {
+                    $pdf->SetXY(78, $detailsY + 8);
+                    $pdf->Cell(60, 4, 'Candidate ID: ' . $profile->vpa_id, 0, 1, 'L');
+                }
+                
+                $pdf->SetAutoPageBreak(true);
             }
         }
         

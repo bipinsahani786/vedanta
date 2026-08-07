@@ -521,7 +521,7 @@
                 subtitle: "step into the right opportunity with trusted schools that value your talent",
                 ctaText: "Job Seeker",
                 ctaLink: "{{ route('candidate.register') }}",
-                imgUrl: "images/men.jpg",
+                imgUrl: "images/2.jpeg",
                 fc1Title: "20K +",
                 fc1Desc: "Job Vacancy",
                 fc1Icon: "fa-briefcase",

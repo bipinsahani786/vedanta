@@ -272,18 +272,18 @@
                                 <template x-if="fieldErrors.preferred_city_id"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.preferred_city_id[0]"></p></template>
                             </div>
 
-                            <!-- Current School (Optional) -->
+                            <!-- Current School (Required) -->
                             <div>
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current School (Optional)</label>
-                                <input type="text" x-model="formData.current_school" placeholder="E.g., DPS Patna"
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current School *</label>
+                                <input type="text" x-model="formData.current_school" placeholder="E.g. DPS Patna (or write 'Fresher')" required
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                                 <template x-if="fieldErrors.current_school"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.current_school[0]"></p></template>
                             </div>
 
                             <!-- English Fluency -->
                             <div>
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">English Fluency (Optional)</label>
-                                <select x-model="formData.english_fluency"
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">English Fluency *</label>
+                                <select x-model="formData.english_fluency" required
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                                     <option value="">Select Fluency</option>
                                     <option value="beginner">Beginner</option>
@@ -452,11 +452,11 @@
                                 <video id="cameraFeed" class="w-full h-full object-cover" autoplay playsinline muted></video>
                                 <div class="absolute inset-0 flex flex-col items-center justify-center bg-card-bg/80 gap-3" x-show="!isCameraOn">
                                     <button @click="startCamera" class="bg-accent-blue text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-accent-blue-hover transition-colors shadow-lg"><i class="fas fa-camera"></i> Start Camera</button>
-                                    <span class="text-xs text-text-dark/50 font-medium">OR</span>
+                                    <!-- <span class="text-xs text-text-dark/50 font-medium">OR</span>
                                     <label class="bg-secondary-bg text-text-main border border-card-border px-4 py-2 rounded-lg text-sm font-semibold hover:bg-card-border transition-colors cursor-pointer shadow-sm">
                                         <i class="fas fa-upload"></i> Upload Photo
                                         <input type="file" class="hidden" accept="image/*" @change="handleLivePhotoUpload">
-                                    </label>
+                                    </label> -->
                                 </div>
                             </div>
 
