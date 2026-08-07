@@ -32,12 +32,14 @@ class PaymentFulfillmentService
         float $amountPaid,
         array $gatewayResponse = [],
         ?string $gatewayTxnId = null,
-        ?string $pendingPlanType = null
+        ?string $pendingPlanType = null,
+        bool $forceReFulfill = false
     ): array {
         Log::info('PaymentFulfillmentService: Processing fulfillment', [
             'txn_id' => $transactionId,
             'is_success' => $isSuccess,
             'amount' => $amountPaid,
+            'force' => $forceReFulfill
         ]);
 
         // Find candidate ID from transaction ID prefix or existing transaction record
@@ -52,8 +54,8 @@ class PaymentFulfillmentService
         $user = $candidateId ? User::find($candidateId) : null;
 
         // IDEMPOTENCY GUARD: If this transaction was already processed as 'success', skip everything.
-        // This prevents double-counting paid_amount when both Webhook and Callback fire.
-        $alreadyFulfilled = $existingTxn && $existingTxn->status === 'success';
+        // Bypassed if forceReFulfill is true (e.g. from payments:repair command).
+        $alreadyFulfilled = !$forceReFulfill && $existingTxn && $existingTxn->status === 'success';
 
         // 1. Record or update PaymentTransaction
         if (!$existingTxn) {
@@ -216,8 +218,7 @@ class PaymentFulfillmentService
                     'paid_amount' => $profile->paid_amount + $amountPaid,
                     'pending_amount' => 0,
                     'payment_id' => $txnId,
-                    'registration_step' => 'completed',
-                    'verified' => true,
+                    'is_verified' => true,
                     'registration_completed_at' => $profile->registration_completed_at ?? now(),
                     'plan_started_at' => $profile->plan_started_at ?? now(),
                 ]);
@@ -229,8 +230,7 @@ class PaymentFulfillmentService
                     'paid_amount' => $profile->paid_amount + $amountPaid,
                     'pending_amount' => 500,
                     'payment_id' => $txnId,
-                    'registration_step' => 'completed',
-                    'verified' => true,
+                    'is_verified' => true,
                     'registration_completed_at' => $profile->registration_completed_at ?? now(),
                     'plan_started_at' => $profile->plan_started_at ?? now(),
                 ]);

@@ -284,6 +284,7 @@ class CrmController extends Controller
             if (!$isFeePaid && $request->filled('payment_amount') && $request->filled('payment_method') && $request->filled('plan_type')) {
                 $paymentId = $request->payment_method . '-ADMIN-' . strtoupper(uniqid());
                 
+                $updates['initial_fee_paid'] = true;
                 $updates['is_fee_paid'] = true;
                 $updates['paid_amount'] = $request->payment_amount;
                 $updates['plan_type'] = $request->plan_type;

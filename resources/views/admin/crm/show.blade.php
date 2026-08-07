@@ -148,9 +148,64 @@
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Plan & Transaction</h4>
-                            <button type="button" onclick="document.getElementById('manualPaymentModal').classList.remove('hidden')" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-bold border border-emerald-200 transition-colors flex items-center gap-1 shadow-sm">
+                            <button type="button" onclick="document.getElementById('manualPaymentModal').style.display='flex'" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-bold border border-emerald-200 transition-colors flex items-center gap-1 shadow-sm">
                                 <i class="fas fa-arrow-up"></i> Manual Upgrade / Payment
                             </button>
+                        </div>
+
+                        <!-- Manual Payment & Plan Upgrade Modal -->
+                        <div id="manualPaymentModal" style="display: none;" class="fixed inset-0 z-[9999] bg-gray-900/60 backdrop-blur-sm items-center justify-center p-4">
+                            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
+                                <button type="button" onclick="document.getElementById('manualPaymentModal').style.display='none'" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-lg">
+                                    &times;
+                                </button>
+                                
+                                <h3 class="text-lg font-extrabold text-gray-900 mb-1 flex items-center gap-2">
+                                    <i class="fas fa-credit-card text-emerald-600"></i> Manual Plan Upgrade / Payment
+                                </h3>
+                                <p class="text-xs text-gray-500 mb-4">Mark candidate payment as completed and upgrade their plan directly from admin panel.</p>
+
+                                <form action="{{ route('admin.crm.candidate.fulfill-payment', $candidate->id) }}" method="POST" class="space-y-4">
+                                    @csrf
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 mb-1">Select Plan Type</label>
+                                        <select name="plan_type" required class="w-full rounded-xl border-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                                            <option value="standard" {{ ($candidate->profile->plan_type ?? '') === 'standard' ? 'selected' : '' }}>Standard Plan (2 Applications)</option>
+                                            <option value="premium" {{ ($candidate->profile->plan_type ?? '') === 'premium' || !($candidate->profile->plan_type ?? '') ? 'selected' : '' }}>Premium Plan (3 Applications)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-700 mb-1">Amount Paid (₹)</label>
+                                            <input type="number" name="amount" value="1000" min="0" required class="w-full rounded-xl border-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-700 mb-1">Payment Method</label>
+                                            <select name="payment_method" required class="w-full rounded-xl border-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                                                <option value="phonepe">PhonePe / UPI</option>
+                                                <option value="bank_transfer">Bank Transfer / NEFT</option>
+                                                <option value="cash">Cash</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 mb-1">Admin Notes (Optional)</label>
+                                        <textarea name="admin_notes" rows="2" placeholder="e.g. Payment received on PhonePe for candidate" class="w-full rounded-xl border-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500"></textarea>
+                                    </div>
+
+                                    <div class="flex justify-end gap-3 pt-2">
+                                        <button type="button" onclick="document.getElementById('manualPaymentModal').style.display='none'" class="px-4 py-2.5 bg-gray-100 text-gray-700 text-xs font-bold rounded-xl hover:bg-gray-200">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 shadow-sm transition-all">
+                                            Confirm & Upgrade Plan
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
@@ -679,60 +734,6 @@
             </div>
         </form>
     </div>
-<!-- Manual Payment & Plan Upgrade Modal -->
-<div id="manualPaymentModal" class="fixed inset-0 z-50 bg-gray-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
-        <button type="button" onclick="document.getElementById('manualPaymentModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-lg">
-            &times;
-        </button>
-        
-        <h3 class="text-lg font-extrabold text-gray-900 mb-1 flex items-center gap-2">
-            <i class="fas fa-credit-card text-emerald-600"></i> Manual Plan Upgrade / Payment
-        </h3>
-        <p class="text-xs text-gray-500 mb-4">Mark candidate payment as completed and upgrade their plan directly from admin panel.</p>
-
-        <form action="{{ route('admin.crm.candidate.fulfill-payment', $candidate->id) }}" method="POST" class="space-y-4">
-            @csrf
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">Select Plan Type</label>
-                <select name="plan_type" required class="w-full rounded-xl border-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500">
-                    <option value="standard" {{ ($candidate->profile->plan_type ?? '') === 'standard' ? 'selected' : '' }}>Standard Plan (2 Applications)</option>
-                    <option value="premium" {{ ($candidate->profile->plan_type ?? '') === 'premium' || !($candidate->profile->plan_type ?? '') ? 'selected' : '' }}>Premium Plan (3 Applications)</option>
-                </select>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Amount Paid (₹)</label>
-                    <input type="number" name="amount" value="1000" min="0" required class="w-full rounded-xl border-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Payment Method</label>
-                    <select name="payment_method" required class="w-full rounded-xl border-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500">
-                        <option value="phonepe">PhonePe / UPI</option>
-                        <option value="bank_transfer">Bank Transfer / NEFT</option>
-                        <option value="cash">Cash</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">Admin Notes (Optional)</label>
-                <textarea name="admin_notes" rows="2" placeholder="e.g. Payment received on PhonePe for Koustav Mani Pathak" class="w-full rounded-xl border-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500"></textarea>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-2">
-                <button type="button" onclick="document.getElementById('manualPaymentModal').classList.add('hidden')" class="px-4 py-2.5 bg-gray-100 text-gray-700 text-xs font-bold rounded-xl hover:bg-gray-200">
-                    Cancel
-                </button>
-                <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 shadow-sm transition-all">
-                    Confirm & Upgrade Plan
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
