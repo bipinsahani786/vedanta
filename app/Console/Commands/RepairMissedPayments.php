@@ -87,9 +87,6 @@ class RepairMissedPayments extends Command
                 } elseif (!$profile->registration_completed_at) {
                     $needsFix = true;
                     $reason = "registration_completed_at=null";
-                } elseif ($profile->registration_step !== 'completed') {
-                    $needsFix = true;
-                    $reason = "registration_step='{$profile->registration_step}' (should be 'completed')";
                 } elseif (!$profile->plan_type) {
                     $needsFix = true;
                     $reason = "plan_type=null";
@@ -150,9 +147,6 @@ class RepairMissedPayments extends Command
                 $this->line("      Reason: {$reason}");
 
                 if (!$isDryRun) {
-                    // Reset the transaction status to allow re-fulfillment
-                    $txn->update(['status' => 'pending_repair']);
-                    
                     $pendingPlan = null;
                     if (str_starts_with($txnId, 'TXN_')) {
                         $pendingPlan = $txn->amount >= 1000 ? 'premium' : 'standard';
@@ -164,7 +158,8 @@ class RepairMissedPayments extends Command
                         $txn->amount,
                         is_array($txn->gateway_response) ? $txn->gateway_response : [],
                         null,
-                        $pendingPlan
+                        $pendingPlan,
+                        true // forceReFulfill
                     );
 
                     if ($result['success']) {
@@ -219,9 +214,6 @@ class RepairMissedPayments extends Command
                 $this->line("      Profile: initial_fee_paid={$profile->initial_fee_paid}, plan_type={$profile->plan_type}, registration_completed_at={$profile->registration_completed_at}");
 
                 if (!$isDryRun) {
-                    // Reset and re-fulfill
-                    $successTxn->update(['status' => 'pending_repair']);
-                    
                     $pendingPlan = $successTxn->amount >= 1000 ? 'premium' : 'standard';
 
                     $result = PaymentFulfillmentService::fulfill(
@@ -230,7 +222,8 @@ class RepairMissedPayments extends Command
                         $successTxn->amount,
                         is_array($successTxn->gateway_response) ? $successTxn->gateway_response : [],
                         null,
-                        $pendingPlan
+                        $pendingPlan,
+                        true // forceReFulfill
                     );
 
                     if ($result['success']) {
@@ -286,9 +279,6 @@ class RepairMissedPayments extends Command
                     $this->line("      PhonePe state: {$statusResult['state']} | Amount: ₹{$amountPaid}");
 
                     if (!$isDryRun) {
-                        // Reset status so FulfillmentService can process it
-                        $txn->update(['status' => 'pending_repair']);
-
                         $pendingPlan = null;
                         if (str_starts_with($txn->transaction_id, 'TXN_')) {
                             $pendingPlan = $amountPaid >= 1000 ? 'premium' : 'standard';
@@ -300,7 +290,8 @@ class RepairMissedPayments extends Command
                             $amountPaid,
                             $statusResult['raw'] ?? [],
                             $statusResult['transactionId'] ?? null,
-                            $pendingPlan
+                            $pendingPlan,
+                            true // forceReFulfill
                         );
 
                         if ($result['success']) {
