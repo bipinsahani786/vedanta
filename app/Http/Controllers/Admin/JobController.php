@@ -102,7 +102,7 @@ class JobController extends Controller
         $employerEmail = $job->email ?? ($job->user ? $job->user->email : null);
         if ($employerEmail) {
             try {
-                \Illuminate\Support\Facades\Mail::to($employerEmail)->queue(new \App\Mail\JobApprovedMail($job));
+                // \Illuminate\Support\Facades\Mail::to($employerEmail)->queue(new \App\Mail\JobApprovedMail($job));
             } catch (\Exception $e) {
                 \Log::error('Failed to send Job Approved email to: ' . $employerEmail . '. Error: ' . $e->getMessage());
             }
@@ -211,7 +211,7 @@ class JobController extends Controller
         $job = JobPost::create($validated);
 
         if (!empty($job->email)) {
-            \Illuminate\Support\Facades\Mail::to($job->email)->send(new \App\Mail\JobApprovedMail($job));
+            // \Illuminate\Support\Facades\Mail::to($job->email)->send(new \App\Mail\JobApprovedMail($job));
         }
 
         return redirect()->route('admin.jobs.index')->with('success', 'Job posted successfully.');
