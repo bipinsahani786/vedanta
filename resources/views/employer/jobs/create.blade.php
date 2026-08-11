@@ -85,7 +85,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Job Category <span class="text-red-500">*</span></label>
-                                    <select :name="`jobs[${index}][category_id]`" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                                    <select :name="`jobs[${index}][category_id]`" x-model="job.category_id" @change="fetchSubjects(job)" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
                                         <option value="">Select Category</option>
                                         @foreach($categories as $category)
                                             <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -94,11 +94,11 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Subject <span class="text-red-500">*</span></label>
-                                    <select :name="`jobs[${index}][subject_id]`" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                                    <select :name="`jobs[${index}][subject_id]`" x-model="job.subject_id" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
                                         <option value="">Select Subject</option>
-                                        @foreach($subjects as $subject)
-                                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                                        @endforeach
+                                        <template x-for="subject in job.subjects" :key="subject.id">
+                                            <option :value="subject.id" x-text="subject.name"></option>
+                                        </template>
                                     </select>
                                 </div>
                                 <div>
@@ -160,10 +160,25 @@
 <script>
     function jobRepeater() {
         return {
-            jobs: [ { id: Date.now(), state_id: '', cities: [] } ],
+            jobs: [ { id: Date.now(), state_id: '', cities: [], category_id: '', subject_id: '', subjects: [] } ],
             
             addJob() {
-                this.jobs.push({ id: Date.now(), state_id: '', cities: [] });
+                this.jobs.push({ id: Date.now(), state_id: '', cities: [], category_id: '', subject_id: '', subjects: [] });
+            },
+            
+            fetchSubjects(job) {
+                if(job.category_id) {
+                    fetch(`/api/categories/${job.category_id}/subjects`)
+                        .then(response => response.json())
+                        .then(data => {
+                            job.subjects = data;
+                            job.subject_id = '';
+                        })
+                        .catch(error => console.error('Error fetching subjects:', error));
+                } else {
+                    job.subjects = [];
+                    job.subject_id = '';
+                }
             },
             
             fetchCities(job) {

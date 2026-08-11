@@ -43,6 +43,11 @@ class EmployerAuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $user->employerProfile()->create([
+            'school_name' => $request->school_name,
+            'contact_person' => $request->contact_person,
+        ]);
+
         event(new Registered($user));
         // \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\EmployerWelcomeMail($user));
         Auth::login($user);
