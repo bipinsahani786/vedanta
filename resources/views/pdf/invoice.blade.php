@@ -32,6 +32,7 @@
             <tr>
                 <td style="width: 50%;">
                     <strong style="color: #031b4e; font-size: 16px;">Billed To:</strong><br>
+                    <strong>VPA ID:</strong> {{ $user->profile->vpa_id ?? 'N/A' }}<br>
                     {{ $user->name }}<br>
                     {{ $user->email }}<br>
                     Phone: {{ $user->phone ?? 'N/A' }}

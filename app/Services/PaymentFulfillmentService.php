@@ -218,7 +218,6 @@ class PaymentFulfillmentService
                     'paid_amount' => $profile->paid_amount + $amountPaid,
                     'pending_amount' => 0,
                     'payment_id' => $txnId,
-                    'is_verified' => true,
                     'registration_completed_at' => $profile->registration_completed_at ?? now(),
                     'plan_started_at' => $profile->plan_started_at ?? now(),
                 ]);
@@ -230,7 +229,6 @@ class PaymentFulfillmentService
                     'paid_amount' => $profile->paid_amount + $amountPaid,
                     'pending_amount' => 500,
                     'payment_id' => $txnId,
-                    'is_verified' => true,
                     'registration_completed_at' => $profile->registration_completed_at ?? now(),
                     'plan_started_at' => $profile->plan_started_at ?? now(),
                 ]);

@@ -930,6 +930,10 @@ class CrmController extends Controller
             'match_score' => 0 // Manually assigned by admin
         ]);
 
+        if ($candidate->profile) {
+            $candidate->profile->increment('used_applications');
+        }
+
         return back()->with('success', 'Job application assigned successfully.');
     }
 

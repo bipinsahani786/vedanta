@@ -20,7 +20,7 @@ class ApplicantController extends Controller
         ->whereHas('jobPost', function ($q) {
             $q->where('user_id', auth()->id());
         })
-        ->whereIn('status', ['shortlisted', 'hired']);
+        ->whereIn('status', ['shortlisted', 'hired', 'rejected']);
 
         if ($jobId = $request->input('job_post_id')) {
             $query->where('job_post_id', $jobId);
