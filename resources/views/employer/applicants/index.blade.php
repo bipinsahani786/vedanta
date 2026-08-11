@@ -72,6 +72,10 @@
                             <span class="bg-green-500/10 text-green-400 px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1 w-max">
                                 <i class="fas fa-check-circle"></i> Selected
                             </span>
+                        @elseif($app->status === 'rejected')
+                            <span class="bg-red-500/10 text-red-500 px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1 w-max">
+                                <i class="fas fa-times-circle"></i> Rejected
+                            </span>
                         @endif
                     </td>
                     <td class="py-4 px-6 text-right">

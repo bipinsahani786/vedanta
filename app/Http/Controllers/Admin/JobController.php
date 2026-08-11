@@ -112,6 +112,11 @@ class JobController extends Controller
         $suggestedCandidates = $job->getSuggestedCandidates(50); // Get top 50 matching candidates
 
         foreach ($suggestedCandidates as $candidateProfile) {
+            // Check if match percentage is 80 or above AND both subject & category match exactly
+            if ($candidateProfile->match_percentage < 80 || !in_array('subject', $candidateProfile->matched_criteria) || !in_array('category', $candidateProfile->matched_criteria)) {
+                continue;
+            }
+
             $candidate = $candidateProfile->user;
             
             if ($candidate) {
@@ -131,7 +136,11 @@ class JobController extends Controller
                 ]);
 
                 // Send Email Notification
-                \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\CandidateJobMatchNotification($job, $candidateProfile->match_percentage));
+                try {
+                    \Illuminate\Support\Facades\Mail::to($candidate->email)->queue(new \App\Mail\CandidateJobMatchNotification($job, $candidateProfile->match_percentage));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send Job Match email to: ' . $candidate->email . '. Error: ' . $e->getMessage());
+                }
             }
         }
 
@@ -156,7 +165,11 @@ class JobController extends Controller
 
                 // Fire registered event to send verification email and send password email
                 event(new \Illuminate\Auth\Events\Registered($user));
-                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\SchoolAccountCreatedMail($user, $password));
+                try {
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\SchoolAccountCreatedMail($user, $password));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send School Account Created email to: ' . $user->email . '. Error: ' . $e->getMessage());
+                }
                 
                 return redirect()->route('admin.jobs.index')->with('success', "Job approved and employer account created. Temporary password is: $password");
             } else {
@@ -258,7 +271,55 @@ class JobController extends Controller
 
     public function searchCandidates(Request $request, JobPost $job)
     {
+        if ($request->input('audience') === 'matched') {
+            $suggested = $job->getSuggestedCandidates(50);
+            $suggested = $suggested->filter(function ($profile) {
+                return $profile->match_percentage >= 80 && in_array('subject', $profile->matched_criteria) && in_array('category', $profile->matched_criteria);
+            });
+            
+            $page = $request->input('page', 1);
+            $perPage = 20;
+            $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+                $suggested->forPage($page, $perPage)->values(),
+                $suggested->count(),
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+
+            $formatted = collect($paginator->items())->map(function($profile) {
+                $user = $profile->user;
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'gender' => $user->profile?->gender ?? 'N/A',
+                    'category' => $user->profile?->category?->name ?? 'N/A',
+                    'subject' => $user->profile?->subject?->name ?? 'N/A',
+                    'city' => $user->profile?->preferredCity?->name ?? 'N/A',
+                ];
+            });
+
+            return response()->json([
+                'data' => $formatted,
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'total' => $paginator->total(),
+                'from' => $paginator->firstItem(),
+                'to' => $paginator->lastItem()
+            ]);
+        }
+
         $query = User::where('role', 'candidate')->with(['profile.category', 'profile.subject', 'profile.preferredCity']);
+
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
 
         if ($categoryId = $request->input('category_id')) {
             $query->whereHas('profile', function($q) use ($categoryId) {
@@ -325,10 +386,17 @@ class JobController extends Controller
         if ($audience === 'all') {
             $candidates = User::where('role', 'candidate')->get();
         } elseif ($audience === 'matched') {
-            $suggested = $job->getSuggestedCandidates(50);
-            $candidates = $suggested->map(function ($profile) {
-                return $profile->user;
-            })->filter();
+            if ($request->has('candidate_ids')) {
+                $candidates = User::whereIn('id', $request->input('candidate_ids'))->get();
+            } else {
+                $suggested = $job->getSuggestedCandidates(50);
+                $suggested = $suggested->filter(function ($profile) {
+                    return $profile->match_percentage >= 80 && in_array('subject', $profile->matched_criteria) && in_array('category', $profile->matched_criteria);
+                });
+                $candidates = $suggested->map(function ($profile) {
+                    return $profile->user;
+                })->filter();
+            }
         } elseif ($audience === 'manual') {
             $candidates = User::whereIn('id', $request->input('candidate_ids'))->get();
         }

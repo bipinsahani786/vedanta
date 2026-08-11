@@ -367,10 +367,13 @@
                     </div>
 
                     <!-- Manual Selection Section -->
-                    <div id="manualSelectSection" class="hidden space-y-4">
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div id="manualSelectSection" class="hidden pt-6 border-t border-gray-200 space-y-4 mt-6">
+                        <div id="filterControls" class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                             <h4 class="text-sm font-bold text-gray-700 mb-3">Filters</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                                <div class="sm:col-span-2 md:col-span-2">
+                                    <input type="text" id="filterSearchText" onkeypress="if(event.keyCode===13) searchCandidates()" placeholder="Search by name, email, phone..." class="block w-full rounded-md border border-gray-300 py-2 px-3 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-700">
+                                </div>
                                 <div>
                                     <select id="filterCategory" class="block w-full rounded-md border border-gray-300 py-2 px-3 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-700">
                                         <option value="">Category</option>
@@ -412,14 +415,14 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <button type="button" onclick="searchCandidates()" class="w-full inline-flex justify-center rounded-md border border-transparent bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                    <button type="button" onclick="searchCandidates()" id="btnSearchCandidates" class="w-full inline-flex justify-center rounded-md border border-transparent bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                         Search
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden max-h-64 overflow-y-auto">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden max-h-96 overflow-y-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50 sticky top-0">
                                     <tr>
@@ -469,13 +472,19 @@
     }
 
     function toggleManualSelect() {
-        const manualSelectChecked = document.querySelector('input[name="audience"][value="manual"]').checked;
+        const audienceValue = document.querySelector('input[name="audience"]:checked').value;
         const manualSelectSection = document.getElementById('manualSelectSection');
+        const filterControls = document.getElementById('filterControls');
         
         updateRadioStyles();
         
-        if (manualSelectChecked) {
+        if (audienceValue === 'manual' || audienceValue === 'matched') {
             manualSelectSection.classList.remove('hidden');
+            if (audienceValue === 'matched') {
+                filterControls.classList.add('hidden');
+            } else {
+                filterControls.classList.remove('hidden');
+            }
             searchCandidates(1);
         } else {
             manualSelectSection.classList.add('hidden');
@@ -504,10 +513,12 @@
 
     function searchCandidates(page = 1) {
         currentPage = page;
-        const btn = document.querySelector('button[onclick="searchCandidates()"]');
+        const btn = document.getElementById('btnSearchCandidates');
         if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         
         const params = new URLSearchParams({
+            audience: document.querySelector('input[name="audience"]:checked').value,
+            search: document.getElementById('filterSearchText').value,
             category_id: document.getElementById('filterCategory').value,
             subject_id: document.getElementById('filterSubject').value,
             qualification_id: document.getElementById('filterQualification').value,
@@ -617,9 +628,9 @@
         const form = document.getElementById('sendMessageForm');
         const audience = document.querySelector('input[name="audience"]:checked').value;
         
-        if (audience === 'manual') {
+        if (audience === 'manual' || audience === 'matched') {
             if (selectedCandidates.size === 0) {
-                alert('Please select at least one candidate to send notifications.');
+                alert('Please select at least one candidate. Use the checkbox at the top to select all.');
                 return;
             }
             

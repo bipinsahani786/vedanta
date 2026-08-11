@@ -638,7 +638,7 @@
                 experience_years: '{{ $profile->experience_years }}',
                 current_salary: '{{ $profile->current_salary }}',
                 expected_salary: '{{ $profile->expected_salary }}',
-                address: '{{ addslashes($profile->address) }}',
+                address: {!! json_encode($profile->address ?? '') !!},
                 marital_status: '{{ $profile->marital_status }}',
                 religion: '{{ $profile->religion }}',
                 english_fluency: '{{ $profile->english_fluency }}',
@@ -652,7 +652,7 @@
                     $customQualString = implode(', ', $customQuals);
                 @endphp
                 other_qualifications: {!! json_encode($checkedQuals) !!},
-                custom_qualification: '{{ addslashes($customQualString) }}'
+                custom_qualification: {!! json_encode($customQualString) !!}
             },
 
             availableSubjects: {!! json_encode($subjects) !!},

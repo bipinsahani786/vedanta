@@ -75,7 +75,7 @@
         <!-- Section 3: Professional Details & Preferences -->
         <div>
             <h3 class="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2 mb-4">3. Professional Details & Preferences</h3>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Teaching Category <span class="text-red-500">*</span></label>
                     <select name="category_id" required class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
@@ -103,8 +103,9 @@
                         @endforeach
                     </select>
                 </div>
+            </div>
 
-                <!-- Additional Qualifications -->
+            <!-- Additional Qualifications -->
                 @php
                     $dbQualNames = $qualifications->pluck('name')->toArray();
                     $allUserQuals = array_filter(array_map('trim', explode(',', $profile->other_qualifications ?? '')));
@@ -112,15 +113,15 @@
                     $customQuals = array_diff($allUserQuals, $dbQualNames);
                     $customQualString = implode(', ', $customQuals);
                 @endphp
-                <div class="md:col-span-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Other / Additional Qualifications & Certifications</label>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-h-40 overflow-y-auto mb-3">
+            <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 mb-6">
+                <label class="block text-sm font-bold text-gray-700 mb-3">Other / Additional Qualifications & Certifications</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-60 overflow-y-auto mb-4 p-3 bg-white rounded-lg border border-gray-100">
                         @foreach($qualifications as $qual)
-                            <label class="flex items-center space-x-2 text-xs text-gray-700 cursor-pointer">
+                            <label class="flex items-start space-x-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 p-1.5 rounded transition-colors">
                                 <input type="checkbox" name="other_qualifications[]" value="{{ $qual->name }}"
                                     {{ in_array($qual->name, $allUserQuals) ? 'checked' : '' }}
-                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span>{{ $qual->name }}</span>
+                                    class="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="leading-snug">{{ $qual->name }}</span>
                             </label>
                         @endforeach
                     </div>
@@ -129,6 +130,8 @@
                         <input type="text" name="custom_qualification" value="{{ old('custom_qualification', $customQualString) }}" placeholder="E.g. CTET Paper 2, P.G. Diploma" class="w-full rounded-lg border-gray-300 shadow-sm text-xs py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Years of Experience <span class="text-red-500">*</span></label>
                     <input type="number" name="experience_years" value="{{ old('experience_years', $profile->experience_years) }}" required min="0" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">

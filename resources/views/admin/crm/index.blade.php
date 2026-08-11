@@ -162,7 +162,9 @@
             @forelse($candidates as $candidate)
             <tr class="group">
                 <td class="text-center">
-                    <input type="checkbox" name="candidate_ids[]" value="{{ $candidate->id }}" class="candidate-checkbox rounded border-card-border text-accent-blue focus:ring-accent-blue cursor-pointer" onchange="updateBulkActionState()">
+                    @if(!$candidate->profile || $candidate->profile->pending_reason !== 'Completed')
+                        <input type="checkbox" name="candidate_ids[]" value="{{ $candidate->id }}" class="candidate-checkbox rounded border-card-border text-accent-blue focus:ring-accent-blue cursor-pointer" onchange="updateBulkActionState()">
+                    @endif
                 </td>
                 <td>
                     <div class="font-semibold text-text-main group-hover:text-accent-blue transition-colors">{{ $candidate->name }}</div>
