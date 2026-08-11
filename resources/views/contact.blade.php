@@ -52,38 +52,56 @@
             <div
                 class="max-w-3xl mx-auto bg-white border border-blue-100 p-8 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] reveal reveal-delay-1">
                 <h3 class="text-2xl font-extrabold text-[#040e2d] mb-6 text-center">Send us a message</h3>
-                <form class="space-y-5">
+                
+                @if(session('success'))
+                    <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                        <span class="block sm:inline">{{ session('success') }}</span>
+                    </div>
+                @endif
+                
+                @if ($errors->any())
+                    <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <ul class="list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form action="{{ route('contact.store') }}" method="POST" class="space-y-5">
+                    @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Full
                                 Name</label>
-                            <input type="text"
+                            <input type="text" name="name" required value="{{ old('name') }}"
                                 class="w-full bg-[#f0f8ff] border border-blue-100 rounded-lg px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-[#129aef] focus:ring-1 focus:ring-[#129aef] transition-all"
                                 placeholder="John Doe">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Email
                                 Address</label>
-                            <input type="email"
+                            <input type="email" name="email" value="{{ old('email') }}"
                                 class="w-full bg-[#f0f8ff] border border-blue-100 rounded-lg px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-[#129aef] focus:ring-1 focus:ring-[#129aef] transition-all"
                                 placeholder="john@example.com">
                         </div>
                     </div>
                     <div>
                         <label
-                            class="block text-[11px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Subject</label>
-                        <input type="text"
+                            class="block text-[11px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Phone Number</label>
+                        <input type="tel" name="phone" required value="{{ old('phone') }}"
                             class="w-full bg-[#f0f8ff] border border-blue-100 rounded-lg px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-[#129aef] focus:ring-1 focus:ring-[#129aef] transition-all"
-                            placeholder="How can we help?">
+                            placeholder="+91-XXXXXXXXXX">
                     </div>
                     <div>
                         <label
                             class="block text-[11px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Message</label>
-                        <textarea rows="5"
+                        <textarea rows="5" name="message" required
                             class="w-full bg-[#f0f8ff] border border-blue-100 rounded-lg px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-[#129aef] focus:ring-1 focus:ring-[#129aef] transition-all resize-none"
-                            placeholder="Type your message here..."></textarea>
+                            placeholder="Type your message here...">{{ old('message') }}</textarea>
                     </div>
-                    <button type="button"
+                    <button type="submit"
                         class="w-full bg-[#129aef] text-white font-bold py-3.5 rounded-lg hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(18,154,239,0.3)] transition-all duration-300">
                         Send Message <i class="fas fa-paper-plane ml-2"></i>
                     </button>
