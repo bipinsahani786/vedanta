@@ -131,7 +131,7 @@
 </div>
 
 <!-- Candidate Details Modal for Employer -->
-<div id="employerCandidateModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+<div id="employerCandidateModal" class="fixed inset-0 z-[9999] hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-card-bg border border-card-border rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         <button type="button" onclick="closeEmployerCandidateModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-secondary-bg text-text-dark/60 hover:text-text-main flex items-center justify-center transition-colors">
             <i class="fas fa-times"></i>
