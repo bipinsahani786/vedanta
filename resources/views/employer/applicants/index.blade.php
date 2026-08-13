@@ -47,7 +47,14 @@
                                 </div>
                             @endif
                             <div>
-                                <div class="font-bold text-text-main">{{ $app->candidate->name }}</div>
+                                <div class="font-bold text-text-main flex items-center gap-1.5 flex-wrap">
+                                    <span>{{ $app->candidate->name }}</span>
+                                    @if($app->candidate->profile && $app->candidate->profile->is_verified)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/10 text-green-400 border border-green-500/20 text-[10px] font-bold rounded-full" title="Verified Candidate">
+                                            <i class="fas fa-check-circle text-green-400"></i> Verified
+                                        </span>
+                                    @endif
+                                </div>
                                 <div class="text-xs text-text-dark/60 mt-0.5 flex flex-col gap-0.5">
                                     <span><i class="fas fa-envelope text-[10px] w-3"></i> {{ $app->candidate->email }}</span>
                                     <span><i class="fas fa-phone-alt text-[10px] w-3"></i> {{ $app->candidate->phone }}</span>
@@ -82,6 +89,7 @@
                         @php
                             $candidateData = [
                                 'name' => $app->candidate->name,
+                                'is_verified' => (bool)($app->candidate->profile?->is_verified ?? false),
                                 'email' => $app->candidate->email,
                                 'phone' => $app->candidate->phone,
                                 'photo' => $app->candidate->profile?->profile_photo_path ? asset('storage/' . $app->candidate->profile->profile_photo_path) : null,
@@ -144,7 +152,12 @@
                 <img id="candModalPhoto" class="w-full h-full object-cover hidden" src="" alt="Candidate Photo">
             </div>
             <div>
-                <h3 class="text-xl font-bold text-text-main" id="candModalName">Candidate Name</h3>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="text-xl font-bold text-text-main" id="candModalName">Candidate Name</h3>
+                    <span id="candModalVerifiedBadge" class="hidden inline-flex items-center gap-1 px-2.5 py-0.5 bg-green-500/10 text-green-400 border border-green-500/20 text-xs font-bold rounded-full" title="Verified Candidate">
+                        <i class="fas fa-check-circle text-green-400"></i> Verified
+                    </span>
+                </div>
                 <p class="text-xs text-accent-yellow font-semibold mt-0.5">Applied For: <span id="candModalJobTitle" class="text-text-main"></span></p>
                 <div class="flex items-center gap-4 text-xs text-text-dark/60 mt-1">
                     <span><i class="fas fa-envelope text-accent-yellow/80"></i> <span id="candModalEmail"></span></span>
@@ -221,6 +234,12 @@
 <script>
     function openEmployerCandidateModal(data) {
         document.getElementById('candModalName').textContent = data.name || 'N/A';
+        const verifiedBadge = document.getElementById('candModalVerifiedBadge');
+        if (data.is_verified) {
+            verifiedBadge.classList.remove('hidden');
+        } else {
+            verifiedBadge.classList.add('hidden');
+        }
         document.getElementById('candModalJobTitle').textContent = data.job_title || 'N/A';
         document.getElementById('candModalEmail').textContent = data.email || 'N/A';
         document.getElementById('candModalPhone').textContent = data.phone || 'N/A';

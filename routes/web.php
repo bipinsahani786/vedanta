@@ -192,6 +192,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/candidate/{id}/assign-job', [\App\Http\Controllers\Admin\CrmController::class, 'assignJob'])->name('crm.application.assign');
     Route::put('/crm/invoice/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'updateInvoiceStatus'])->name('crm.invoice.update');
     Route::put('/crm/invoice/{id}/edit-details', [\App\Http\Controllers\Admin\CrmController::class, 'updateInvoiceDetails'])->name('crm.invoice.update-details');
+    Route::delete('/crm/invoice/{id}', [\App\Http\Controllers\Admin\CrmController::class, 'destroyInvoice'])->name('crm.invoice.destroy');
     Route::post('/crm/invoice/{id}/remind', [\App\Http\Controllers\Admin\CrmController::class, 'sendInvoiceReminder'])->name('crm.invoice.remind');
     Route::post('/crm/invoice/{id}/adjust', [\App\Http\Controllers\Admin\CrmController::class, 'adjustInvoice'])->name('crm.invoice.adjust');
     Route::post('/crm/candidate/{id}/toggle-verification', [\App\Http\Controllers\Admin\CrmController::class, 'toggleVerification'])->name('crm.candidate.verify');

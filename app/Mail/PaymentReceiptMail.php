@@ -12,7 +12,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-class PaymentReceiptMail extends Mailable implements ShouldQueue
+class PaymentReceiptMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -66,7 +66,26 @@ class PaymentReceiptMail extends Mailable implements ShouldQueue
     public function attachments(): array
     {
         try {
-            // Generate PDF on the fly
+            // Check if this is a Service Charge transaction
+            if (str_starts_with($this->transactionId, 'SC_')) {
+                $parts = explode('_', $this->transactionId);
+                $invoiceId = count($parts) >= 2 ? $parts[1] : null;
+                $invoice = $invoiceId ? \App\Models\ServiceChargeInvoice::find($invoiceId) : null;
+
+                if ($invoice) {
+                    $pdf = Pdf::loadView('candidate.serviceCharge.invoice_pdf', [
+                        'invoice' => $invoice,
+                        'user' => $this->user
+                    ]);
+
+                    return [
+                        Attachment::fromData(fn () => $pdf->output(), "Service_Charge_Invoice_{$invoice->id}.pdf")
+                            ->withMime('application/pdf'),
+                    ];
+                }
+            }
+
+            // Fallback for general registration/renewal payments
             $pdf = Pdf::loadView('pdf.invoice', [
                 'user' => $this->user,
                 'transactionId' => $this->transactionId,

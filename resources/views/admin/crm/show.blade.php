@@ -27,6 +27,18 @@
         <a href="{{ route('admin.crm.edit', $candidate->id) }}" class="px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded-xl hover:bg-blue-200 transition-colors flex items-center shadow-sm">
             <i class="fas fa-edit mr-2"></i> Edit Profile
         </a>
+
+        @if($candidate->phone)
+            @php
+                $waPhone = preg_replace('/[^0-9]/', '', $candidate->phone);
+                if (strlen($waPhone) === 10) {
+                    $waPhone = '91' . $waPhone;
+                }
+            @endphp
+            <a href="https://wa.me/{{ $waPhone }}" target="_blank" class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors flex items-center shadow-sm">
+                <i class="fab fa-whatsapp text-lg mr-2"></i> WhatsApp
+            </a>
+        @endif
         
         <a href="{{ route('admin.crm.candidate.magic-login', $candidate->id) }}" target="_blank" class="px-4 py-2 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-xl hover:bg-indigo-200 transition-colors flex items-center shadow-sm">
             <i class="fas fa-sign-in-alt mr-2"></i> Login as Candidate
@@ -64,7 +76,20 @@
                         </div>
                         <div class="text-xs text-gray-500 mt-1.5 flex flex-wrap items-center gap-1.5 sm:gap-4">
                             <span class="flex items-center gap-1.5"><i class="fas fa-envelope text-gray-400"></i> {{ $candidate->email }}</span>
-                            <span class="flex items-center gap-1.5"><i class="fas fa-phone-alt text-gray-400"></i> {{ $candidate->phone }}</span>
+                            <span class="flex items-center gap-1.5">
+                                <i class="fas fa-phone-alt text-gray-400"></i> {{ $candidate->phone }}
+                                @if($candidate->phone)
+                                    @php
+                                        $waCard = preg_replace('/[^0-9]/', '', $candidate->phone);
+                                        if (strlen($waCard) === 10) {
+                                            $waCard = '91' . $waCard;
+                                        }
+                                    @endphp
+                                    <a href="https://wa.me/{{ $waCard }}" target="_blank" class="ml-1 inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-full hover:bg-emerald-200 transition-colors">
+                                        <i class="fab fa-whatsapp"></i> WhatsApp
+                                    </a>
+                                @endif
+                            </span>
                             @if($candidate->profile && $candidate->profile->latitude && $candidate->profile->longitude)
                                 <a href="https://www.google.com/maps/search/?api=1&query={{ $candidate->profile->latitude }},{{ $candidate->profile->longitude }}" target="_blank" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-map-marker-alt text-gray-400"></i> {{ $candidate->profile->latitude }}, {{ $candidate->profile->longitude }}
@@ -538,6 +563,14 @@
                                         @else
                                             <span class="text-xs text-gray-400 font-medium">Settled</span>
                                         @endif
+
+                                        <form action="{{ route('admin.crm.invoice.destroy', $invoice->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-xs text-red-600 hover:text-red-900 font-bold bg-red-50 px-2 py-1 rounded transition-colors" onclick="return confirm('Are you sure you want to delete this invoice?')">
+                                                <i class="fas fa-trash-alt mr-0.5"></i> Delete
+                                            </button>
+                                        </form>
                                     </div>
 
                                     @if($invoice->status !== 'paid' && $invoice->late_fee > 0)

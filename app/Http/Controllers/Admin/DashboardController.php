@@ -57,7 +57,7 @@ class DashboardController extends Controller
         $transferredApplications = (clone $appQuery)->where('is_forwarded', true)->count();
 
         // Revenue Chart Data Generation (Combines Registration Payments & Service Charge Invoices cleanly)
-        $registrationTxns = PaymentTransaction::where('status', 'success')->get(['amount', 'created_at']);
+        $registrationTxns = PaymentTransaction::where('status', 'success')->where('type', 'registration_fee')->get(['amount', 'created_at']);
         $paidInvoices = ServiceChargeInvoice::where('status', 'paid')->get(['amount', 'updated_at', 'payment_date']);
         
         $chartData = ['days' => ['labels' => [], 'data' => []], 'months' => ['labels' => [], 'data' => []], 'years' => ['labels' => [], 'data' => []]];
