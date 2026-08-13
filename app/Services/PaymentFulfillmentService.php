@@ -135,10 +135,22 @@ class PaymentFulfillmentService
                     'payment_date' => now()
                 ]);
 
-                $profile->pending_amount = max(0, $profile->pending_amount - $invoice->amount);
-                if ($profile->pending_amount <= 0) {
+                $otherPendingCount = ServiceChargeInvoice::where('candidate_id', $user->id)
+                    ->where('id', '!=', $invoice->id)
+                    ->whereIn('status', ['pending', 'overdue'])
+                    ->count();
+
+                if ($otherPendingCount === 0) {
+                    $profile->pending_amount = 0;
                     $profile->is_fee_paid = true;
+                } else {
+                    $profile->pending_amount = max(0, $profile->pending_amount - $invoice->amount);
+                    if ($profile->pending_amount <= 0) {
+                        $profile->is_fee_paid = true;
+                        $profile->pending_amount = 0;
+                    }
                 }
+
                 if ($profile->placed_status !== 'placed') {
                     $profile->placed_status = 'placed';
                 }

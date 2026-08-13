@@ -98,14 +98,38 @@ class JobController extends Controller
             'status' => 'approved'
         ]);
 
-        // Send Job Approved Email to Employer
+        // Send Job Approved Email & DB Notification to Employer
         $employerEmail = $job->email ?? ($job->user ? $job->user->email : null);
         if ($employerEmail) {
             try {
-                // \Illuminate\Support\Facades\Mail::to($employerEmail)->queue(new \App\Mail\JobApprovedMail($job));
+                \Illuminate\Support\Facades\Mail::to($employerEmail)->send(new \App\Mail\JobApprovedMail($job));
             } catch (\Exception $e) {
                 \Log::error('Failed to send Job Approved email to: ' . $employerEmail . '. Error: ' . $e->getMessage());
             }
+        }
+
+        $employerUserId = $job->user_id ?? ($job->user ? $job->user->id : null);
+        if (!$employerUserId && $employerEmail) {
+            $empUser = User::where('email', $employerEmail)->first();
+            if ($empUser) {
+                $employerUserId = $empUser->id;
+            }
+        }
+
+        if ($employerUserId) {
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => Str::uuid(),
+                'type' => 'App\Notifications\JobApproved',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $employerUserId,
+                'data' => json_encode([
+                    'title' => 'Job Query Approved',
+                    'message' => 'Your job query for ' . $job->title . ' at ' . ($job->school_name ?? 'your institution') . ' has been approved and is now live.',
+                    'job_id' => $job->id
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
 
         // Smart Job Matching: Notify Candidates with similar subject/location/category

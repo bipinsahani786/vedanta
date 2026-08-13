@@ -16,13 +16,11 @@ class ServiceChargeController extends Controller
         $user = auth()->user();
         $profile = $user->profile;
 
-        // Auto-create pending service charge invoice for standard plan remaining balance
-        if ($profile && $profile->pending_amount > 0) {
-            $hasPending = ServiceChargeInvoice::where('candidate_id', $candidateId)
-                ->whereIn('status', ['pending', 'overdue'])
-                ->exists();
+        // Auto-create pending service charge invoice for standard plan remaining balance ONLY if no invoice exists yet for candidate
+        if ($profile && $profile->pending_amount > 0 && !$profile->is_fee_paid) {
+            $hasInvoice = ServiceChargeInvoice::where('candidate_id', $candidateId)->exists();
 
-            if (!$hasPending) {
+            if (!$hasInvoice) {
                 $latestApp = \App\Models\JobApplication::where('candidate_id', $candidateId)->latest()->first();
 
                 ServiceChargeInvoice::create([
@@ -109,7 +107,8 @@ class ServiceChargeController extends Controller
             if ($invoice) {
                 $invoice->update(['status' => 'paid', 'payment_date' => now()]);
                 if ($user->profile) {
-                    $user->profile->pending_amount = max(0, $user->profile->pending_amount - $invoice->amount);
+                    $user->profile->pending_amount = 0;
+                    $user->profile->is_fee_paid = true;
                     $user->profile->save();
                 }
                 PaymentTransaction::create([
@@ -120,6 +119,15 @@ class ServiceChargeController extends Controller
                     'status' => 'success',
                     'gateway_response' => ['bypassed' => true]
                 ]);
+
+                // Send email receipt
+                try {
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(
+                        new \App\Mail\PaymentReceiptMail($user, $request->transactionId, $request->amount, 'Service Charge Invoice Payment')
+                    );
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('Bypass email dispatch failed: ' . $e->getMessage());
+                }
 
                 // Notify Admin
                 $adminUser = \App\Models\User::where('role', 'admin')->first();

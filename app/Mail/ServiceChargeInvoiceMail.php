@@ -11,7 +11,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ServiceChargeInvoiceMail extends Mailable implements ShouldQueue
+class ServiceChargeInvoiceMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -31,7 +31,7 @@ class ServiceChargeInvoiceMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Service Charge Invoice Generated',
+            subject: 'Service Charge Invoice - Vedanta Placement Agency',
         );
     }
 
@@ -52,6 +52,22 @@ class ServiceChargeInvoiceMail extends Mailable implements ShouldQueue
      */
     public function attachments(): array
     {
+        try {
+            if ($this->invoice && $this->invoice->candidate) {
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('candidate.serviceCharge.invoice_pdf', [
+                    'invoice' => $this->invoice,
+                    'user' => $this->invoice->candidate
+                ]);
+
+                return [
+                    Attachment::fromData(fn () => $pdf->output(), "Service_Charge_Invoice_{$this->invoice->id}.pdf")
+                        ->withMime('application/pdf'),
+                ];
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to generate PDF attachment for ServiceChargeInvoiceMail #{$this->invoice->id}: " . $e->getMessage());
+        }
+
         return [];
     }
 }

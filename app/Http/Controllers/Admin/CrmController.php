@@ -1059,4 +1059,22 @@ class CrmController extends Controller
 
         return back()->with('error', 'Failed to process payment fulfillment.');
     }
+
+    public function destroyInvoice($invoiceId)
+    {
+        $invoice = ServiceChargeInvoice::findOrFail($invoiceId);
+        $candidate = User::find($invoice->candidate_id);
+
+        if ($invoice->status !== 'paid' && $candidate && $candidate->profile) {
+            $candidate->profile->pending_amount = max(0, $candidate->profile->pending_amount - $invoice->amount);
+            $candidate->profile->save();
+        }
+
+        // Delete associated MANUAL_SC_ payment transaction if exists
+        \App\Models\PaymentTransaction::where('transaction_id', 'MANUAL_SC_' . $invoice->id)->delete();
+
+        $invoice->delete();
+
+        return back()->with('success', 'Service charge invoice deleted successfully.');
+    }
 }
