@@ -191,7 +191,7 @@ class PhonePeService
      * Check payment status using V2 Order Status API
      *
      * @param string $orderId  The merchantOrderId used during payment
-     * @return array ['success' => bool, 'state' => string|null, 'amount' => int, 'transactionId' => string|null, 'raw' => array]
+     * @return array ['success' => bool, 'is_pending' => bool, 'is_failed' => bool, 'state' => string|null, 'amount' => int, 'transactionId' => string|null, 'raw' => array]
      */
     public function checkStatus(string $orderId): array
     {
@@ -199,7 +199,9 @@ class PhonePeService
         if (!$token) {
             return [
                 'success' => false,
-                'state' => null,
+                'is_pending' => true,
+                'is_failed' => false,
+                'state' => 'TOKEN_ERROR',
                 'amount' => 0,
                 'transactionId' => null,
                 'raw' => [],
@@ -220,6 +222,23 @@ class PhonePeService
         }
 
         $response = $http->get($statusUrl);
+
+        // If token expired, clear cache and retry once
+        if ($response->status() === 401) {
+            Cache::forget('phonepe_access_token_' . $this->env);
+            $token = $this->getAccessToken();
+            if ($token) {
+                $http2 = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'O-Bearer ' . $token,
+                ]);
+                if (!$this->isProd) {
+                    $http2 = $http2->withoutVerifying();
+                }
+                $response = $http2->get($statusUrl);
+            }
+        }
+
         $rData = $response->json();
 
         Log::info('PhonePe V2 Status Response', [
@@ -230,15 +249,19 @@ class PhonePeService
 
         $state = strtoupper($rData['state'] ?? ($rData['data']['state'] ?? ($rData['code'] ?? '')));
         $isCompleted = in_array($state, ['COMPLETED', 'SUCCESS', 'PAYMENT_SUCCESS']);
+        $isPending = in_array($state, ['PENDING', 'PAYMENT_PENDING', 'IN_PROCESS', 'INTERNAL_SERVER_ERROR', 'AUTHORIZATION_PENDING']) || ($response->status() >= 500);
+        $isFailed = in_array($state, ['FAILED', 'PAYMENT_ERROR', 'PAYMENT_DECLINED', 'TIMED_OUT', 'CANCELLED', 'DECLINED']);
         $amountPaise = $rData['amount'] ?? ($rData['data']['amount'] ?? 0);
         $txnId = $rData['orderId'] ?? ($rData['data']['transactionId'] ?? $orderId);
 
         return [
             'success' => $isCompleted,
+            'is_pending' => $isPending,
+            'is_failed' => $isFailed,
             'state' => $state,
             'amount' => $amountPaise, // in paise
             'transactionId' => $txnId,
-            'raw' => $rData,
+            'raw' => $rData ?? [],
         ];
     }
 

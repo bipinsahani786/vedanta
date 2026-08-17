@@ -11,17 +11,31 @@ class PhonePeWebhookController extends Controller
 {
     public function handle(Request $request)
     {
-        Log::info('PhonePe S2S Webhook Received', ['payload' => $request->all()]);
+        Log::info('PhonePe S2S Webhook Received', [
+            'payload' => $request->all(),
+            'raw_content' => $request->getContent()
+        ]);
 
         $transactionId = null;
 
         if ($request->has('response')) {
             $decoded = json_decode(base64_decode($request->response), true);
-            $transactionId = $decoded['data']['merchantTransactionId'] ?? $decoded['data']['merchantOrderId'] ?? null;
+            $transactionId = $decoded['data']['merchantOrderId'] 
+                ?? $decoded['data']['merchantTransactionId'] 
+                ?? $decoded['data']['orderId'] 
+                ?? null;
         } elseif ($request->has('merchantOrderId')) {
             $transactionId = $request->merchantOrderId;
         } elseif ($request->has('merchantTransactionId')) {
             $transactionId = $request->merchantTransactionId;
+        } elseif ($request->has('orderId')) {
+            $transactionId = $request->orderId;
+        } else {
+            $jsonData = $request->json()->all();
+            $transactionId = $jsonData['data']['merchantOrderId'] 
+                ?? $jsonData['data']['merchantTransactionId'] 
+                ?? $jsonData['merchantOrderId'] 
+                ?? null;
         }
 
         if (!$transactionId) {

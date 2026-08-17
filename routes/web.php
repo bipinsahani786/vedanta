@@ -112,7 +112,39 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
     Route::post('/wizard/payment', [\App\Http\Controllers\Candidate\RegistrationWizardController::class, 'initiatePayment'])->name('wizard.payment');
 
     Route::get('/dashboard', function () {
-        $profile = auth()->user()->profile;
+        $user = auth()->user();
+        $profile = $user ? ($user->profile ?: $user->profile()->firstOrCreate([])) : null;
+
+        // Auto-heal pending payment transaction if any exists in last 2 hours
+        if ($user) {
+            $pendingTxn = \App\Models\PaymentTransaction::where('candidate_id', $user->id)
+                ->where('status', 'pending')
+                ->where('created_at', '>=', now()->subHours(2))
+                ->latest()
+                ->first();
+
+            if ($pendingTxn) {
+                try {
+                    $phonePe = new \App\Services\PhonePeService();
+                    $statusResult = $phonePe->checkStatus($pendingTxn->transaction_id);
+                    if ($statusResult['success']) {
+                        \App\Services\PaymentFulfillmentService::fulfill(
+                            $pendingTxn->transaction_id,
+                            true,
+                            ($statusResult['amount'] ?? 0) / 100,
+                            $statusResult['raw'] ?? [],
+                            $statusResult['transactionId'] ?? null
+                        );
+                        $profile = $user->fresh()->profile;
+                    } elseif ($statusResult['is_failed'] ?? false) {
+                        $pendingTxn->update(['status' => 'failed']);
+                    }
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Dashboard auto-heal check error: ' . $e->getMessage());
+                }
+            }
+        }
+
         return view('candidate.dashboard', compact('profile'));
     })->name('dashboard');
 });

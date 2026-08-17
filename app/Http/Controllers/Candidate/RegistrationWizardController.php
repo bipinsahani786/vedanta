@@ -41,7 +41,8 @@ class RegistrationWizardController extends Controller
     public function saveStep1(Request $request)
     {
         try {
-            $profile = auth()->user()->profile;
+            $user = auth()->user();
+            $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
                 'date_of_birth' => 'required|date',
@@ -175,7 +176,8 @@ class RegistrationWizardController extends Controller
             'agreed' => 'required|boolean|accepted',
         ]);
 
-        $profile = auth()->user()->profile;
+        $user = auth()->user();
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
         $profile->update([
             'is_terms_agreed' => true,
@@ -195,7 +197,7 @@ class RegistrationWizardController extends Controller
         ]);
 
         $user = auth()->user();
-        $profile = $user->profile;
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
         $signatureData = $request->signature_data;
 
@@ -238,16 +240,29 @@ class RegistrationWizardController extends Controller
         ]);
 
         $user = auth()->user();
-        $profile = $user->profile;
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
         if ($profile->initial_fee_paid || $profile->is_fee_paid) {
             return response()->json(['success' => false, 'message' => 'You have already paid the registration fee.']);
         }
 
-        // Don't save plan_type yet — only save after payment confirmation
         $planType = $request->plan_type;
         $amount = $planType === 'standard' ? 500 : 1000;
         $transactionId = 'TXN_' . $user->id . '_' . time();
+
+        // Pre-create transaction record in database so intent and plan choice are never lost
+        \App\Models\PaymentTransaction::create([
+            'candidate_id' => $user->id,
+            'amount' => $amount,
+            'transaction_id' => $transactionId,
+            'type' => 'registration_fee',
+            'status' => 'pending',
+            'gateway_response' => [
+                'plan_type' => $planType,
+                'initiated_at' => now()->toIso8601String(),
+                'ip' => $request->ip()
+            ]
+        ]);
 
         // Store plan choice in session for callback
         session([
@@ -267,6 +282,12 @@ class RegistrationWizardController extends Controller
             ]);
         }
 
+        // Mark as failed if PhonePe initiation failed
+        \App\Models\PaymentTransaction::where('transaction_id', $transactionId)->update([
+            'status' => 'failed',
+            'gateway_response' => ['init_error' => $result['error']]
+        ]);
+
         \Illuminate\Support\Facades\Log::error('PhonePe Wizard Pay Initiation Failed', [
             'error' => $result['error'],
             'raw' => $result['raw'],
@@ -280,11 +301,26 @@ class RegistrationWizardController extends Controller
 
     public function callback(Request $request)
     {
-        $transactionId = $request->merchantOrderId ?? $request->transactionId ?? $request->orderId ?? session('last_txn_id');
-        $pendingPlanType = session('pending_plan_type', 'standard');
+        $transactionId = $request->merchantOrderId 
+            ?? $request->merchantTransactionId 
+            ?? $request->orderId 
+            ?? (str_starts_with($request->transactionId ?? '', 'TXN_') ? $request->transactionId : null)
+            ?? session('last_txn_id');
+
+        // Fallback: If session was lost on mobile and no ID in request, recover active user's pending transaction
+        if (!$transactionId && auth()->check()) {
+            $latestPending = \App\Models\PaymentTransaction::where('candidate_id', auth()->id())
+                ->where('status', 'pending')
+                ->where('created_at', '>=', now()->subHours(2))
+                ->latest()
+                ->first();
+            $transactionId = $latestPending?->transaction_id;
+        }
+
+        $pendingPlanType = session('pending_plan_type');
 
         if (!$transactionId) {
-            return redirect()->route('candidate.dashboard')->with('error', 'Payment session expired. Please try again.');
+            return redirect()->route('candidate.dashboard')->with('error', 'Payment session expired. Please check your dashboard or try again.');
         }
 
         // Auto-login user if session was lost on cross-site redirect
@@ -305,20 +341,25 @@ class RegistrationWizardController extends Controller
             'plan' => $pendingPlanType
         ]);
 
-        $isSuccess = $statusResult['success'];
+        $isSuccess = $statusResult['success'] ?? false;
+        $isPending = $statusResult['is_pending'] ?? false;
         $amountPaid = ($statusResult['amount'] ?? 0) / 100; // Convert paise to rupees
 
         $fulfillment = \App\Services\PaymentFulfillmentService::fulfill(
             $transactionId,
             $isSuccess,
             $amountPaid,
-            $statusResult['raw'] ?? [],
+            $statusResult['raw'] ?? ['is_pending' => $isPending],
             $statusResult['transactionId'] ?? null,
             $pendingPlanType
         );
 
         // Clear session
         $request->session()->forget(['registration_plan', 'payment_txn_id', 'pending_plan_type', 'last_txn_id']);
+
+        if ($isPending) {
+            return redirect()->route('candidate.dashboard')->with('warning', 'Payment is being processed by your bank. Your registration plan will be active shortly.');
+        }
 
         if (!$isSuccess) {
             return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or was cancelled. Please try again.');

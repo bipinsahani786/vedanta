@@ -869,7 +869,7 @@
                         fd.append('offer_letter', this.offerLetterFile);
                     }
 
-                    const response = await fetch('{{ route("candidate.wizard.step1") }}', {
+                    const response = await fetch('{{ route("candidate.wizard.step1", [], false) }}', {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
@@ -1021,7 +1021,7 @@
                     formData.append('_token', '{{ csrf_token() }}');
                     formData.append('agreed', 1);
 
-                    const response = await fetch('{{ route("candidate.wizard.step2") }}', {
+                    const response = await fetch('{{ route("candidate.wizard.step2", [], false) }}', {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
@@ -1098,7 +1098,7 @@
                     formData.append('latitude', this.latitude);
                     formData.append('longitude', this.longitude);
 
-                    const response = await fetch('{{ route("candidate.wizard.step3") }}', {
+                    const response = await fetch('{{ route("candidate.wizard.step3", [], false) }}', {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
@@ -1204,7 +1204,7 @@
                 this.loading = true;
 
                 try {
-                    const response = await fetch('{{ route("candidate.wizard.payment") }}', {
+                    const response = await fetch('{{ route("candidate.wizard.payment", [], false) }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

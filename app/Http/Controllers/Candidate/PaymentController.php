@@ -20,8 +20,35 @@ class PaymentController extends Controller
     public function show(Request $request)
     {
         $user = auth()->user();
-        $profile = $user->profile;
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
         $isRenewal = $request->query('type') === 'renewal';
+
+        // Auto-heal any pending payment in the last 2 hours
+        $pendingTxn = \App\Models\PaymentTransaction::where('candidate_id', $user->id)
+            ->where('status', 'pending')
+            ->where('created_at', '>=', now()->subHours(2))
+            ->latest()
+            ->first();
+
+        if ($pendingTxn) {
+            try {
+                $statusResult = $this->phonePe->checkStatus($pendingTxn->transaction_id);
+                if ($statusResult['success']) {
+                    \App\Services\PaymentFulfillmentService::fulfill(
+                        $pendingTxn->transaction_id,
+                        true,
+                        ($statusResult['amount'] ?? 0) / 100,
+                        $statusResult['raw'] ?? [],
+                        $statusResult['transactionId'] ?? null
+                    );
+                    $profile = $user->fresh()->profile ?: $user->profile()->firstOrCreate([]);
+                } elseif ($statusResult['is_failed'] ?? false) {
+                    $pendingTxn->update(['status' => 'failed']);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Payment show auto-heal error: ' . $e->getMessage());
+            }
+        }
 
         if (!$profile->is_profile_complete || !$profile->is_agreement_signed) {
             return redirect()->route('candidate.dashboard')->with('error', 'Please complete previous steps first.');
@@ -50,7 +77,7 @@ class PaymentController extends Controller
         if ($request->plan === 'premium' || $request->plan === 'renewal_premium') $amount = 1000;
         if ($isUpgrade) $amount = 500;
         
-        $profile = $user->profile;
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
         // Prevent duplicate payments
         if ($request->plan === 'basic' && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid)) {
@@ -66,25 +93,62 @@ class PaymentController extends Controller
         if ($isUpgrade) $prefix = 'UPGRADE_';
         $transactionId = $prefix . $user->id . '_' . time();
 
+        $planTypeChoice = ($isUpgrade || $request->plan === 'premium' || $request->plan === 'renewal_premium') ? 'premium' : 'standard';
+
+        // Pre-create transaction record in database so intent is never lost even if session drops
+        \App\Models\PaymentTransaction::create([
+            'candidate_id' => $user->id,
+            'amount' => $amount,
+            'transaction_id' => $transactionId,
+            'type' => 'registration_fee',
+            'status' => 'pending',
+            'gateway_response' => [
+                'plan' => $request->plan,
+                'plan_type' => $planTypeChoice,
+                'initiated_at' => now()->toIso8601String(),
+                'ip' => $request->ip()
+            ]
+        ]);
+
         $redirectUrl = route('candidate.payment.callback');
 
         // Initiate payment via PhonePe V2
         $result = $this->phonePe->initiatePay($transactionId, $amount, $redirectUrl);
 
         if ($result['success']) {
-            session(['last_txn_id' => $transactionId]);
+            session(['last_txn_id' => $transactionId, 'pending_plan_type' => $planTypeChoice]);
             return redirect()->away($result['redirect_url']);
         }
+
+        // Mark as failed if initiation could not connect to PhonePe
+        \App\Models\PaymentTransaction::where('transaction_id', $transactionId)->update([
+            'status' => 'failed',
+            'gateway_response' => ['init_error' => $result['error']]
+        ]);
 
         return back()->with('error', 'Failed to initiate payment: ' . $result['error']);
     }
 
     public function callback(Request $request)
     {
-        $transactionId = $request->merchantOrderId ?? $request->transactionId ?? $request->orderId ?? session('last_txn_id');
+        $transactionId = $request->merchantOrderId 
+            ?? $request->merchantTransactionId 
+            ?? $request->orderId 
+            ?? (str_starts_with($request->transactionId ?? '', 'TXN_') || str_starts_with($request->transactionId ?? '', 'UPGRADE_') || str_starts_with($request->transactionId ?? '', 'RENEW_') ? $request->transactionId : null)
+            ?? session('last_txn_id');
+
+        // Fallback: If session was lost on mobile and no ID in request, recover active user's pending transaction
+        if (!$transactionId && auth()->check()) {
+            $latestPending = \App\Models\PaymentTransaction::where('candidate_id', auth()->id())
+                ->where('status', 'pending')
+                ->where('created_at', '>=', now()->subHours(2))
+                ->latest()
+                ->first();
+            $transactionId = $latestPending?->transaction_id;
+        }
 
         if (!$transactionId) {
-            return redirect()->route('candidate.dashboard')->with('error', 'Payment session expired. Please try again.');
+            return redirect()->route('candidate.dashboard')->with('error', 'Payment session expired. Please check your dashboard or try again.');
         }
 
         // Auto-login user if session was lost on cross-site redirect
@@ -104,22 +168,27 @@ class PaymentController extends Controller
             'txn' => $transactionId
         ]);
 
-        $isSuccess = $statusResult['success'];
+        $isSuccess = $statusResult['success'] ?? false;
+        $isPending = $statusResult['is_pending'] ?? false;
         $amountPaid = ($statusResult['amount'] ?? 0) / 100; // Convert paise to rupees
 
         $fulfillment = \App\Services\PaymentFulfillmentService::fulfill(
             $transactionId,
             $isSuccess,
             $amountPaid,
-            $statusResult['raw'] ?? [],
+            $statusResult['raw'] ?? ['is_pending' => $isPending],
             $statusResult['transactionId'] ?? null
         );
+
+        if ($isPending) {
+            return redirect()->route('candidate.dashboard')->with('warning', 'Payment is being processed by your bank. Your plan will be updated automatically shortly.');
+        }
 
         if (!$isSuccess) {
             return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or was cancelled. Please try again.');
         }
 
-        return redirect()->route('candidate.dashboard')->with('success', 'Payment processed successfully.');
+        return redirect()->route('candidate.dashboard')->with('success', 'Payment processed successfully. Your plan is now active!');
     }
 
     public function invoice($id)
