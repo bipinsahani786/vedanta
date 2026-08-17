@@ -14,7 +14,7 @@ class ServiceChargeController extends Controller
     {
         $candidateId = auth()->id();
         $user = auth()->user();
-        $profile = $user->profile;
+        $profile = $user ? ($user->profile ?: $user->profile()->firstOrCreate([])) : null;
 
         // Auto-create pending service charge invoice for standard plan remaining balance ONLY if no invoice exists yet for candidate
         if ($profile && $profile->pending_amount > 0 && !$profile->is_fee_paid) {
@@ -77,6 +77,21 @@ class ServiceChargeController extends Controller
         // --------------------
 
         $transactionId = 'SC_' . $invoice->id . '_' . time();
+
+        // Pre-create pending transaction record in database
+        \App\Models\PaymentTransaction::create([
+            'candidate_id' => $user->id,
+            'amount' => $amount,
+            'transaction_id' => $transactionId,
+            'type' => 'service_charge',
+            'status' => 'pending',
+            'gateway_response' => [
+                'invoice_id' => $invoice->id,
+                'initiated_at' => now()->toIso8601String(),
+                'ip' => $request->ip()
+            ]
+        ]);
+
         session(['sc_invoice_id' => $invoice->id, 'last_txn_id' => $transactionId]);
 
         $redirectUrl = route('candidate.serviceCharge.callback');
@@ -88,6 +103,12 @@ class ServiceChargeController extends Controller
         if ($result['success']) {
             return redirect()->away($result['redirect_url']);
         }
+
+        // Mark as failed if initiation failed
+        \App\Models\PaymentTransaction::where('transaction_id', $transactionId)->update([
+            'status' => 'failed',
+            'gateway_response' => ['init_error' => $result['error']]
+        ]);
 
         \Illuminate\Support\Facades\Log::error('PhonePe ServiceCharge Pay Initiation Failed', [
             'error' => $result['error'],
@@ -152,10 +173,25 @@ class ServiceChargeController extends Controller
         }
         // --------------------
 
-        $transactionId = $request->merchantOrderId ?? $request->transactionId ?? $request->orderId ?? session('last_txn_id');
+        $transactionId = $request->merchantOrderId 
+            ?? $request->merchantTransactionId 
+            ?? $request->orderId 
+            ?? (str_starts_with($request->transactionId ?? '', 'SC_') ? $request->transactionId : null)
+            ?? session('last_txn_id');
+
+        // Fallback: If session was lost on mobile and no ID in request, recover active user's pending transaction
+        if (!$transactionId && auth()->check()) {
+            $latestPending = \App\Models\PaymentTransaction::where('candidate_id', auth()->id())
+                ->where('type', 'service_charge')
+                ->where('status', 'pending')
+                ->where('created_at', '>=', now()->subHours(2))
+                ->latest()
+                ->first();
+            $transactionId = $latestPending?->transaction_id;
+        }
 
         if (!$transactionId) {
-            return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment session expired. Please try again.');
+            return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment session expired. Please check your invoice or try again.');
         }
 
         // Auto-login user if session was lost on cross-site redirect
@@ -176,16 +212,21 @@ class ServiceChargeController extends Controller
             'result' => $statusResult,
         ]);
 
-        $isSuccess = $statusResult['success'];
+        $isSuccess = $statusResult['success'] ?? false;
+        $isPending = $statusResult['is_pending'] ?? false;
         $amountPaid = ($statusResult['amount'] ?? 0) / 100;
 
         $fulfillment = \App\Services\PaymentFulfillmentService::fulfill(
             $transactionId,
             $isSuccess,
             $amountPaid,
-            $statusResult['raw'] ?? [],
+            $statusResult['raw'] ?? ['is_pending' => $isPending],
             $statusResult['transactionId'] ?? null
         );
+
+        if ($isPending) {
+            return redirect()->route('candidate.serviceCharge.show')->with('warning', 'Payment is being processed by your bank. Invoice will be updated shortly.');
+        }
 
         if (!$isSuccess) {
             return redirect()->route('candidate.serviceCharge.show')->with('error', 'Payment failed or was cancelled. Please try again.');

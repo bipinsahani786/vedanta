@@ -17,41 +17,68 @@ class EmployerAuthController extends Controller
 
     public function register(Request $request)
     {
-        // Remove unverified user with same email or phone so they can register again
-        $unverifiedUser = User::where(function($query) use ($request) {
-            if ($request->email) $query->orWhere('email', $request->email);
-            if ($request->phone) $query->orWhere('phone', $request->phone);
-        })->whereNull('email_verified_at')->first();
-
-        if ($unverifiedUser) {
-            $unverifiedUser->delete();
-        }
-
         $request->validate([
             'school_name' => 'required|string|max:255',
             'contact_person' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'required|string|max:15|unique:users',
+            'email' => 'required|string|email|max:255',
+            'phone' => 'required|string|max:15',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $user = User::create([
-            'name' => $request->contact_person,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'role' => 'employer',
-            'password' => Hash::make($request->password),
-        ]);
+        // Clean up unverified accounts with same email or phone so employer can retry registration
+        $unverifiedUsers = User::where(function($query) use ($request) {
+            $query->where('email', $request->email)
+                  ->orWhere('phone', $request->phone);
+        })->whereNull('email_verified_at')->get();
 
-        $user->employerProfile()->create([
-            'school_name' => $request->school_name,
-            'contact_person' => $request->contact_person,
-        ]);
+        foreach ($unverifiedUsers as $unverified) {
+            $unverified->employerProfile()?->delete();
+            $unverified->delete();
+        }
 
-        event(new Registered($user));
-        // \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\EmployerWelcomeMail($user));
-        Auth::login($user);
+        // Check if an existing verified user already exists with this email or phone
+        $existingEmailUser = User::where('email', $request->email)->first();
+        if ($existingEmailUser) {
+            return back()->withInput()->withErrors([
+                'email' => 'This email is already registered. Please login instead.'
+            ]);
+        }
 
-        return redirect()->route('verification.notice');
+        $existingPhoneUser = User::where('phone', $request->phone)->first();
+        if ($existingPhoneUser) {
+            return back()->withInput()->withErrors([
+                'phone' => 'This mobile number is already registered. Please login instead.'
+            ]);
+        }
+
+        try {
+            $user = User::create([
+                'name' => $request->contact_person,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'role' => 'employer',
+                'password' => Hash::make($request->password),
+            ]);
+
+            $user->employerProfile()->firstOrCreate([
+                'school_name' => $request->school_name,
+                'contact_person' => $request->contact_person,
+            ]);
+
+            event(new Registered($user));
+            Auth::login($user);
+
+            return redirect()->route('verification.notice');
+        } catch (\Illuminate\Database\UniqueConstraintViolationException | \Illuminate\Database\QueryException $e) {
+            $existingUser = User::where('email', $request->email)->first();
+            if ($existingUser && Hash::check($request->password, $existingUser->password)) {
+                Auth::login($existingUser);
+                return redirect()->route('verification.notice');
+            }
+
+            return back()->withInput()->withErrors([
+                'email' => 'This email or phone is already registered. Please login to continue.'
+            ]);
+        }
     }
 }

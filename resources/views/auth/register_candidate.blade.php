@@ -80,7 +80,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('candidate.register.post') }}" method="POST" class="space-y-4">
+            <form action="{{ route('candidate.register.post') }}" method="POST" class="space-y-4" onsubmit="let btn = document.getElementById('registerSubmitBtn'); if(btn.disabled) return false; btn.disabled = true; btn.innerHTML = '<i class=\'fas fa-spinner fa-spin\'></i> Creating Account...'; return true;">
                 @csrf
                 <div>
                     <label for="name" class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Full Name</label>
@@ -134,8 +134,8 @@
                     </div>
                 </div>
 
-                <button type="submit"
-                    class="w-full bg-accent-blue text-white font-semibold py-3.5 rounded-xl hover:bg-accent-blue-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-blue transition-all shadow-lg hover:shadow-[0_4px_20px_rgba(var(--theme-accent-blue-rgb,18,154,239),0.35)] hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-2">
+                <button type="submit" id="registerSubmitBtn"
+                    class="w-full bg-accent-blue text-white font-semibold py-3.5 rounded-xl hover:bg-accent-blue-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-blue transition-all shadow-lg hover:shadow-[0_4px_20px_rgba(var(--theme-accent-blue-rgb,18,154,239),0.35)] hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-2 disabled:opacity-60 disabled:cursor-not-allowed">
                     <i class="fas fa-user-plus"></i>
                     Create Candidate Account
                 </button>
