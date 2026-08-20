@@ -16,30 +16,50 @@ class PhonePeWebhookController extends Controller
             'raw_content' => $request->getContent()
         ]);
 
+        $rawContent = $request->getContent();
+        $jsonData = json_decode($rawContent, true) ?: $request->all();
+
         $transactionId = null;
 
+        // 1. Check if base64 encoded 'response' is present (Standard PhonePe V1 / V2)
         if ($request->has('response')) {
             $decoded = json_decode(base64_decode($request->response), true);
-            $transactionId = $decoded['data']['merchantOrderId'] 
-                ?? $decoded['data']['merchantTransactionId'] 
-                ?? $decoded['data']['orderId'] 
-                ?? null;
-        } elseif ($request->has('merchantOrderId')) {
-            $transactionId = $request->merchantOrderId;
-        } elseif ($request->has('merchantTransactionId')) {
-            $transactionId = $request->merchantTransactionId;
-        } elseif ($request->has('orderId')) {
-            $transactionId = $request->orderId;
-        } else {
-            $jsonData = $request->json()->all();
-            $transactionId = $jsonData['data']['merchantOrderId'] 
+            if (is_array($decoded)) {
+                $transactionId = $decoded['data']['merchantOrderId'] 
+                    ?? $decoded['data']['merchantTransactionId'] 
+                    ?? $decoded['payload']['merchantOrderId']
+                    ?? $decoded['payload']['orderId']
+                    ?? $decoded['data']['orderId']
+                    ?? $decoded['merchantOrderId']
+                    ?? null;
+            }
+        }
+
+        // 2. Check direct and nested JSON payload fields (PhonePe V2 PG_CHECKOUT)
+        if (!$transactionId && is_array($jsonData)) {
+            $transactionId = $jsonData['payload']['merchantOrderId']
+                ?? $jsonData['payload']['orderId']
+                ?? $jsonData['data']['merchantOrderId'] 
                 ?? $jsonData['data']['merchantTransactionId'] 
+                ?? $jsonData['data']['orderId']
                 ?? $jsonData['merchantOrderId'] 
+                ?? $jsonData['merchantTransactionId'] 
+                ?? $jsonData['orderId'] 
                 ?? null;
         }
 
+        // 3. Check query/input fallback
         if (!$transactionId) {
-            Log::error('PhonePe Webhook: Could not extract transaction ID', ['payload' => $request->all()]);
+            $transactionId = $request->input('merchantOrderId')
+                ?? $request->input('merchantTransactionId')
+                ?? $request->input('orderId');
+        }
+
+        if (!$transactionId) {
+            Log::error('PhonePe Webhook: Could not extract transaction ID', [
+                'payload' => $request->all(),
+                'raw_content' => $rawContent
+            ]);
             return response()->json(['success' => false, 'message' => 'Invalid Payload'], 400);
         }
 
