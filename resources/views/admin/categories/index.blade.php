@@ -97,6 +97,7 @@
                         @endif
                     </a>
                 </th>
+                <th class="text-text-dark/60">Linked Subjects</th>
                 <th>
                     <a href="{{ route($route, array_merge(request()->query(), ['sort_by' => 'is_active', 'order' => $order])) }}" class="flex items-center gap-2 hover:text-accent-blue transition-colors">
                         Status
@@ -125,6 +126,12 @@
             <tr>
                 <td class="font-medium text-text-dark/50">#{{ $category->id }}</td>
                 <td class="font-semibold text-text-main">{{ $category->name }}</td>
+                <td>
+                    <a href="{{ route('admin.subjects.index', ['category_id' => $category->id]) }}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-accent-blue/10 text-accent-blue hover:bg-accent-blue hover:text-white transition-colors border border-accent-blue/20" title="View subjects under {{ $category->name }}">
+                        <i class="fas fa-book text-[10px]"></i>
+                        {{ $category->subjects_count }} Subjects
+                    </a>
+                </td>
                 <td>
                     @if($category->is_active)
                         <span class="bg-green-500/10 text-green-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-green-500/20 uppercase tracking-wider">Active</span>

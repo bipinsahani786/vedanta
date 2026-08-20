@@ -44,13 +44,34 @@ class SubjectController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:subjects,name',
-            'categories' => 'nullable|array',
+            'name' => 'required|string|max:255',
+            'categories' => 'required|array|min:1',
             'categories.*' => 'exists:categories,id'
+        ], [
+            'name.required' => 'Subject name is required.',
+            'categories.required' => 'Please select at least one category for this subject.',
+            'categories.min' => 'Please select at least one category for this subject.'
         ]);
 
+        $trimmedName = trim($request->name);
+
+        // Check if subject with this name already exists (case-insensitive)
+        $existingSubject = Subject::whereRaw('LOWER(TRIM(name)) = ?', [strtolower($trimmedName)])->first();
+
+        if ($existingSubject) {
+            // Attach any newly selected categories without detaching existing ones
+            $existingSubject->categories()->syncWithoutDetaching($request->categories);
+            
+            if ($request->has('is_active')) {
+                $existingSubject->update(['is_active' => true]);
+            }
+
+            return redirect()->route('admin.subjects.index')
+                ->with('success', "Subject '{$existingSubject->name}' already exists. Assigned categories have been updated successfully.");
+        }
+
         $subject = Subject::create([
-            'name' => $request->name,
+            'name' => $trimmedName,
             'is_active' => $request->has('is_active'),
         ]);
 
@@ -58,19 +79,23 @@ class SubjectController extends Controller
             $subject->categories()->sync($request->categories);
         }
 
-        return redirect()->route('admin.subjects.index')->with('success', 'Subject created successfully.');
+        return redirect()->route('admin.subjects.index')->with('success', "Subject '{$subject->name}' created successfully with assigned categories.");
     }
 
     public function update(Request $request, Subject $subject)
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:subjects,name,' . $subject->id,
-            'categories' => 'nullable|array',
+            'categories' => 'required|array|min:1',
             'categories.*' => 'exists:categories,id'
+        ], [
+            'name.required' => 'Subject name is required.',
+            'categories.required' => 'Please select at least one category for this subject.',
+            'categories.min' => 'Please select at least one category for this subject.'
         ]);
 
         $subject->update([
-            'name' => $request->name,
+            'name' => trim($request->name),
             'is_active' => $request->has('is_active'),
         ]);
 
@@ -85,6 +110,7 @@ class SubjectController extends Controller
 
     public function destroy(Subject $subject)
     {
+        $subject->categories()->detach();
         $subject->delete();
         return redirect()->route('admin.subjects.index')->with('success', 'Subject deleted successfully.');
     }
