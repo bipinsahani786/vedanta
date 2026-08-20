@@ -422,18 +422,54 @@
 
                 {{-- Alerts --}}
                 @if(session('success'))
-                    <div
-                        class="bg-green-500/10 border border-green-500/20 text-green-500 p-4 mb-8 rounded-xl shadow-sm flex items-start gap-3 animate-[fadeIn_0.3s_ease-out]">
-                        <i class="fas fa-check-circle mt-0.5 text-lg"></i>
-                        <p class="font-medium text-sm">{{ session('success') }}</p>
+                    <div x-data="{ show: true }" x-show="show" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                        class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 p-4 mb-6 rounded-2xl shadow-sm flex items-start justify-between gap-3 animate-[fadeIn_0.3s_ease-out]">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-check-circle mt-0.5 text-lg text-emerald-500"></i>
+                            <div>
+                                <p class="font-bold text-sm text-emerald-700 dark:text-emerald-300">Success</p>
+                                <p class="font-medium text-sm text-emerald-600 dark:text-emerald-400">{{ session('success') }}</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="show = false" class="text-emerald-500 hover:text-emerald-700 text-sm p-1">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 @endif
 
                 @if(session('error'))
-                    <div
-                        class="bg-red-500/10 border border-red-500/20 text-red-500 p-4 mb-8 rounded-xl shadow-sm flex items-start gap-3 animate-[fadeIn_0.3s_ease-out]">
-                        <i class="fas fa-exclamation-triangle mt-0.5 text-lg"></i>
-                        <p class="font-medium text-sm">{{ session('error') }}</p>
+                    <div x-data="{ show: true }" x-show="show" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                        class="bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 p-4 mb-6 rounded-2xl shadow-sm flex items-start justify-between gap-3 animate-[fadeIn_0.3s_ease-out]">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-exclamation-circle mt-0.5 text-lg text-red-500"></i>
+                            <div>
+                                <p class="font-bold text-sm text-red-700 dark:text-red-300">Error</p>
+                                <p class="font-medium text-sm text-red-600 dark:text-red-400">{{ session('error') }}</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="show = false" class="text-red-500 hover:text-red-700 text-sm p-1">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div x-data="{ show: true }" x-show="show" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                        class="bg-red-500/10 border border-red-500/30 p-4 mb-6 rounded-2xl shadow-sm flex items-start justify-between gap-3 animate-[fadeIn_0.3s_ease-out]">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-exclamation-triangle mt-0.5 text-lg text-red-500"></i>
+                            <div>
+                                <p class="font-bold text-sm text-red-700 dark:text-red-300 mb-1">Please fix the following issues:</p>
+                                <ul class="list-disc list-inside text-xs space-y-1 text-red-600 dark:text-red-400 font-medium">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                        <button type="button" @click="show = false" class="text-red-500 hover:text-red-700 text-sm p-1">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 @endif
 
