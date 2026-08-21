@@ -197,7 +197,7 @@
                                 </h3>
                                 <p class="text-xs text-gray-500 mb-4">Mark candidate payment as completed and upgrade their plan directly from admin panel.</p>
 
-                                <form action="{{ route('admin.crm.candidate.fulfill-payment', $candidate->id) }}" method="POST" class="space-y-4">
+                                <form action="{{ route('admin.crm.candidate.fulfill-payment', $candidate->id) }}" method="POST" class="space-y-4" onsubmit="return handleManualPaymentSubmit(this);">
                                     @csrf
                                     <div>
                                         <label class="block text-xs font-bold text-gray-700 mb-1">Select Plan Type</label>
@@ -232,8 +232,8 @@
                                         <button type="button" onclick="document.getElementById('manualPaymentModal').style.display='none'" class="px-4 py-2.5 bg-gray-100 text-gray-700 text-xs font-bold rounded-xl hover:bg-gray-200">
                                             Cancel
                                         </button>
-                                        <button type="submit" class="px-5 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 shadow-sm transition-all">
-                                            Confirm & Upgrade Plan
+                                        <button type="submit" id="manualPaymentSubmitBtn" class="px-5 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 shadow-sm transition-all flex items-center gap-2">
+                                            <span>Confirm & Upgrade Plan</span>
                                         </button>
                                     </div>
                                 </form>
@@ -814,6 +814,20 @@
 
     function closeEditInvoiceModal() {
         document.getElementById('editInvoiceModal').classList.add('hidden');
+    }
+
+    function handleManualPaymentSubmit(form) {
+        if (form.dataset.submitted === 'true') {
+            return false;
+        }
+        form.dataset.submitted = 'true';
+        const btn = document.getElementById('manualPaymentSubmitBtn') || form.querySelector('button[type="submit"]');
+        if (btn) {
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Processing...';
+        }
+        return true;
     }
 </script>
 @endpush

@@ -11,7 +11,7 @@
 
 @section('content')
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
-    <form action="{{ route('admin.crm.store') }}" method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
+    <form action="{{ route('admin.crm.store') }}" method="POST" enctype="multipart/form-data" class="p-8 space-y-8" onsubmit="const btn = this.querySelector('button[type=submit]'); if(this.dataset.submitted){return false;} this.dataset.submitted='true'; if(btn){btn.disabled=true; btn.classList.add('opacity-75', 'cursor-not-allowed'); btn.innerHTML='<i class=\'fas fa-spinner fa-spin mr-2\'></i> Onboarding Candidate...';}">
         @csrf
 
         @if($errors->any())
