@@ -447,7 +447,7 @@
         <div
             class="border-t border-gray-600/30 pt-4 flex flex-col md:flex-row justify-between items-center text-[11px] text-gray-500">
             <p class="mb-1 md:mb-0">Copyright © 2026</p>
-            <p>Designed By: Vedanta Placement Agency</p>
+            <a href="https://startupwebsupport.com" class="text-accent-blue hover:text-accent-blue">Designed By: Startup Web Support</a>
         </div>
     </footer>
 
