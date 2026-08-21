@@ -1038,6 +1038,19 @@ class CrmController extends Controller
         ]);
 
         $user = User::findOrFail($id);
+
+        // Anti-duplicate protection: check if a manual payment was already processed for this user in the last 30 seconds
+        $recentTxn = \App\Models\PaymentTransaction::where('candidate_id', $user->id)
+            ->where('transaction_id', 'LIKE', 'MANUAL_%')
+            ->where('created_at', '>=', now()->subSeconds(30))
+            ->where('status', 'success')
+            ->latest()
+            ->first();
+
+        if ($recentTxn) {
+            return back()->with('warning', 'A manual payment for this candidate was already processed a few seconds ago (' . $recentTxn->transaction_id . '). Duplicate submission prevented.');
+        }
+
         $transactionId = 'MANUAL_' . strtoupper($request->payment_method) . '_' . $user->id . '_' . time();
 
         $result = \App\Services\PaymentFulfillmentService::fulfill(
