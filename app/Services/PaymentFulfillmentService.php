@@ -190,6 +190,9 @@ class PaymentFulfillmentService
                         $profile->placed_status = 'placed';
                     }
                     $profile->save();
+
+                    // Advance referral stage to placed & complete
+                    \App\Services\ReferralService::advanceStage($user, 'placed');
                 }
 
             } elseif (str_starts_with($transactionId, 'UPGRADE_')) {

@@ -61,6 +61,11 @@ class CandidateAuthController extends Controller
 
             $user->profile()->firstOrCreate([]);
 
+            // Process Referral if code was supplied
+            if ($request->filled('referral_code')) {
+                \App\Services\ReferralService::recordReferral($user, $request->referral_code);
+            }
+
             event(new Registered($user));
             Auth::login($user);
 

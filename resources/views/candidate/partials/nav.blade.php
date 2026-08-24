@@ -12,6 +12,7 @@
                     ['route' => 'candidate.agreement.show', 'routeIs' => 'candidate.agreement.*', 'icon' => 'fa-file-contract', 'label' => 'My Agreement'],
                     ['route' => 'candidate.registration.show', 'routeIs' => 'candidate.registration.*', 'icon' => 'fa-clipboard-list', 'label' => 'Registration'],
                     ['route' => 'candidate.serviceCharge.show', 'routeIs' => 'candidate.servicecharge.*', 'icon' => 'fa-file-invoice-dollar', 'label' => 'Service Charge'],
+                    ['route' => 'candidate.referral.index', 'routeIs' => 'candidate.referral.*', 'icon' => 'fa-gift', 'label' => 'Refer & Earn'],
                     ['route' => 'candidate.aditionalFeature.show', 'routeIs' => 'candidate.aditional.*', 'icon' => 'fa-puzzle-piece', 'label' => 'Aditional Feature'],
                 ];
             @endphp

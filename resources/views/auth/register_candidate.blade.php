@@ -134,6 +134,23 @@
                     </div>
                 </div>
 
+                {{-- Referral Code (Optional / Auto-filled) --}}
+                @php $refCode = request('ref', old('referral_code')); @endphp
+                <div>
+                    <label for="referral_code" class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider flex items-center justify-between">
+                        <span>Referral Code <span class="text-text-dark/40 font-normal">(Optional)</span></span>
+                        @if($refCode)
+                            <span class="text-[10px] text-accent-yellow font-bold"><i class="fas fa-gift"></i> Referral Applied</span>
+                        @endif
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-accent-yellow"><i class="fas fa-gift text-sm"></i></span>
+                        <input id="referral_code" name="referral_code" type="text"
+                            class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm font-mono tracking-wider text-text-main placeholder-text-dark/40 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue uppercase transition-all"
+                            placeholder="e.g. VPA-REF-XXXXXX" value="{{ $refCode }}">
+                    </div>
+                </div>
+
                 <button type="submit" id="registerSubmitBtn"
                     class="w-full bg-accent-blue text-white font-semibold py-3.5 rounded-xl hover:bg-accent-blue-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-blue transition-all shadow-lg hover:shadow-[0_4px_20px_rgba(var(--theme-accent-blue-rgb,18,154,239),0.35)] hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-2 disabled:opacity-60 disabled:cursor-not-allowed">
                     <i class="fas fa-user-plus"></i>

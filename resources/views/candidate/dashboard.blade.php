@@ -282,7 +282,32 @@
                                     </span>
                                 </div>
                             @endif
+                    {{-- Refer & Earn Card Widget --}}
+                    @php
+                        $userWallet = \App\Services\ReferralService::getWallet(auth()->user());
+                        $rate = \App\Services\ReferralService::getPointRate();
+                    @endphp
+                    <div class="bg-gradient-to-br from-[#031b4e] to-[#0866c6] rounded-2xl p-6 text-white shadow-lg border border-accent-blue/30 relative overflow-hidden reveal">
+                        <div class="absolute -top-12 -right-12 w-32 h-32 bg-accent-yellow/20 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent-yellow/20 text-accent-yellow rounded-lg text-[10px] font-bold uppercase tracking-wider border border-accent-yellow/30">
+                                <i class="fas fa-gift"></i> Refer & Earn
+                            </span>
+                            <span class="text-xs font-bold text-accent-yellow">₹{{ number_format($userWallet->available_points * $rate, 2) }}</span>
                         </div>
+                        <h4 class="text-base font-bold text-white mb-1">Invite Friends & Earn Cash</h4>
+                        <p class="text-xs text-white/80 leading-relaxed mb-4">
+                            Share your referral code and earn reward points on registration and placement!
+                        </p>
+                        <div class="p-2.5 bg-white/10 border border-white/20 rounded-xl flex items-center justify-between mb-4">
+                            <span class="font-mono font-bold text-sm tracking-widest text-accent-yellow">{{ auth()->user()->referral_code }}</span>
+                            <button type="button" onclick="navigator.clipboard.writeText('{{ auth()->user()->referral_code }}'); alert('Referral code copied!');" class="text-xs font-bold text-white hover:text-accent-yellow flex items-center gap-1">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <a href="{{ route('candidate.referral.index') }}" class="block w-full py-2.5 bg-white text-accent-blue font-bold text-xs text-center rounded-xl hover:bg-gray-50 transition-all shadow-md">
+                            View Referral Hub <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>

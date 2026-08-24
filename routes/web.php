@@ -171,6 +171,12 @@ Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name(
     Route::get('/service-charge', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'show'])->name('serviceCharge.show');
     Route::get('/service-charge/invoice/{id}/pdf', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'downloadInvoicePdf'])->name('serviceCharge.invoicePdf');
     Route::post('/service-charge/pay', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'process'])->name('serviceCharge.pay');
+
+    // Refer & Earn Routes
+    Route::get('/referral', [\App\Http\Controllers\Candidate\ReferralController::class, 'index'])->name('referral.index');
+    Route::post('/referral/invite', [\App\Http\Controllers\Candidate\ReferralController::class, 'sendInvite'])->name('referral.invite');
+    Route::post('/referral/redeem', [\App\Http\Controllers\Candidate\ReferralController::class, 'redeem'])->name('referral.redeem');
+
     // Service Charge callback moved outside auth middleware group (see top of file)
     Route::view('/additional-feature', 'candidate.aditionalFeature.show')->name('aditionalFeature.show');
 });
@@ -279,4 +285,24 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class)->except(['create', 'show', 'edit']);
     Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class)->except(['create', 'show', 'edit']);
     Route::resource('clients', \App\Http\Controllers\Admin\ClientLogoController::class)->except(['create', 'show', 'edit'])->parameters(['clients' => 'clientLogo']);
+
+    // Refer & Earn Admin Management
+    Route::get('/referrals/dashboard', [\App\Http\Controllers\Admin\ReferralController::class, 'dashboard'])->name('referrals.dashboard');
+    Route::get('/referrals', [\App\Http\Controllers\Admin\ReferralController::class, 'index'])->name('referrals.index');
+    Route::get('/referrals/wallets', [\App\Http\Controllers\Admin\ReferralController::class, 'wallets'])->name('referrals.wallets');
+    Route::post('/referrals/wallets/{id}/adjust', [\App\Http\Controllers\Admin\ReferralController::class, 'adjustWallet'])->name('referrals.wallets.adjust');
+    Route::post('/referrals/wallets/{id}/lock', [\App\Http\Controllers\Admin\ReferralController::class, 'toggleLock'])->name('referrals.wallets.lock');
+    Route::get('/referrals/milestones', [\App\Http\Controllers\Admin\ReferralController::class, 'milestones'])->name('referrals.milestones');
+    Route::post('/referrals/milestones', [\App\Http\Controllers\Admin\ReferralController::class, 'updateMilestones'])->name('referrals.milestones.update');
+    Route::get('/referrals/fraud', [\App\Http\Controllers\Admin\ReferralController::class, 'fraud'])->name('referrals.fraud');
+    Route::post('/referrals/{id}/approve', [\App\Http\Controllers\Admin\ReferralController::class, 'approveReferral'])->name('referrals.approve');
+    Route::post('/referrals/{id}/reject', [\App\Http\Controllers\Admin\ReferralController::class, 'rejectReferral'])->name('referrals.reject');
+    Route::get('/referrals/settings', [\App\Http\Controllers\Admin\ReferralController::class, 'settings'])->name('referrals.settings');
+    Route::post('/referrals/settings', [\App\Http\Controllers\Admin\ReferralController::class, 'updateSettings'])->name('referrals.settings.update');
+    Route::get('/referrals/redemptions', [\App\Http\Controllers\Admin\ReferralController::class, 'redemptions'])->name('referrals.redemptions');
 });
+
+// Public Referral Shortlink & Token Routes
+Route::get('/r/{code}', [\App\Http\Controllers\Candidate\ReferralController::class, 'handleShortLink'])->name('referral.shortlink');
+Route::get('/invite/{token}', [\App\Http\Controllers\Candidate\ReferralController::class, 'handleInviteToken'])->name('referral.invite.token');
+

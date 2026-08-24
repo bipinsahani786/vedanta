@@ -62,23 +62,38 @@
                             </div>
                         </div>
 
-                        {{-- Pending Amount --}}
+                        {{-- Pending / Net Payable Amount --}}
                         <div>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Pending Amount</p>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Net Payable Amount</p>
                             <div class="text-2xl font-bold text-accent-blue">
                                 @php
-                                    $pendingAmount = ($invoice->status === 'pending' || $invoice->status === 'overdue') ? ($invoice->amount + $invoice->late_fee) : 0;
+                                    $gross = $invoice->amount + $invoice->late_fee;
+                                    $discount = (float) ($invoice->discount_amount ?? 0);
+                                    $pendingAmount = ($invoice->status === 'pending' || $invoice->status === 'overdue') ? max(0, $gross - $discount) : 0;
                                 @endphp
                                 ₹{{ number_format($pendingAmount, 2) }}
                             </div>
+                            @if($discount > 0)
+                                <div class="text-[10px] text-emerald-400 font-bold mt-1">
+                                    <i class="fas fa-tag"></i> ₹{{ number_format($discount, 2) }} Wallet Discount Applied
+                                </div>
+                            @endif
                         </div>
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-card-border flex flex-wrap gap-4 items-center justify-between">
-                        {{-- Invoice PDF Button --}}
-                        <a href="{{ route('candidate.serviceCharge.invoicePdf', $invoice->id) }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-secondary-bg text-text-main rounded-xl text-sm font-semibold hover:bg-card-border/50 transition-colors border border-card-border">
-                            <i class="fas fa-file-pdf text-red-400"></i> Download Invoice PDF
-                        </a>
+                        <div class="flex items-center gap-3">
+                            {{-- Invoice PDF Button --}}
+                            <a href="{{ route('candidate.serviceCharge.invoicePdf', $invoice->id) }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-secondary-bg text-text-main rounded-xl text-sm font-semibold hover:bg-card-border/50 transition-colors border border-card-border">
+                                <i class="fas fa-file-pdf text-red-400"></i> Download Invoice PDF
+                            </a>
+
+                            @if($invoice->status !== 'paid')
+                                <a href="{{ route('candidate.referral.index') }}#redeem" class="inline-flex items-center gap-2 px-4 py-2.5 bg-accent-yellow/15 text-accent-yellow border border-accent-yellow/30 rounded-xl text-sm font-semibold hover:bg-accent-yellow/25 transition-all">
+                                    <i class="fas fa-coins"></i> Use Wallet Points
+                                </a>
+                            @endif
+                        </div>
                         
                         @if($invoice->status !== 'paid')
                             <form action="{{ route('candidate.serviceCharge.pay') }}" method="POST" class="inline m-0 p-0">
