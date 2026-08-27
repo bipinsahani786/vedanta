@@ -133,11 +133,16 @@ class ReferralService
     }
 
     /**
-     * Advance referral funnel stage (5-Stage progression).
-     * Stages: registered -> profile_completed -> verified -> interview_scheduled -> placed
+     * Advance referral funnel stage (6-Stage progression).
+     * Stages: registered -> profile_completed -> verified -> interview_scheduled -> selected -> joined
      */
     public static function advanceStage(User $referee, string $newStage): ?Referral
     {
+        // Backward compat: map 'placed' to 'joined'
+        if ($newStage === 'placed') {
+            $newStage = 'joined';
+        }
+
         $referral = Referral::where('referee_id', $referee->id)->first();
         if (!$referral || $referral->status !== 'active') {
             return null;
@@ -148,7 +153,8 @@ class ReferralService
             'profile_completed' => 2,
             'verified' => 3,
             'interview_scheduled' => 4,
-            'placed' => 5,
+            'selected' => 5,
+            'joined' => 6,
         ];
 
         $currentOrder = $stageHierarchy[$referral->stage] ?? 1;
@@ -214,8 +220,26 @@ class ReferralService
                 $referral->interview_at = now();
             }
 
-            // Stage 5: Placed & Converted (+500 pts)
+            // Stage 5: Selected (+0 pts by default — configurable)
             if ($newOrder >= 5 && ($stageHierarchy[$referral->stage] ?? 0) < 5) {
+                if (!self::hasRewardBeenIssued($referral->id, 'referral_selection')) {
+                    $points = (float) ReferralSetting::get('points_on_selection', 0);
+                    if ($points > 0 && $referrer) {
+                        self::creditReward(
+                            $referrer,
+                            $points,
+                            'referral_selection',
+                            "Milestone bonus: {$referee->name} was selected for placement",
+                            $referral->id
+                        );
+                        $referral->increment('points_earned', $points);
+                    }
+                }
+                $referral->selected_at = now();
+            }
+
+            // Stage 6: Joined & Confirmed (+500 pts)
+            if ($newOrder >= 6 && ($stageHierarchy[$referral->stage] ?? 0) < 6) {
                 if (!self::hasRewardBeenIssued($referral->id, 'referral_placement')) {
                     $points = (float) ReferralSetting::get('points_on_placement', 500);
                     if ($points > 0 && $referrer) {
@@ -223,7 +247,7 @@ class ReferralService
                             $referrer,
                             $points,
                             'referral_placement',
-                            "🎉 Big Reward: {$referee->name} got successfully placed with Vedanta!",
+                            "🎉 Big Reward: {$referee->name} got successfully joined with Vedanta!",
                             $referral->id
                         );
                         $referral->increment('points_earned', $points);
@@ -242,8 +266,8 @@ class ReferralService
             $referral->stage = $newStage;
             $referral->save();
 
-            // Check and award Milestone Bonuses (5, 10, 25 referrals) after stage is placed
-            if ($newOrder >= 5 && $referrer) {
+            // Check and award Milestone Bonuses after stage is joined
+            if ($newOrder >= 6 && $referrer) {
                 self::checkAndAwardMilestoneBonuses($referrer);
             }
 
@@ -520,7 +544,7 @@ class ReferralService
         ]);
 
         try {
-            Mail::to($friendEmail)->queue(new ReferralInviteMail($user, $friendName, $token));
+            Mail::to($friendEmail)->queue(new ReferralInviteMail($user, $invite));
         } catch (\Exception $e) {
             Log::error("Failed to queue referral invite email: " . $e->getMessage());
         }

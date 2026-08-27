@@ -905,6 +905,10 @@ class CrmController extends Controller
 
             // Email Notification
             \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\ProfileApprovedMail($candidate));
+
+            // Advance referral funnel to 'verified' stage (+100 pts for referrer)
+            \App\Services\ReferralService::advanceStage($candidate, 'verified');
+
             return back()->with('success', 'Candidate profile has been verified and notified.');
         }
 

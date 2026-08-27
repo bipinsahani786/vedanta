@@ -26,8 +26,8 @@ class ReferralController extends Controller
 
         // Core Candidate KPIs
         $totalReferrals = Referral::where('referrer_id', $user->id)->count();
-        $successfulReferrals = Referral::where('referrer_id', $user->id)->where('stage', 'placed')->count();
-        $pendingReferrals = Referral::where('referrer_id', $user->id)->where('stage', '!=', 'placed')->where('status', 'active')->count();
+        $successfulReferrals = Referral::where('referrer_id', $user->id)->whereIn('stage', ['joined', 'placed'])->count();
+        $pendingReferrals = Referral::where('referrer_id', $user->id)->whereNotIn('stage', ['joined', 'placed'])->where('status', 'active')->count();
         $rejectedReferrals = Referral::where('referrer_id', $user->id)->whereIn('status', ['cancelled', 'flagged'])->count();
 
         $availablePoints = (float) $wallet->available_points;
@@ -197,8 +197,12 @@ class ReferralController extends Controller
         $cookie = cookie('vpa_referral_code', $code, 60 * 24 * $cookieDays);
         session(['referral_code' => $code]);
 
+        // Track referral source from query param (?source=whatsapp/email/telegram/copy_link/other)
+        $source = $request->input('source', 'other');
+        session(['referral_source' => $source]);
+
         if (!$referrer) {
-            return redirect()->route('register')->withCookie($cookie);
+            return redirect()->route('candidate.register')->withCookie($cookie);
         }
 
         return response()
@@ -214,7 +218,7 @@ class ReferralController extends Controller
         $invite = ReferralEmailInvite::with('referrer')->where('token', $token)->first();
 
         if (!$invite || !$invite->referrer) {
-            return redirect()->route('register');
+            return redirect()->route('candidate.register');
         }
 
         // Mark as opened
@@ -234,5 +238,24 @@ class ReferralController extends Controller
                 'friendName' => $invite->friend_name,
             ])
             ->withCookie($cookie);
+    }
+
+    /**
+     * Display Single Candidate Referral Detail & 6-Stage Timeline.
+     */
+    public function show($id)
+    {
+        $user = auth()->user();
+        $referral = Referral::with(['referee.profile', 'transactions' => function ($q) {
+            $q->latest();
+        }])
+            ->where('referrer_id', $user->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $pointRate = ReferralService::getPointRate();
+        $wallet = ReferralService::getWallet($user);
+
+        return view('candidate.referral.show', compact('referral', 'user', 'wallet', 'pointRate'));
     }
 }

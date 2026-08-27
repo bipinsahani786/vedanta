@@ -14,11 +14,19 @@ class ReferralInviteMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public User $referrer;
+    public ReferralEmailInvite $invite;
+    public ?string $personalNote;
+
     public function __construct(
-        public User $referrer,
-        public ReferralEmailInvite $invite,
-        public ?string $personalNote = null
-    ) {}
+        User $referrer,
+        ReferralEmailInvite $invite,
+        ?string $personalNote = null
+    ) {
+        $this->referrer = $referrer;
+        $this->invite = $invite;
+        $this->personalNote = $personalNote;
+    }
 
     public function envelope(): Envelope
     {

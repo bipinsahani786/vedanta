@@ -18,33 +18,41 @@
         </div>
     </div>
 
-    {{-- Stage Statistics Quick Filter Cards --}}
-    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        <a href="{{ route('admin.referrals.index') }}" class="p-4 bg-white rounded-xl border {{ !request('stage') ? 'border-accent-blue ring-2 ring-accent-blue/20' : 'border-slate-200' }} shadow-sm text-center">
-            <div class="text-xs text-slate-400 font-bold uppercase">All Referrals</div>
-            <div class="text-2xl font-black text-slate-800 mt-1">{{ number_format($stats['total']) }}</div>
+    {{-- Stage Statistics Quick Filter Cards: 6 stages --}}
+    <div class="grid grid-cols-3 sm:grid-cols-7 gap-3">
+        <a href="{{ route('admin.referrals.index') }}" class="p-3 bg-white rounded-xl border {{ !request('stage') ? 'border-accent-blue ring-2 ring-accent-blue/20' : 'border-slate-200' }} shadow-sm text-center">
+            <div class="text-[10px] text-slate-400 font-bold uppercase">All</div>
+            <div class="text-xl font-black text-slate-800 mt-1">{{ number_format($stats['total']) }}</div>
         </a>
-        <a href="{{ route('admin.referrals.index', ['stage' => 'registered']) }}" class="p-4 bg-white rounded-xl border {{ request('stage') === 'registered' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200' }} shadow-sm text-center">
-            <div class="text-xs text-blue-500 font-bold uppercase">1. Registered</div>
-            <div class="text-2xl font-black text-blue-600 mt-1">{{ number_format($stats['registered']) }}</div>
+        <a href="{{ route('admin.referrals.index', ['stage' => 'registered']) }}" class="p-3 bg-white rounded-xl border {{ request('stage') === 'registered' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200' }} shadow-sm text-center">
+            <div class="text-[10px] text-blue-500 font-bold uppercase">1.Registered</div>
+            <div class="text-xl font-black text-blue-600 mt-1">{{ number_format($stats['registered']) }}</div>
         </a>
-        <a href="{{ route('admin.referrals.index', ['stage' => 'profile_completed']) }}" class="p-4 bg-white rounded-xl border {{ request('stage') === 'profile_completed' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-slate-200' }} shadow-sm text-center">
-            <div class="text-xs text-purple-500 font-bold uppercase">2. Profile Done</div>
-            <div class="text-2xl font-black text-purple-600 mt-1">{{ number_format($stats['profile_completed']) }}</div>
+        <a href="{{ route('admin.referrals.index', ['stage' => 'profile_completed']) }}" class="p-3 bg-white rounded-xl border {{ request('stage') === 'profile_completed' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-slate-200' }} shadow-sm text-center">
+            <div class="text-[10px] text-purple-500 font-bold uppercase">2.Profile</div>
+            <div class="text-xl font-black text-purple-600 mt-1">{{ number_format($stats['profile_completed']) }}</div>
         </a>
-        <a href="{{ route('admin.referrals.index', ['stage' => 'interview_scheduled']) }}" class="p-4 bg-white rounded-xl border {{ request('stage') === 'interview_scheduled' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200' }} shadow-sm text-center">
-            <div class="text-xs text-amber-500 font-bold uppercase">3. Interviewed</div>
-            <div class="text-2xl font-black text-amber-600 mt-1">{{ number_format($stats['interview_scheduled']) }}</div>
+        <a href="{{ route('admin.referrals.index', ['stage' => 'verified']) }}" class="p-3 bg-white rounded-xl border {{ request('stage') === 'verified' ? 'border-cyan-500 ring-2 ring-cyan-500/20' : 'border-slate-200' }} shadow-sm text-center">
+            <div class="text-[10px] text-cyan-500 font-bold uppercase">3.Verified</div>
+            <div class="text-xl font-black text-cyan-600 mt-1">{{ number_format($stats['verified']) }}</div>
         </a>
-        <a href="{{ route('admin.referrals.index', ['stage' => 'placed']) }}" class="p-4 bg-white rounded-xl border {{ request('stage') === 'placed' ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200' }} shadow-sm text-center col-span-2 sm:col-span-1">
-            <div class="text-xs text-emerald-500 font-bold uppercase">4. Placed & Paid</div>
-            <div class="text-2xl font-black text-emerald-600 mt-1">{{ number_format($stats['placed']) }}</div>
+        <a href="{{ route('admin.referrals.index', ['stage' => 'interview_scheduled']) }}" class="p-3 bg-white rounded-xl border {{ request('stage') === 'interview_scheduled' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200' }} shadow-sm text-center">
+            <div class="text-[10px] text-amber-500 font-bold uppercase">4.Interview</div>
+            <div class="text-xl font-black text-amber-600 mt-1">{{ number_format($stats['interview_scheduled']) }}</div>
+        </a>
+        <a href="{{ route('admin.referrals.index', ['stage' => 'selected']) }}" class="p-3 bg-white rounded-xl border {{ request('stage') === 'selected' ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200' }} shadow-sm text-center">
+            <div class="text-[10px] text-indigo-500 font-bold uppercase">5.Selected</div>
+            <div class="text-xl font-black text-indigo-600 mt-1">{{ number_format($stats['selected'] ?? 0) }}</div>
+        </a>
+        <a href="{{ route('admin.referrals.index', ['stage' => 'joined']) }}" class="p-3 bg-white rounded-xl border {{ request('stage') === 'joined' ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200' }} shadow-sm text-center">
+            <div class="text-[10px] text-emerald-500 font-bold uppercase">6.Joined</div>
+            <div class="text-xl font-black text-emerald-600 mt-1">{{ number_format($stats['joined'] ?? 0) }}</div>
         </a>
     </div>
 
     {{-- Filter & Search Toolbar --}}
     <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-        <form method="GET" action="{{ route('admin.referrals.index') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <form method="GET" action="{{ route('admin.referrals.index') }}" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
             <div class="sm:col-span-2 relative">
                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"><i class="fas fa-search"></i></span>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by candidate name, email, phone, or referral code..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-accent-blue/50">
@@ -52,19 +60,32 @@
 
             <div>
                 <select name="stage" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent-blue/50">
-                    <option value="">All Funnel Stages</option>
-                    <option value="registered" {{ request('stage') === 'registered' ? 'selected' : '' }}>Stage 1: Registered</option>
-                    <option value="profile_completed" {{ request('stage') === 'profile_completed' ? 'selected' : '' }}>Stage 2: Profile Completed</option>
-                    <option value="interview_scheduled" {{ request('stage') === 'interview_scheduled' ? 'selected' : '' }}>Stage 3: Interview Scheduled</option>
-                    <option value="placed" {{ request('stage') === 'placed' ? 'selected' : '' }}>Stage 4: Placed & Converted</option>
+                    <option value="">All Stages</option>
+                    <option value="registered" {{ request('stage') === 'registered' ? 'selected' : '' }}>1: Registered</option>
+                    <option value="profile_completed" {{ request('stage') === 'profile_completed' ? 'selected' : '' }}>2: Profile Completed</option>
+                    <option value="verified" {{ request('stage') === 'verified' ? 'selected' : '' }}>3: Profile Verified</option>
+                    <option value="interview_scheduled" {{ request('stage') === 'interview_scheduled' ? 'selected' : '' }}>4: Interview</option>
+                    <option value="selected" {{ request('stage') === 'selected' ? 'selected' : '' }}>5: Selected</option>
+                    <option value="joined" {{ request('stage') === 'joined' ? 'selected' : '' }}>6: Joined</option>
+                </select>
+            </div>
+
+            <div>
+                <select name="source" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent-blue/50">
+                    <option value="">All Sources</option>
+                    <option value="whatsapp" {{ request('source') === 'whatsapp' ? 'selected' : '' }}>WhatsApp</option>
+                    <option value="email" {{ request('source') === 'email' ? 'selected' : '' }}>Email Invite</option>
+                    <option value="telegram" {{ request('source') === 'telegram' ? 'selected' : '' }}>Telegram</option>
+                    <option value="copy_link" {{ request('source') === 'copy_link' ? 'selected' : '' }}>Direct Link</option>
+                    <option value="other" {{ request('source') === 'other' ? 'selected' : '' }}>Other</option>
                 </select>
             </div>
 
             <div class="flex items-center gap-2">
                 <button type="submit" class="w-full py-2 bg-accent-blue hover:bg-accent-blue-hover text-white font-bold text-xs rounded-xl transition-all shadow-sm">
-                    Filter Results
+                    <i class="fas fa-filter mr-1"></i> Filter
                 </button>
-                @if(request()->hasAny(['search', 'stage']))
+                @if(request()->hasAny(['search', 'stage', 'source']))
                     <a href="{{ route('admin.referrals.index') }}" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
                         Clear
                     </a>
@@ -86,49 +107,64 @@
                 <table class="w-full text-left text-xs admin-table">
                     <thead>
                         <tr>
-                            <th>Referrer (Invited By)</th>
-                            <th>Referee (Joined Friend)</th>
-                            <th>Referral Code</th>
-                            <th>Current Stage</th>
-                            <th>Total Reward Points</th>
+                            <th>Referrer</th>
+                            <th>Referee (Friend)</th>
+                            <th>Code / Source</th>
+                            <th>Stage</th>
+                            <th>Points</th>
                             <th>Status</th>
-                            <th>Created At</th>
+                            <th>Date</th>
+                            <th class="text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach($referrals as $ref)
-                            @php $stageBadge = $ref->stage_badge; @endphp
+                            @php
+                                $stageBadge = $ref->stage_badge;
+                                $srcBadge = $ref->source_badge;
+                            @endphp
                             <tr class="hover:bg-slate-50">
                                 <td>
-                                    <div class="font-bold text-slate-800">{{ $ref->referrer?->name ?? 'Deleted User' }}</div>
-                                    <div class="text-[11px] text-slate-500 font-mono">{{ $ref->referrer?->email }}</div>
+                                    <div class="font-bold text-slate-800">{{ $ref->referrer?->name ?? 'Deleted' }}</div>
+                                    <div class="text-[11px] text-slate-500">{{ $ref->referrer?->email }}</div>
                                     <div class="text-[10px] text-slate-400">{{ $ref->referrer?->phone }}</div>
                                 </td>
                                 <td>
-                                    <div class="font-bold text-slate-800">{{ $ref->referee?->name ?? 'Deleted User' }}</div>
-                                    <div class="text-[11px] text-slate-500 font-mono">{{ $ref->referee?->email }}</div>
+                                    <div class="font-bold text-slate-800">{{ $ref->referee?->name ?? 'Deleted' }}</div>
+                                    <div class="text-[11px] text-slate-500">{{ $ref->referee?->email }}</div>
                                     <div class="text-[10px] text-slate-400">{{ $ref->referee?->phone }}</div>
                                 </td>
                                 <td>
-                                    <span class="font-mono font-bold text-accent-blue bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-[11px]">
+                                    <div class="font-mono font-bold text-accent-blue bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-[11px] inline-block mb-1">
                                         {{ $ref->referral_code_used }}
-                                    </span>
+                                    </div>
+                                    <div class="inline-flex items-center gap-1 text-[10px] font-bold {{ $srcBadge['class'] }} px-1.5 py-0.5 rounded">
+                                        <i class="fab {{ $srcBadge['icon'] }}"></i> {{ $srcBadge['label'] }}
+                                    </div>
                                 </td>
                                 <td>
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border {{ $stageBadge['class'] }}">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold border {{ $stageBadge['class'] }}">
                                         <i class="fas {{ $stageBadge['icon'] }}"></i> {{ $stageBadge['label'] }}
                                     </span>
+                                    <div class="w-full bg-slate-100 rounded-full h-1 mt-1.5">
+                                        <div class="bg-accent-blue h-1 rounded-full transition-all" style="width:{{ $ref->progress_percent }}%"></div>
+                                    </div>
                                 </td>
-                                <td class="font-bold text-slate-800 text-sm">
+                                <td class="font-bold text-slate-800">
                                     +{{ number_format($ref->points_earned) }} pts
                                 </td>
                                 <td>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $ref->status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600' }}">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $ref->status === 'active' ? 'bg-emerald-50 text-emerald-600' : ($ref->status === 'completed' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-600') }}">
                                         {{ $ref->status }}
                                     </span>
                                 </td>
-                                <td class="text-slate-500 whitespace-nowrap">
-                                    {{ $ref->created_at->format('d M, Y H:i') }}
+                                <td class="text-slate-500 whitespace-nowrap text-[11px]">
+                                    {{ $ref->created_at->format('d M Y') }}
+                                </td>
+                                <td class="text-right">
+                                    <a href="{{ route('admin.referrals.show', $ref->id) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-accent-blue hover:text-white text-slate-600 rounded-lg text-[11px] font-bold transition-all">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach

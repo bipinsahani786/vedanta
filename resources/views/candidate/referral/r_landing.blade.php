@@ -60,7 +60,7 @@
 
         {{-- Action CTA Buttons --}}
         <div class="space-y-3">
-            <a href="{{ route('register', ['ref' => $code]) }}" class="w-full py-4 px-6 bg-gradient-to-r from-accent-blue to-accent-blue-hover hover:from-accent-blue-hover hover:to-accent-blue text-white font-bold text-base rounded-2xl transition-all shadow-lg hover:shadow-accent-blue/25 hover:-translate-y-0.5 flex items-center justify-center gap-2">
+            <a href="{{ route('candidate.register', ['ref' => $code]) }}" class="w-full py-4 px-6 bg-gradient-to-r from-accent-blue to-accent-blue-hover hover:from-accent-blue-hover hover:to-accent-blue text-white font-bold text-base rounded-2xl transition-all shadow-lg hover:shadow-accent-blue/25 hover:-translate-y-0.5 flex items-center justify-center gap-2">
                 <span>Claim 100 Welcome Points & Register</span>
                 <i class="fas fa-arrow-right text-sm"></i>
             </a>

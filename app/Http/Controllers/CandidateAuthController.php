@@ -61,9 +61,17 @@ class CandidateAuthController extends Controller
 
             $user->profile()->firstOrCreate([]);
 
-            // Process Referral if code was supplied
-            if ($request->filled('referral_code')) {
-                \App\Services\ReferralService::recordReferral($user, $request->referral_code);
+            // Process Referral — Priority: form input > session > cookie
+            $referralCode = $request->input('referral_code')
+                ?: session('referral_code')
+                ?: $request->cookie('vpa_referral_code');
+
+            if ($referralCode) {
+                $referralSource = $request->input('referral_source')
+                    ?: session('referral_source', 'other');
+                \App\Services\ReferralService::recordReferral($user, $referralCode, $referralSource);
+                // Clear session referral data after consumption
+                session()->forget(['referral_code', 'referral_source']);
             }
 
             event(new Registered($user));

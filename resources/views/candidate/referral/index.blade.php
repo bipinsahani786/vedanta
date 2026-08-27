@@ -24,10 +24,10 @@
             navigator.share({
                 title: 'Join Vedanta Placement Agency',
                 text: 'Hi! You can register with Vedanta Placement Agency and explore relevant teaching opportunities. Use my referral link to get 100 Welcome Points:',
-                url: '{{ url('/r/' . $user->referral_code) }}'
+                url: '{{ url('/r/' . $user->referral_code . '?source=native_share') }}'
             }).catch(() => {});
         } else {
-            this.copyToClipboard('{{ url('/r/' . $user->referral_code) }}', 'link');
+            this.copyToClipboard('{{ url('/r/' . $user->referral_code . '?source=copy_link') }}', 'link');
         }
     }
 }">
@@ -246,7 +246,7 @@
                     
                     {{-- WhatsApp Share --}}
                     @php
-                        $waText = urlencode("Hi! You can register with Vedanta Placement Agency and explore teaching opportunities. Use my referral link to get 100 Welcome Points:\n" . url('/r/' . $user->referral_code) . "\nReferral Code: " . $user->referral_code);
+                        $waText = urlencode("Hi! You can register with Vedanta Placement Agency and explore teaching opportunities. Use my referral link to get 100 Welcome Points:\n" . url('/r/' . $user->referral_code . '?source=whatsapp') . "\nReferral Code: " . $user->referral_code);
                     @endphp
                     <a href="https://api.whatsapp.com/send?text={{ $waText }}" target="_blank" class="px-4 py-2.5 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2">
                         <i class="fab fa-whatsapp text-sm"></i> WhatsApp
@@ -259,7 +259,7 @@
 
                     {{-- Telegram Share --}}
                     @php
-                        $tgUrl = "https://t.me/share/url?url=" . urlencode(url('/r/' . $user->referral_code)) . "&text=" . urlencode("Join Vedanta Placement Agency with 100 Welcome Points!");
+                        $tgUrl = "https://t.me/share/url?url=" . urlencode(url('/r/' . $user->referral_code . '?source=telegram')) . "&text=" . urlencode("Join Vedanta Placement Agency with 100 Welcome Points!");
                     @endphp
                     <a href="{{ $tgUrl }}" target="_blank" class="px-4 py-2.5 bg-[#0088cc] hover:bg-[#0077b5] text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2">
                         <i class="fab fa-telegram-plane text-xs"></i> Telegram
@@ -419,7 +419,7 @@
             <p class="text-xs text-text-dark/50">Points awarded as your friend advances</p>
 
             <div class="space-y-3 pt-2">
-                {{-- Milestone 1 --}}
+                {{-- Stage 1 --}}
                 <div class="p-3 bg-secondary-bg/60 rounded-2xl border border-card-border flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">1</div>
@@ -431,7 +431,7 @@
                     <span class="text-xs font-black text-blue-400">+50 Pts</span>
                 </div>
 
-                {{-- Milestone 2 --}}
+                {{-- Stage 2 --}}
                 <div class="p-3 bg-secondary-bg/60 rounded-2xl border border-card-border flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs font-bold">2</div>
@@ -443,19 +443,19 @@
                     <span class="text-xs font-black text-purple-400">+100 Pts</span>
                 </div>
 
-                {{-- Milestone 3 --}}
+                {{-- Stage 3 --}}
                 <div class="p-3 bg-secondary-bg/60 rounded-2xl border border-card-border flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold">3</div>
                         <div>
-                            <div class="text-xs font-bold text-text-main">Verified</div>
+                            <div class="text-xs font-bold text-text-main">Profile Verified</div>
                             <div class="text-[10px] text-text-dark/40">Reward: 100 Points</div>
                         </div>
                     </div>
                     <span class="text-xs font-black text-cyan-400">+100 Pts</span>
                 </div>
 
-                {{-- Milestone 4 --}}
+                {{-- Stage 4 --}}
                 <div class="p-3 bg-secondary-bg/60 rounded-2xl border border-card-border flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-7 h-7 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">4</div>
@@ -467,10 +467,22 @@
                     <span class="text-xs font-black text-amber-400">+150 Pts</span>
                 </div>
 
-                {{-- Milestone 5 --}}
+                {{-- Stage 5 --}}
+                <div class="p-3 bg-secondary-bg/60 rounded-2xl border border-card-border flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold">5</div>
+                        <div>
+                            <div class="text-xs font-bold text-text-main">Selected for Placement</div>
+                            <div class="text-[10px] text-text-dark/40">Milestone Reached</div>
+                        </div>
+                    </div>
+                    <span class="text-xs font-black text-indigo-400"><i class="fas fa-check"></i></span>
+                </div>
+
+                {{-- Stage 6 --}}
                 <div class="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/30 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">5</div>
+                        <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">6</div>
                         <div>
                             <div class="text-xs font-bold text-white">Successfully Joined</div>
                             <div class="text-[10px] text-emerald-400/70">Reward: 500 Points</div>
@@ -513,6 +525,7 @@
                                     <th class="py-2.5 px-3">Status</th>
                                     <th class="py-2.5 px-3">Progress</th>
                                     <th class="py-2.5 px-3 text-right">Reward</th>
+                                    <th class="py-2.5 px-3 text-right">Details</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-card-border/50">
@@ -548,16 +561,68 @@
                                         </td>
                                         <td class="py-3 px-3 text-right">
                                             <div class="font-bold text-text-main">{{ number_format($ref->points_earned) }} Points</div>
-                                            @if($ref->stage !== 'placed')
+                                            @if(!in_array($ref->stage, ['joined', 'placed']))
                                                 <div class="text-[9px] text-text-dark/40">(900 max on joining)</div>
                                             @else
                                                 <div class="text-[9px] text-emerald-400 font-bold">Completed</div>
                                             @endif
                                         </td>
+                                        <td class="py-3 px-3 text-right">
+                                            <a href="{{ route('candidate.referral.show', $ref->id) }}" class="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary-bg hover:bg-accent-blue hover:text-white border border-card-border rounded-lg text-[10px] font-bold transition-all text-text-main">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+                @endif
+
+                {{-- Sent Email Invites Section --}}
+                @if($sentInvites->isNotEmpty())
+                    <div class="mt-8 pt-6 border-t border-card-border">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-text-dark/60 mb-3 flex items-center gap-2">
+                            <i class="fas fa-paper-plane text-purple-400"></i> Sent Email Invitations ({{ $sentInvites->count() }})
+                        </h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-card-border text-[10px] uppercase font-bold text-text-dark/40 tracking-wider">
+                                        <th class="py-2 px-3">Friend</th>
+                                        <th class="py-2 px-3">Email</th>
+                                        <th class="py-2 px-3">Status</th>
+                                        <th class="py-2 px-3 text-right">Sent Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-card-border/50">
+                                    @foreach($sentInvites as $inv)
+                                        <tr class="hover:bg-secondary-bg/50">
+                                            <td class="py-2.5 px-3 font-semibold text-text-main">{{ $inv->friend_name }}</td>
+                                            <td class="py-2.5 px-3 font-mono text-[11px] text-text-dark/60">{{ $inv->friend_email }}</td>
+                                            <td class="py-2.5 px-3">
+                                                @if($inv->status === 'converted')
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                                        <i class="fas fa-check-double text-[9px] mr-1"></i> Registered & Converted
+                                                    </span>
+                                                @elseif($inv->status === 'opened')
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                                                        <i class="fas fa-envelope-open text-[9px] mr-1"></i> Link Opened
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                                                        <i class="fas fa-paper-plane text-[9px] mr-1"></i> Invitation Sent
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="py-2.5 px-3 text-right text-[11px] text-text-dark/40 whitespace-nowrap">
+                                                {{ $inv->created_at->format('d M Y') }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 @endif
             </div>

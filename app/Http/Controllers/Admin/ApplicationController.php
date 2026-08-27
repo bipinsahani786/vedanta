@@ -106,7 +106,7 @@ class ApplicationController extends Controller
         // Advance Referral Funnel Stage
         if ($application->candidate) {
             if ($request->status === 'hired') {
-                \App\Services\ReferralService::advanceStage($application->candidate, 'placed');
+                \App\Services\ReferralService::advanceStage($application->candidate, 'selected');
             } elseif ($application->interview_date || $request->status === 'shortlisted') {
                 \App\Services\ReferralService::advanceStage($application->candidate, 'interview_scheduled');
             }

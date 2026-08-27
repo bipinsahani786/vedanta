@@ -174,6 +174,7 @@ Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name(
 
     // Refer & Earn Routes
     Route::get('/referral', [\App\Http\Controllers\Candidate\ReferralController::class, 'index'])->name('referral.index');
+    Route::get('/referral/{id}', [\App\Http\Controllers\Candidate\ReferralController::class, 'show'])->name('referral.show');
     Route::post('/referral/invite', [\App\Http\Controllers\Candidate\ReferralController::class, 'sendInvite'])->name('referral.invite');
     Route::post('/referral/redeem', [\App\Http\Controllers\Candidate\ReferralController::class, 'redeem'])->name('referral.redeem');
 
@@ -289,6 +290,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Refer & Earn Admin Management
     Route::get('/referrals/dashboard', [\App\Http\Controllers\Admin\ReferralController::class, 'dashboard'])->name('referrals.dashboard');
     Route::get('/referrals', [\App\Http\Controllers\Admin\ReferralController::class, 'index'])->name('referrals.index');
+    Route::get('/referrals/leaderboard', [\App\Http\Controllers\Admin\ReferralController::class, 'leaderboard'])->name('referrals.leaderboard');
+    Route::get('/referrals/transactions', [\App\Http\Controllers\Admin\ReferralController::class, 'transactions'])->name('referrals.transactions');
     Route::get('/referrals/wallets', [\App\Http\Controllers\Admin\ReferralController::class, 'wallets'])->name('referrals.wallets');
     Route::post('/referrals/wallets/{id}/adjust', [\App\Http\Controllers\Admin\ReferralController::class, 'adjustWallet'])->name('referrals.wallets.adjust');
     Route::post('/referrals/wallets/{id}/lock', [\App\Http\Controllers\Admin\ReferralController::class, 'toggleLock'])->name('referrals.wallets.lock');
@@ -300,6 +303,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/referrals/settings', [\App\Http\Controllers\Admin\ReferralController::class, 'settings'])->name('referrals.settings');
     Route::post('/referrals/settings', [\App\Http\Controllers\Admin\ReferralController::class, 'updateSettings'])->name('referrals.settings.update');
     Route::get('/referrals/redemptions', [\App\Http\Controllers\Admin\ReferralController::class, 'redemptions'])->name('referrals.redemptions');
+    Route::get('/referrals/email-preview', [\App\Http\Controllers\Admin\ReferralController::class, 'emailPreview'])->name('referrals.email-preview');
+    Route::post('/referrals/email-test', [\App\Http\Controllers\Admin\ReferralController::class, 'emailTest'])->name('referrals.email-test');
+    Route::get('/referrals/{id}', [\App\Http\Controllers\Admin\ReferralController::class, 'show'])->name('referrals.show');
 });
 
 // Public Referral Shortlink & Token Routes
