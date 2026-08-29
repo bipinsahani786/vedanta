@@ -1,8 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.candidate')
 
-@section('content')
-@include('candidate.partials.nav')
-<div class="space-y-8 max-w-7xl mx-auto pb-12" x-data="{
+@section('candidate_content')
+<div class="space-y-8 w-full pb-12" x-data="{
     copiedCode: false,
     copiedLink: false,
     toastMsg: '',

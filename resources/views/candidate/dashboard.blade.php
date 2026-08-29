@@ -1,517 +1,737 @@
-@extends('layouts.app')
+@extends('layouts.candidate')
 
-@section('content')
-    @include('candidate.partials.nav')
+@section('candidate_content')
+<div class="space-y-6 pb-8">
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {{-- Top Welcome & Profile Strength Banner --}}
+    <div class="bg-gradient-to-r from-[#031544] via-[#092b7a] to-[#1e0e47] border border-blue-400/25 rounded-3xl p-6 sm:p-7 text-white shadow-[0_10px_35px_rgba(3,27,78,0.45)] relative overflow-hidden">
+        {{-- Decorative ambient glow backlights --}}
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-sky-400/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 left-1/3 w-80 h-80 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-1/2 -left-12 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
-        @if($profile->initial_fee_paid || $profile->is_fee_paid)
-            @if(!$profile->is_agreement_signed)
-                {{-- Agreement Pending Alert Banner --}}
-                <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm reveal">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
-                            <i class="fas fa-file-signature"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-amber-300 text-sm">Agreement Signature Pending</h4>
-                            <p class="text-xs text-amber-200/80">Please review and digitally sign your placement agreement to finalize your account setup.</p>
-                        </div>
-                    </div>
-                    <a href="{{ route('candidate.agreement.show') }}" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2">
-                        <i class="fas fa-pen-nib"></i> Sign Agreement Now
-                    </a>
-                </div>
-            @endif
-
-            {{-- Welcome Banner --}}
-            <div
-                class="bg-gradient-to-r from-accent-blue to-accent-blue-hover rounded-3xl p-8 mb-8 text-white shadow-lg relative overflow-hidden reveal">
-                <!-- Decorative Elements -->
-                <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-2xl"></div>
-                <div class="absolute bottom-0 right-32 -mb-16 w-40 h-40 rounded-full bg-white opacity-10 blur-xl"></div>
-
-                <div class="relative z-10 flex flex-col md:flex-row items-center gap-6">
+        <div class="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-6">
+            {{-- Left: Candidate Info & Meta Badges --}}
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 text-center sm:text-left flex-1 min-w-0">
+                {{-- Avatar with Verified Badge --}}
+                <div class="relative shrink-0 group">
                     @if($profile->profile_photo_path)
-                        <img src="{{ asset('storage/' . $profile->profile_photo_path) }}" alt="Profile Photo"
-                            class="w-24 h-24 rounded-full object-cover border-4 border-white/20 shadow-xl">
+                        <img src="{{ asset('storage/' . $profile->profile_photo_path) }}" alt="{{ auth()->user()->name }}"
+                            class="w-20 h-20 sm:w-22 sm:h-22 rounded-full object-cover ring-4 ring-white/20 shadow-2xl transition-transform duration-300 group-hover:scale-105">
                     @else
-                        <div
-                            class="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-4xl border-4 border-white/20 shadow-xl">
-                            <i class="fas fa-user text-white"></i>
+                        <div class="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-gradient-to-br from-accent-blue via-blue-600 to-indigo-800 flex items-center justify-center text-3xl font-black ring-4 ring-white/20 shadow-2xl transition-transform duration-300 group-hover:scale-105">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
                     @endif
-                    <div class="text-center md:text-left flex-1">
-                        <h1 class="text-3xl font-bold mb-1 flex items-center flex-wrap gap-2">
-                            Welcome back, {{ auth()->user()->name }}!
-                            @if($profile->is_verified)
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/20 border border-blue-400/50 text-blue-300 text-xs font-bold uppercase tracking-wider rounded-full shadow-[0_0_15px_rgba(59,130,246,0.3)]"
-                                    title="Verified Profile">
-                                    <i class="fas fa-check-circle"></i> Verified
-                                </span>
-                            @endif
+
+                    @if($profile->is_verified || $profile->is_fee_paid)
+                        <span class="absolute bottom-0.5 right-0.5 w-6 h-6 rounded-full bg-emerald-500 ring-2 ring-[#031544] flex items-center justify-center text-[10px] text-white shadow-lg" title="Verified Candidate">
+                            <i class="fas fa-check"></i>
+                        </span>
+                    @endif
+                </div>
+
+                {{-- Text Info --}}
+                <div class="space-y-2 min-w-0">
+                    <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                            Welcome back, {{ auth()->user()->name }}
                         </h1>
+                        <span class="text-2xl select-none animate-pulse">👋</span>
+                    </div>
+
+                    <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
                         @if($profile->vpa_id)
-                            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg text-white font-mono text-sm tracking-widest border border-white/20 mb-2 shadow-inner">
-                                <i class="fas fa-id-badge opacity-70"></i> {{ $profile->vpa_id }}
+                            <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs font-mono font-bold text-sky-200 tracking-wider shadow-inner">
+                                <i class="fas fa-id-badge text-sky-400 text-xs"></i>
+                                <span>{{ $profile->vpa_id }}</span>
                             </div>
                         @endif
-                        <p class="text-white/80 text-lg">Your profile is active and visible to top schools.</p>
+                        <span class="text-xs text-blue-200/80 font-medium">
+                            Your profile is active and visible to top schools.
+                        </span>
                     </div>
-                    <div class="mt-4 md:mt-0 flex gap-3">
-                        <a href="{{ route('jobs') }}"
-                            class="px-6 py-3 bg-white text-accent-blue font-bold rounded-xl hover:bg-gray-50 transition-all shadow-md flex items-center gap-2">
-                            <i class="fas fa-search"></i> Find Jobs
-                        </a>
+
+                    {{-- Meta Badges Row --}}
+                    <div class="flex items-center justify-center sm:justify-start gap-2 pt-1 flex-wrap text-xs">
+                        {{-- Profile Strength --}}
+                        <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold backdrop-blur-sm shadow-sm">
+                            <i class="fas fa-bullseye text-xs text-emerald-400"></i>
+                            <span>Profile Strength <strong class="text-white ml-0.5">{{ $profileStrength }}%</strong></span>
+                        </div>
+
+                        {{-- Profile Views --}}
+                        <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-200 text-[11px] font-semibold backdrop-blur-sm shadow-sm">
+                            <i class="fas fa-eye text-xs text-sky-400"></i>
+                            <span>Profile Views <strong class="text-white ml-0.5">{{ $profileViews }}</strong></span>
+                        </div>
+
+                        {{-- Member Since --}}
+                        <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-200 text-[11px] font-semibold backdrop-blur-sm shadow-sm">
+                            <i class="fas fa-calendar-alt text-xs text-amber-400"></i>
+                            <span>Member Since <strong class="text-white ml-0.5">{{ auth()->user()->created_at->format('M Y') }}</strong></span>
+                        </div>
+
+                        {{-- Plan --}}
+                        <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-200 text-[11px] font-semibold backdrop-blur-sm shadow-sm">
+                            <i class="fas fa-crown text-xs text-amber-400"></i>
+                            <span>Plan <strong class="text-white capitalize ml-0.5">{{ $profile->plan_type ?? 'Standard' }}</strong></span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {{-- Left Column: Stats & Plan --}}
-                <div class="lg:col-span-2 space-y-8">
+            {{-- Right: Profile Strength Gauge & Interactive Checklist --}}
+            <div class="flex flex-col sm:flex-row items-center gap-5 sm:gap-6 bg-white/[0.08] backdrop-blur-xl border border-white/15 rounded-2xl p-4 sm:p-5 shrink-0 shadow-lg">
+                {{-- Neon Circular Gauge --}}
+                <div class="relative w-[84px] h-[84px] flex items-center justify-center shrink-0">
+                    <svg class="w-[84px] h-[84px] transform -rotate-90" viewBox="0 0 36 36">
+                        <defs>
+                            <linearGradient id="neonGauge" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#34d399" />
+                                <stop offset="100%" stop-color="#06b6d4" />
+                            </linearGradient>
+                        </defs>
+                        {{-- Background Ring --}}
+                        <path class="text-white/10" stroke-width="3.5" stroke="currentColor" fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        {{-- Foreground Neon Progress Ring --}}
+                        <path stroke="url(#neonGauge)" stroke-dasharray="{{ $profileStrength }}, 100" stroke-width="3.5" stroke-linecap="round" fill="none"
+                              class="transition-all duration-1000 ease-out drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div class="absolute flex flex-col items-center justify-center pointer-events-none">
+                        <span class="text-xl font-black text-white tracking-tight">{{ $profileStrength }}%</span>
+                        <span class="text-[8px] uppercase tracking-widest text-emerald-300 font-extrabold">Strength</span>
+                    </div>
+                </div>
 
-                    {{-- Quick Stats & Application Limit --}}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 reveal reveal-delay-1">
-                        <div onclick="window.location='{{ route('candidate.applications.index') }}'"
-                            class="bg-card-bg rounded-2xl border border-card-border p-6 flex flex-col items-center justify-center text-center hover:border-accent-blue/30 transition-all shadow-sm relative cursor-pointer hover:bg-secondary-bg/30">
-                            <div class="w-12 h-12 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xl mb-3">
-                                <i class="fas fa-paper-plane"></i>
-                            </div>
-                            @php
-                                $actualUsedApplications = $profile->used_applications;
-                            @endphp
-                            <h3 class="text-3xl font-bold text-text-main">{{ $actualUsedApplications }} <span
-                                    class="text-sm text-text-dark/40 font-normal">/
-                                    {{ $profile->total_allowed_applications }}</span>
-                            </h3>
-                            <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1">Applications Used
-                            </p>
-            @php
-                $isHired = \App\Models\JobApplication::where('candidate_id', auth()->id())
-                    ->where('status', 'hired')
-                    ->where('updated_at', '>=', $profile->plan_started_at ?? $profile->created_at)
-                    ->exists();
-                $limitReached = $actualUsedApplications >= $profile->total_allowed_applications;
-                $hasActiveApplications = \App\Models\JobApplication::where('candidate_id', auth()->id())
-                    ->whereIn('status', ['applied', 'shortlisted'])
-                    ->exists();
-                $isExpired = $limitReached && !$hasActiveApplications && !$isHired;
-            @endphp
-                            @if($isHired || $isExpired || $limitReached)
-                                <div onclick="event.stopPropagation()"
-                                    class="absolute inset-0 bg-black/50 rounded-2xl border border-card-border flex items-center justify-center backdrop-blur-sm flex-col z-10 cursor-default">
-                                    <span
-                                        class="{{ $isHired ? 'bg-green-500' : ($isExpired ? 'bg-red-500' : 'bg-accent-yellow text-slate-900') }} text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg mb-2">
-                                        {{ $isHired ? 'Plan Completed' : ($isExpired ? 'Plan Expired' : 'Applications In Progress') }}
-                                    </span>
-                                    @if($isExpired || $isHired)
-                                        <a href="{{ route('candidate.payment.show', ['type' => 'renewal']) }}"
-                                            class="px-3 py-1 bg-white text-red-600 text-xs font-bold rounded shadow hover:bg-red-50 transition-colors">Renew
-                                            Plan</a>
-                                    @endif
-                                </div>
-                            @endif
-                        </div>
-                        
-                        {{-- Card 2: Shortlisted --}}
-                        <a href="{{ route('candidate.applications.index') }}"
-                            class="bg-card-bg rounded-2xl border border-card-border p-6 flex flex-col items-center justify-center text-center hover:border-green-500/30 hover:bg-secondary-bg/30 transition-all shadow-sm cursor-pointer block">
-                            <div
-                                class="w-12 h-12 rounded-xl bg-green-500/10 text-green-400 flex items-center justify-center text-xl mb-3 mx-auto">
-                                <i class="fas fa-check-double"></i>
-                            </div>
-                            <h3 class="text-3xl font-bold text-text-main">
-                                {{ auth()->user()->applications()->where('status', 'shortlisted')->count() }}</h3>
-                            <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1">Shortlisted</p>
-                        </a>
+                {{-- Checklist Items --}}
+                <div class="space-y-1.5 text-xs text-left">
+                    <div class="flex items-center gap-2 {{ $profile->is_profile_complete ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
+                        <i class="fas {{ $profile->is_profile_complete ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
+                        <span>Complete your profile</span>
+                    </div>
+                    <div class="flex items-center gap-2 {{ $profile->experience_years > 0 ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
+                        <i class="fas {{ $profile->experience_years > 0 ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
+                        <span>Add experience details</span>
+                    </div>
+                    <div class="flex items-center gap-2 {{ !empty($profile->resume_path) ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
+                        <i class="fas {{ !empty($profile->resume_path) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
+                        <span>Upload documents</span>
+                    </div>
+                    <div class="flex items-center gap-2 {{ ($profile->is_verified || $profile->is_fee_paid) ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
+                        <i class="fas {{ ($profile->is_verified || $profile->is_fee_paid) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
+                        <span>Profile is visible to schools</span>
                     </div>
 
-                    {{-- Financial & Pending Charges --}}
-                    @if($profile->pending_amount > 0)
-                        <div class="bg-blue-50/50 border border-blue-200/50 rounded-2xl p-6 flex items-center justify-between shadow-sm reveal reveal-delay-2">
-                            <div>
-                                <h3 class="text-lg font-bold text-blue-800 flex items-center gap-2">
-                                    <i class="fas fa-info-circle"></i> Pending Service Charge
-                                </h3>
-                                <p class="text-sm text-blue-700/80 mt-1">
-                                    You have a pending balance of <strong>₹{{ number_format($profile->pending_amount, 0) }}</strong>.
-                                    <br>
-                                    <span class="text-xs opacity-90 block mt-1"><i class="fas fa-clock mr-1"></i> Please clear your dues to continue accessing premium features.</span>
-                                </p>
+                    <div class="pt-1.5">
+                        <a href="{{ route('candidate.profile.edit') }}" 
+                           class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-bold text-white transition-all shadow hover:shadow-md hover:scale-[1.02] active:scale-[0.98]">
+                            <span>Improve Profile</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Metrics / Stat Cards (Row of 5 Cards) --}}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        {{-- Card 1: Applications --}}
+        <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-purple-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-11 h-11 rounded-2xl bg-purple-500/15 border border-purple-500/25 text-purple-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:bg-purple-500/25 transition-all">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Applications</span>
+            </div>
+            <div>
+                <div class="text-2xl lg:text-3xl font-black text-white flex items-baseline gap-1 tracking-tight">
+                    <span>{{ $profile->used_applications }}</span>
+                    <span class="text-xs text-slate-400 font-semibold">/ {{ $profile->total_allowed_applications }}</span>
+                </div>
+                <div class="text-[11px] text-slate-400 font-medium mt-0.5">Used</div>
+                <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-3 shadow-inner">
+                    <div class="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-accent-blue rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+                         style="width: {{ $profile->total_allowed_applications > 0 ? min(100, ($profile->used_applications / $profile->total_allowed_applications) * 100) : 0 }}%"></div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card 2: Shortlisted --}}
+        <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-emerald-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:bg-emerald-500/25 transition-all">
+                    <i class="fas fa-bookmark"></i>
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Shortlisted</span>
+            </div>
+            <div>
+                <div class="text-2xl lg:text-3xl font-black text-white tracking-tight">{{ $shortlistedCount }}</div>
+                <div class="text-[11px] text-slate-400 font-medium mt-0.5">Times shortlisted</div>
+            </div>
+        </div>
+
+        {{-- Card 3: Interviews --}}
+        <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/25 text-amber-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:bg-amber-500/25 transition-all">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Interviews</span>
+            </div>
+            <div>
+                <div class="text-2xl lg:text-3xl font-black text-white tracking-tight">{{ $interviewsCount }}</div>
+                <div class="text-[11px] text-slate-400 font-medium mt-0.5">Scheduled</div>
+            </div>
+        </div>
+
+        {{-- Card 4: Profile Views --}}
+        <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-sky-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-11 h-11 rounded-2xl bg-sky-500/15 border border-sky-500/25 text-sky-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:bg-sky-500/25 transition-all">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Profile Views</span>
+            </div>
+            <div>
+                <div class="text-2xl lg:text-3xl font-black text-white tracking-tight">{{ $profileViews }}</div>
+                <div class="text-[11px] text-slate-400 font-medium mt-0.5">Total views</div>
+            </div>
+        </div>
+
+        {{-- Card 5: Wallet Balance --}}
+        <a href="{{ route('candidate.referral.index') }}"
+           class="col-span-2 sm:col-span-1 bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-pink-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-11 h-11 rounded-2xl bg-pink-500/15 border border-pink-500/25 text-pink-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:bg-pink-500/25 transition-all">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Wallet</span>
+            </div>
+            <div>
+                <div class="text-2xl lg:text-3xl font-black text-white flex items-center justify-between tracking-tight">
+                    <span>₹{{ number_format($walletBalanceInr, 0) }}</span>
+                    <i class="fas fa-chevron-right text-xs text-slate-500 group-hover:text-pink-400 group-hover:translate-x-1 transition-all"></i>
+                </div>
+                <div class="text-[11px] text-slate-400 font-medium mt-0.5">
+                    = {{ number_format($availablePoints, 0) }} Points
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {{-- Main Two-Column Grid: Left (Col 8) + Right (Col 4) --}}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+        {{-- ==================== LEFT COLUMN ==================== --}}
+        <div class="lg:col-span-8 space-y-5">
+
+            {{-- 1. Registration Progress Stepper Card --}}
+            @php
+                $step1Complete = (bool) $profile->is_profile_complete;
+                $step2Complete = (bool) $profile->is_agreement_signed;
+                $step3Complete = (bool) ($profile->initial_fee_paid || $profile->is_fee_paid);
+
+                $completedSteps = 0;
+                if ($step1Complete) $completedSteps++;
+                if ($step2Complete) $completedSteps++;
+                if ($step3Complete) $completedSteps++;
+            @endphp
+            <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <span>Registration Progress</span>
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Complete all steps to start applying for jobs</p>
+                    </div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 self-start sm:self-auto shadow-sm">
+                        <i class="fas fa-shield-alt text-[10px] mr-1.5"></i>
+                        {{ $completedSteps }}/3 Completed
+                    </span>
+                </div>
+
+                {{-- Stepper Progress Timeline --}}
+                <div class="relative flex items-center justify-between mb-6 px-4 sm:px-8">
+                    {{-- Connecting Line Background --}}
+                    <div class="absolute left-12 right-12 top-5 h-0.5 bg-white/10 -z-0"></div>
+                    <div class="absolute left-12 top-5 h-0.5 bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-700 -z-0"
+                         style="width: {{ $completedSteps == 3 ? 'calc(100% - 6rem)' : ($completedSteps == 2 ? '50%' : ($completedSteps == 1 ? '10%' : '0%')) }}"></div>
+
+                    {{-- Step 1 --}}
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-md {{ $step1Complete ? 'bg-emerald-500 text-white ring-4 ring-emerald-500/20' : 'bg-[#0a1e4a] border-2 border-accent-blue text-accent-blue' }}">
+                            <i class="fas {{ $step1Complete ? 'fa-check' : 'fa-user' }}"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-2">Step 1</span>
+                        <span class="text-xs font-bold text-white mt-0.5">Complete Profile</span>
+                        <span class="text-[10px] font-semibold {{ $step1Complete ? 'text-emerald-400' : 'text-accent-blue' }}">
+                            {{ $step1Complete ? 'Completed' : 'In Progress' }}
+                        </span>
+                    </div>
+
+                    {{-- Step 2 --}}
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-md {{ $step2Complete ? 'bg-emerald-500 text-white ring-4 ring-emerald-500/20' : ($step1Complete ? 'bg-[#0a1e4a] border-2 border-accent-blue text-accent-blue ring-4 ring-accent-blue/15' : 'bg-white/5 border border-white/10 text-white/40') }}">
+                            <i class="fas {{ $step2Complete ? 'fa-check' : 'fa-file-signature' }}"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-2">Step 2</span>
+                        <span class="text-xs font-bold text-white mt-0.5">Sign Agreement</span>
+                        <span class="text-[10px] font-semibold {{ $step2Complete ? 'text-emerald-400' : ($step1Complete ? 'text-amber-400 animate-pulse' : 'text-slate-500') }}">
+                            {{ $step2Complete ? 'Completed' : ($step1Complete ? 'Pending Signature' : 'Pending') }}
+                        </span>
+                    </div>
+
+                    {{-- Step 3 --}}
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-md {{ $step3Complete ? 'bg-emerald-500 text-white ring-4 ring-emerald-500/20' : ($step2Complete ? 'bg-amber-500 text-slate-950 ring-4 ring-amber-500/20 font-black' : 'bg-white/5 border border-white/10 text-white/40') }}">
+                            <i class="fas {{ $step3Complete ? 'fa-check' : 'fa-credit-card' }}"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-2">Step 3</span>
+                        <span class="text-xs font-bold text-white mt-0.5">Initial Fee</span>
+                        <span class="text-[10px] font-semibold {{ $step3Complete ? 'text-emerald-400' : ($step2Complete ? 'text-amber-400' : 'text-slate-500') }}">
+                            {{ $step3Complete ? 'Completed' : 'Pending' }}
+                        </span>
+                    </div>
+                </div>
+
+                {{-- Action Strip below Stepper --}}
+                @if(!$step3Complete)
+                    <div class="bg-[#0b1b4d]/80 border border-white/10 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+                        <div class="flex items-center gap-3 text-xs text-white text-center sm:text-left">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 text-sm">
+                                <i class="fas fa-clock"></i>
                             </div>
-                            <div class="ml-4 flex-shrink-0">
-                                <a href="{{ route('candidate.serviceCharge.show') }}" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 shadow-md transition-colors flex items-center gap-2">
-                                    <i class="fas fa-credit-card"></i> Pay Now
+                            <span>Pay initial registration fee of <strong class="text-accent-yellow">₹500</strong> to activate your profile</span>
+                        </div>
+                        <a href="{{ route('candidate.payment.show') }}"
+                           class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-accent-blue hover:bg-accent-blue-hover text-white font-black text-xs shadow-[0_4px_15px_rgba(18,154,239,0.35)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5 shrink-0">
+                            <span>Pay Now ₹500</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                @elseif(!$step2Complete)
+                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+                        <div class="flex items-center gap-3 text-xs text-amber-300 text-center sm:text-left">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 text-sm">
+                                <i class="fas fa-file-signature"></i>
+                            </div>
+                            <span>Please review and digitally sign your candidate placement agreement</span>
+                        </div>
+                        <a href="{{ route('candidate.agreement.show') }}"
+                           class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5 shrink-0">
+                            <span>Sign Agreement Now</span>
+                            <i class="fas fa-pen-nib text-[10px]"></i>
+                        </a>
+                    </div>
+                @else
+                    <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3.5 flex items-center justify-between gap-3 text-xs text-emerald-300">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fas fa-check-circle text-emerald-400 text-base"></i>
+                            <span>All registration steps completed! Your profile is verified & active for school placement.</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-300 px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-500/30">Active</span>
+                    </div>
+                @endif
+            </div>
+
+            {{-- 2. Notifications & Updates List --}}
+            <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-bell text-accent-blue text-sm"></i>
+                        <span>Notifications</span>
+                    </h3>
+                    <a href="{{ route('candidate.aditionalFeature.show') }}" class="text-xs font-semibold text-accent-blue hover:text-white transition-colors">
+                        View All
+                    </a>
+                </div>
+
+                <div class="space-y-2.5">
+                    @forelse($notifications as $notif)
+                        <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-accent-blue/30 transition-all flex items-center justify-between gap-3 group">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-xl bg-accent-blue/15 text-accent-blue flex items-center justify-center text-sm shrink-0 group-hover:scale-105 transition-transform">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-white truncate">{{ $notif->data['title'] ?? 'System Update' }}</h4>
+                                    <p class="text-[11px] text-slate-400 truncate mt-0.5">{{ $notif->data['message'] ?? 'You have a new update.' }}</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-medium shrink-0">{{ $notif->created_at->diffForHumans() }}</span>
+                        </div>
+                    @empty
+                        {{-- Clean Realistic System Notification Updates --}}
+                        <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-blue-500/30 transition-all flex items-center justify-between gap-3 group">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/25 text-blue-400 flex items-center justify-center text-sm shrink-0 group-hover:scale-105 transition-transform">
+                                    <i class="fas fa-file-signature"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-white">Application Update</h4>
+                                    <p class="text-[11px] text-slate-400 truncate mt-0.5">Your profile application status has been updated by Vedanta Placement Agency.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-[10px] text-slate-500 font-medium">1 week ago</span>
+                                <i class="fas fa-chevron-right text-[10px] text-slate-600 group-hover:text-white transition-colors"></i>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-emerald-500/30 transition-all flex items-center justify-between gap-3 group">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 flex items-center justify-center text-sm shrink-0 group-hover:scale-105 transition-transform">
+                                    <i class="fas fa-bookmark"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-white">Application Update</h4>
+                                    <p class="text-[11px] text-slate-400 truncate mt-0.5">Your application has been successfully shortlisted for reviewed schools.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-[10px] text-slate-500 font-medium">1 week ago</span>
+                                <i class="fas fa-chevron-right text-[10px] text-slate-600 group-hover:text-white transition-colors"></i>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-amber-500/30 transition-all flex items-center justify-between gap-3 group">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/25 text-amber-400 flex items-center justify-center text-sm shrink-0 group-hover:scale-105 transition-transform">
+                                    <i class="fas fa-paper-plane"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-white">New Job Alert</h4>
+                                    <p class="text-[11px] text-slate-400 truncate mt-0.5">New high-priority teaching opportunities have been shared matching your profile.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-[10px] text-slate-500 font-medium">2 weeks ago</span>
+                                <i class="fas fa-chevron-right text-[10px] text-slate-600 group-hover:text-white transition-colors"></i>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            {{-- 3. Quick Actions (4 Interactive Cards Grid) --}}
+            <div>
+                <h3 class="text-base font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fas fa-bolt text-accent-yellow text-sm"></i>
+                    <span>Quick Actions</span>
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                    {{-- 1. Resume Builder --}}
+                    <a href="{{ route('resume.builder') }}" 
+                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-purple-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(168,85,247,0.2)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="w-11 h-11 rounded-2xl bg-purple-500/15 border border-purple-500/25 text-purple-400 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Resume Builder</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Create ATS friendly resume</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-400 mt-3 group-hover:translate-x-1 transition-transform">
+                                <span>Build Resume</span>
+                                <i class="fas fa-arrow-right text-[9px]"></i>
+                            </span>
+                        </div>
+                    </a>
+
+                    {{-- 2. Find Jobs --}}
+                    <a href="{{ route('jobs') }}" 
+                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-accent-blue/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(18,154,239,0.2)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="w-11 h-11 rounded-2xl bg-accent-blue/15 border border-accent-blue/25 text-accent-blue flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Find Jobs</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Explore matching opportunities</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-accent-blue mt-3 group-hover:translate-x-1 transition-transform">
+                                <span>Search Jobs</span>
+                                <i class="fas fa-arrow-right text-[9px]"></i>
+                            </span>
+                        </div>
+                    </a>
+
+                    {{-- 3. Saved Jobs --}}
+                    <a href="{{ route('candidate.applications.index') }}" 
+                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-emerald-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(52,211,153,0.2)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-bookmark"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Saved Jobs</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">View and manage applications</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-3 group-hover:translate-x-1 transition-transform">
+                                <span>View Saved</span>
+                                <i class="fas fa-arrow-right text-[9px]"></i>
+                            </span>
+                        </div>
+                    </a>
+
+                    {{-- 4. Job Alerts --}}
+                    <a href="{{ route('candidate.aditionalFeature.show') }}" 
+                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-amber-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(245,158,11,0.2)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/25 text-amber-400 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Job Alerts</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Get notified about new jobs</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-400 mt-3 group-hover:translate-x-1 transition-transform">
+                                <span>Manage Alerts</span>
+                                <i class="fas fa-arrow-right text-[9px]"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            {{-- 4. Recommended Jobs for You --}}
+            <div class="space-y-3.5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-white">Recommended Jobs for You</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Jobs that match your profile and preferences</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('jobs') }}" class="text-xs font-bold text-accent-blue hover:text-white flex items-center gap-1.5 transition-colors">
+                            <span>View All Jobs</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    @forelse($recommendedJobs as $job)
+                        <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-accent-blue/40 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-all duration-300 flex flex-col justify-between group">
+                            <div>
+                                <div class="flex items-start justify-between gap-3 mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-accent-blue/15 border border-accent-blue/30 text-accent-blue font-black flex items-center justify-center text-xs shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                                            {{ strtoupper(substr($job->title ?? 'TR', 0, 2)) }}
+                                        </div>
+                                        <div>
+                                            <h4 class="text-xs sm:text-sm font-bold text-white group-hover:text-accent-blue transition-colors line-clamp-1">
+                                                {{ $job->title }}
+                                            </h4>
+                                            <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{{ $job->school_name }}</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="text-slate-500 hover:text-accent-blue transition-colors p-1" title="Save Job">
+                                        <i class="far fa-bookmark text-xs"></i>
+                                    </button>
+                                </div>
+
+                                <div class="space-y-1.5 text-xs text-slate-300 mb-3">
+                                    <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
+                                        <i class="fas fa-map-marker-alt text-amber-400 text-xs w-3 text-center"></i>
+                                        <span>{{ $job->city->name ?? 'Bihar' }}, {{ $job->state->name ?? 'India' }}</span>
+                                    </div>
+                                    <div class="text-xs font-bold text-white flex items-center gap-1">
+                                        <span>₹{{ $job->salary_range ?? '25,000 - 35,000 / Month' }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-white/5 border border-white/10 text-slate-300">
+                                        Full Time
+                                    </span>
+                                    <span class="px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-white/5 border border-white/10 text-slate-300">
+                                        On-site
+                                    </span>
+                                    <span class="ml-auto text-[10px] text-slate-500 font-medium">
+                                        {{ $job->created_at->diffForHumans() }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 mt-3 border-t border-white/[0.08]">
+                                <a href="{{ route('jobs.show', $job->id) }}" 
+                                   class="w-full py-2 px-3 rounded-xl bg-accent-blue/15 hover:bg-accent-blue text-accent-blue hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                                    <span>Apply Now</span>
+                                    <i class="fas fa-chevron-right text-[10px]"></i>
                                 </a>
                             </div>
                         </div>
-                    @endif
-
-                    {{-- Recent Notifications --}}
-                    <div
-                        class="bg-card-bg rounded-2xl border border-card-border overflow-hidden shadow-sm reveal reveal-delay-2">
-                        <div class="px-6 py-4 border-b border-card-border flex justify-between items-center bg-secondary-bg/30">
-                            <h3 class="font-bold text-text-main flex items-center gap-2"><i
-                                    class="fas fa-bell text-accent-yellow"></i> Notifications & Updates</h3>
+                    @empty
+                        <div class="col-span-2 text-center py-8 text-slate-500 text-xs bg-white/[0.02] rounded-2xl border border-white/[0.05]">
+                            No jobs currently available. Check back soon!
                         </div>
-                        <div class="divide-y divide-card-border">
-                            @forelse(auth()->user()->notifications()->take(3)->get() as $notification)
-                                <div class="p-5 flex gap-4 hover:bg-secondary-bg/30 transition-colors {{ $notification->unread() ? 'bg-secondary-bg/10' : '' }}">
-                                    <div
-                                        class="w-10 h-10 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center flex-shrink-0 mt-1">
-                                        <i class="fas fa-bell"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-bold text-text-main mb-1">{{ $notification->data['title'] ?? 'Notification' }}</h4>
-                                        <p class="text-xs text-text-dark/70 leading-relaxed">{{ $notification->data['message'] ?? 'You have a new update.' }}</p>
-                                        <span
-                                            class="text-[10px] text-text-dark/40 font-medium mt-2 block">{{ $notification->created_at->diffForHumans() }}</span>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="p-5 text-center text-text-dark/50 text-sm">
-                                    No new notifications
-                                </div>
-                            @endforelse
-                        </div>
-                        <!-- <div class="px-6 py-3 border-t border-card-border bg-secondary-bg/30 text-center">
-                            <a href="#" class="text-xs font-semibold text-accent-blue hover:text-accent-blue-hover">View All
-                                Notifications</a>
-                        </div> -->
-                    </div>
-
-                </div>
-
-                {{-- Right Column: Plan Details --}}
-                <div class="space-y-6 reveal reveal-delay-3">
-                    <div class="bg-card-bg rounded-2xl border border-card-border overflow-hidden shadow-sm relative">
-                        <div
-                            class="px-6 py-5 border-b border-card-border {{ $profile->plan_type === 'premium' ? 'bg-gradient-to-r from-accent-yellow/20 to-transparent border-accent-yellow/30' : 'bg-secondary-bg/30' }}">
-                            <div class="flex justify-between items-start mb-2">
-                                <h3 class="font-bold text-text-main flex items-center gap-2">
-                                    <i
-                                        class="fas fa-star {{ $profile->plan_type === 'premium' ? 'text-accent-yellow' : 'text-text-dark/40' }}"></i>
-                                    Current Plan
-                                </h3>
-                                @if($isHired)
-                                    <span class="px-3 py-1 bg-accent-blue/10 text-accent-blue text-[10px] font-bold uppercase tracking-wider rounded-lg border border-accent-blue/20">Completed</span>
-                                @elseif($isExpired)
-                                    <span class="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-red-500/20">Expired</span>
-                                @else
-                                    <span class="px-3 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-green-500/20">Active</span>
-                                @endif
-                            </div>
-                            <div class="mt-4">
-                                <span
-                                    class="text-3xl font-black text-text-main capitalize">{{ $profile->plan_type ?? 'Standard' }}</span>
-                            </div>
-                        </div>
-
-                        <div class="p-6">
-                            <ul class="space-y-3 mb-6">
-                                <li class="flex items-start gap-3 text-sm text-text-dark/70">
-                                    <i class="fas fa-check text-green-400 mt-1"></i> Apply to all available jobs
-                                </li>
-                                <li class="flex items-start gap-3 text-sm text-text-dark/70">
-                                    <i class="fas fa-check text-green-400 mt-1"></i> Profile visibility to schools
-                                </li>
-                                <li class="flex items-start gap-3 text-sm text-text-dark/70">
-                                    <i class="fas fa-check text-green-400 mt-1"></i> Standard placement support
-                                </li>
-                                @if($profile->plan_type === 'premium')
-                                    <li class="flex items-start gap-3 text-sm text-text-main font-semibold">
-                                        <i class="fas fa-check text-accent-yellow mt-1"></i> Dedicated Relationship Manager
-                                    </li>
-                                    <li class="flex items-start gap-3 text-sm text-text-main font-semibold">
-                                        <i class="fas fa-check text-accent-yellow mt-1"></i> Guaranteed Interviews
-                                    </li>
-                                    <li class="flex items-start gap-3 text-sm text-text-main font-semibold">
-                                        <i class="fas fa-check text-accent-yellow mt-1"></i> Resume Building Assistance
-                                    </li>
-                                @else
-                                    <li class="flex items-start gap-3 text-sm text-text-dark/40">
-                                        <i class="fas fa-times text-red-400/50 mt-1"></i> Dedicated Relationship Manager
-                                    </li>
-                                    <li class="flex items-start gap-3 text-sm text-text-dark/40">
-                                        <i class="fas fa-times text-red-400/50 mt-1"></i> Guaranteed Interviews
-                                    </li>
-                                @endif
-                            </ul>
-
-                            @if($isHired)
-                                <div class="pt-4 border-t border-card-border text-center">
-                                    <span class="inline-block px-4 py-2 bg-green-500/10 text-green-400 font-bold text-xs rounded-lg border border-green-500/20 mb-3">
-                                        <i class="fas fa-trophy mr-1"></i> Congratulations! You are placed.
-                                    </span>
-                                    <a href="{{ route('candidate.payment.show', ['type' => 'renewal']) }}"
-                                        class="block w-full py-3 bg-red-50 text-red-600 font-bold text-sm text-center rounded-xl hover:bg-red-100 transition-all border border-red-200">
-                                        <i class="fas fa-sync-alt mr-1"></i> Renew for New Applications
-                                    </a>
-                                </div>
-                            @elseif($isExpired)
-                                <div class="pt-4 border-t border-card-border">
-                                    <p class="text-xs text-text-dark/60 mb-3 text-center">Your plan has expired. Renew to get more applications.</p>
-                                    <a href="{{ route('candidate.payment.show', ['type' => 'renewal']) }}"
-                                        class="block w-full py-3 bg-red-50 text-red-600 font-bold text-sm text-center rounded-xl hover:bg-red-100 transition-all border border-red-200">
-                                        <i class="fas fa-sync-alt mr-1"></i> Renew Plan
-                                    </a>
-                                </div>
-                            @elseif($limitReached && $hasActiveApplications)
-                                <div class="pt-4 border-t border-card-border text-center">
-                                    <p class="text-xs text-text-dark/60 mb-3 text-center">You've reached your application limit, but your applications are currently in progress. Please wait for the results.</p>
-                                    <span class="inline-block px-4 py-2 bg-accent-yellow/10 text-accent-yellow font-bold text-xs rounded-lg border border-accent-yellow/20">
-                                        <i class="fas fa-spinner fa-spin mr-1"></i> Applications Under Review
-                                    </span>
-                                </div>
-                            @elseif($profile->plan_type !== 'premium')
-                                <div class="pt-4 border-t border-card-border">
-                                    <p class="text-xs text-text-dark/60 mb-3 text-center">Get more opportunities and faster
-                                        placements with Premium.</p>
-                                    <a href="{{ route('candidate.payment.show') }}"
-                                        class="block w-full py-3 bg-gradient-to-r from-accent-yellow to-yellow-500 text-[#031b4e] font-bold text-sm text-center rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                                        <i class="fas fa-rocket mr-1"></i> Upgrade to Premium
-                                    </a>
-                                </div>
-                            @else
-                                <div class="pt-4 border-t border-card-border text-center">
-                                    <span
-                                        class="inline-block px-4 py-2 bg-accent-yellow/10 text-accent-yellow font-bold text-xs rounded-lg border border-accent-yellow/20">
-                                        <i class="fas fa-crown mr-1"></i> You are on the best plan!
-                                    </span>
-                                </div>
-                            @endif
-                    {{-- Refer & Earn Card Widget --}}
-                    @php
-                        $userWallet = \App\Services\ReferralService::getWallet(auth()->user());
-                        $rate = \App\Services\ReferralService::getPointRate();
-                    @endphp
-                    <div class="bg-gradient-to-br from-[#031b4e] to-[#0866c6] rounded-2xl p-6 text-white shadow-lg border border-accent-blue/30 relative overflow-hidden reveal">
-                        <div class="absolute -top-12 -right-12 w-32 h-32 bg-accent-yellow/20 rounded-full blur-2xl pointer-events-none"></div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent-yellow/20 text-accent-yellow rounded-lg text-[10px] font-bold uppercase tracking-wider border border-accent-yellow/30">
-                                <i class="fas fa-gift"></i> Refer & Earn
-                            </span>
-                            <span class="text-xs font-bold text-accent-yellow">₹{{ number_format($userWallet->available_points * $rate, 2) }}</span>
-                        </div>
-                        <h4 class="text-base font-bold text-white mb-1">Invite Friends & Earn Cash</h4>
-                        <p class="text-xs text-white/80 leading-relaxed mb-4">
-                            Share your referral code and earn reward points on registration and placement!
-                        </p>
-                        <div class="p-2.5 bg-white/10 border border-white/20 rounded-xl flex items-center justify-between mb-4">
-                            <span class="font-mono font-bold text-sm tracking-widest text-accent-yellow">{{ auth()->user()->referral_code }}</span>
-                            <button type="button" onclick="navigator.clipboard.writeText('{{ auth()->user()->referral_code }}'); alert('Referral code copied!');" class="text-xs font-bold text-white hover:text-accent-yellow flex items-center gap-1">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                        </div>
-                        <a href="{{ route('candidate.referral.index') }}" class="block w-full py-2.5 bg-white text-accent-blue font-bold text-xs text-center rounded-xl hover:bg-gray-50 transition-all shadow-md">
-                            View Referral Hub <i class="fas fa-arrow-right ml-1"></i>
-                        </a>
-                    </div>
+                    @endforelse
                 </div>
             </div>
 
-        @else
-            {{-- ================= PENDING REGISTRATION DASHBOARD ================= --}}
+        </div>
 
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 reveal">
-                <div class="flex items-center gap-4">
-                    <div
-                        class="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent-blue to-accent-blue/60 text-white flex items-center justify-center text-xl font-bold shadow-lg">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                    </div>
+        {{-- ==================== RIGHT COLUMN ==================== --}}
+        <div class="lg:col-span-4 space-y-5">
+
+            {{-- 1. Refer & Earn Leaderboard Card --}}
+            <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-trophy text-amber-400 text-sm"></i>
+                        <span>Refer & Earn Leaderboard</span>
+                    </h3>
+                    <span class="text-[10px] font-bold text-slate-400 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10">
+                        This Week ⌵
+                    </span>
+                </div>
+
+                {{-- Podium: Top 3 Referrers --}}
+                @php
+                    $rank1 = $leaderboard->get(0);
+                    $rank2 = $leaderboard->get(1);
+                    $rank3 = $leaderboard->get(2);
+                @endphp
+                <div class="grid grid-cols-3 gap-2 items-end text-center pt-3 pb-5 border-b border-white/[0.08]">
+                    {{-- Rank 2 (Silver) --}}
+                    @if($rank2)
+                        <div class="flex flex-col items-center">
+                            <div class="relative mb-2">
+                                <div class="w-12 h-12 rounded-full bg-slate-800 border-2 border-slate-300 flex items-center justify-center font-bold text-xs text-white shadow-md">
+                                    {{ strtoupper(substr($rank2['name'], 0, 1)) }}
+                                </div>
+                                <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-slate-300 text-slate-900 font-black text-[10px] flex items-center justify-center shadow">
+                                    2
+                                </span>
+                            </div>
+                            <div class="text-[11px] font-bold text-white truncate w-full" title="{{ $rank2['name'] }}">{{ $rank2['name'] }}</div>
+                            <div class="text-[10px] font-extrabold text-amber-400 mt-0.5">{{ number_format($rank2['points']) }} <span class="text-[8px] font-normal text-slate-400">Pts</span></div>
+                        </div>
+                    @endif
+
+                    {{-- Rank 1 (Gold Crown 👑) --}}
+                    @if($rank1)
+                        <div class="flex flex-col items-center -mt-3">
+                            <div class="text-amber-400 text-base mb-0.5 animate-bounce">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                            <div class="relative mb-2">
+                                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 border-2 border-amber-300 flex items-center justify-center font-black text-sm text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+                                    {{ strtoupper(substr($rank1['name'], 0, 1)) }}
+                                </div>
+                                <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] flex items-center justify-center shadow">
+                                    1
+                                </span>
+                            </div>
+                            <div class="text-xs font-black text-white truncate w-full" title="{{ $rank1['name'] }}">{{ $rank1['name'] }}</div>
+                            <div class="text-[11px] font-black text-amber-400 mt-0.5">{{ number_format($rank1['points']) }} <span class="text-[8px] font-normal text-slate-400">Pts</span></div>
+                        </div>
+                    @endif
+
+                    {{-- Rank 3 (Bronze) --}}
+                    @if($rank3)
+                        <div class="flex flex-col items-center">
+                            <div class="relative mb-2">
+                                <div class="w-12 h-12 rounded-full bg-amber-950/80 border-2 border-amber-600 flex items-center justify-center font-bold text-xs text-white shadow-md">
+                                    {{ strtoupper(substr($rank3['name'], 0, 1)) }}
+                                </div>
+                                <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-600 text-white font-black text-[10px] flex items-center justify-center shadow">
+                                    3
+                                </span>
+                            </div>
+                            <div class="text-[11px] font-bold text-white truncate w-full" title="{{ $rank3['name'] }}">{{ $rank3['name'] }}</div>
+                            <div class="text-[10px] font-extrabold text-amber-400 mt-0.5">{{ number_format($rank3['points']) }} <span class="text-[8px] font-normal text-slate-400">Pts</span></div>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Ranks 4 & 5 List --}}
+                <div class="divide-y divide-white/[0.06]">
+                    @foreach($leaderboard->slice(3, 2)->values() as $runner)
+                        <div class="py-2.5 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="text-[10px] font-bold text-slate-500 w-4 text-center">{{ $loop->iteration + 3 }}</span>
+                                <div class="w-7 h-7 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                                    {{ strtoupper(substr($runner['name'], 0, 1)) }}
+                                </div>
+                                <span class="font-semibold text-white truncate">{{ $runner['name'] }}</span>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-300 shrink-0">{{ number_format($runner['points']) }} Pts</span>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="pt-3.5 mt-1 text-center">
+                    <a href="{{ route('candidate.referral.index') }}" 
+                       class="text-xs font-bold text-accent-blue hover:text-white inline-flex items-center gap-1.5 transition-colors">
+                        <span>View Full Leaderboard</span>
+                        <i class="fas fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+
+            {{-- 2. Your Current Plan Card --}}
+            <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.25)] space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-white/[0.08]">
                     <div>
-                        <h1 class="text-2xl font-bold text-text-main">Welcome, {{ auth()->user()->name }}</h1>
-                        @if(auth()->user()->profile && auth()->user()->profile->vpa_id)
-                            <div class="inline-flex items-center gap-2 mt-1 px-2.5 py-1 bg-gray-100 rounded text-gray-600 font-mono text-xs font-semibold tracking-wider border border-gray-200">
-                                <i class="fas fa-id-badge text-gray-400"></i> {{ auth()->user()->profile->vpa_id }}
-                            </div>
-                        @endif
-                        <p class="text-sm text-text-dark/50 mt-1">Complete your registration to unlock job applications.</p>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Your Current Plan</span>
+                        <h4 class="text-xl font-black text-white capitalize mt-0.5 tracking-tight">
+                            {{ $profile->plan_type ?? 'Standard' }}
+                        </h4>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase tracking-wider shadow-sm">
+                        Active
+                    </span>
+                </div>
+
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Upgrade to Premium and unlock exclusive career benefits.
+                </p>
+
+                {{-- Plan Features with Circular Check / Cross Icons --}}
+                <div class="space-y-2.5 text-xs">
+                    <div class="flex items-center gap-2.5 text-white font-medium">
+                        <i class="fas fa-check-circle text-emerald-400 text-sm"></i>
+                        <span>Apply to all available jobs</span>
+                    </div>
+                    <div class="flex items-center gap-2.5 text-white font-medium">
+                        <i class="fas fa-check-circle text-emerald-400 text-sm"></i>
+                        <span>Profile visibility to schools</span>
+                    </div>
+                    <div class="flex items-center gap-2.5 {{ $profile->plan_type === 'premium' ? 'text-white font-medium' : 'text-slate-500' }}">
+                        <i class="fas {{ $profile->plan_type === 'premium' ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
+                        <span>Dedicated Relationship Manager</span>
+                    </div>
+                    <div class="flex items-center gap-2.5 {{ $profile->plan_type === 'premium' ? 'text-white font-medium' : 'text-slate-500' }}">
+                        <i class="fas {{ $profile->plan_type === 'premium' ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
+                        <span>Guaranteed Interviews</span>
+                    </div>
+                    <div class="flex items-center gap-2.5 {{ $profile->plan_type === 'premium' ? 'text-white font-medium' : 'text-slate-500' }}">
+                        <i class="fas {{ $profile->plan_type === 'premium' ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
+                        <span>Resume Building Assistance</span>
+                    </div>
+                    <div class="flex items-center gap-2.5 {{ $profile->plan_type === 'premium' ? 'text-white font-medium' : 'text-slate-500' }}">
+                        <i class="fas {{ $profile->plan_type === 'premium' ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
+                        <span>Priority application processing</span>
                     </div>
                 </div>
-                <div>
-                    @if($profile->is_agreement_signed)
-                        <span
-                            class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-accent-blue/10 text-accent-blue border border-accent-blue/20">
-                            <i class="fas fa-clock mr-2"></i> Payment Pending
-                        </span>
-                    @elseif($profile->is_profile_complete)
-                        <span
-                            class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-accent-blue/10 text-accent-blue border border-accent-blue/20">
-                            <i class="fas fa-file-signature mr-2"></i> Agreement Pending
-                        </span>
-                    @else
-                        <span
-                            class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-accent-yellow/10 text-accent-yellow border border-accent-yellow/20">
-                            <i class="fas fa-exclamation-circle mr-2"></i> Registration Pending
-                        </span>
-                    @endif
+
+                {{-- Upgrade Promo Box --}}
+                <div class="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/20 via-[#0d2258] to-[#120f38] border border-amber-500/30 flex items-center justify-between gap-3 shadow-md">
+                    <div>
+                        <div class="flex items-center gap-1.5 text-xs font-black text-amber-400">
+                            <i class="fas fa-crown"></i>
+                            <span>Upgrade to Premium</span>
+                        </div>
+                        <p class="text-[10px] text-slate-300 mt-0.5">Starting at just ₹499</p>
+                    </div>
+                    <a href="{{ route('candidate.payment.show') }}" 
+                       class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs shadow-lg hover:shadow-[0_4px_15px_rgba(245,158,11,0.4)] hover:-translate-y-0.5 transition-all shrink-0 flex items-center gap-1.5">
+                        <span>Upgrade Now</span>
+                        <i class="fas fa-arrow-right text-[10px]"></i>
+                    </a>
                 </div>
             </div>
 
-            {{-- Progress Bar --}}
-            @php
-                $completedSteps = 0;
-                if ($profile->is_profile_complete)
-                    $completedSteps++;
-                if ($profile->is_agreement_signed)
-                    $completedSteps++;
-                if ($profile->is_fee_paid)
-                    $completedSteps++;
-                $progressPercent = ($completedSteps / 3) * 100;
-            @endphp
-            <div class="mb-10 reveal reveal-delay-1">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-sm font-semibold text-text-main">Registration Progress</span>
-                    <span class="text-sm font-bold text-accent-blue">{{ $completedSteps }}/3 Completed</span>
-                </div>
-                <div class="w-full h-2.5 bg-card-border rounded-full overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-accent-blue to-accent-yellow rounded-full transition-all duration-700 ease-out"
-                        style="width: {{ $progressPercent }}%"></div>
-                </div>
-            </div>
+        </div>
 
-            {{-- Step Cards --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                {{-- Step 1: Profile --}}
-                <div
-                    class="bg-card-bg rounded-2xl border transition-all duration-300 hover:shadow-xl group overflow-hidden reveal reveal-delay-1
-                        {{ $profile->is_profile_complete ? 'border-green-500/20' : 'border-accent-blue/30 shadow-[0_0_20px_rgba(var(--theme-accent-blue-rgb,18,154,239),0.08)]' }}">
-                    <div class="px-6 pt-5 pb-0 flex items-center justify-between">
-                        <span
-                            class="text-[10px] font-bold uppercase tracking-widest {{ $profile->is_profile_complete ? 'text-green-400' : 'text-accent-blue' }}">Step
-                            1</span>
-                        @if($profile->is_profile_complete)
-                            <span
-                                class="w-6 h-6 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center text-xs"><i
-                                    class="fas fa-check"></i></span>
-                        @else
-                            <span
-                                class="w-6 h-6 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center text-[10px] font-bold">1</span>
-                        @endif
-                    </div>
-                    <div class="p-6 flex flex-col items-center text-center">
-                        <div
-                            class="w-16 h-16 rounded-2xl {{ $profile->is_profile_complete ? 'bg-green-500/10 text-green-400' : 'bg-accent-blue/10 text-accent-blue' }} flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
-                            <i class="fas {{ $profile->is_profile_complete ? 'fa-check-circle' : 'fa-user-edit' }}"></i>
-                        </div>
-                        <h3 class="font-bold text-text-main mb-1.5 text-lg">Complete Profile</h3>
-                        <p class="text-sm text-text-dark/50 mb-6 leading-relaxed">Fill in your professional details,
-                            qualifications, and experience</p>
-                        @if($profile->is_profile_complete)
-                            <a href="{{ route('candidate.profile.edit') }}"
-                                class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-semibold border border-green-500/20 text-green-400 hover:bg-green-500/5 transition-all flex items-center justify-center gap-2">
-                                <i class="fas fa-pen text-xs"></i> Edit Profile
-                            </a>
-                        @else
-                            <a href="{{ route('candidate.wizard') }}"
-                                class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-semibold bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-lg transition-all flex items-center justify-center gap-2">
-                                <i class="fas fa-arrow-right text-xs"></i> Complete Profile
-                            </a>
-                        @endif
-                    </div>
-                </div>
-
-                {{-- Step 2: Agreement --}}
-                <div
-                    class="bg-card-bg rounded-2xl border transition-all duration-300 hover:shadow-xl group overflow-hidden reveal reveal-delay-2
-                        {{ $profile->is_agreement_signed ? 'border-green-500/20' : ($profile->is_profile_complete ? 'border-accent-blue/30 shadow-[0_0_20px_rgba(var(--theme-accent-blue-rgb,18,154,239),0.08)]' : 'border-card-border opacity-50') }}">
-                    <div class="px-6 pt-5 pb-0 flex items-center justify-between">
-                        <span
-                            class="text-[10px] font-bold uppercase tracking-widest {{ $profile->is_agreement_signed ? 'text-green-400' : ($profile->is_profile_complete ? 'text-accent-blue' : 'text-text-dark/30') }}">Step
-                            2</span>
-                        @if($profile->is_agreement_signed)
-                            <span
-                                class="w-6 h-6 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center text-xs"><i
-                                    class="fas fa-check"></i></span>
-                        @else
-                            <span
-                                class="w-6 h-6 rounded-full {{ $profile->is_profile_complete ? 'bg-accent-blue/10 text-accent-blue' : 'bg-card-border text-text-dark/30' }} flex items-center justify-center text-[10px] font-bold">2</span>
-                        @endif
-                    </div>
-                    <div class="p-6 flex flex-col items-center text-center">
-                        <div
-                            class="w-16 h-16 rounded-2xl {{ $profile->is_agreement_signed ? 'bg-green-500/10 text-green-400' : ($profile->is_profile_complete ? 'bg-accent-blue/10 text-accent-blue' : 'bg-card-border/50 text-text-dark/20') }} flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
-                            <i class="fas {{ $profile->is_agreement_signed ? 'fa-check-circle' : 'fa-file-signature' }}"></i>
-                        </div>
-                        <h3 class="font-bold text-text-main mb-1.5 text-lg">Sign Agreement</h3>
-                        <p class="text-sm text-text-dark/50 mb-6 leading-relaxed">Review and digitally sign the placement terms
-                            & conditions</p>
-                        @if($profile->is_agreement_signed)
-                            <a href="{{ route('candidate.agreement.show') }}"
-                                class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-semibold border border-green-500/20 text-green-400 hover:bg-green-500/5 transition-all flex items-center justify-center gap-2">
-                                <i class="fas fa-eye text-xs"></i> View Agreement
-                            </a>
-                        @elseif($profile->is_profile_complete)
-                            <a href="{{ route('candidate.wizard') }}"
-                                class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-semibold bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-lg transition-all flex items-center justify-center gap-2">
-                                <i class="fas fa-arrow-right text-xs"></i> Review & Sign
-                            </a>
-                        @else
-                            <button disabled
-                                class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-semibold bg-card-border/50 text-text-dark/30 cursor-not-allowed flex items-center justify-center gap-2">
-                                <i class="fas fa-lock text-xs"></i> Locked
-                            </button>
-                        @endif
-                    </div>
-                </div>
-
-                {{-- Step 3: Payment --}}
-                <div
-                    class="bg-card-bg rounded-2xl border transition-all duration-300 hover:shadow-xl group overflow-hidden reveal reveal-delay-3
-                        {{ $profile->initial_fee_paid ? 'border-green-500/20' : ($profile->is_agreement_signed ? 'border-accent-yellow/30 shadow-[0_0_20px_rgba(255,184,0,0.08)]' : 'border-card-border opacity-50') }}">
-                    <div class="px-6 pt-5 pb-0 flex items-center justify-between">
-                        <span
-                            class="text-[10px] font-bold uppercase tracking-widest {{ $profile->initial_fee_paid ? 'text-green-400' : ($profile->is_agreement_signed ? 'text-accent-yellow' : 'text-text-dark/30') }}">Step
-                            3</span>
-                        @if($profile->initial_fee_paid)
-                            <span
-                                class="w-6 h-6 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center text-xs"><i
-                                    class="fas fa-check"></i></span>
-                        @else
-                            <span
-                                class="w-6 h-6 rounded-full {{ $profile->is_agreement_signed ? 'bg-accent-yellow/10 text-accent-yellow' : 'bg-card-border text-text-dark/30' }} flex items-center justify-center text-[10px] font-bold">3</span>
-                        @endif
-                    </div>
-                    <div class="p-6 flex flex-col items-center text-center">
-                        <div
-                            class="w-16 h-16 rounded-2xl {{ $profile->is_fee_paid ? 'bg-green-500/10 text-green-400' : ($profile->is_agreement_signed ? 'bg-accent-yellow/10 text-accent-yellow' : 'bg-card-border/50 text-text-dark/20') }} flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
-                            <i class="fas {{ $profile->is_fee_paid ? 'fa-check-circle' : 'fa-credit-card' }}"></i>
-                        </div>
-                        <h3 class="font-bold text-text-main mb-1.5 text-lg">Initial Registration Fee</h3>
-                        <p class="text-sm text-text-dark/50 mb-4 leading-relaxed">Please pay the initial <strong class="text-accent-yellow">₹500</strong> registration fee to activate your profile and start applying for jobs.</p>
-                        @if($profile->initial_fee_paid)
-                            <span
-                                class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-bold bg-green-500/10 text-green-400 border border-green-500/20 flex items-center justify-center gap-2">
-                                <i class="fas fa-check-circle"></i> Initial Payment Received
-                            </span>
-                        @elseif($profile->is_agreement_signed)
-                            <a href="{{ route('candidate.payment.show') }}"
-                                class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-semibold bg-accent-yellow text-[#031b4e] hover:brightness-110 hover:-translate-y-0.5 shadow-lg transition-all flex items-center justify-center gap-2">
-                                <i class="fas fa-arrow-right text-xs"></i> Proceed to Pay
-                            </a>
-                        @else
-                            <button disabled
-                                class="mt-auto w-full px-4 py-3 rounded-xl text-sm font-semibold bg-card-border/50 text-text-dark/30 cursor-not-allowed flex items-center justify-center gap-2">
-                                <i class="fas fa-lock text-xs"></i> Locked
-                            </button>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        @endif
     </div>
 
-    <style>
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
+</div>
 @endsection

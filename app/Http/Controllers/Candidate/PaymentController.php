@@ -50,17 +50,55 @@ class PaymentController extends Controller
             }
         }
 
-        if (!$profile->is_profile_complete || !$profile->is_agreement_signed) {
-            return redirect()->route('candidate.dashboard')->with('error', 'Please complete previous steps first.');
-        }
-
-        // Allow standard plan users to upgrade by paying their pending amount as an upgrade fee
+        // Allow candidate to view Payment & Plan dashboard
+        // If renewal with pending amount, guide to service charge
         if ($isRenewal && $profile->pending_amount > 0 && $profile->plan_type !== 'standard') {
             return redirect()->route('candidate.serviceCharge.show')->with('error', 'You must clear your pending dues of ₹' . $profile->pending_amount . ' before renewing your plan.');
         }
 
-        // Removed the check that blocked paid users from viewing their plans
-        return view('candidate.payment.show', compact('user', 'profile', 'isRenewal'));
+        // Referral Wallet
+        $wallet = \App\Services\ReferralService::getWallet($user);
+        $pointRate = \App\Services\ReferralService::getPointRate();
+        $availablePoints = $wallet ? (float)$wallet->available_points : 0;
+        $walletBalanceInr = round($availablePoints * $pointRate, 2);
+
+        // Transactions & Paid Amounts
+        $transactions = \App\Models\PaymentTransaction::where('candidate_id', $user->id)
+            ->latest()
+            ->get();
+        $dbPaidSum = $transactions->where('status', 'success')->sum('amount');
+        $fallbackPaid = ($profile->is_fee_paid ? 1000 : ($profile->initial_fee_paid ? 500 : 0));
+        $totalPaidAmount = max($dbPaidSum, $fallbackPaid);
+
+        // Next Payment Due
+        if ($profile->is_fee_paid) {
+            $nextPaymentDue = (float)($profile->pending_amount ?? 0);
+        } elseif ($profile->initial_fee_paid) {
+            $nextPaymentDue = 500;
+        } else {
+            $nextPaymentDue = 500;
+        }
+
+        // Validity Date & Registration Date
+        $planStartedAt = $profile->plan_started_at ?? $profile->created_at ?? now();
+        $planValidityDate = \Carbon\Carbon::parse($planStartedAt)->addDays(30);
+        $firstSuccessTxn = $transactions->where('status', 'success')->first();
+        $registrationPaidDate = $firstSuccessTxn ? $firstSuccessTxn->created_at->format('d M Y') : ($profile->initial_fee_paid ? ($profile->updated_at ? $profile->updated_at->format('d M Y') : now()->format('d M Y')) : null);
+
+        return view('candidate.payment.show', compact(
+            'user',
+            'profile',
+            'isRenewal',
+            'wallet',
+            'pointRate',
+            'availablePoints',
+            'walletBalanceInr',
+            'transactions',
+            'totalPaidAmount',
+            'nextPaymentDue',
+            'planValidityDate',
+            'registrationPaidDate'
+        ));
     }
 
     public function process(Request $request)

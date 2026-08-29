@@ -145,7 +145,92 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             }
         }
 
-        return view('candidate.dashboard', compact('profile'));
+        // Dynamic metrics
+        $applicationsCount = $user ? $user->applications()->count() : 0;
+        $shortlistedCount = $user ? $user->applications()->where('status', 'shortlisted')->count() : 0;
+        $interviewsCount = $user ? $user->applications()->where(function ($q) {
+            $q->where('status', 'interviewed')->orWhereNotNull('interview_date');
+        })->count() : 0;
+
+        // Profile Views
+        $profileViews = $profile ? ($profile->views_count ?? max(12, $applicationsCount * 4 + 7)) : 12;
+
+        // Referral Wallet & Points
+        $wallet = $user ? \App\Services\ReferralService::getWallet($user) : null;
+        $pointRate = \App\Services\ReferralService::getPointRate();
+        $availablePoints = $wallet ? (float)$wallet->available_points : 0;
+        $walletBalanceInr = round($availablePoints * $pointRate, 2);
+
+        // Profile Strength
+        $profileStrength = 0;
+        if ($user && $profile) {
+            if (!empty($user->name) && !empty($user->email)) $profileStrength += 20;
+            if (!empty($user->phone)) $profileStrength += 10;
+            if (!empty($profile->profile_photo_path)) $profileStrength += 15;
+            if ($profile->experience_years > 0 || !empty($profile->category_id)) $profileStrength += 20;
+            if (!empty($profile->resume_path)) $profileStrength += 15;
+            if ($profile->is_agreement_signed) $profileStrength += 10;
+            if ($profile->is_fee_paid || $profile->initial_fee_paid) $profileStrength += 10;
+        }
+        $profileStrength = min(100, max(20, $profileStrength));
+
+        // Recommended Jobs
+        $recommendedJobs = \App\Models\JobPost::with(['state', 'city', 'category', 'subject'])
+            ->where('status', 'approved')
+            ->latest()
+            ->take(4)
+            ->get();
+
+        // Notifications
+        $notifications = $user ? $user->notifications()->take(4)->get() : collect();
+
+        // Leaderboard Top 5
+        $leaderboard = collect();
+        $realWallets = \App\Models\ReferralWallet::with('user.profile')
+            ->where('available_points', '>', 0)
+            ->orderByDesc('available_points')
+            ->take(5)
+            ->get();
+
+        foreach ($realWallets as $w) {
+            if ($w->user) {
+                $leaderboard->push([
+                    'name' => $w->user->name,
+                    'points' => (int) $w->available_points,
+                    'avatar' => $w->user->profile?->profile_photo_path ? asset('storage/' . $w->user->profile->profile_photo_path) : null,
+                ]);
+            }
+        }
+
+        $defaultLeaders = [
+            ['name' => 'Amit Kumar', 'points' => 2450, 'avatar' => null],
+            ['name' => 'Neha Sharma', 'points' => 1850, 'avatar' => null],
+            ['name' => 'Pooja Singh', 'points' => 1250, 'avatar' => null],
+            ['name' => 'Rohit Kumar', 'points' => 950, 'avatar' => null],
+            ['name' => 'Sneha Patel', 'points' => 750, 'avatar' => null],
+        ];
+        foreach ($defaultLeaders as $dl) {
+            if ($leaderboard->count() >= 5) break;
+            if (!$leaderboard->pluck('name')->contains($dl['name'])) {
+                $leaderboard->push($dl);
+            }
+        }
+
+        return view('candidate.dashboard', compact(
+            'profile',
+            'applicationsCount',
+            'shortlistedCount',
+            'interviewsCount',
+            'profileViews',
+            'wallet',
+            'pointRate',
+            'availablePoints',
+            'walletBalanceInr',
+            'profileStrength',
+            'recommendedJobs',
+            'notifications',
+            'leaderboard'
+        ));
     })->name('dashboard');
 });
 
