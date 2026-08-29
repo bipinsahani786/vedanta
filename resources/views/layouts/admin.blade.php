@@ -244,12 +244,20 @@
                     <i class="fas fa-chart-pie w-5 text-center"></i> Referral Dashboard
                 </a>
                 <a href="{{ route('admin.referrals.index') }}"
-                    class="sidebar-link {{ request()->routeIs('admin.referrals.index') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.index') || request()->routeIs('admin.referrals.show') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-user-friends w-5 text-center"></i> All Referrals
+                </a>
+                <a href="{{ route('admin.referrals.leaderboard') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.leaderboard*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm text-amber-400">
+                    <i class="fas fa-medal w-5 text-center"></i> Top Leaderboard
                 </a>
                 <a href="{{ route('admin.referrals.wallets') }}"
                     class="sidebar-link {{ request()->routeIs('admin.referrals.wallets*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-wallet w-5 text-center"></i> Candidate Wallets
+                </a>
+                <a href="{{ route('admin.referrals.transactions') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.transactions*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-receipt w-5 text-center"></i> Transactions Ledger
                 </a>
                 <a href="{{ route('admin.referrals.milestones') }}"
                     class="sidebar-link {{ request()->routeIs('admin.referrals.milestones*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm text-amber-400">
@@ -436,20 +444,23 @@
                 
                 <div class="flex-1">
                     {{-- Breadcrumb/Title Area --}}
-                    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                    <div>
-                        <h1 class="text-2xl sm:text-3xl font-bold text-text-main tracking-tight">
-                            @yield('title', 'Dashboard')</h1>
-                        @hasSection('subtitle')
-                            <p class="text-sm text-text-dark/50 mt-1">@yield('subtitle')</p>
-                        @endif
-                    </div>
-                    @hasSection('actions')
-                        <div class="flex items-center gap-3">
-                            @yield('actions')
+                    @hasSection('title')
+                        <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                            <div>
+                                <h1 class="text-2xl sm:text-3xl font-bold text-text-main tracking-tight">
+                                    @yield('title')
+                                </h1>
+                                @hasSection('subtitle')
+                                    <p class="text-sm text-text-dark/50 mt-1">@yield('subtitle')</p>
+                                @endif
+                            </div>
+                            @hasSection('actions')
+                                <div class="flex items-center gap-3">
+                                    @yield('actions')
+                                </div>
+                            @endif
                         </div>
                     @endif
-                </div>
 
                 {{-- Alerts --}}
                 @if(session('success'))

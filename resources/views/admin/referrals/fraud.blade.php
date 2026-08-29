@@ -13,6 +13,72 @@
         </a>
     </div>
 
+    {{-- Flagged Referrals Review Section --}}
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-4">
+            <i class="fas fa-flag text-rose-600"></i> Flagged Referrals Pending Review ({{ $flaggedReferrals->count() }})
+        </h3>
+
+        @if($flaggedReferrals->isEmpty())
+            <div class="py-8 text-center text-slate-400 text-xs font-semibold">
+                <i class="fas fa-check-circle text-2xl text-emerald-500 mb-2"></i>
+                <p>No referrals are currently flagged. All active referrals are clear.</p>
+            </div>
+        @else
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs admin-table">
+                    <thead>
+                        <tr>
+                            <th>Ref ID</th>
+                            <th>Referrer</th>
+                            <th>Referee</th>
+                            <th>Code Used</th>
+                            <th>Stage</th>
+                            <th>Date</th>
+                            <th class="text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach($flaggedReferrals as $ref)
+                            <tr class="hover:bg-slate-50">
+                                <td class="font-mono font-bold text-slate-500">#REF{{ str_pad($ref->id, 5, '0', STR_PAD_LEFT) }}</td>
+                                <td>
+                                    <div class="font-bold text-slate-800">{{ $ref->referrer?->name ?? 'Deleted' }}</div>
+                                    <div class="text-[10px] text-slate-400">{{ $ref->referrer?->email }}</div>
+                                </td>
+                                <td>
+                                    <div class="font-bold text-slate-800">{{ $ref->referee?->name ?? 'Deleted' }}</div>
+                                    <div class="text-[10px] text-slate-400">{{ $ref->referee?->email }}</div>
+                                </td>
+                                <td><span class="font-mono text-accent-blue bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-[10px]">{{ $ref->referral_code_used }}</span></td>
+                                <td>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $ref->stage_badge['class'] }}">
+                                        {{ $ref->stage_badge['label'] }}
+                                    </span>
+                                </td>
+                                <td class="text-slate-400 text-[11px]">{{ $ref->created_at->format('d M Y') }}</td>
+                                <td class="text-right space-x-1">
+                                    <form action="{{ route('admin.referrals.approve', $ref->id) }}" method="POST" class="inline" onsubmit="return confirm('Approve this referral?')">
+                                        @csrf
+                                        <button type="submit" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg text-xs font-bold transition-all">
+                                            <i class="fas fa-check mr-1"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.referrals.reject', $ref->id) }}" method="POST" class="inline" onsubmit="return confirm('Reject and cancel this referral?')">
+                                        @csrf
+                                        <button type="submit" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition-all">
+                                            <i class="fas fa-times mr-1"></i> Reject
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
+
     {{-- Frozen Wallets Section --}}
     <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
         <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-4">

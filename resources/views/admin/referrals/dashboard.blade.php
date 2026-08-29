@@ -207,21 +207,33 @@
                         $intPct = $funnel['registered'] > 0 ? round(($funnel['interview_scheduled'] / $funnel['registered']) * 100, 1) : 0;
                     @endphp
                     <div class="p-2.5 rounded-xl bg-amber-50/60 border border-amber-100 flex items-center justify-between text-xs">
-                        <span class="font-bold text-amber-700 flex items-center gap-2"><i class="fas fa-calendar-alt text-amber-500"></i> Interviews Scheduled</span>
+                        <span class="font-bold text-amber-700 flex items-center gap-2"><i class="fas fa-calendar-alt text-amber-500"></i> Interviews</span>
                         <div class="text-right">
                             <span class="font-mono font-black text-slate-800">{{ number_format($funnel['interview_scheduled']) }}</span>
                             <span class="text-[10px] text-slate-400 ml-1">({{ $intPct }}%)</span>
                         </div>
                     </div>
 
-                    {{-- 5. Joined Successfully --}}
+                    {{-- 5. Selected --}}
                     @php
-                        $joinPct = $funnel['registered'] > 0 ? round(($funnel['placed'] / $funnel['registered']) * 100, 1) : 0;
+                        $selPct = $funnel['registered'] > 0 ? round(($funnel['selected'] / $funnel['registered']) * 100, 1) : 0;
+                    @endphp
+                    <div class="p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between text-xs">
+                        <span class="font-bold text-indigo-700 flex items-center gap-2"><i class="fas fa-user-graduate text-indigo-500"></i> Selected</span>
+                        <div class="text-right">
+                            <span class="font-mono font-black text-slate-800">{{ number_format($funnel['selected']) }}</span>
+                            <span class="text-[10px] text-slate-400 ml-1">({{ $selPct }}%)</span>
+                        </div>
+                    </div>
+
+                    {{-- 6. Joined Successfully --}}
+                    @php
+                        $joinPct = $funnel['registered'] > 0 ? round(($funnel['joined'] / $funnel['registered']) * 100, 1) : 0;
                     @endphp
                     <div class="p-2.5 rounded-xl bg-emerald-100/70 border border-emerald-200 flex items-center justify-between text-xs">
                         <span class="font-bold text-emerald-900 flex items-center gap-2"><i class="fas fa-trophy text-emerald-600"></i> Joined Successfully</span>
                         <div class="text-right">
-                            <span class="font-mono font-black text-emerald-700">{{ number_format($funnel['placed']) }}</span>
+                            <span class="font-mono font-black text-emerald-700">{{ number_format($funnel['joined']) }}</span>
                             <span class="text-[10px] text-emerald-700 ml-1 font-bold">({{ $joinPct }}%)</span>
                         </div>
                     </div>
@@ -339,9 +351,11 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h3 class="text-sm font-bold text-slate-800">Top Referrers (This Month)</h3>
-                        <p class="text-[11px] text-slate-400">Leading candidate referrers</p>
+                        <p class="text-[11px] text-slate-400">Leading candidate advocates</p>
                     </div>
-                    <a href="{{ route('admin.referrals.wallets') }}" class="text-xs font-bold text-accent-blue hover:underline">View All</a>
+                    <a href="{{ route('admin.referrals.leaderboard') }}" class="text-xs font-bold text-accent-blue hover:underline flex items-center gap-1">
+                        <span>View Leaderboard</span> <i class="fas fa-arrow-right text-[10px]"></i>
+                    </a>
                 </div>
 
                 @if($topReferrers->isEmpty())
@@ -356,7 +370,7 @@
                                     </span>
                                     <div>
                                         <div class="font-bold text-slate-800">{{ $user->name }}</div>
-                                        <div class="text-[10px] text-slate-400">Successful: {{ $user->placed_count }}</div>
+                                        <div class="text-[10px] text-slate-400">Joined: {{ $user->joined_count }} &bull; Total: {{ $user->total_referred }}</div>
                                     </div>
                                 </div>
                                 <div class="text-right font-black text-slate-800">
@@ -369,8 +383,8 @@
             </div>
 
             <div class="pt-3 border-t border-slate-100 mt-4 text-center">
-                <a href="{{ route('admin.referrals.milestones') }}" class="text-[11px] font-bold text-indigo-600 hover:underline">
-                    <i class="fas fa-trophy mr-1"></i> Configure Referral Milestone Bonuses
+                <a href="{{ route('admin.referrals.leaderboard') }}" class="text-[11px] font-bold text-indigo-600 hover:underline">
+                    <i class="fas fa-medal mr-1"></i> View Complete Rankings Leaderboard
                 </a>
             </div>
         </div>
@@ -525,15 +539,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 3. Referral Source Donut
+    // 3. Referral Source Donut (Dynamic from Database)
     const sourceCtx = document.getElementById('sourceChart').getContext('2d');
+    @php
+        $wa = $sourceStats['whatsapp'] ?? 0;
+        $em = $sourceStats['email'] ?? 0;
+        $tg = $sourceStats['telegram'] ?? 0;
+        $cl = $sourceStats['copy_link'] ?? 0;
+        $ot = $sourceStats['other'] ?? 0;
+        $totalSrc = $wa + $em + $tg + $cl + $ot;
+        if ($totalSrc == 0) { $wa = 1; $em = 1; $tg = 1; $cl = 1; }
+    @endphp
     new Chart(sourceCtx, {
         type: 'doughnut',
         data: {
-            labels: ['WhatsApp', 'Email Invite', 'Direct Link', 'Others'],
+            labels: ['WhatsApp ({{ $sourceStats['whatsapp'] ?? 0 }})', 'Email ({{ $sourceStats['email'] ?? 0 }})', 'Telegram ({{ $sourceStats['telegram'] ?? 0 }})', 'Direct Link ({{ $sourceStats['copy_link'] ?? 0 }})', 'Other ({{ $sourceStats['other'] ?? 0 }})'],
             datasets: [{
-                data: [62.2, 21.4, 13.7, 2.7],
-                backgroundColor: ['#25D366', '#8b5cf6', '#3b82f6', '#94a3b8']
+                data: [{{ $wa }}, {{ $em }}, {{ $tg }}, {{ $cl }}, {{ $ot }}],
+                backgroundColor: ['#25D366', '#8b5cf6', '#0088cc', '#3b82f6', '#94a3b8']
             }]
         },
         options: {

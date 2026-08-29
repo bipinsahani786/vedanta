@@ -87,7 +87,9 @@
                                 </td>
                                 <td>
                                     @if($redemption->serviceChargeInvoice)
-                                        <span class="font-mono font-bold text-accent-blue">#INV-{{ str_pad($redemption->serviceChargeInvoice->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                        <a href="{{ route('admin.crm.show', $redemption->user_id) }}" class="font-mono font-bold text-accent-blue hover:underline">
+                                            #INV-{{ str_pad($redemption->serviceChargeInvoice->id, 5, '0', STR_PAD_LEFT) }}
+                                        </a>
                                     @else
                                         <span class="text-slate-400">N/A</span>
                                     @endif

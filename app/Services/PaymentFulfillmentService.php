@@ -191,8 +191,8 @@ class PaymentFulfillmentService
                     }
                     $profile->save();
 
-                    // Advance referral stage to placed & complete
-                    \App\Services\ReferralService::advanceStage($user, 'placed');
+                    // Advance referral stage to joined & complete
+                    \App\Services\ReferralService::advanceStage($user, 'joined');
                 }
 
             } elseif (str_starts_with($transactionId, 'UPGRADE_')) {

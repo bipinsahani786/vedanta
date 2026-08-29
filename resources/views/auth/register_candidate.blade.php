@@ -134,14 +134,33 @@
                     </div>
                 </div>
 
-                {{-- Referral Code (Optional / Auto-filled) --}}
-                @php $refCode = request('ref', old('referral_code')); @endphp
+                {{-- Referral Code (Optional / Auto-filled from Cookie/Session/Query) --}}
+                @php
+                    $refCode = old('referral_code')
+                        ?: request('ref')
+                        ?: session('referral_code')
+                        ?: request()->cookie('vpa_referral_code')
+                        ?: '';
+                    $refSource = session('referral_source', request('source', ''));
+                @endphp
+
+                {{-- Referral Applied Banner --}}
+                <div id="referralBanner" class="{{ $refCode ? '' : 'hidden' }}">
+                    <div class="p-3 bg-accent-yellow/10 border border-accent-yellow/30 rounded-xl flex items-center gap-3 mb-1">
+                        <div class="w-8 h-8 rounded-lg bg-accent-yellow/20 text-accent-yellow flex items-center justify-center text-sm shrink-0">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-accent-yellow">🎉 Referral Code Applied!</div>
+                            <div class="text-[11px] text-text-dark/60">You'll receive <strong class="text-accent-yellow">100 Welcome Points</strong> after registration.</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <label for="referral_code" class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider flex items-center justify-between">
                         <span>Referral Code <span class="text-text-dark/40 font-normal">(Optional)</span></span>
-                        @if($refCode)
-                            <span class="text-[10px] text-accent-yellow font-bold"><i class="fas fa-gift"></i> Referral Applied</span>
-                        @endif
+                        <span id="referralAppliedTag" class="{{ $refCode ? '' : 'hidden' }} text-[10px] text-accent-yellow font-bold"><i class="fas fa-gift"></i> Referral Applied</span>
                     </label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-accent-yellow"><i class="fas fa-gift text-sm"></i></span>
@@ -150,6 +169,34 @@
                             placeholder="e.g. VPA-REF-XXXXXX" value="{{ $refCode }}">
                     </div>
                 </div>
+                <input type="hidden" name="referral_source" value="{{ $refSource }}">
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const refInput = document.getElementById('referral_code');
+                        const banner = document.getElementById('referralBanner');
+                        const tag = document.getElementById('referralAppliedTag');
+                        // If not already set from server, try reading from cookie
+                        if (!refInput.value) {
+                            const match = document.cookie.match(/(?:^|;\s*)vpa_referral_code=([^;]*)/);
+                            if (match && match[1]) {
+                                refInput.value = decodeURIComponent(match[1]);
+                                if (banner) banner.classList.remove('hidden');
+                                if (tag) tag.classList.remove('hidden');
+                            }
+                        }
+                        // Show/hide banner on input change
+                        refInput.addEventListener('input', function() {
+                            if (this.value.trim().length > 3) {
+                                if (banner) banner.classList.remove('hidden');
+                                if (tag) tag.classList.remove('hidden');
+                            } else {
+                                if (banner) banner.classList.add('hidden');
+                                if (tag) tag.classList.add('hidden');
+                            }
+                        });
+                    });
+                </script>
 
                 <button type="submit" id="registerSubmitBtn"
                     class="w-full bg-accent-blue text-white font-semibold py-3.5 rounded-xl hover:bg-accent-blue-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-blue transition-all shadow-lg hover:shadow-[0_4px_20px_rgba(var(--theme-accent-blue-rgb,18,154,239),0.35)] hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-2 disabled:opacity-60 disabled:cursor-not-allowed">
