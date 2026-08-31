@@ -417,6 +417,16 @@
             </h3>
             <p class="text-xs text-text-dark/50">Points awarded as your friend advances</p>
 
+            @php
+                $pReg = (int) ($rewardSettings['points_on_registration'] ?? 50);
+                $pProfile = (int) ($rewardSettings['points_on_profile_complete'] ?? 100);
+                $pVerify = (int) ($rewardSettings['points_on_verification'] ?? 100);
+                $pInterview = (int) ($rewardSettings['points_on_interview'] ?? 150);
+                $pSelect = (int) ($rewardSettings['points_on_selection'] ?? 0);
+                $pJoin = (int) ($rewardSettings['points_on_placement'] ?? 500);
+                $totalPotential = $pReg + $pProfile + $pVerify + $pInterview + $pSelect + $pJoin;
+            @endphp
+
             <div class="space-y-3 pt-2">
                 {{-- Stage 1 --}}
                 <div class="p-3 bg-secondary-bg/60 rounded-2xl border border-card-border flex items-center justify-between">
@@ -424,10 +434,10 @@
                         <div class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">1</div>
                         <div>
                             <div class="text-xs font-bold text-text-main">Registered</div>
-                            <div class="text-[10px] text-text-dark/40">Reward: 50 Points</div>
+                            <div class="text-[10px] text-text-dark/40">Reward: {{ $pReg }} Points</div>
                         </div>
                     </div>
-                    <span class="text-xs font-black text-blue-400">+50 Pts</span>
+                    <span class="text-xs font-black text-blue-400">+{{ $pReg }} Pts</span>
                 </div>
 
                 {{-- Stage 2 --}}
@@ -436,10 +446,10 @@
                         <div class="w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs font-bold">2</div>
                         <div>
                             <div class="text-xs font-bold text-text-main">Profile Completed</div>
-                            <div class="text-[10px] text-text-dark/40">Reward: 100 Points</div>
+                            <div class="text-[10px] text-text-dark/40">Reward: {{ $pProfile }} Points</div>
                         </div>
                     </div>
-                    <span class="text-xs font-black text-purple-400">+100 Pts</span>
+                    <span class="text-xs font-black text-purple-400">+{{ $pProfile }} Pts</span>
                 </div>
 
                 {{-- Stage 3 --}}
@@ -448,10 +458,10 @@
                         <div class="w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold">3</div>
                         <div>
                             <div class="text-xs font-bold text-text-main">Profile Verified</div>
-                            <div class="text-[10px] text-text-dark/40">Reward: 100 Points</div>
+                            <div class="text-[10px] text-text-dark/40">Reward: {{ $pVerify }} Points</div>
                         </div>
                     </div>
-                    <span class="text-xs font-black text-cyan-400">+100 Pts</span>
+                    <span class="text-xs font-black text-cyan-400">+{{ $pVerify }} Pts</span>
                 </div>
 
                 {{-- Stage 4 --}}
@@ -460,10 +470,10 @@
                         <div class="w-7 h-7 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">4</div>
                         <div>
                             <div class="text-xs font-bold text-text-main">Interview Scheduled</div>
-                            <div class="text-[10px] text-text-dark/40">Reward: 150 Points</div>
+                            <div class="text-[10px] text-text-dark/40">Reward: {{ $pInterview }} Points</div>
                         </div>
                     </div>
-                    <span class="text-xs font-black text-amber-400">+150 Pts</span>
+                    <span class="text-xs font-black text-amber-400">+{{ $pInterview }} Pts</span>
                 </div>
 
                 {{-- Stage 5 --}}
@@ -472,10 +482,14 @@
                         <div class="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold">5</div>
                         <div>
                             <div class="text-xs font-bold text-text-main">Selected for Placement</div>
-                            <div class="text-[10px] text-text-dark/40">Milestone Reached</div>
+                            <div class="text-[10px] text-text-dark/40">{{ $pSelect > 0 ? 'Reward: ' . $pSelect . ' Points' : 'Milestone Reached' }}</div>
                         </div>
                     </div>
-                    <span class="text-xs font-black text-indigo-400"><i class="fas fa-check"></i></span>
+                    @if($pSelect > 0)
+                        <span class="text-xs font-black text-indigo-400">+{{ $pSelect }} Pts</span>
+                    @else
+                        <span class="text-xs font-black text-indigo-400"><i class="fas fa-check"></i></span>
+                    @endif
                 </div>
 
                 {{-- Stage 6 --}}
@@ -484,15 +498,15 @@
                         <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">6</div>
                         <div>
                             <div class="text-xs font-bold text-white">Successfully Joined</div>
-                            <div class="text-[10px] text-emerald-400/70">Reward: 500 Points</div>
+                            <div class="text-[10px] text-emerald-400/70">Reward: {{ $pJoin }} Points</div>
                         </div>
                     </div>
-                    <span class="text-xs font-black text-emerald-400">+500 Pts</span>
+                    <span class="text-xs font-black text-emerald-400">+{{ $pJoin }} Pts</span>
                 </div>
             </div>
 
             <div class="p-3 rounded-2xl bg-secondary-bg text-[11px] text-text-dark/50 text-center font-semibold">
-                Total Potential: <strong class="text-text-main font-bold">900 Points (₹450)</strong> per friend
+                Total Potential: <strong class="text-text-main font-bold">{{ number_format($totalPotential) }} Points (₹{{ number_format($totalPotential * $pointRate, 2) }})</strong> per friend
             </div>
         </div>
 

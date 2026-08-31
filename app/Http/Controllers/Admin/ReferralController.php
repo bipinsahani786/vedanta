@@ -426,7 +426,16 @@ class ReferralController extends Controller
 
         $pointRate = (float) ReferralSetting::get('point_rate_inr', 0.50);
 
-        return view('admin.referrals.show', compact('referral', 'pointRate'));
+        $rewardSettings = [
+            'points_on_registration' => (float) ReferralSetting::get('points_on_registration', 50),
+            'points_on_profile_complete' => (float) ReferralSetting::get('points_on_profile_complete', 100),
+            'points_on_verification' => (float) ReferralSetting::get('points_on_verification', 100),
+            'points_on_interview' => (float) ReferralSetting::get('points_on_interview', 150),
+            'points_on_selection' => (float) ReferralSetting::get('points_on_selection', 0),
+            'points_on_placement' => (float) ReferralSetting::get('points_on_placement', 500),
+        ];
+
+        return view('admin.referrals.show', compact('referral', 'pointRate', 'rewardSettings'));
     }
 
     /**

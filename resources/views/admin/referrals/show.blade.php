@@ -47,12 +47,19 @@
         $referrer = $referral->referrer;
         $referee = $referral->referee;
 
+        $regPoints = (int) ($rewardSettings['points_on_registration'] ?? \App\Models\ReferralSetting::get('points_on_registration', 50));
+        $profilePoints = (int) ($rewardSettings['points_on_profile_complete'] ?? \App\Models\ReferralSetting::get('points_on_profile_complete', 100));
+        $verifyPoints = (int) ($rewardSettings['points_on_verification'] ?? \App\Models\ReferralSetting::get('points_on_verification', 100));
+        $interviewPoints = (int) ($rewardSettings['points_on_interview'] ?? \App\Models\ReferralSetting::get('points_on_interview', 150));
+        $selectionPoints = (int) ($rewardSettings['points_on_selection'] ?? \App\Models\ReferralSetting::get('points_on_selection', 0));
+        $placementPoints = (int) ($rewardSettings['points_on_placement'] ?? \App\Models\ReferralSetting::get('points_on_placement', 500));
+
         $stages = [
             'registered' => [
                 'step' => 1,
                 'name' => 'Registered',
                 'desc' => 'Candidate created account using referral code',
-                'points' => 50,
+                'points' => $regPoints,
                 'date' => $referral->created_at,
                 'icon' => 'fa-user-check',
             ],
@@ -60,7 +67,7 @@
                 'step' => 2,
                 'name' => 'Profile Completed',
                 'desc' => 'Candidate filled personal details, education & preferences',
-                'points' => 100,
+                'points' => $profilePoints,
                 'date' => $referral->completed_at,
                 'icon' => 'fa-id-card',
             ],
@@ -68,7 +75,7 @@
                 'step' => 3,
                 'name' => 'Profile Verified',
                 'desc' => 'Admin verified candidate documentation and credentials',
-                'points' => 100,
+                'points' => $verifyPoints,
                 'date' => $referral->verified_at,
                 'icon' => 'fa-check-double',
             ],
@@ -76,7 +83,7 @@
                 'step' => 4,
                 'name' => 'Interview Scheduled',
                 'desc' => 'Interview coordinated with school or employer',
-                'points' => 150,
+                'points' => $interviewPoints,
                 'date' => $referral->interview_at,
                 'icon' => 'fa-calendar-alt',
             ],
@@ -84,7 +91,7 @@
                 'step' => 5,
                 'name' => 'Selected for Placement',
                 'desc' => 'Candidate accepted offer / selected by employer',
-                'points' => 0,
+                'points' => $selectionPoints,
                 'date' => $referral->selected_at,
                 'icon' => 'fa-user-graduate',
             ],
@@ -92,7 +99,7 @@
                 'step' => 6,
                 'name' => 'Successfully Joined',
                 'desc' => 'Placement finalized and confirmed with service charge',
-                'points' => 500,
+                'points' => $placementPoints,
                 'date' => $referral->joined_at,
                 'icon' => 'fa-trophy',
             ],

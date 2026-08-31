@@ -79,7 +79,15 @@ class ReferralController extends Controller
         $sampleFinalPayable = max(0, $sampleOriginal - $sampleAvailableDiscount);
 
         // Milestone Bonus Tiers for Showcase
-        $allMilestones = ReferralMilestone::where('is_active', true)->orderBy('successful_referrals_required')->get();
+        $rewardSettings = [
+            'points_on_registration' => (float) ReferralSetting::get('points_on_registration', 50),
+            'points_on_profile_complete' => (float) ReferralSetting::get('points_on_profile_complete', 100),
+            'points_on_verification' => (float) ReferralSetting::get('points_on_verification', 100),
+            'points_on_interview' => (float) ReferralSetting::get('points_on_interview', 150),
+            'points_on_selection' => (float) ReferralSetting::get('points_on_selection', 0),
+            'points_on_placement' => (float) ReferralSetting::get('points_on_placement', 500),
+            'referee_bonus_points' => (float) ReferralSetting::get('referee_bonus_points', 100),
+        ];
 
         return view('candidate.referral.index', compact(
             'user',
@@ -104,7 +112,8 @@ class ReferralController extends Controller
             'sampleAvailableDiscount',
             'sampleFinalPayable',
             'maxDiscountPercentage',
-            'allMilestones'
+            'allMilestones',
+            'rewardSettings'
         ));
     }
 
@@ -256,6 +265,15 @@ class ReferralController extends Controller
         $pointRate = ReferralService::getPointRate();
         $wallet = ReferralService::getWallet($user);
 
-        return view('candidate.referral.show', compact('referral', 'user', 'wallet', 'pointRate'));
+        $rewardSettings = [
+            'points_on_registration' => (float) ReferralSetting::get('points_on_registration', 50),
+            'points_on_profile_complete' => (float) ReferralSetting::get('points_on_profile_complete', 100),
+            'points_on_verification' => (float) ReferralSetting::get('points_on_verification', 100),
+            'points_on_interview' => (float) ReferralSetting::get('points_on_interview', 150),
+            'points_on_selection' => (float) ReferralSetting::get('points_on_selection', 0),
+            'points_on_placement' => (float) ReferralSetting::get('points_on_placement', 500),
+        ];
+
+        return view('candidate.referral.show', compact('referral', 'user', 'wallet', 'pointRate', 'rewardSettings'));
     }
 }
