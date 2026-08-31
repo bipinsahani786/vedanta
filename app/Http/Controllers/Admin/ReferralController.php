@@ -280,12 +280,13 @@ class ReferralController extends Controller
 
     public function rejectReferral(Request $request, $id)
     {
-        $request->validate(['reason' => 'required|string|max:255']);
+        $request->validate(['reason' => 'nullable|string|max:255']);
         $referral = Referral::findOrFail($id);
         $referral->status = 'flagged';
         $referral->save();
 
-        ReferralService::logAudit(auth()->id(), $referral->referrer_id, 'referral_rejected', $request->reason);
+        $reason = $request->filled('reason') ? $request->reason : 'Flagged / rejected by administrator';
+        ReferralService::logAudit(auth()->id(), $referral->referrer_id, 'referral_rejected', $reason);
 
         return back()->with('success', "Referral #{$id} rejected & flagged.");
     }

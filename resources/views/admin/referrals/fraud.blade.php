@@ -66,6 +66,7 @@
                                     </form>
                                     <form action="{{ route('admin.referrals.reject', $ref->id) }}" method="POST" class="inline" onsubmit="return confirm('Reject and cancel this referral?')">
                                         @csrf
+                                        <input type="hidden" name="reason" value="Rejected from Fraud review">
                                         <button type="submit" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition-all">
                                             <i class="fas fa-times mr-1"></i> Reject
                                         </button>

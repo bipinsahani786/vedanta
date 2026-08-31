@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="p-6 space-y-6">
+<div class="p-6 space-y-6" x-data="{ rejectModalOpen: false }">
     {{-- Alerts --}}
     @if(session('success'))
         <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between text-emerald-800 text-xs font-semibold">
@@ -34,12 +34,9 @@
                     </button>
                 </form>
             @elseif($referral->status === 'active')
-                <form action="{{ route('admin.referrals.reject', $referral->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to flag/cancel this referral?')">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
-                        <i class="fas fa-flag"></i> Flag / Reject
-                    </button>
-                </form>
+                <button type="button" @click="rejectModalOpen = true" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+                    <i class="fas fa-flag"></i> Flag / Reject
+                </button>
             @endif
         </div>
     </div>
@@ -275,6 +272,39 @@
                 </table>
             </div>
         @endif
+    </div>
+
+    {{-- Flag / Reject Referral Modal --}}
+    <div x-show="rejectModalOpen" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative" @click.away="rejectModalOpen = false">
+            <button type="button" @click="rejectModalOpen = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl mb-4">
+                <i class="fas fa-flag"></i>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-800 mb-1">Flag & Reject Referral</h3>
+            <p class="text-xs text-slate-500 mb-5">Provide a reason for rejecting and flagging Referral <strong>#REF{{ str_pad($referral->id, 5, '0', STR_PAD_LEFT) }}</strong>.</p>
+
+            <form action="{{ route('admin.referrals.reject', $referral->id) }}" method="POST" class="space-y-4">
+                @csrf
+                <div>
+                    <label for="reject_reason" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Reason / Note <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea id="reject_reason" name="reason" rows="3" required placeholder="e.g. Fraudulent activity, duplicate account, self-referral, fake documents..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/50 resize-none"></textarea>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-2">
+                    <button type="button" @click="rejectModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-200 transition-all flex items-center gap-1.5">
+                        <i class="fas fa-flag"></i> Confirm Reject
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection
