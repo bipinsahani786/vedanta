@@ -1,13 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $currentRole = $role ?? request('role', 'candidate');
+    if (!in_array($currentRole, ['candidate', 'employer'])) {
+        $currentRole = 'candidate';
+    }
+    $isEmployer = $currentRole === 'employer';
+@endphp
+
 <div class="min-h-[85vh] flex items-center justify-center bg-secondary-bg py-12 px-4 sm:px-6 lg:px-8">
     <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-card-bg rounded-3xl shadow-2xl border border-card-border overflow-hidden reveal">
         
         {{-- Left Panel - Branding --}}
-        <div class="hidden lg:flex flex-col justify-between relative bg-gradient-to-br from-primary-bg via-accent-blue/20 to-primary-bg p-10 overflow-hidden">
+        <div class="hidden lg:flex flex-col justify-between relative bg-gradient-to-br {{ $isEmployer ? 'from-primary-bg via-emerald-600/15 to-primary-bg' : 'from-primary-bg via-accent-blue/20 to-primary-bg' }} p-10 overflow-hidden">
             {{-- Decorative Elements --}}
-            <div class="absolute -top-20 -left-20 w-72 h-72 bg-accent-blue/10 rounded-full blur-3xl"></div>
+            <div class="absolute -top-20 -left-20 w-72 h-72 {{ $isEmployer ? 'bg-emerald-500/10' : 'bg-accent-blue/10' }} rounded-full blur-3xl"></div>
             <div class="absolute -bottom-20 -right-20 w-72 h-72 bg-accent-yellow/10 rounded-full blur-3xl"></div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 border border-white/5 rounded-full"></div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-white/5 rounded-full"></div>
@@ -19,18 +27,35 @@
             </div>
 
             <div class="relative z-10 space-y-6">
-                <h2 class="text-3xl font-bold text-text-main leading-snug">Welcome back to<br><span class="text-accent-yellow">Vedanta Placement</span></h2>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold {{ $isEmployer ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-accent-blue/20 text-blue-300 border border-accent-blue/30' }}">
+                    <i class="{{ $isEmployer ? 'fas fa-building' : 'fas fa-user-graduate' }}"></i>
+                    <span>{{ $isEmployer ? 'Employer Portal' : 'Job Seeker Portal' }}</span>
+                </div>
+
+                <h2 class="text-3xl font-bold text-text-main leading-snug">
+                    @if($isEmployer)
+                        Hire top educators<br>with <span class="text-accent-yellow">Vedanta Placement</span>
+                    @else
+                        Welcome back to<br><span class="text-accent-yellow">Vedanta Placement</span>
+                    @endif
+                </h2>
                 <p class="text-sm text-text-main/70 leading-relaxed max-w-xs">
-                    Sign in to access your dashboard, manage job listings, and connect with top educational institutions across India.
+                    @if($isEmployer)
+                        Sign in to post teaching vacancies, review verified applications, and manage your school hiring pipeline.
+                    @else
+                        Sign in to access your dashboard, discover teaching jobs, track applications, and manage your verified profile.
+                    @endif
                 </p>
                 <div class="flex items-center gap-4 pt-2">
                     <div class="flex -space-x-2">
                         <img src="https://i.pravatar.cc/80?img=11" alt="" class="w-8 h-8 rounded-full border-2 border-card-bg">
                         <img src="https://i.pravatar.cc/80?img=32" alt="" class="w-8 h-8 rounded-full border-2 border-card-bg">
                         <img src="https://i.pravatar.cc/80?img=44" alt="" class="w-8 h-8 rounded-full border-2 border-card-bg">
-                        <div class="w-8 h-8 rounded-full bg-accent-blue text-white text-[10px] font-bold flex items-center justify-center border-2 border-card-bg">+500</div>
+                        <div class="w-8 h-8 rounded-full {{ $isEmployer ? 'bg-emerald-600' : 'bg-accent-blue' }} text-white text-[10px] font-bold flex items-center justify-center border-2 border-card-bg">+500</div>
                     </div>
-                    <p class="text-xs text-text-main/60">Trusted by <strong class="text-text-main">500+</strong> educators</p>
+                    <p class="text-xs text-text-main/60">
+                        {{ $isEmployer ? 'Trusted by 500+ schools & colleges' : 'Trusted by 500+ verified educators' }}
+                    </p>
                 </div>
             </div>
 
@@ -48,9 +73,27 @@
                 </a>
             </div>
 
-            <div class="mb-8">
-                <h2 class="text-2xl font-bold text-text-main">Sign In</h2>
-                <p class="mt-1.5 text-sm text-text-dark/60">Enter your credentials to access your account</p>
+            {{-- Role Switcher Tabs --}}
+            <div class="mb-6 p-1 bg-secondary-bg border border-card-border rounded-2xl grid grid-cols-2 gap-1">
+                <a href="{{ route('login', ['role' => 'candidate']) }}" 
+                   class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all {{ !$isEmployer ? 'bg-[#0052cc] text-white shadow-md' : 'text-text-dark/70 hover:text-text-main hover:bg-white/5' }}">
+                    <i class="far fa-user"></i>
+                    <span>Job Seeker</span>
+                </a>
+                <a href="{{ route('login', ['role' => 'employer']) }}" 
+                   class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all {{ $isEmployer ? 'bg-[#008a4e] text-white shadow-md' : 'text-text-dark/70 hover:text-text-main hover:bg-white/5' }}">
+                    <i class="far fa-building"></i>
+                    <span>Employer</span>
+                </a>
+            </div>
+
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-text-main">
+                    {{ $isEmployer ? 'Employer Sign In' : 'Job Seeker Sign In' }}
+                </h2>
+                <p class="mt-1.5 text-sm text-text-dark/60">
+                    {{ $isEmployer ? 'Enter your credentials to manage your school vacancies' : 'Enter your credentials to access your candidate dashboard' }}
+                </p>
             </div>
 
             @if($errors->any())
@@ -104,9 +147,9 @@
                 </div>
 
                 <button type="submit"
-                    class="w-full bg-accent-blue text-white font-semibold py-3.5 rounded-xl hover:bg-accent-blue-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-blue transition-all shadow-lg hover:shadow-[0_4px_20px_rgba(var(--theme-accent-blue-rgb,18,154,239),0.35)] hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    class="w-full text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 {{ $isEmployer ? 'bg-[#008a4e] hover:bg-[#007340] focus:ring-emerald-500' : 'bg-accent-blue hover:bg-accent-blue-hover focus:ring-accent-blue' }} focus:outline-none focus:ring-2 focus:ring-offset-2">
                     <i class="fas fa-sign-in-alt"></i>
-                    Sign In
+                    <span>{{ $isEmployer ? 'Sign In as Employer' : 'Sign In as Job Seeker' }}</span>
                 </button>
                 
                 <div class="mt-4 text-center">
@@ -119,20 +162,20 @@
 
             <div class="mt-8 flex items-center gap-4">
                 <div class="flex-1 h-px bg-card-border"></div>
-                <span class="text-xs text-text-dark/40 uppercase tracking-wider font-medium">New here?</span>
+                <span class="text-xs text-text-dark/40 uppercase tracking-wider font-medium">New to Vedanta?</span>
                 <div class="flex-1 h-px bg-card-border"></div>
             </div>
 
             <div class="mt-6 grid grid-cols-2 gap-3">
                 <a href="{{ route('candidate.register') }}"
-                    class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium border border-card-border text-text-main hover:bg-accent-blue/10 hover:border-accent-blue/30 transition-all group">
-                    <i class="fas fa-user-graduate text-accent-blue group-hover:scale-110 transition-transform"></i>
-                    <span>Candidate</span>
+                    class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold border transition-all group {{ !$isEmployer ? 'border-[#0052cc] bg-[#0052cc]/10 text-[#0052cc]' : 'border-card-border text-text-main hover:bg-white/5' }}">
+                    <i class="fas fa-user-graduate group-hover:scale-110 transition-transform"></i>
+                    <span>Register Candidate</span>
                 </a>
                 <a href="{{ route('employer.register') }}"
-                    class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium border border-card-border text-text-main hover:bg-accent-yellow/10 hover:border-accent-yellow/30 transition-all group">
-                    <i class="fas fa-building text-accent-yellow group-hover:scale-110 transition-transform"></i>
-                    <span>Employer</span>
+                    class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold border transition-all group {{ $isEmployer ? 'border-[#008a4e] bg-[#008a4e]/10 text-[#008a4e]' : 'border-card-border text-text-main hover:bg-white/5' }}">
+                    <i class="fas fa-building group-hover:scale-110 transition-transform"></i>
+                    <span>Register Employer</span>
                 </a>
             </div>
         </div>

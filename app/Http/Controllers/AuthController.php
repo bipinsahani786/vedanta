@@ -10,9 +10,13 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
-        return view('auth.login');
+        $role = $request->query('role', 'candidate');
+        if (!in_array($role, ['candidate', 'employer'])) {
+            $role = 'candidate';
+        }
+        return view('auth.login', compact('role'));
     }
 
     public function login(Request $request)
