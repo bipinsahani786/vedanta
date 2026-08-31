@@ -23,6 +23,41 @@
         </a>
     </div>
 
+    {{-- Referral Flagged / Rejected Notice --}}
+    @if(in_array($referral->status, ['flagged', 'cancelled']))
+        <div class="bg-rose-500/10 border border-rose-500/30 rounded-3xl p-5 sm:p-6 text-rose-300">
+            <div class="flex items-start gap-3.5">
+                <div class="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-lg shrink-0 border border-rose-500/30">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="space-y-1.5 flex-1">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                            Referral Under Review / Flagged
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                                {{ ucfirst($referral->status) }}
+                            </span>
+                        </h4>
+                        @if($referral->rejected_at)
+                            <span class="text-[11px] font-mono text-text-dark/50">
+                                <i class="far fa-clock mr-1"></i> {{ $referral->rejected_at->format('d M Y') }}
+                            </span>
+                        @endif
+                    </div>
+                    <p class="text-xs text-text-dark/70">
+                        This referral was flagged or rejected during administrative verification. Reward points for this referral are currently paused.
+                    </p>
+                    @if($referral->rejection_reason)
+                        <div class="mt-2 text-xs bg-secondary-bg/80 border border-card-border rounded-xl p-3 text-text-main">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 block mb-1">Reason:</span>
+                            {{ $referral->rejection_reason }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
     @php
         $stageBadge = $referral->stage_badge;
         $sourceBadge = $referral->source_badge;

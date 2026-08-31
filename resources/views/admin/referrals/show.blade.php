@@ -41,6 +41,34 @@
         </div>
     </div>
 
+    {{-- Rejection / Flagged Banner --}}
+    @if($referral->status === 'flagged')
+        <div class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-start gap-3.5">
+                <div class="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center text-lg shrink-0 shadow-md shadow-rose-200">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="space-y-1 flex-1">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h4 class="text-sm font-bold text-rose-800 flex items-center gap-2">
+                            This Referral is Flagged & Rejected
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-200 text-rose-800 tracking-wider">Flagged</span>
+                        </h4>
+                        @if($referral->rejected_at)
+                            <span class="text-[11px] font-mono text-rose-600/80">
+                                <i class="far fa-clock mr-1"></i> Rejected on: {{ $referral->rejected_at->format('d M Y, h:i A') }}
+                            </span>
+                        @endif
+                    </div>
+                    <div class="pt-1 text-xs text-rose-900 leading-relaxed bg-white/80 border border-rose-200/80 rounded-xl p-3">
+                        <strong class="text-rose-700 font-bold uppercase tracking-wider text-[10px] block mb-1">Reason provided:</strong>
+                        <span>{{ $referral->rejection_reason ?: 'Flagged / rejected by administrator' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     @php
         $stageBadge = $referral->stage_badge;
         $sourceBadge = $referral->source_badge;

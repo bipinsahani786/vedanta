@@ -17,6 +17,8 @@ class Referral extends Model
         'points_earned',
         'points_pending',
         'status',
+        'rejection_reason',
+        'rejected_at',
         'completed_at',
         'verified_at',
         'interview_at',
@@ -27,6 +29,7 @@ class Referral extends Model
     protected $casts = [
         'points_earned' => 'decimal:2',
         'points_pending' => 'decimal:2',
+        'rejected_at' => 'datetime',
         'completed_at' => 'datetime',
         'verified_at' => 'datetime',
         'interview_at' => 'datetime',

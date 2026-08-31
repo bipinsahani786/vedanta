@@ -271,6 +271,8 @@ class ReferralController extends Controller
     {
         $referral = Referral::findOrFail($id);
         $referral->status = 'active';
+        $referral->rejection_reason = null;
+        $referral->rejected_at = null;
         $referral->save();
 
         ReferralService::logAudit(auth()->id(), $referral->referrer_id, 'referral_approved', "Referral #{$id} approved");
@@ -282,10 +284,13 @@ class ReferralController extends Controller
     {
         $request->validate(['reason' => 'nullable|string|max:255']);
         $referral = Referral::findOrFail($id);
+        $reason = $request->filled('reason') ? $request->reason : 'Flagged / rejected by administrator';
+
         $referral->status = 'flagged';
+        $referral->rejection_reason = $reason;
+        $referral->rejected_at = now();
         $referral->save();
 
-        $reason = $request->filled('reason') ? $request->reason : 'Flagged / rejected by administrator';
         ReferralService::logAudit(auth()->id(), $referral->referrer_id, 'referral_rejected', $reason);
 
         return back()->with('success', "Referral #{$id} rejected & flagged.");
