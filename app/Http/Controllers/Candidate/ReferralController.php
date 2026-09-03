@@ -37,8 +37,8 @@ class ReferralController extends Controller
         $pendingPoints = (float) $wallet->pending_points;
 
         // Next Milestone Calculation
-        $milestones = ReferralMilestone::where('is_active', true)->orderBy('successful_referrals_required')->get();
-        $nextMilestone = $milestones->firstWhere('successful_referrals_required', '>', $successfulReferrals);
+        $allMilestones = ReferralMilestone::where('is_active', true)->orderBy('successful_referrals_required')->get();
+        $nextMilestone = $allMilestones->firstWhere('successful_referrals_required', '>', $successfulReferrals);
         
         $milestoneData = [
             'has_next' => (bool) $nextMilestone,
