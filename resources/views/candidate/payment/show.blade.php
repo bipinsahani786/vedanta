@@ -28,8 +28,8 @@
         @endif
     </div>
 
-    {{-- Top Overview Metrics (Row of 5 Cards) --}}
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+    {{-- Top Overview Metrics (Row of 4 Cards) --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {{-- Card 1: Current Plan --}}
         <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-purple-500/40 transition-all group">
             <div>
@@ -137,8 +137,9 @@
             </div>
         </div>
 
-        {{-- Card 5: Service Charge (After Joining) --}}
-        <div class="col-span-2 sm:col-span-1 bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-pink-500/40 transition-all group">
+        {{-- Card 5: Service Charge (After Joining) - Commented Out --}}
+        {{--
+        <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-pink-500/40 transition-all group">
             <div>
                 <div class="flex items-center justify-between mb-3">
                     <div class="w-11 h-11 rounded-2xl bg-pink-500/15 border border-pink-500/25 text-pink-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">
@@ -159,6 +160,7 @@
                 </a>
             </div>
         </div>
+        --}}
     </div>
 
     {{-- Middle Section (2 Columns): Payment Progress (Left) + Upgrade Your Plan (Right) --}}
