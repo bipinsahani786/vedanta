@@ -65,77 +65,77 @@
         </div>
     </div>
 
-    {{-- 6 TOP KPI CARDS (MATCHING MOCKUP 1) --}}
+    {{-- 6 TOP KPI CARDS (MATCHING MOCKUP 1 - CLICKABLE) --}}
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {{-- Card 1: Total Referrers --}}
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <a href="{{ route('admin.referrals.wallets') }}" class="block bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-indigo-300 hover:-translate-y-1 transition-all group cursor-pointer" title="View all candidate wallets and referrers">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-bold uppercase text-slate-400">Total Referrers</span>
-                <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs"><i class="fas fa-users"></i></span>
+                <span class="text-[10px] font-bold uppercase text-slate-400 group-hover:text-indigo-600 transition-colors">Total Referrers</span>
+                <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs group-hover:bg-indigo-600 group-hover:text-white transition-all"><i class="fas fa-users"></i></span>
             </div>
             <div class="text-2xl font-black text-slate-800">{{ number_format($totalReferrers) }}</div>
             <div class="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
                 <i class="fas fa-arrow-up text-[9px]"></i> +{{ $thisMonthReferrers }} this month
             </div>
-        </div>
+        </a>
 
         {{-- Card 2: Total Referrals --}}
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <a href="{{ route('admin.referrals.index') }}" class="block bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-blue-300 hover:-translate-y-1 transition-all group cursor-pointer" title="View all referral records">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-bold uppercase text-slate-400">Total Referrals</span>
-                <span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs"><i class="fas fa-link"></i></span>
+                <span class="text-[10px] font-bold uppercase text-slate-400 group-hover:text-blue-600 transition-colors">Total Referrals</span>
+                <span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs group-hover:bg-blue-600 group-hover:text-white transition-all"><i class="fas fa-link"></i></span>
             </div>
             <div class="text-2xl font-black text-slate-800">{{ number_format($totalReferrals) }}</div>
             <div class="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
                 <i class="fas fa-arrow-up text-[9px]"></i> +{{ $thisMonthReferrals }} this month
             </div>
-        </div>
+        </a>
 
         {{-- Card 3: Successful Referrals --}}
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <a href="{{ route('admin.referrals.index', ['stage' => 'joined']) }}" class="block bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-emerald-300 hover:-translate-y-1 transition-all group cursor-pointer" title="View joined / placed referrals">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-bold uppercase text-slate-400">Successful Referrals</span>
-                <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs"><i class="fas fa-check-circle"></i></span>
+                <span class="text-[10px] font-bold uppercase text-slate-400 group-hover:text-emerald-600 transition-colors">Successful Referrals</span>
+                <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs group-hover:bg-emerald-600 group-hover:text-white transition-all"><i class="fas fa-check-circle"></i></span>
             </div>
             <div class="text-2xl font-black text-emerald-600">{{ number_format($successfulReferrals) }}</div>
             <div class="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
                 <i class="fas fa-arrow-up text-[9px]"></i> +{{ $thisMonthSuccessful }} this month
             </div>
-        </div>
+        </a>
 
         {{-- Card 4: Pending Referrals --}}
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <a href="{{ route('admin.referrals.index', ['status' => 'active']) }}" class="block bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-amber-300 hover:-translate-y-1 transition-all group cursor-pointer" title="View in-pipeline active referrals">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-bold uppercase text-slate-400">Pending Referrals</span>
-                <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs"><i class="fas fa-hourglass-half"></i></span>
+                <span class="text-[10px] font-bold uppercase text-slate-400 group-hover:text-amber-600 transition-colors">Pending Referrals</span>
+                <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs group-hover:bg-amber-600 group-hover:text-white transition-all"><i class="fas fa-hourglass-half"></i></span>
             </div>
             <div class="text-2xl font-black text-amber-600">{{ number_format($pendingReferrals) }}</div>
             <div class="text-[10px] text-slate-500 font-medium mt-1">In active pipeline</div>
-        </div>
+        </a>
 
         {{-- Card 5: Points Issued --}}
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <a href="{{ route('admin.referrals.transactions') }}" class="block bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-amber-300 hover:-translate-y-1 transition-all group cursor-pointer" title="View all point transactions ledger">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-bold uppercase text-slate-400">Points Issued</span>
-                <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs"><i class="fas fa-coins"></i></span>
+                <span class="text-[10px] font-bold uppercase text-slate-400 group-hover:text-amber-600 transition-colors">Points Issued</span>
+                <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs group-hover:bg-amber-600 group-hover:text-white transition-all"><i class="fas fa-coins"></i></span>
             </div>
             <div class="text-2xl font-black text-slate-800">{{ number_format($pointsIssued) }}</div>
             <div class="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
                 <i class="fas fa-arrow-up text-[9px]"></i> +{{ number_format($thisMonthPointsIssued) }} this month
             </div>
-        </div>
+        </a>
 
         {{-- Card 6: Points Redeemed --}}
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <a href="{{ route('admin.referrals.redemptions') }}" class="block bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-rose-300 hover:-translate-y-1 transition-all group cursor-pointer" title="View points redemptions and discounts">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-bold uppercase text-slate-400">Points Redeemed</span>
-                <span class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-xs"><i class="fas fa-gift"></i></span>
+                <span class="text-[10px] font-bold uppercase text-slate-400 group-hover:text-rose-600 transition-colors">Points Redeemed</span>
+                <span class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-xs group-hover:bg-rose-600 group-hover:text-white transition-all"><i class="fas fa-gift"></i></span>
             </div>
             <div class="text-2xl font-black text-rose-600">{{ number_format($pointsRedeemed) }}</div>
             <div class="text-[10px] text-rose-600 font-bold mt-1 flex items-center gap-1">
                 <i class="fas fa-tag text-[9px]"></i> ₹{{ number_format($pointsRedeemed * $pointRate, 2) }} value
             </div>
-        </div>
+        </a>
     </div>
 
     {{-- MIDDLE ROW: GROWTH CHART + FUNNEL + QUICK ACTIONS --}}
@@ -182,61 +182,61 @@
                     @php
                         $regPct = $funnel['clicks'] > 0 ? round(($funnel['registered'] / $funnel['clicks']) * 100, 1) : 0;
                     @endphp
-                    <div class="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 flex items-center justify-between text-xs">
-                        <span class="font-bold text-emerald-700 flex items-center gap-2"><i class="fas fa-user-plus text-emerald-500"></i> Registrations</span>
+                    <a href="{{ route('admin.referrals.index', ['stage' => 'registered']) }}" class="p-2.5 rounded-xl bg-emerald-50/60 hover:bg-emerald-100/80 border border-emerald-100 flex items-center justify-between text-xs transition-all group cursor-pointer" title="View registered referrals">
+                        <span class="font-bold text-emerald-700 flex items-center gap-2 group-hover:translate-x-0.5 transition-transform"><i class="fas fa-user-plus text-emerald-500"></i> Registrations</span>
                         <div class="text-right">
                             <span class="font-mono font-black text-slate-800">{{ number_format($funnel['registered']) }}</span>
                             <span class="text-[10px] text-slate-400 ml-1">({{ $regPct }}%)</span>
                         </div>
-                    </div>
+                    </a>
 
                     {{-- 3. Profile Completed --}}
                     @php
                         $profPct = $funnel['registered'] > 0 ? round(($funnel['profile_completed'] / $funnel['registered']) * 100, 1) : 0;
                     @endphp
-                    <div class="p-2.5 rounded-xl bg-purple-50/60 border border-purple-100 flex items-center justify-between text-xs">
-                        <span class="font-bold text-purple-700 flex items-center gap-2"><i class="fas fa-id-card text-purple-500"></i> Profile Completed</span>
+                    <a href="{{ route('admin.referrals.index', ['stage' => 'profile_completed']) }}" class="p-2.5 rounded-xl bg-purple-50/60 hover:bg-purple-100/80 border border-purple-100 flex items-center justify-between text-xs transition-all group cursor-pointer" title="View profile completed referrals">
+                        <span class="font-bold text-purple-700 flex items-center gap-2 group-hover:translate-x-0.5 transition-transform"><i class="fas fa-id-card text-purple-500"></i> Profile Completed</span>
                         <div class="text-right">
                             <span class="font-mono font-black text-slate-800">{{ number_format($funnel['profile_completed']) }}</span>
                             <span class="text-[10px] text-slate-400 ml-1">({{ $profPct }}%)</span>
                         </div>
-                    </div>
+                    </a>
 
                     {{-- 4. Interview Scheduled --}}
                     @php
                         $intPct = $funnel['registered'] > 0 ? round(($funnel['interview_scheduled'] / $funnel['registered']) * 100, 1) : 0;
                     @endphp
-                    <div class="p-2.5 rounded-xl bg-amber-50/60 border border-amber-100 flex items-center justify-between text-xs">
-                        <span class="font-bold text-amber-700 flex items-center gap-2"><i class="fas fa-calendar-alt text-amber-500"></i> Interviews</span>
+                    <a href="{{ route('admin.referrals.index', ['stage' => 'interview_scheduled']) }}" class="p-2.5 rounded-xl bg-amber-50/60 hover:bg-amber-100/80 border border-amber-100 flex items-center justify-between text-xs transition-all group cursor-pointer" title="View interview scheduled referrals">
+                        <span class="font-bold text-amber-700 flex items-center gap-2 group-hover:translate-x-0.5 transition-transform"><i class="fas fa-calendar-alt text-amber-500"></i> Interviews</span>
                         <div class="text-right">
                             <span class="font-mono font-black text-slate-800">{{ number_format($funnel['interview_scheduled']) }}</span>
                             <span class="text-[10px] text-slate-400 ml-1">({{ $intPct }}%)</span>
                         </div>
-                    </div>
+                    </a>
 
                     {{-- 5. Selected --}}
                     @php
                         $selPct = $funnel['registered'] > 0 ? round(($funnel['selected'] / $funnel['registered']) * 100, 1) : 0;
                     @endphp
-                    <div class="p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between text-xs">
-                        <span class="font-bold text-indigo-700 flex items-center gap-2"><i class="fas fa-user-graduate text-indigo-500"></i> Selected</span>
+                    <a href="{{ route('admin.referrals.index', ['stage' => 'selected']) }}" class="p-2.5 rounded-xl bg-indigo-50/60 hover:bg-indigo-100/80 border border-indigo-100 flex items-center justify-between text-xs transition-all group cursor-pointer" title="View selected referrals">
+                        <span class="font-bold text-indigo-700 flex items-center gap-2 group-hover:translate-x-0.5 transition-transform"><i class="fas fa-user-graduate text-indigo-500"></i> Selected</span>
                         <div class="text-right">
                             <span class="font-mono font-black text-slate-800">{{ number_format($funnel['selected']) }}</span>
                             <span class="text-[10px] text-slate-400 ml-1">({{ $selPct }}%)</span>
                         </div>
-                    </div>
+                    </a>
 
                     {{-- 6. Joined Successfully --}}
                     @php
                         $joinPct = $funnel['registered'] > 0 ? round(($funnel['joined'] / $funnel['registered']) * 100, 1) : 0;
                     @endphp
-                    <div class="p-2.5 rounded-xl bg-emerald-100/70 border border-emerald-200 flex items-center justify-between text-xs">
-                        <span class="font-bold text-emerald-900 flex items-center gap-2"><i class="fas fa-trophy text-emerald-600"></i> Joined Successfully</span>
+                    <a href="{{ route('admin.referrals.index', ['stage' => 'joined']) }}" class="p-2.5 rounded-xl bg-emerald-100/70 hover:bg-emerald-200/80 border border-emerald-200 flex items-center justify-between text-xs transition-all group cursor-pointer" title="View joined referrals">
+                        <span class="font-bold text-emerald-900 flex items-center gap-2 group-hover:translate-x-0.5 transition-transform"><i class="fas fa-trophy text-emerald-600"></i> Joined Successfully</span>
                         <div class="text-right">
                             <span class="font-mono font-black text-emerald-700">{{ number_format($funnel['joined']) }}</span>
                             <span class="text-[10px] text-emerald-700 ml-1 font-bold">({{ $joinPct }}%)</span>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
             <div class="text-[10px] text-slate-400 text-center border-t border-slate-100 pt-2.5 mt-2">
