@@ -166,9 +166,14 @@
 
             if (config.showBadge) {
                 badge.classList.remove('hidden');
+                badge.classList.add('inline-flex');
+                badge.style.display = 'inline-flex';
                 badge.innerHTML = config.badgeHtml;
             } else {
                 badge.classList.add('hidden');
+                badge.classList.remove('inline-flex');
+                badge.style.display = 'none';
+                badge.innerHTML = '';
             }
 
             title.textContent = config.title;
