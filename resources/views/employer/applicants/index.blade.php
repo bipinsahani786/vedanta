@@ -88,6 +88,7 @@
                     <td class="py-4 px-6 text-right">
                         @php
                             $candidateData = [
+                                'candidate_id' => $app->candidate->id,
                                 'name' => $app->candidate->name,
                                 'is_verified' => (bool)($app->candidate->profile?->is_verified ?? false),
                                 'email' => $app->candidate->email,
@@ -298,6 +299,20 @@
         } else {
             resumeBtn.classList.add('hidden');
             noResume.classList.remove('hidden');
+        }
+
+        // Asynchronously track view for candidate
+        if (data.candidate_id) {
+            fetch('{{ url('/employer/candidate') }}/' + data.candidate_id + '/track-view', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            }).catch(function(err) {
+                console.debug('Candidate view tracking error:', err);
+            });
         }
 
         document.getElementById('employerCandidateModal').classList.remove('hidden');

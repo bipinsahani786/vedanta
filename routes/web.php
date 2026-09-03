@@ -152,8 +152,8 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             $q->where('status', 'interviewed')->orWhereNotNull('interview_date');
         })->count() : 0;
 
-        // Profile Views
-        $profileViews = $profile ? ($profile->views_count ?? max(12, $applicationsCount * 4 + 7)) : 12;
+        // Profile Views (Dynamic from actual views recorded)
+        $profileViews = $profile ? (int)($profile->views_count ?? 0) : 0;
 
         // Referral Wallet & Points
         $wallet = $user ? \App\Services\ReferralService::getWallet($user) : null;
@@ -281,6 +281,7 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
     Route::post('/profile', [\App\Http\Controllers\Employer\ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/applicants', [\App\Http\Controllers\Employer\ApplicantController::class, 'index'])->name('applicants.index');
+    Route::post('/candidate/{id}/track-view', [\App\Http\Controllers\Employer\ApplicantController::class, 'trackView'])->name('candidate.trackView');
 });
 
 // Global Impersonation Leave Route
