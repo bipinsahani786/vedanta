@@ -137,6 +137,45 @@
         </div>
     </div>
 
+    {{-- Refer & Earn Top Promo Banner --}}
+    <div class="bg-gradient-to-r from-amber-500/15 via-[#0a1e4a]/95 to-[#1a103c]/90 backdrop-blur-xl border border-amber-500/30 rounded-3xl p-4 sm:p-5 shadow-[0_6px_25px_rgba(245,158,11,0.12)] flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden group hover:border-amber-400/50 transition-all duration-300">
+        <div class="absolute -right-12 -top-12 w-40 h-40 bg-amber-400/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute left-1/3 -bottom-10 w-32 h-32 bg-sky-400/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="flex flex-col sm:flex-row items-center sm:items-center gap-3.5 sm:gap-4 text-center sm:text-left z-10">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 flex items-center justify-center text-xl shadow-[0_4px_15px_rgba(245,158,11,0.35)] shrink-0 group-hover:scale-105 transition-transform">
+                <i class="fas fa-gift"></i>
+            </div>
+            <div>
+                <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                    <h3 class="text-sm sm:text-base font-black text-white flex items-center gap-1.5 tracking-tight">
+                        <span class="text-amber-400">Refer & Earn Points</span>
+                    </h3>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400/15 text-amber-300 border border-amber-400/30 shadow-sm">
+                        🎁 Bonus Points on Every Friend
+                    </span>
+                </div>
+                <p class="text-xs text-slate-300/90 mt-0.5 font-medium">
+                    Invite fellow educators & earn discount points on your service charge!
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 shrink-0 z-10 w-full sm:w-auto justify-center">
+            @if(auth()->user()->referral_code)
+                <div class="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white">
+                    <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Your Code:</span>
+                    <strong class="text-amber-400 font-mono font-bold tracking-wider">{{ auth()->user()->referral_code }}</strong>
+                </div>
+            @endif
+            <a href="{{ route('candidate.referral.index') }}" 
+               class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs shadow-lg hover:shadow-[0_4px_20px_rgba(245,158,11,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 shrink-0">
+                <i class="fas fa-share-alt text-xs"></i>
+                <span>Refer Friends</span>
+            </a>
+        </div>
+    </div>
+
     {{-- Metrics / Stat Cards (Row of 5 Cards) --}}
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
         {{-- Card 1: Applications --}}

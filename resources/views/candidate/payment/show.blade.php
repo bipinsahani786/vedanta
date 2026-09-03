@@ -73,9 +73,8 @@
                 </div>
             </div>
             <div class="pt-3 mt-3 border-t border-white/[0.08]">
-                <a href="{{ route('candidate.referral.index') }}" class="w-full py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sky-400 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
-                    <i class="fas fa-plus text-[10px]"></i>
-                    <span>Add Money</span>
+                <a href="{{ route('candidate.referral.index') }}" class="w-full py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
+                    <span>View Wallet</span>
                 </a>
             </div>
         </div>

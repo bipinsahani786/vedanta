@@ -436,7 +436,174 @@
         </div>
     </section>
 
-    
+    <!-- Refer & Earn Showcase Section -->
+    <section class="py-20 px-6 lg:px-[5%] relative overflow-hidden bg-gradient-to-br from-[#031544] via-[#071d5a] to-[#160c38] text-white">
+        <!-- Ambient decorative blurs -->
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto relative z-10">
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-extrabold uppercase tracking-wider mb-4 shadow-sm">
+                    <i class="fas fa-gift text-sm animate-bounce"></i>
+                    <span>Refer & Earn Program</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+                    Invite Fellow Educators, <br class="hidden sm:inline">
+                    <span class="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-200 bg-clip-text text-transparent">Earn Reward Points & Save</span>
+                </h2>
+                <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
+                    Know a passionate teacher looking for their dream school? Refer them to Vedanta Placement Agency and earn points at every stage of their onboarding and placement!
+                </p>
+            </div>
+
+            <!-- 3-Step Process Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <!-- Card 1 -->
+                <div class="bg-white/[0.05] backdrop-blur-xl border border-white/10 rounded-3xl p-7 flex flex-col justify-between hover:border-amber-400/50 hover:bg-white/[0.08] hover:-translate-y-1.5 transition-all duration-300 shadow-xl group reveal">
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="w-14 h-14 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-amber-400 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                                <i class="fas fa-share-nodes"></i>
+                            </div>
+                            <span class="text-2xl font-black text-white/20 group-hover:text-amber-400/40 transition-colors">01</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Share Your Link</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Get your unique referral link and invite fellow teachers via WhatsApp, email, or social media.
+                        </p>
+                    </div>
+                    <div class="pt-6 mt-6 border-t border-white/10 flex items-center gap-2 text-amber-400 text-xs font-bold">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Instant Invitation Link</span>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white/[0.05] backdrop-blur-xl border border-white/10 rounded-3xl p-7 flex flex-col justify-between hover:border-sky-400/50 hover:bg-white/[0.08] hover:-translate-y-1.5 transition-all duration-300 shadow-xl group reveal reveal-delay-1">
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="w-14 h-14 rounded-2xl bg-sky-400/15 border border-sky-400/30 text-sky-400 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <span class="text-2xl font-black text-white/20 group-hover:text-sky-400/40 transition-colors">02</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Friend Joins Vedanta</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Your friend registers, completes their teacher profile, gets verified, and secures a teaching position.
+                        </p>
+                    </div>
+                    <div class="pt-6 mt-6 border-t border-white/10 flex items-center gap-2 text-sky-400 text-xs font-bold">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Track Live Onboarding</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white/[0.05] backdrop-blur-xl border border-white/10 rounded-3xl p-7 flex flex-col justify-between hover:border-emerald-400/50 hover:bg-white/[0.08] hover:-translate-y-1.5 transition-all duration-300 shadow-xl group reveal reveal-delay-2">
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-400/15 border border-emerald-400/30 text-emerald-400 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <span class="text-2xl font-black text-white/20 group-hover:text-emerald-400/40 transition-colors">03</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Earn & Save 30%</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Earn up to 900+ points per placement and redeem your reward points against Vedanta service charges.
+                        </p>
+                    </div>
+                    <div class="pt-6 mt-6 border-t border-white/10 flex items-center gap-2 text-emerald-400 text-xs font-bold">
+                        <i class="fas fa-check-circle"></i>
+                        <span>100 Pts = ₹50 Discount</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reward Stages & Milestone Showcase Banner -->
+            <div class="bg-gradient-to-r from-white/[0.07] via-white/[0.04] to-white/[0.07] backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl reveal">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <!-- Left: Reward Stages Breakdown -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-amber-400">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Points Earned at Every Stage</span>
+                        </div>
+                        <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                            Earn Up to <span class="text-amber-400">900 Reward Points (₹450)</span> Per Friend
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            You receive rewards incrementally as your friend progresses through registration, profile verification, interview, and placement:
+                        </p>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                            <div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                                <span class="text-[11px] text-slate-400 font-medium block">Registration</span>
+                                <span class="text-sm font-extrabold text-amber-400 mt-0.5 block">+50 Pts</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                                <span class="text-[11px] text-slate-400 font-medium block">Profile Verified</span>
+                                <span class="text-sm font-extrabold text-sky-400 mt-0.5 block">+200 Pts</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                                <span class="text-[11px] text-slate-400 font-medium block">Interview Done</span>
+                                <span class="text-sm font-extrabold text-purple-400 mt-0.5 block">+150 Pts</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                                <span class="text-[11px] text-slate-400 font-medium block">Joined School</span>
+                                <span class="text-sm font-extrabold text-emerald-400 mt-0.5 block">+500 Pts</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                                <span class="text-[11px] text-slate-400 font-medium block">Friend's Bonus</span>
+                                <span class="text-sm font-extrabold text-amber-300 mt-0.5 block">100 Welcome Pts</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-center">
+                                <span class="text-[11px] text-amber-300 font-bold block">Milestone Bonus</span>
+                                <span class="text-sm font-black text-amber-400 mt-0.5 block">Up to +5,000 Pts</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Call to Action Card -->
+                    <div class="lg:col-span-5 bg-gradient-to-br from-[#0a1e4a] to-[#040e2d] border border-white/15 rounded-2xl p-6 sm:p-7 text-center space-y-4 shadow-xl">
+                        <div class="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 flex items-center justify-center text-2xl shadow-lg">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h4 class="text-xl font-black text-white">Start Earning Rewards Today</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Sign up or log in as a candidate to access your referral code, shareable links, and track your wallet balance in real-time.
+                        </p>
+                        
+                        <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                            @auth
+                                @if(auth()->user()->role === 'candidate')
+                                    <a href="{{ route('candidate.referral.index') }}" class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg hover:shadow-[0_4px_20px_rgba(245,158,11,0.4)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                        <i class="fas fa-wallet"></i>
+                                        <span>Open My Referral Hub</span>
+                                    </a>
+                                @else
+                                    <a href="{{ route('candidate.dashboard') }}" class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                        <span>Go to Dashboard</span>
+                                    </a>
+                                @endif
+                            @else
+                                <button type="button" onclick="openAuthChoiceModal('register')" class="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg hover:shadow-[0_4px_20px_rgba(245,158,11,0.4)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-user-plus"></i>
+                                    <span>Register & Refer</span>
+                                </button>
+                                <button type="button" onclick="openAuthChoiceModal('login')" class="w-full py-3 px-5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-bold text-xs sm:text-sm hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-arrow-right-to-bracket"></i>
+                                    <span>Login</span>
+                                </button>
+                            @endauth
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Testimonial Section -->
     <section class="py-20 px-6 lg:px-[5%] text-center relative bg-slate-50">
