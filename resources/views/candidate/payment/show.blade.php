@@ -316,8 +316,8 @@
 
                         <div>
                             <div class="mb-3">
-                                <span class="text-xl font-black text-white">₹1,000</span>
-                                <span class="text-[10px] text-slate-400 ml-1">Total (₹500 + ₹500)</span>
+                                <span class="text-xl font-black text-white">₹500</span>
+                                <span class="text-[10px] text-slate-400 ml-1">Plan Fee</span>
                             </div>
 
                             @if($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
@@ -377,8 +377,8 @@
 
                         <div>
                             <div class="mb-3">
-                                <span class="text-xl font-black text-purple-400">₹2,000</span>
-                                <span class="text-[10px] text-slate-400 ml-1">Total (₹1000 + ₹1000)</span>
+                                <span class="text-xl font-black text-purple-400">₹1,000</span>
+                                <span class="text-[10px] text-slate-400 ml-1">Plan Fee</span>
                             </div>
 
                             @if($profile->plan_type === 'premium' && $profile->is_fee_paid)
