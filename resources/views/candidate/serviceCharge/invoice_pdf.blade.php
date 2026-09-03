@@ -163,6 +163,9 @@
                 <div class="card">
                     <h3>Billed To (Candidate):</h3>
                     <p><strong>Name:</strong> {{ $user->name }}</p>
+                    @if($user->profile && $user->profile->vpa_id)
+                        <p><strong>Candidate ID:</strong> {{ $user->profile->vpa_id }}</p>
+                    @endif
                     <p><strong>Email:</strong> {{ $user->email }}</p>
                     <p><strong>Phone:</strong> {{ $user->phone ?? 'N/A' }}</p>
                 </div>
@@ -173,6 +176,12 @@
                     <p><strong>Issued Date:</strong> {{ $invoice->created_at ? $invoice->created_at->format('d M, Y') : 'N/A' }}</p>
                     <p><strong>Due Date:</strong> {{ $invoice->due_date ? \Carbon\Carbon::parse($invoice->due_date)->format('d M, Y') : 'N/A' }}</p>
                     <p><strong>Payment Status:</strong> {{ ucfirst($invoice->status) }}</p>
+                    @if(($invoice->discount_amount ?? 0) > 0)
+                        @php
+                            $coinsUsed = (float) ($invoice->points_redeemed > 0 ? $invoice->points_redeemed : $invoice->discount_amount);
+                        @endphp
+                        <p style="color: #166534;"><strong>Coins Discount:</strong> {{ number_format($coinsUsed, 0) }} Coins (-&#8377;{{ number_format($invoice->discount_amount, 2) }})</p>
+                    @endif
                     @if($invoice->status === 'paid' && $invoice->payment_date)
                         <p><strong>Payment Date:</strong> {{ \Carbon\Carbon::parse($invoice->payment_date)->format('d M, Y, h:i A') }}</p>
                     @endif
@@ -185,7 +194,7 @@
         <thead>
             <tr>
                 <th>Description</th>
-                <th>Job Post</th>
+                <th>Job Post / Notes</th>
                 <th class="amount-col">Amount (INR)</th>
             </tr>
         </thead>
@@ -200,6 +209,7 @@
                 </td>
                 <td class="amount-col">&#8377;{{ number_format($invoice->amount, 2) }}</td>
             </tr>
+
             @if(($invoice->late_fee ?? 0) > 0)
             <tr>
                 <td>
@@ -207,18 +217,59 @@
                     <small style="color: #ef4444;">Accrued late payment fee charges.</small>
                 </td>
                 <td>-</td>
-                <td class="amount-col" style="color: #dc2626;">&#8377;{{ number_format($invoice->late_fee, 2) }}</td>
+                <td class="amount-col" style="color: #dc2626;">+&#8377;{{ number_format($invoice->late_fee, 2) }}</td>
             </tr>
             @endif
+
+            @if(($invoice->discount_amount ?? 0) > 0)
+            @php
+                $coinsUsed = (float) ($invoice->points_redeemed > 0 ? $invoice->points_redeemed : $invoice->discount_amount);
+            @endphp
+            <tr style="background-color: #f0fdf4;">
+                <td>
+                    <strong style="color: #166534;">Wallet Coins / Referral Discount</strong><br>
+                    <small style="color: #166534;">
+                        {{ number_format($coinsUsed, 0) }} Coins used &minus;&gt; &minus;&#8377;{{ number_format($invoice->discount_amount, 2) }} deducted from invoice total.
+                    </small>
+                </td>
+                <td style="color: #166534; font-size: 11px;">
+                    {{ number_format($coinsUsed, 0) }} Coins redeemed
+                </td>
+                <td class="amount-col" style="color: #166534; font-weight: bold;">
+                    -&#8377;{{ number_format($invoice->discount_amount, 2) }}
+                </td>
+            </tr>
+            @endif
+
+            @if(($invoice->discount_amount ?? 0) > 0)
+            <tr>
+                <td colspan="2" style="text-align: right; color: #64748b; font-size: 12px;">Gross Total</td>
+                <td class="amount-col" style="color: #64748b; font-size: 12px;">&#8377;{{ number_format($invoice->gross_amount, 2) }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: right; color: #166534; font-size: 12px;">
+                    Less: Wallet Coins Discount ({{ number_format($coinsUsed, 0) }} Coins)
+                </td>
+                <td class="amount-col" style="color: #166534; font-size: 12px; font-weight: bold;">
+                    -&#8377;{{ number_format($invoice->discount_amount, 2) }}
+                </td>
+            </tr>
+            @endif
+
             <tr class="total-row">
-                <td colspan="2" style="text-align: right;">Total Amount {{ $invoice->status === 'paid' ? 'Paid' : 'Due' }}</td>
-                <td class="amount-col" style="color: #031b4e;">&#8377;{{ number_format($invoice->amount + ($invoice->late_fee ?? 0), 2) }}</td>
+                <td colspan="2" style="text-align: right;">
+                    Final Total Amount {{ $invoice->status === 'paid' ? 'Paid' : 'Due' }}
+                </td>
+                <td class="amount-col" style="color: #031b4e; font-size: 15px;">
+                    &#8377;{{ number_format($invoice->net_amount, 2) }}
+                </td>
             </tr>
         </tbody>
     </table>
 
     <div class="footer">
         <p><strong>Vedanta Placement Agency</strong> — Empowering Educational Leadership across India</p>
+        <p>Career Point Building, 2nd floor, Patna, 800001, Bihar | Email: info@vedantaplacementagency.in</p>
         <p>This is a computer-generated document. No signature required.</p>
     </div>
 

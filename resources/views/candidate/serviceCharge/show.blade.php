@@ -165,6 +165,7 @@
                     @php
                         $gross = $pendingInvoice->amount + $pendingInvoice->late_fee;
                         $discount = (float) ($pendingInvoice->discount_amount ?? 0);
+                        $coinsUsed = (float) ($pendingInvoice->points_redeemed > 0 ? $pendingInvoice->points_redeemed : $discount);
                         $netPayable = max(0, $gross - $discount);
                     @endphp
                     <div class="mb-4 p-4 rounded-xl bg-gradient-to-r from-amber-500/15 via-[#0c1e50] to-[#120f38] border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
@@ -175,10 +176,15 @@
                                 </span>
                                 <span class="text-xs text-slate-300 font-medium">Due by {{ \Carbon\Carbon::parse($pendingInvoice->due_date)->format('d M, Y') }}</span>
                             </div>
-                            <div class="text-lg font-black text-white mt-1">
-                                ₹{{ number_format($netPayable, 2) }}
+                            <div class="text-lg font-black text-white mt-1 flex items-center flex-wrap gap-2">
                                 @if($discount > 0)
-                                    <span class="text-xs text-emerald-400 font-semibold ml-2">(-₹{{ number_format($discount, 0) }} wallet discount)</span>
+                                    <span class="text-sm text-slate-400 line-through">₹{{ number_format($gross, 2) }}</span>
+                                @endif
+                                <span>₹{{ number_format($netPayable, 2) }}</span>
+                                @if($discount > 0)
+                                    <span class="text-xs text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-md">
+                                        -₹{{ number_format($discount, 0) }} ({{ number_format($coinsUsed, 0) }} coins used)
+                                    </span>
                                 @endif
                             </div>
                         </div>
