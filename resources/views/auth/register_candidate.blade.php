@@ -115,6 +115,46 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
+                        <label for="category_id" class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">
+                            Job Category <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40 pointer-events-none"><i class="fas fa-layer-group text-sm"></i></span>
+                            @php
+                                $candidateCategories = \App\Models\Category::with(['subjects' => function($q) {
+                                    $q->where('subjects.is_active', true)->orderBy('name');
+                                }])->where('is_active', true)->orderBy('name')->get();
+                            @endphp
+                            <select id="category_id" name="category_id" required onchange="handleCandidateCategoryChange(this.value)"
+                                class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-10 py-3 text-sm text-text-main placeholder-text-dark/40 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none cursor-pointer">
+                                <option value="" style="background-color: #040e2d; color: #94a3b8;">Select Category</option>
+                                @foreach($candidateCategories as $category)
+                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }} style="background-color: #040e2d; color: #ffffff;">
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-text-dark/40 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="subject_id" class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">
+                            Subject <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40 pointer-events-none"><i class="fas fa-book text-sm"></i></span>
+                            <select id="subject_id" name="subject_id" required
+                                class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-10 py-3 text-sm text-text-main placeholder-text-dark/40 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none cursor-pointer">
+                                <option value="" style="background-color: #040e2d; color: #94a3b8;">Select Subject</option>
+                            </select>
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-text-dark/40 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
                         <label for="password" class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Password</label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-lock text-sm"></i></span>
@@ -222,4 +262,81 @@
         </div>
     </div>
 </div>
+
+<script>
+    const candidateCategorySubjectsMap = {
+        @foreach($candidateCategories as $cat)
+            "{{ $cat->id }}": [
+                @foreach($cat->subjects as $sub)
+                    { id: "{{ $sub->id }}", name: "{{ addslashes($sub->name) }}" },
+                @endforeach
+            ],
+        @endforeach
+    };
+
+    function populateCandidateSubjects(subjects, selectedSubjectId = null) {
+        const subjectSelect = document.getElementById('subject_id');
+        if (!subjectSelect) return;
+
+        subjectSelect.innerHTML = '<option value="" style="background-color: #040e2d; color: #94a3b8;">Select Subject</option>';
+
+        if (!subjects || subjects.length === 0) {
+            subjectSelect.innerHTML = '<option value="" style="background-color: #040e2d; color: #94a3b8;">No subjects available</option>';
+            return;
+        }
+
+        subjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.id;
+            option.textContent = subject.name;
+            option.style.backgroundColor = '#040e2d';
+            option.style.color = '#ffffff';
+            if (selectedSubjectId && String(subject.id) === String(selectedSubjectId)) {
+                option.selected = true;
+            }
+            subjectSelect.appendChild(option);
+        });
+    }
+
+    function handleCandidateCategoryChange(categoryId, selectedSubjectId = null) {
+        const subjectSelect = document.getElementById('subject_id');
+        if (!subjectSelect) return;
+
+        if (!categoryId) {
+            subjectSelect.innerHTML = '<option value="" style="background-color: #040e2d; color: #94a3b8;">Select Subject (Choose category first)</option>';
+            return;
+        }
+
+        if (candidateCategorySubjectsMap[categoryId] && candidateCategorySubjectsMap[categoryId].length > 0) {
+            populateCandidateSubjects(candidateCategorySubjectsMap[categoryId], selectedSubjectId);
+            return;
+        }
+
+        subjectSelect.innerHTML = '<option value="" style="background-color: #040e2d; color: #94a3b8;">Loading subjects...</option>';
+        fetch("{{ url('/api/categories') }}/" + categoryId + "/subjects")
+            .then(res => res.json())
+            .then(data => {
+                candidateCategorySubjectsMap[categoryId] = data;
+                populateCandidateSubjects(data, selectedSubjectId);
+            })
+            .catch(() => {
+                populateCandidateSubjects([], null);
+            });
+    }
+
+    (function initCandidateCategorySubject() {
+        function runInit() {
+            const categorySelect = document.getElementById('category_id');
+            const oldSubjectId = "{{ old('subject_id') }}";
+            if (categorySelect && categorySelect.value) {
+                handleCandidateCategoryChange(categorySelect.value, oldSubjectId);
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runInit);
+        } else {
+            runInit();
+        }
+    })();
+</script>
 @endsection
