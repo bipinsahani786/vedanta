@@ -216,6 +216,10 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             }
         }
 
+        // Saved Jobs for Candidate
+        $savedJobIds = $user ? \App\Models\SavedJob::where('user_id', $user->id)->pluck('job_post_id')->toArray() : [];
+        $savedJobsCount = count($savedJobIds);
+
         return view('candidate.dashboard', compact(
             'profile',
             'applicationsCount',
@@ -229,9 +233,15 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             'profileStrength',
             'recommendedJobs',
             'notifications',
-            'leaderboard'
+            'leaderboard',
+            'savedJobIds',
+            'savedJobsCount'
         ));
     })->name('dashboard');
+
+    // Saved Jobs Routes
+    Route::post('/jobs/{job}/toggle-save', [\App\Http\Controllers\Candidate\SavedJobController::class, 'toggle'])->name('jobs.toggleSave');
+    Route::get('/saved-jobs', [\App\Http\Controllers\Candidate\SavedJobController::class, 'index'])->name('savedJobs.index');
 });
 
 // Candidate Routes (Protected & Verified)

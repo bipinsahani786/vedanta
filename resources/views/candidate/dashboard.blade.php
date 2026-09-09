@@ -509,16 +509,23 @@
                     </a>
 
                     {{-- 3. Saved Jobs --}}
-                    <a href="{{ route('candidate.applications.index') }}" 
+                    <a href="{{ route('candidate.savedJobs.index') }}" 
                        class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-emerald-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(52,211,153,0.2)] transition-all duration-300 flex flex-col justify-between group">
                         <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
                             <i class="fas fa-bookmark"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs font-bold text-white">Saved Jobs</h4>
-                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">View and manage applications</p>
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xs font-bold text-white">Saved Jobs</h4>
+                                @if(!empty($savedJobsCount) && $savedJobsCount > 0)
+                                    <span class="px-1.5 py-0.2 rounded-md text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                        {{ $savedJobsCount }}
+                                    </span>
+                                @endif
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">View your bookmarked jobs</p>
                             <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-3 group-hover:translate-x-1 transition-transform">
-                                <span>View Saved</span>
+                                <span>View Saved ({{ $savedJobsCount ?? 0 }})</span>
                                 <i class="fas fa-arrow-right text-[9px]"></i>
                             </span>
                         </div>
@@ -573,8 +580,37 @@
                                             <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{{ $job->school_name }}</p>
                                         </div>
                                     </div>
-                                    <button type="button" class="text-slate-500 hover:text-accent-blue transition-colors p-1" title="Save Job">
-                                        <i class="far fa-bookmark text-xs"></i>
+                                    <button type="button" 
+                                            x-data="{
+                                                isSaved: {{ in_array($job->id, $savedJobIds ?? []) ? 'true' : 'false' }},
+                                                loading: false,
+                                                async toggleSave() {
+                                                    if (this.loading) return;
+                                                    this.loading = true;
+                                                    try {
+                                                        const res = await fetch('{{ route('candidate.jobs.toggleSave', $job->id) }}', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                                'Accept': 'application/json'
+                                                            }
+                                                        });
+                                                        const data = await res.json();
+                                                        this.isSaved = data.saved;
+                                                    } catch (e) {
+                                                        console.error('Error saving job:', e);
+                                                    } finally {
+                                                        this.loading = false;
+                                                    }
+                                                }
+                                            }"
+                                            @click.prevent.stop="toggleSave()"
+                                            :disabled="loading"
+                                            :class="isSaved ? 'text-amber-400 hover:text-amber-300 scale-110' : 'text-slate-500 hover:text-accent-blue'"
+                                            class="transition-all p-1.5 rounded-lg hover:bg-white/10 active:scale-90"
+                                            :title="isSaved ? 'Remove from Saved' : 'Save Job'">
+                                        <i :class="isSaved ? 'fas fa-bookmark text-xs text-amber-400' : 'far fa-bookmark text-xs'"></i>
                                     </button>
                                 </div>
 

@@ -123,4 +123,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(ReferralRedemption::class, 'user_id')->latest();
     }
+
+    public function savedJobs()
+    {
+        return $this->hasMany(SavedJob::class, 'user_id')->latest();
+    }
 }

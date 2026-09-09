@@ -3,6 +3,7 @@
     $user = auth()->user();
     $profile = $user ? ($user->profile ?: null) : null;
     $appCount = $user ? $user->applications()->count() : 0;
+    $savedCount = $user ? \App\Models\SavedJob::where('user_id', $user->id)->count() : 0;
     $isAgreementSigned = $profile && $profile->is_agreement_signed;
     $isVerified = $profile && $profile->is_verified;
     $isDrawer = $isMobileDrawer ?? false;
@@ -30,6 +31,14 @@
                     'label' => 'My Applications',
                     'badge' => $appCount,
                     'badgeClass' => 'bg-accent-blue/25 text-accent-blue border border-accent-blue/30',
+                ],
+                [
+                    'route' => 'candidate.savedJobs.index',
+                    'routeIs' => 'candidate.savedJobs.*',
+                    'icon' => 'fa-bookmark',
+                    'label' => 'Saved Jobs',
+                    'badge' => $savedCount > 0 ? $savedCount : null,
+                    'badgeClass' => 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
                 ],
                 [
                     'route' => 'candidate.applications.available',
