@@ -163,125 +163,16 @@
         --}}
     </div>
 
-    {{-- Middle Section (2 Columns): Payment Progress (Left) + Upgrade Your Plan (Right) --}}
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch" id="plans-section">
-
-        {{-- Left: Payment Progress Timeline --}}
-        <div class="lg:col-span-6 bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.25)] flex flex-col justify-between">
-            <div>
-                <h3 class="text-base font-bold text-white mb-6">Payment Progress</h3>
-
-                {{-- Horizontal Stepper with Lines --}}
-                <div class="relative flex items-start justify-between mb-8 px-2 sm:px-6">
-                    {{-- Connecting Line 1 (Step 1 to Step 2) --}}
-                    <div class="absolute left-8 sm:left-14 right-1/2 top-5 h-0.5 {{ ($profile->initial_fee_paid || $profile->is_fee_paid) ? 'bg-emerald-500' : 'bg-white/10' }} -z-0"></div>
-                    {{-- Connecting Line 2 (Step 2 to Step 3) --}}
-                    <div class="absolute left-1/2 right-8 sm:right-14 top-5 h-0.5 {{ $profile->is_fee_paid ? 'bg-emerald-500' : 'bg-white/10' }} -z-0"></div>
-
-                    {{-- Step 1: Registration Fee --}}
-                    <div class="relative z-10 flex flex-col items-center text-center max-w-[110px]">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shadow-md {{ ($profile->initial_fee_paid || $profile->is_fee_paid) ? 'bg-emerald-500 text-white ring-4 ring-emerald-500/20' : 'bg-[#0a1e4a] border-2 border-accent-blue text-accent-blue' }}">
-                            <i class="fas {{ ($profile->initial_fee_paid || $profile->is_fee_paid) ? 'fa-check' : 'fa-receipt' }}"></i>
-                        </div>
-                        <span class="text-xs font-bold text-white mt-3 leading-tight">Registration Fee</span>
-                        <span class="text-sm font-black text-white mt-0.5">₹500</span>
-                        <span class="text-[10px] font-semibold {{ ($profile->initial_fee_paid || $profile->is_fee_paid) ? 'text-emerald-400' : 'text-slate-400' }} mt-1">
-                            {{ ($profile->initial_fee_paid || $profile->is_fee_paid) ? 'Paid on ' . ($registrationPaidDate ?? '19 Aug 2024') : 'Pending' }}
-                        </span>
-                    </div>
-
-                    {{-- Step 2: Final Registration Payment --}}
-                    <div class="relative z-10 flex flex-col items-center text-center max-w-[125px]">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shadow-md {{ $profile->is_fee_paid ? 'bg-emerald-500 text-white ring-4 ring-emerald-500/20' : ($profile->initial_fee_paid ? 'bg-blue-600 text-white ring-4 ring-blue-500/25 font-black' : 'bg-white/5 border border-white/10 text-white/40') }}">
-                            @if($profile->is_fee_paid)
-                                <i class="fas fa-check"></i>
-                            @else
-                                <span>2</span>
-                            @endif
-                        </div>
-                        <span class="text-xs font-bold text-white mt-3 leading-tight">Final Registration Payment</span>
-                        <span class="text-sm font-black text-white mt-0.5">₹500</span>
-                        <span class="text-[10px] font-semibold {{ $profile->is_fee_paid ? 'text-emerald-400' : 'text-amber-400' }} mt-1">
-                            {{ $profile->is_fee_paid ? 'Paid' : 'Pending Payment' }}
-                        </span>
-                    </div>
-
-                    {{-- Step 3: Service Charge --}}
-                    <div class="relative z-10 flex flex-col items-center text-center max-w-[110px]">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shadow-md bg-white/5 border border-white/10 text-slate-400">
-                            <span>3</span>
-                        </div>
-                        <span class="text-xs font-bold text-white mt-3 leading-tight">Service Charge</span>
-                        <span class="text-xs font-semibold text-slate-300 mt-0.5">After Joining</span>
-                        <span class="text-[10px] text-slate-400 mt-1 leading-tight">
-                            Pay after 1st month salary
-                        </span>
-                    </div>
-                </div>
+    {{-- Upgrade Your Plan Section --}}
+    <div id="plans-section" class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
+        <div>
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base font-bold text-white">Upgrade Your Plan</h3>
+                <a href="#plans-section" class="text-xs font-semibold text-accent-blue hover:text-white flex items-center gap-1.5 transition-colors">
+                    <i class="fas fa-sliders-h text-[10px]"></i>
+                    <span>Compare Plans</span>
+                </a>
             </div>
-
-            {{-- Alert Callout Container --}}
-            @if(!$profile->is_fee_paid && $profile->initial_fee_paid)
-                <div class="bg-[#0b1b4d]/90 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-inner">
-                    <div class="flex items-center gap-3.5">
-                        <div class="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl shrink-0 shadow-sm">
-                            <i class="fas fa-file-invoice-dollar"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-white">Final registration payment of ₹500 is pending.</h4>
-                            <p class="text-[11px] text-slate-300 mt-0.5">Complete your payment to activate full access and apply to more schools.</p>
-                        </div>
-                    </div>
-                    <form action="{{ route('candidate.payment.process') }}" method="POST" class="shrink-0 w-full sm:w-auto">
-                        @csrf
-                        <input type="hidden" name="plan" value="upgrade">
-                        <button type="submit" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-accent-yellow hover:brightness-110 text-slate-950 font-black text-xs shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5">
-                            <span>Pay Now</span>
-                            <i class="fas fa-arrow-right text-[10px]"></i>
-                        </button>
-                    </form>
-                </div>
-            @elseif(!$profile->initial_fee_paid)
-                <div class="bg-[#0b1b4d]/90 border border-accent-blue/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-inner">
-                    <div class="flex items-center gap-3.5">
-                        <div class="w-11 h-11 rounded-xl bg-accent-blue/20 text-accent-blue flex items-center justify-center text-xl shrink-0 shadow-sm">
-                            <i class="fas fa-credit-card"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-white">Initial registration payment of ₹500 is pending.</h4>
-                            <p class="text-[11px] text-slate-300 mt-0.5">Complete your payment to activate your profile and unlock job applications.</p>
-                        </div>
-                    </div>
-                    <form action="{{ route('candidate.payment.process') }}" method="POST" class="shrink-0 w-full sm:w-auto">
-                        @csrf
-                        <input type="hidden" name="plan" value="basic">
-                        <button type="submit" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-accent-blue hover:bg-accent-blue-hover text-white font-black text-xs shadow-[0_4px_15px_rgba(18,154,239,0.35)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5">
-                            <span>Pay Now</span>
-                            <i class="fas fa-arrow-right text-[10px]"></i>
-                        </button>
-                    </form>
-                </div>
-            @else
-                <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3.5 text-emerald-300">
-                    <i class="fas fa-check-circle text-emerald-400 text-2xl shrink-0"></i>
-                    <div class="text-xs">
-                        <span class="font-bold">All registration payments completed!</span>
-                        <p class="text-emerald-200/80 text-[11px] mt-0.5">Your profile is fully verified. The service charge of 50% will be payable only after you join a school.</p>
-                    </div>
-                </div>
-            @endif
-        </div>
-
-        {{-- Right: Upgrade Your Plan --}}
-        <div class="lg:col-span-6 bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.25)] flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-base font-bold text-white">Upgrade Your Plan</h3>
-                    <a href="#plans-section" class="text-xs font-semibold text-accent-blue hover:text-white flex items-center gap-1.5 transition-colors">
-                        <i class="fas fa-sliders-h text-[10px]"></i>
-                        <span>Compare Plans</span>
-                    </a>
-                </div>
 
                 {{-- 2 Plan Cards Side-by-Side --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -407,7 +298,6 @@
                 <span>Upgrade to Premium Plan and get priority access to top schools.</span>
             </div>
         </div>
-
     </div>
 
     {{-- Bottom Section (2 Columns): Payment History (Left 7) + Invoices (Right 5) --}}
