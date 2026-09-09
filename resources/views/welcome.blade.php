@@ -437,22 +437,38 @@
     </section>
 
     <!-- Refer & Earn Showcase Section -->
-    <section class="py-20 px-6 lg:px-[5%] relative overflow-hidden bg-gradient-to-br from-[#031544] via-[#071d5a] to-[#160c38] text-white">
-        <!-- Ambient decorative blurs -->
-        <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <section class="pt-24 pb-32 px-6 lg:px-[5%] relative overflow-hidden bg-gradient-to-b from-[#031b4e] via-[#04153f] to-[#020b22] text-white">
+        <!-- Top Seamless Luminous Boundary -->
+        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 via-amber-400/40 to-transparent"></div>
+        
+        <!-- Top Center Illumination Beam -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-44 bg-gradient-to-b from-sky-500/15 via-amber-400/10 to-transparent blur-3xl pointer-events-none"></div>
+
+        <!-- Tech Dot-Matrix Texture Overlay -->
+        <div class="absolute inset-0 opacity-[0.14] pointer-events-none" 
+             style="background-image: radial-gradient(rgba(255,255,255,0.25) 1px, transparent 1px); background-size: 32px 32px; -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 95%); mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 95%);">
+        </div>
+
+        <!-- Vibrant Multi-Color Ambient Mesh Glows -->
+        <div class="absolute top-1/4 -left-32 w-[520px] h-[520px] bg-sky-500/15 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute top-1/3 -right-32 w-[540px] h-[540px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute bottom-20 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-amber-500/12 rounded-full blur-[150px] pointer-events-none"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[400px] bg-blue-600/10 rounded-full blur-[160px] pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto relative z-10">
             <!-- Section Header -->
             <div class="text-center max-w-3xl mx-auto mb-16 reveal">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-extrabold uppercase tracking-wider mb-4 shadow-sm">
-                    <i class="fas fa-gift text-sm animate-bounce"></i>
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-400/20 via-amber-400/10 to-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-black uppercase tracking-wider mb-4 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                    <i class="fas fa-gift text-sm text-amber-400"></i>
                     <span>Refer & Earn Program</span>
                 </div>
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
                     Invite Fellow Educators, <br class="hidden sm:inline">
-                    <span class="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-200 bg-clip-text text-transparent">Earn Reward Points & Save</span>
+                    <span class="bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-300 bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(245,158,11,0.3)]">Earn Reward Points & Save</span>
                 </h2>
                 <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
                     Know a passionate teacher looking for their dream school? Refer them to Vedanta Placement Agency and earn points at every stage of their onboarding and placement!
@@ -460,17 +476,18 @@
             </div>
 
             <!-- 3-Step Process Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
                 <!-- Card 1 -->
-                <div class="bg-white/[0.05] backdrop-blur-xl border border-white/10 rounded-3xl p-7 flex flex-col justify-between hover:border-amber-400/50 hover:bg-white/[0.08] hover:-translate-y-1.5 transition-all duration-300 shadow-xl group reveal">
+                <div class="relative bg-gradient-to-b from-white/[0.08] to-white/[0.02] backdrop-blur-2xl border border-white/[0.12] rounded-3xl p-7 sm:p-8 flex flex-col justify-between hover:border-amber-400/50 hover:bg-white/[0.09] hover:-translate-y-2 transition-all duration-300 shadow-[0_10px_35px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(245,158,11,0.15)] group reveal overflow-hidden">
+                    <div class="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:via-amber-400/60 transition-all"></div>
                     <div>
                         <div class="flex items-center justify-between mb-6">
-                            <div class="w-14 h-14 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-amber-400 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400/20 to-amber-500/10 border border-amber-400/30 text-amber-400 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(245,158,11,0.2)] group-hover:scale-110 transition-transform">
                                 <i class="fas fa-share-nodes"></i>
                             </div>
-                            <span class="text-2xl font-black text-white/20 group-hover:text-amber-400/40 transition-colors">01</span>
+                            <span class="text-3xl font-black text-white/15 group-hover:text-amber-400/50 transition-colors font-mono">01</span>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Share Your Link</h3>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">Share Your Link</h3>
                         <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
                             Get your unique referral link and invite fellow teachers via WhatsApp, email, or social media.
                         </p>
@@ -482,15 +499,16 @@
                 </div>
 
                 <!-- Card 2 -->
-                <div class="bg-white/[0.05] backdrop-blur-xl border border-white/10 rounded-3xl p-7 flex flex-col justify-between hover:border-sky-400/50 hover:bg-white/[0.08] hover:-translate-y-1.5 transition-all duration-300 shadow-xl group reveal reveal-delay-1">
+                <div class="relative bg-gradient-to-b from-white/[0.08] to-white/[0.02] backdrop-blur-2xl border border-white/[0.12] rounded-3xl p-7 sm:p-8 flex flex-col justify-between hover:border-sky-400/50 hover:bg-white/[0.09] hover:-translate-y-2 transition-all duration-300 shadow-[0_10px_35px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(14,165,233,0.15)] group reveal reveal-delay-1 overflow-hidden">
+                    <div class="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:via-sky-400/60 transition-all"></div>
                     <div>
                         <div class="flex items-center justify-between mb-6">
-                            <div class="w-14 h-14 rounded-2xl bg-sky-400/15 border border-sky-400/30 text-sky-400 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-400/20 to-sky-500/10 border border-sky-400/30 text-sky-400 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(14,165,233,0.2)] group-hover:scale-110 transition-transform">
                                 <i class="fas fa-user-check"></i>
                             </div>
-                            <span class="text-2xl font-black text-white/20 group-hover:text-sky-400/40 transition-colors">02</span>
+                            <span class="text-3xl font-black text-white/15 group-hover:text-sky-400/50 transition-colors font-mono">02</span>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Friend Joins Vedanta</h3>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-sky-300 transition-colors">Friend Joins Vedanta</h3>
                         <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
                             Your friend registers, completes their teacher profile, gets verified, and secures a teaching position.
                         </p>
@@ -502,15 +520,16 @@
                 </div>
 
                 <!-- Card 3 -->
-                <div class="bg-white/[0.05] backdrop-blur-xl border border-white/10 rounded-3xl p-7 flex flex-col justify-between hover:border-emerald-400/50 hover:bg-white/[0.08] hover:-translate-y-1.5 transition-all duration-300 shadow-xl group reveal reveal-delay-2">
+                <div class="relative bg-gradient-to-b from-white/[0.08] to-white/[0.02] backdrop-blur-2xl border border-white/[0.12] rounded-3xl p-7 sm:p-8 flex flex-col justify-between hover:border-emerald-400/50 hover:bg-white/[0.09] hover:-translate-y-2 transition-all duration-300 shadow-[0_10px_35px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(16,185,129,0.15)] group reveal reveal-delay-2 overflow-hidden">
+                    <div class="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:via-emerald-400/60 transition-all"></div>
                     <div>
                         <div class="flex items-center justify-between mb-6">
-                            <div class="w-14 h-14 rounded-2xl bg-emerald-400/15 border border-emerald-400/30 text-emerald-400 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-emerald-500/10 border border-emerald-400/30 text-emerald-400 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(16,185,129,0.2)] group-hover:scale-110 transition-transform">
                                 <i class="fas fa-coins"></i>
                             </div>
-                            <span class="text-2xl font-black text-white/20 group-hover:text-emerald-400/40 transition-colors">03</span>
+                            <span class="text-3xl font-black text-white/15 group-hover:text-emerald-400/50 transition-colors font-mono">03</span>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Earn & Save 30%</h3>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors">Earn & Save 30%</h3>
                         <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
                             Earn up to 900+ points per placement and redeem your reward points against Vedanta service charges.
                         </p>
@@ -523,8 +542,12 @@
             </div>
 
             <!-- Reward Stages & Milestone Showcase Banner -->
-            <div class="bg-gradient-to-r from-white/[0.07] via-white/[0.04] to-white/[0.07] backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl reveal">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div class="relative bg-gradient-to-br from-white/[0.08] via-white/[0.04] to-white/[0.02] backdrop-blur-2xl border border-white/[0.12] rounded-3xl p-6 sm:p-8 lg:p-10 shadow-[0_25px_60px_rgba(0,0,0,0.4)] reveal overflow-hidden">
+                <!-- Inner subtle ambient highlights -->
+                <div class="absolute -top-20 -right-20 w-72 h-72 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-20 -left-20 w-72 h-72 bg-sky-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
                     <!-- Left: Reward Stages Breakdown -->
                     <div class="lg:col-span-7 space-y-4">
                         <div class="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-amber-400">
@@ -539,36 +562,37 @@
                         </p>
 
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-                            <div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                            <div class="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 hover:border-amber-400/30 transition-all text-center group">
                                 <span class="text-[11px] text-slate-400 font-medium block">Registration</span>
-                                <span class="text-sm font-extrabold text-amber-400 mt-0.5 block">+50 Pts</span>
+                                <span class="text-sm font-extrabold text-amber-400 mt-0.5 block group-hover:scale-105 transition-transform">+50 Pts</span>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                            <div class="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 hover:border-sky-400/30 transition-all text-center group">
                                 <span class="text-[11px] text-slate-400 font-medium block">Profile Verified</span>
-                                <span class="text-sm font-extrabold text-sky-400 mt-0.5 block">+200 Pts</span>
+                                <span class="text-sm font-extrabold text-sky-400 mt-0.5 block group-hover:scale-105 transition-transform">+200 Pts</span>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                            <div class="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 hover:border-purple-400/30 transition-all text-center group">
                                 <span class="text-[11px] text-slate-400 font-medium block">Interview Done</span>
-                                <span class="text-sm font-extrabold text-purple-400 mt-0.5 block">+150 Pts</span>
+                                <span class="text-sm font-extrabold text-purple-400 mt-0.5 block group-hover:scale-105 transition-transform">+150 Pts</span>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                            <div class="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 hover:border-emerald-400/30 transition-all text-center group">
                                 <span class="text-[11px] text-slate-400 font-medium block">Joined School</span>
-                                <span class="text-sm font-extrabold text-emerald-400 mt-0.5 block">+500 Pts</span>
+                                <span class="text-sm font-extrabold text-emerald-400 mt-0.5 block group-hover:scale-105 transition-transform">+500 Pts</span>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                            <div class="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 hover:border-amber-300/30 transition-all text-center group">
                                 <span class="text-[11px] text-slate-400 font-medium block">Friend's Bonus</span>
-                                <span class="text-sm font-extrabold text-amber-300 mt-0.5 block">100 Welcome Pts</span>
+                                <span class="text-sm font-extrabold text-amber-300 mt-0.5 block group-hover:scale-105 transition-transform">100 Welcome Pts</span>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-center">
+                            <div class="p-3.5 rounded-2xl bg-gradient-to-br from-amber-400/20 to-amber-500/10 border border-amber-400/30 text-center group shadow-sm">
                                 <span class="text-[11px] text-amber-300 font-bold block">Milestone Bonus</span>
-                                <span class="text-sm font-black text-amber-400 mt-0.5 block">Up to +5,000 Pts</span>
+                                <span class="text-sm font-black text-amber-400 mt-0.5 block group-hover:scale-105 transition-transform">Up to +5,000 Pts</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Right: Call to Action Card -->
-                    <div class="lg:col-span-5 bg-gradient-to-br from-[#0a1e4a] to-[#040e2d] border border-white/15 rounded-2xl p-6 sm:p-7 text-center space-y-4 shadow-xl">
-                        <div class="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 flex items-center justify-center text-2xl shadow-lg">
+                    <div class="lg:col-span-5 bg-gradient-to-br from-[#0a1f52] via-[#06153d] to-[#020b22] border border-amber-400/30 rounded-3xl p-6 sm:p-7 text-center space-y-4 shadow-[0_15px_40px_rgba(0,0,0,0.4)] relative overflow-hidden group">
+                        <div class="absolute -top-10 -right-10 w-36 h-36 bg-amber-400/15 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 flex items-center justify-center text-2xl shadow-[0_0_25px_rgba(245,158,11,0.35)] group-hover:scale-105 transition-transform">
                             <i class="fas fa-trophy"></i>
                         </div>
                         <h4 class="text-xl font-black text-white">Start Earning Rewards Today</h4>
@@ -602,6 +626,13 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Bottom Elegant Smooth Wave to Testimonial Section (slate-50) -->
+        <div class="absolute bottom-0 inset-x-0 w-full overflow-hidden leading-none pointer-events-none z-10">
+            <svg class="relative block w-full h-8 sm:h-12 text-slate-50" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M0,0 C150,90 350,-40 500,40 C650,120 900,10 1200,40 L1200,120 L0,120 Z" fill="currentColor"></path>
+            </svg>
         </div>
     </section>
 
