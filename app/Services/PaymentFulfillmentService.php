@@ -197,16 +197,23 @@ class PaymentFulfillmentService
 
             } elseif (str_starts_with($transactionId, 'UPGRADE_')) {
                 // --- UPGRADE TO PREMIUM PLAN ---
+                $newPaidAmount = max(1000, ($profile->paid_amount ?? 0) + $amountPaid);
                 $profile->update([
                     'plan_type' => 'premium',
                     'total_allowed_applications' => 3,
                     'initial_fee_paid' => true,
                     'is_fee_paid' => true,
-                    'paid_amount' => $profile->paid_amount + $amountPaid,
+                    'paid_amount' => $newPaidAmount,
                     'pending_amount' => 0,
                     'payment_id' => $txnId,
                     'plan_started_at' => now(),
                 ]);
+
+                // Clear any auto-generated pending balance invoice
+                ServiceChargeInvoice::where('candidate_id', $user->id)
+                    ->where('description', 'Standard Plan Remaining Placement Balance')
+                    ->where('status', 'pending')
+                    ->update(['status' => 'paid', 'payment_date' => now()]);
 
             } elseif (str_starts_with($transactionId, 'RENEW_BASIC_')) {
                 // --- RENEWAL TO BASIC / STANDARD PLAN ---
@@ -236,32 +243,65 @@ class PaymentFulfillmentService
                 ]);
 
             } else {
-                // --- INITIAL REGISTRATION / WIZARD PAYMENT (TXN_ / MANUAL_) ---
-                $isPremium = ($pendingPlanType === 'premium') || ($amountPaid >= 1000);
+                // --- INITIAL REGISTRATION / WIZARD / GENERAL PAYMENT (TXN_ / MANUAL_) ---
+                $currentPaid = (float)($profile->paid_amount ?? 0);
+                $newTotalPaid = $currentPaid + (float)$amountPaid;
 
-                if ($isPremium) {
-                    $profile->update([
-                        'plan_type' => 'premium',
-                        'total_allowed_applications' => 3,
-                        'initial_fee_paid' => true,
-                        'is_fee_paid' => true,
-                        'paid_amount' => $profile->paid_amount + $amountPaid,
-                        'pending_amount' => 0,
-                        'payment_id' => $txnId,
-                        'registration_completed_at' => $profile->registration_completed_at ?? now(),
-                        'plan_started_at' => $profile->plan_started_at ?? now(),
-                    ]);
-                } else {
+                // Check plan validity of existing standard plan
+                $planStartedAt = $profile->plan_started_at ?? $profile->created_at;
+                $isPlanExpired = ($profile->plan_type === 'standard' && $planStartedAt) 
+                    ? \Carbon\Carbon::parse($planStartedAt)->addDays(30)->isPast() 
+                    : false;
+
+                // If candidate had a standard plan that is now EXPIRED (past 30 days), a ₹500 recharge is a renewal of Standard plan for new cycle, NOT an upgrade!
+                if ($isPlanExpired && $amountPaid < 1000 && $pendingPlanType !== 'premium') {
                     $profile->update([
                         'plan_type' => 'standard',
                         'total_allowed_applications' => 2,
+                        'used_applications' => 0, // Reset application count for new cycle
                         'initial_fee_paid' => true,
-                        'paid_amount' => $profile->paid_amount + $amountPaid,
+                        'paid_amount' => $currentPaid + $amountPaid,
                         'pending_amount' => 500,
                         'payment_id' => $txnId,
-                        'registration_completed_at' => $profile->registration_completed_at ?? now(),
-                        'plan_started_at' => $profile->plan_started_at ?? now(),
+                        'plan_started_at' => now(), // Fresh 30 days cycle
                     ]);
+                } else {
+                    // Plan is active (within 30 days) OR fresh registration OR single ₹1000 payment
+                    $isPremium = ($pendingPlanType === 'premium') 
+                        || ($amountPaid >= 1000) 
+                        || (!$isPlanExpired && $newTotalPaid >= 1000)
+                        || (!$isPlanExpired && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $currentPaid >= 500) && $amountPaid >= 500);
+
+                    if ($isPremium) {
+                        $profile->update([
+                            'plan_type' => 'premium',
+                            'total_allowed_applications' => 3,
+                            'initial_fee_paid' => true,
+                            'is_fee_paid' => true,
+                            'paid_amount' => max(1000, $newTotalPaid),
+                            'pending_amount' => 0,
+                            'payment_id' => $txnId,
+                            'registration_completed_at' => $profile->registration_completed_at ?? now(),
+                            'plan_started_at' => $profile->plan_started_at ?? now(),
+                        ]);
+
+                        // Settle any auto-created pending balance invoice
+                        ServiceChargeInvoice::where('candidate_id', $user->id)
+                            ->where('description', 'Standard Plan Remaining Placement Balance')
+                            ->where('status', 'pending')
+                            ->update(['status' => 'paid', 'payment_date' => now()]);
+                    } else {
+                        $profile->update([
+                            'plan_type' => 'standard',
+                            'total_allowed_applications' => 2,
+                            'initial_fee_paid' => true,
+                            'paid_amount' => $newTotalPaid,
+                            'pending_amount' => max(0, 500 - max(0, $newTotalPaid - 500)),
+                            'payment_id' => $txnId,
+                            'registration_completed_at' => $profile->registration_completed_at ?? now(),
+                            'plan_started_at' => $profile->plan_started_at ?? now(),
+                        ]);
+                    }
                 }
             }
 
@@ -294,20 +334,39 @@ class PaymentFulfillmentService
                     Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Premium Plan Renewal'));
                 });
             } else {
-                self::sendNotification($user, 'Registration Successful', 'Welcome to Vedanta! Your registration plan is now active.');
-                
-                try {
-                    // Ensure the agreement PDF is generated before sending the welcome email
-                    \App\Http\Controllers\Candidate\AgreementController::ensureAgreementPdfExists($profile);
-                    $user->refresh();
-                } catch (\Throwable $pdfEx) {
-                    Log::warning('Agreement PDF auto-generation warning: ' . $pdfEx->getMessage());
-                }
+                $planStarted = $profile->plan_started_at ?? $profile->created_at;
+                $isExpiredCheck = ($profile->plan_type === 'standard' && $planStarted) 
+                    ? \Carbon\Carbon::parse($planStarted)->addDays(30)->isPast() 
+                    : false;
+                $isRenewalNotification = $isExpiredCheck && $amountPaid < 1000 && $pendingPlanType !== 'premium';
+                $isUpgradeShift = ($profile->plan_type === 'premium' && $amountPaid < 1000);
 
-                self::sendEmailOnce($transactionId, 'welcome_emails', function() use ($user, $transactionId, $amountPaid) {
-                    Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Candidate Profile Registration Fee'));
-                    Mail::to($user->email)->send(new RegistrationSuccessMail($user));
-                });
+                if ($isRenewalNotification) {
+                    self::sendNotification($user, 'Plan Renewed Successfully', 'Basic Plan renewed with 2 application slots.');
+                    self::sendEmailOnce($transactionId, 'renew_basic_receipt', function() use ($user, $transactionId, $amountPaid) {
+                        Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Basic Plan Renewal'));
+                    });
+                } elseif ($isUpgradeShift) {
+                    self::sendNotification($user, 'Plan Upgraded to Premium', 'Your plan has been upgraded to Premium with 3 application slots.');
+                    self::sendEmailOnce($transactionId, 'upgrade_receipt', function() use ($user, $transactionId, $amountPaid) {
+                        Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Upgrade to Premium Plan'));
+                    });
+                } else {
+                    self::sendNotification($user, 'Registration Successful', 'Welcome to Vedanta! Your registration plan is now active.');
+                    
+                    try {
+                        // Ensure the agreement PDF is generated before sending the welcome email
+                        \App\Http\Controllers\Candidate\AgreementController::ensureAgreementPdfExists($profile);
+                        $user->refresh();
+                    } catch (\Throwable $pdfEx) {
+                        Log::warning('Agreement PDF auto-generation warning: ' . $pdfEx->getMessage());
+                    }
+
+                    self::sendEmailOnce($transactionId, 'welcome_emails', function() use ($user, $transactionId, $amountPaid) {
+                        Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Candidate Profile Registration Fee'));
+                        Mail::to($user->email)->send(new RegistrationSuccessMail($user));
+                    });
+                }
             }
         } catch (\Throwable $e) {
             Log::error('Post-fulfillment notification/mail error (plan remains upgraded): ' . $e->getMessage());

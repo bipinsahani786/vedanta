@@ -268,8 +268,13 @@
 
                         <div>
                             <div class="mb-3">
-                                <span class="text-xl font-black text-purple-400">₹1,000</span>
-                                <span class="text-[10px] text-slate-400 ml-1">Plan Fee</span>
+                                @if($profile->plan_type === 'standard' && ($profile->initial_fee_paid || ($profile->paid_amount ?? 0) >= 500) && !$profile->is_fee_paid)
+                                    <span class="text-xl font-black text-purple-400">₹500</span>
+                                    <span class="text-[10px] text-slate-400 ml-1">Upgrade Fee (₹1,000 Plan)</span>
+                                @else
+                                    <span class="text-xl font-black text-purple-400">₹1,000</span>
+                                    <span class="text-[10px] text-slate-400 ml-1">Plan Fee</span>
+                                @endif
                             </div>
 
                             @if($profile->plan_type === 'premium' && $profile->is_fee_paid)

@@ -111,16 +111,35 @@ class PaymentController extends Controller
         $isRenewal = str_starts_with($request->plan, 'renewal');
         $isUpgrade = $request->plan === 'upgrade';
         
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
+
+        // Check if existing plan is expired (after 30 days)
+        $planStartedAt = $profile->plan_started_at ?? $profile->created_at;
+        $isPlanExpired = $planStartedAt ? \Carbon\Carbon::parse($planStartedAt)->addDays(30)->isPast() : false;
+
+        // If candidate already paid ₹500 for Standard plan:
+        if ($profile->plan_type === 'standard' && ($profile->initial_fee_paid || ($profile->paid_amount ?? 0) >= 500)) {
+            if ($isPlanExpired && !$isUpgrade && $request->plan !== 'premium') {
+                // Plan is expired/ended (after 30 days): ₹500 payment is a RENEWAL of Standard plan, NOT an upgrade!
+                $isRenewal = true;
+                $request->merge(['plan' => 'renewal_basic']);
+            } elseif (!$profile->is_fee_paid || $profile->pending_amount > 0) {
+                // Plan is still active (within 30 days): second ₹500 payment upgrades to Premium (total ₹1000)
+                if ($request->plan === 'basic' || $request->plan === 'upgrade' || $request->plan === 'premium') {
+                    $isUpgrade = true;
+                }
+            } else {
+                if ($request->plan === 'basic') {
+                    return back()->with('error', 'You have already paid for the Basic plan.');
+                }
+            }
+        }
+
         $amount = 500;
         if ($request->plan === 'premium' || $request->plan === 'renewal_premium') $amount = 1000;
         if ($isUpgrade) $amount = 500;
-        
-        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
-        // Prevent duplicate payments
-        if ($request->plan === 'basic' && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid)) {
-            return back()->with('error', 'You have already paid for the Basic plan.');
-        }
+        // Prevent duplicate payment if already active Premium
         if (($request->plan === 'premium' || $request->plan === 'upgrade') && $profile->plan_type === 'premium' && $profile->is_fee_paid) {
             return back()->with('error', 'You are already a Premium member.');
         }
