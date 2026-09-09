@@ -1,6 +1,9 @@
 @extends('layouts.candidate')
 
 @section('candidate_content')
+{{-- Popup Modal for Incomplete Registration / Profile --}}
+@include('candidate.partials.incomplete-profile-modal')
+
 <div class="space-y-6 pb-8">
 
     {{-- Top Welcome & Profile Strength Banner --}}
@@ -287,10 +290,20 @@
                         </h3>
                         <p class="text-xs text-slate-400 mt-0.5">Complete all steps to start applying for jobs</p>
                     </div>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 self-start sm:self-auto shadow-sm">
-                        <i class="fas fa-shield-alt text-[10px] mr-1.5"></i>
-                        {{ $completedSteps }}/3 Completed
-                    </span>
+                    <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                        @if($completedSteps < 3)
+                            <button type="button" 
+                                    @click="$dispatch('open-incomplete-modal')"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition-all shadow-sm cursor-pointer">
+                                <i class="fas fa-exclamation-circle text-[10px] animate-pulse"></i>
+                                <span>Action Required</span>
+                            </button>
+                        @endif
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-sm">
+                            <i class="fas fa-shield-alt text-[10px] mr-1.5"></i>
+                            {{ $completedSteps }}/3 Completed
+                        </span>
+                    </div>
                 </div>
 
                 {{-- Stepper Progress Timeline --}}

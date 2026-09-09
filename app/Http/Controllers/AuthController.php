@@ -35,6 +35,7 @@ class AuthController extends Controller
             } elseif ($user->role === 'employer') {
                 return redirect()->intended('/employer/dashboard');
             } else {
+                session()->flash('candidate_just_logged_in', true);
                 return redirect()->intended('/candidate/dashboard');
             }
         }
@@ -119,6 +120,7 @@ class AuthController extends Controller
             } elseif ($user->role === 'employer') {
                 return redirect()->intended('/employer/dashboard');
             } else {
+                session()->flash('candidate_just_logged_in', true);
                 return redirect()->intended('/candidate/dashboard');
             }
         }
