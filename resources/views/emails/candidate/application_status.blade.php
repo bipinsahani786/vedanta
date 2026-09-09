@@ -9,7 +9,7 @@ Dear {{ $application->candidate->name }},
 
 There is an update regarding your application for the **{{ $application->jobPost->title }}** position at **{{ $application->jobPost->school_name }}**.
 
-Your application status is now: **{{ ucfirst($application->status) }}**
+Your application status is now: **{{ $application->status === 'hold' ? 'On Hold' : ucfirst($application->status) }}**
 
 @if($application->status === 'shortlisted')
 Congratulations! Your profile has been shortlisted and forwarded to the school. We will let you know if the school schedules an interview.
@@ -17,6 +17,8 @@ Congratulations! Your profile has been shortlisted and forwarded to the school. 
 Congratulations! You have been selected for this position. Please check your dashboard for further instructions and service charge details.
 @elseif($application->status === 'rejected')
 Unfortunately, the school has decided to move forward with other candidates at this time. Don't worry, your remaining opportunities are still valid for other roles!
+@elseif($application->status === 'hold')
+Your application for this position has been placed on hold by the recruitment team. We will notify you once there are further developments. In the meantime, you can continue exploring and applying to other open positions!
 @endif
 
 @if($application->remarks)

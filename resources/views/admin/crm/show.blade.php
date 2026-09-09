@@ -396,6 +396,7 @@
                                         <select name="status" class="text-xs font-bold px-2 py-1.5 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 cursor-pointer w-full">
                                             <option value="applied" {{ $app->status === 'applied' ? 'selected' : '' }}>Applied</option>
                                             <option value="shortlisted" {{ $app->status === 'shortlisted' ? 'selected' : '' }}>Shortlisted (Schedule Interview)</option>
+                                            <option value="hold" {{ $app->status === 'hold' ? 'selected' : '' }}>Hold</option>
                                             <option value="hired" {{ $app->status === 'hired' ? 'selected' : '' }}>Hired</option>
                                             <option value="rejected" {{ $app->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
                                         </select>

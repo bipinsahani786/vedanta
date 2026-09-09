@@ -6,7 +6,7 @@
 @section('content')
 
 {{-- Analytics Cards --}}
-<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-6">
     <a href="{{ request()->fullUrlWithQuery(['status' => null, 'page' => null]) }}" class="bg-card-bg border {{ request('status') === null ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-blue-500 transition-all">
         <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Total Apps</p>
@@ -21,6 +21,11 @@
         <div class="absolute inset-0 bg-purple-500/5 group-hover:bg-purple-500/10 transition-colors"></div>
         <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Forwarded</p>
         <h4 class="text-2xl font-extrabold text-purple-500 relative z-10">{{ $stats['shortlisted'] }}</h4>
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'hold', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'hold' ? 'border-amber-500 shadow-md ring-1 ring-amber-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-amber-500 transition-all">
+        <div class="absolute inset-0 bg-amber-500/5 group-hover:bg-amber-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">On Hold</p>
+        <h4 class="text-2xl font-extrabold text-amber-500 relative z-10">{{ $stats['hold'] }}</h4>
     </a>
     <a href="{{ request()->fullUrlWithQuery(['status' => 'hired', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'hired' ? 'border-green-500 shadow-md ring-1 ring-green-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-green-500 transition-all">
         <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
@@ -46,6 +51,7 @@
                 <option value="">All Statuses</option>
                 <option value="applied" {{ request('status') == 'applied' ? 'selected' : '' }}>New (Applied)</option>
                 <option value="shortlisted" {{ request('status') == 'shortlisted' ? 'selected' : '' }}>Forwarded</option>
+                <option value="hold" {{ request('status') == 'hold' ? 'selected' : '' }}>On Hold</option>
                 <option value="hired" {{ request('status') == 'hired' ? 'selected' : '' }}>Selected (Hired)</option>
                 <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
             </select>
@@ -92,6 +98,8 @@
                         <span class="bg-text-dark/10 text-text-dark px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">New</span>
                     @elseif($app->status === 'shortlisted')
                         <span class="bg-accent-blue/10 text-accent-blue px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">Forwarded</span>
+                    @elseif($app->status === 'hold')
+                        <span class="bg-amber-500/10 text-amber-500 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">On Hold</span>
                     @elseif($app->status === 'hired')
                         <span class="bg-green-500/10 text-green-400 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">Selected</span>
                     @elseif($app->status === 'rejected')
@@ -160,6 +168,7 @@
                         <select name="status" id="modal_status" onchange="toggleScheduleFields()" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:border-accent-blue focus:outline-none">
                             <option value="applied">New (Applied)</option>
                             <option value="shortlisted">Forwarded to School</option>
+                            <option value="hold">On Hold</option>
                             <option value="hired">Selected (Hired)</option>
                             <option value="rejected">Rejected</option>
                         </select>

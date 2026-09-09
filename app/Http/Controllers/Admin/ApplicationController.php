@@ -29,6 +29,7 @@ class ApplicationController extends Controller
             'total' => (clone $baseQuery)->count(),
             'applied' => (clone $baseQuery)->where('status', 'applied')->count(),
             'shortlisted' => (clone $baseQuery)->where('status', 'shortlisted')->count(),
+            'hold' => (clone $baseQuery)->where('status', 'hold')->count(),
             'hired' => (clone $baseQuery)->where('status', 'hired')->count(),
             'rejected' => (clone $baseQuery)->where('status', 'rejected')->count(),
         ];
@@ -45,7 +46,7 @@ class ApplicationController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:applied,shortlisted,hired,rejected',
+            'status' => 'required|in:applied,shortlisted,hired,rejected,hold',
             'remarks' => 'nullable|string',
             'interview_date' => 'nullable|date',
             'interview_link' => 'nullable|string|max:255',
@@ -85,6 +86,7 @@ class ApplicationController extends Controller
         }
 
         if ($request->status !== $oldStatus) {
+            $statusText = $request->status === 'hold' ? 'placed on hold' : 'now ' . $request->status;
             // DB Notification for Candidate Dashboard
             \Illuminate\Support\Facades\DB::table('notifications')->insert([
                 'id' => \Illuminate\Support\Str::uuid(),
@@ -93,7 +95,7 @@ class ApplicationController extends Controller
                 'notifiable_id' => $application->candidate_id,
                 'data' => json_encode([
                     'title' => 'Application Update',
-                    'message' => 'Your application for ' . $application->jobPost->title . ' is now ' . $request->status . '.',
+                    'message' => 'Your application for ' . $application->jobPost->title . ' is ' . $statusText . '.',
                     'application_id' => $application->id
                 ]),
                 'created_at' => now(),

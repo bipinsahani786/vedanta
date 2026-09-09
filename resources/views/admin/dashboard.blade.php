@@ -265,10 +265,16 @@
                             <td class="px-6 py-4">
                                 @if($app->status === 'applied')
                                     <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-semibold border border-blue-100">Applied</span>
+                                @elseif($app->status === 'shortlisted')
+                                    <span class="bg-purple-50 text-purple-600 px-3 py-1 rounded-full text-xs font-semibold border border-purple-100">Forwarded</span>
+                                @elseif($app->status === 'hold')
+                                    <span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-semibold border border-amber-100">On Hold</span>
                                 @elseif($app->status === 'hired')
                                     <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-100">Hired</span>
+                                @elseif($app->status === 'rejected')
+                                    <span class="bg-rose-50 text-rose-600 px-3 py-1 rounded-full text-xs font-semibold border border-rose-100">Rejected</span>
                                 @else
-                                    <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold border border-gray-200">Waitlisted</span>
+                                    <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold border border-gray-200">{{ ucfirst($app->status) }}</span>
                                 @endif
                             </td>
                         </tr>
