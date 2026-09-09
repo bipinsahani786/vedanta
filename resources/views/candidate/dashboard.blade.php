@@ -807,7 +807,7 @@
                             <i class="fas fa-crown"></i>
                             <span>Upgrade to Premium</span>
                         </div>
-                        <p class="text-[10px] text-slate-300 mt-0.5">Starting at just ₹499</p>
+                        <p class="text-[10px] text-slate-300 mt-0.5"></p>
                     </div>
                     <a href="{{ route('candidate.payment.show') }}" 
                        class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs shadow-lg hover:shadow-[0_4px_15px_rgba(245,158,11,0.4)] hover:-translate-y-0.5 transition-all shrink-0 flex items-center gap-1.5">
