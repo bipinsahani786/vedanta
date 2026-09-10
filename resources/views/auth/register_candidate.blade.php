@@ -115,6 +115,46 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
+                        <label for="category_id" class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">
+                            Job Category <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40 pointer-events-none"><i class="fas fa-layer-group text-sm"></i></span>
+                            @php
+                                $candidateCategories = \App\Models\Category::with(['subjects' => function($q) {
+                                    $q->where('subjects.is_active', true)->orderBy('name');
+                                }])->where('is_active', true)->orderBy('name')->get();
+                            @endphp
+                            <select id="category_id" name="category_id" required onchange="handleCandidateCategoryChange(this.value)"
+                                class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-10 py-3 text-sm text-text-main placeholder-text-dark/40 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none cursor-pointer">
+                                <option value="" style="background-color: #040e2d; color: #94a3b8;">Select Category</option>
+                                @foreach($candidateCategories as $category)
+                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }} style="background-color: #040e2d; color: #ffffff;">
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-text-dark/40 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="subject_id" class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">
+                            Subject <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40 pointer-events-none"><i class="fas fa-book text-sm"></i></span>
+                            <select id="subject_id" name="subject_id" required
+                                class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-10 py-3 text-sm text-text-main placeholder-text-dark/40 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all appearance-none cursor-pointer">
+                                <option value="" style="background-color: #040e2d; color: #94a3b8;">Select Subject</option>
+                            </select>
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-text-dark/40 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
                         <label for="password" class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Password</label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-lock text-sm"></i></span>
@@ -133,6 +173,70 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Referral Code (Optional / Auto-filled from Cookie/Session/Query) --}}
+                @php
+                    $refCode = old('referral_code')
+                        ?: request('ref')
+                        ?: session('referral_code')
+                        ?: request()->cookie('vpa_referral_code')
+                        ?: '';
+                    $refSource = session('referral_source', request('source', ''));
+                @endphp
+
+                {{-- Referral Applied Banner --}}
+                <div id="referralBanner" class="{{ $refCode ? '' : 'hidden' }}">
+                    <div class="p-3 bg-accent-yellow/10 border border-accent-yellow/30 rounded-xl flex items-center gap-3 mb-1">
+                        <div class="w-8 h-8 rounded-lg bg-accent-yellow/20 text-accent-yellow flex items-center justify-center text-sm shrink-0">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-accent-yellow">🎉 Referral Code Applied!</div>
+                            <div class="text-[11px] text-text-dark/60">You'll receive <strong class="text-accent-yellow">100 Welcome Points</strong> after registration.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="referral_code" class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider flex items-center justify-between">
+                        <span>Referral Code <span class="text-text-dark/40 font-normal">(Optional)</span></span>
+                        <span id="referralAppliedTag" class="{{ $refCode ? '' : 'hidden' }} text-[10px] text-accent-yellow font-bold"><i class="fas fa-gift"></i> Referral Applied</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-accent-yellow"><i class="fas fa-gift text-sm"></i></span>
+                        <input id="referral_code" name="referral_code" type="text"
+                            class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm font-mono tracking-wider text-text-main placeholder-text-dark/40 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue uppercase transition-all"
+                            placeholder="e.g. VPA-REF-XXXXXX" value="{{ $refCode }}">
+                    </div>
+                </div>
+                <input type="hidden" name="referral_source" value="{{ $refSource }}">
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const refInput = document.getElementById('referral_code');
+                        const banner = document.getElementById('referralBanner');
+                        const tag = document.getElementById('referralAppliedTag');
+                        // If not already set from server, try reading from cookie
+                        if (!refInput.value) {
+                            const match = document.cookie.match(/(?:^|;\s*)vpa_referral_code=([^;]*)/);
+                            if (match && match[1]) {
+                                refInput.value = decodeURIComponent(match[1]);
+                                if (banner) banner.classList.remove('hidden');
+                                if (tag) tag.classList.remove('hidden');
+                            }
+                        }
+                        // Show/hide banner on input change
+                        refInput.addEventListener('input', function() {
+                            if (this.value.trim().length > 3) {
+                                if (banner) banner.classList.remove('hidden');
+                                if (tag) tag.classList.remove('hidden');
+                            } else {
+                                if (banner) banner.classList.add('hidden');
+                                if (tag) tag.classList.add('hidden');
+                            }
+                        });
+                    });
+                </script>
 
                 <button type="submit" id="registerSubmitBtn"
                     class="w-full bg-accent-blue text-white font-semibold py-3.5 rounded-xl hover:bg-accent-blue-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-blue transition-all shadow-lg hover:shadow-[0_4px_20px_rgba(var(--theme-accent-blue-rgb,18,154,239),0.35)] hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-2 disabled:opacity-60 disabled:cursor-not-allowed">
@@ -158,4 +262,81 @@
         </div>
     </div>
 </div>
+
+<script>
+    const candidateCategorySubjectsMap = {
+        @foreach($candidateCategories as $cat)
+            "{{ $cat->id }}": [
+                @foreach($cat->subjects as $sub)
+                    { id: "{{ $sub->id }}", name: "{{ addslashes($sub->name) }}" },
+                @endforeach
+            ],
+        @endforeach
+    };
+
+    function populateCandidateSubjects(subjects, selectedSubjectId = null) {
+        const subjectSelect = document.getElementById('subject_id');
+        if (!subjectSelect) return;
+
+        subjectSelect.innerHTML = '<option value="" style="background-color: #040e2d; color: #94a3b8;">Select Subject</option>';
+
+        if (!subjects || subjects.length === 0) {
+            subjectSelect.innerHTML = '<option value="" style="background-color: #040e2d; color: #94a3b8;">No subjects available</option>';
+            return;
+        }
+
+        subjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.id;
+            option.textContent = subject.name;
+            option.style.backgroundColor = '#040e2d';
+            option.style.color = '#ffffff';
+            if (selectedSubjectId && String(subject.id) === String(selectedSubjectId)) {
+                option.selected = true;
+            }
+            subjectSelect.appendChild(option);
+        });
+    }
+
+    function handleCandidateCategoryChange(categoryId, selectedSubjectId = null) {
+        const subjectSelect = document.getElementById('subject_id');
+        if (!subjectSelect) return;
+
+        if (!categoryId) {
+            subjectSelect.innerHTML = '<option value="" style="background-color: #040e2d; color: #94a3b8;">Select Subject (Choose category first)</option>';
+            return;
+        }
+
+        if (candidateCategorySubjectsMap[categoryId] && candidateCategorySubjectsMap[categoryId].length > 0) {
+            populateCandidateSubjects(candidateCategorySubjectsMap[categoryId], selectedSubjectId);
+            return;
+        }
+
+        subjectSelect.innerHTML = '<option value="" style="background-color: #040e2d; color: #94a3b8;">Loading subjects...</option>';
+        fetch("{{ url('/api/categories') }}/" + categoryId + "/subjects")
+            .then(res => res.json())
+            .then(data => {
+                candidateCategorySubjectsMap[categoryId] = data;
+                populateCandidateSubjects(data, selectedSubjectId);
+            })
+            .catch(() => {
+                populateCandidateSubjects([], null);
+            });
+    }
+
+    (function initCandidateCategorySubject() {
+        function runInit() {
+            const categorySelect = document.getElementById('category_id');
+            const oldSubjectId = "{{ old('subject_id') }}";
+            if (categorySelect && categorySelect.value) {
+                handleCandidateCategoryChange(categorySelect.value, oldSubjectId);
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runInit);
+        } else {
+            runInit();
+        }
+    })();
+</script>
 @endsection

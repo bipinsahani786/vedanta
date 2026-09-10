@@ -72,13 +72,51 @@
                 <div class="w-full md:w-auto shrink-0 pt-2 md:pt-0">
                     @auth
                         @if(auth()->user()->role === 'candidate')
-                            <form action="{{ route('candidate.applications.apply', $job->id) }}" method="POST" class="w-full sm:w-auto">
-                                @csrf
-                                <button type="submit" class="w-full sm:w-auto px-8 py-3.5 bg-[#129aef] hover:bg-[#0d85d4] text-white font-extrabold rounded-xl shadow-lg shadow-[#129aef]/25 hover:shadow-[#129aef]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all text-center flex items-center justify-center gap-2 cursor-pointer">
-                                    <i class="fas fa-paper-plane"></i>
-                                    <span>Apply Now</span>
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <form action="{{ route('candidate.applications.apply', $job->id) }}" method="POST" class="w-full sm:w-auto">
+                                    @csrf
+                                    <button type="submit" class="w-full sm:w-auto px-8 py-3.5 bg-[#129aef] hover:bg-[#0d85d4] text-white font-extrabold rounded-xl shadow-lg shadow-[#129aef]/25 hover:shadow-[#129aef]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all text-center flex items-center justify-center gap-2 cursor-pointer">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>Apply Now</span>
+                                    </button>
+                                </form>
+                                @php
+                                    $isJobSaved = \App\Models\SavedJob::where('user_id', auth()->id())->where('job_post_id', $job->id)->exists();
+                                @endphp
+                                <button type="button" 
+                                        x-data="{
+                                            isSaved: {{ $isJobSaved ? 'true' : 'false' }},
+                                            loading: false,
+                                            async toggleSave() {
+                                                if (this.loading) return;
+                                                this.loading = true;
+                                                try {
+                                                    const res = await fetch('{{ route('candidate.jobs.toggleSave', $job->id) }}', {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                            'Accept': 'application/json'
+                                                        }
+                                                    });
+                                                    const data = await res.json();
+                                                    this.isSaved = data.saved;
+                                                } catch(e) {
+                                                    console.error(e);
+                                                } finally {
+                                                    this.loading = false;
+                                                }
+                                            }
+                                        }"
+                                        @click="toggleSave()"
+                                        :disabled="loading"
+                                        :class="isSaved ? 'bg-amber-50 text-amber-600 border-amber-300' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'"
+                                        class="px-5 py-3.5 rounded-xl border font-bold text-sm flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+                                        :title="isSaved ? 'Remove from Saved' : 'Save Job'">
+                                    <i :class="isSaved ? 'fas fa-bookmark text-amber-500' : 'far fa-bookmark'"></i>
+                                    <span x-text="isSaved ? 'Saved' : 'Save Job'"></span>
                                 </button>
-                            </form>
+                            </div>
                         @endif
                     @else
                         <a href="{{ route('candidate.register') }}" class="w-full sm:w-auto px-8 py-3.5 bg-[#129aef] hover:bg-[#0d85d4] text-white font-extrabold rounded-xl shadow-lg shadow-[#129aef]/25 hover:shadow-[#129aef]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all inline-flex items-center justify-center gap-2 text-center">

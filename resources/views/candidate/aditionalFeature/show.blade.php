@@ -1,9 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.candidate')
 
-@section('content')
-    @include('candidate.partials.nav')
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+@section('candidate_content')
+    <div class="space-y-6">
 
         {{-- Page Header --}}
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 reveal">

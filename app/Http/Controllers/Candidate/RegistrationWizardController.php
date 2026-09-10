@@ -141,6 +141,9 @@ class RegistrationWizardController extends Controller
                 'is_profile_complete' => true,
             ]);
 
+            // Advance Referral Funnel Stage to profile_completed
+            \App\Services\ReferralService::advanceStage($user, 'profile_completed');
+
             if ($isFirstTime) {
                 $adminUser = \App\Models\User::where('role', 'admin')->first();
                 if ($adminUser) {

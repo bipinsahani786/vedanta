@@ -85,4 +85,9 @@ class JobPost extends Model
             ->take($limit)
             ->values();
     }
+
+    public function savedByUsers()
+    {
+        return $this->hasMany(SavedJob::class, 'job_post_id');
+    }
 }

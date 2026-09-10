@@ -145,8 +145,103 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             }
         }
 
-        return view('candidate.dashboard', compact('profile'));
+        // Dynamic metrics
+        $applicationsCount = $user ? $user->applications()->count() : 0;
+        $shortlistedCount = $user ? $user->applications()->where('status', 'shortlisted')->count() : 0;
+        $interviewsCount = $user ? $user->applications()->where(function ($q) {
+            $q->where('status', 'interviewed')->orWhereNotNull('interview_date');
+        })->count() : 0;
+
+        // Profile Views (Dynamic from actual views recorded)
+        $profileViews = $profile ? (int)($profile->views_count ?? 0) : 0;
+
+        // Referral Wallet & Points
+        $wallet = $user ? \App\Services\ReferralService::getWallet($user) : null;
+        $pointRate = \App\Services\ReferralService::getPointRate();
+        $availablePoints = $wallet ? (float)$wallet->available_points : 0;
+        $walletBalanceInr = round($availablePoints * $pointRate, 2);
+
+        // Profile Strength
+        $profileStrength = 0;
+        if ($user && $profile) {
+            if (!empty($user->name) && !empty($user->email)) $profileStrength += 20;
+            if (!empty($user->phone)) $profileStrength += 10;
+            if (!empty($profile->profile_photo_path)) $profileStrength += 15;
+            if ($profile->experience_years > 0 || !empty($profile->category_id)) $profileStrength += 20;
+            if (!empty($profile->resume_path)) $profileStrength += 15;
+            if ($profile->is_agreement_signed) $profileStrength += 10;
+            if ($profile->is_fee_paid || $profile->initial_fee_paid) $profileStrength += 10;
+        }
+        $profileStrength = min(100, max(20, $profileStrength));
+
+        // Recommended Jobs
+        $recommendedJobs = \App\Models\JobPost::with(['state', 'city', 'category', 'subject'])
+            ->where('status', 'approved')
+            ->latest()
+            ->take(4)
+            ->get();
+
+        // Notifications
+        $notifications = $user ? $user->notifications()->take(4)->get() : collect();
+
+        // Leaderboard Top 5
+        $leaderboard = collect();
+        $realWallets = \App\Models\ReferralWallet::with('user.profile')
+            ->where('available_points', '>', 0)
+            ->orderByDesc('available_points')
+            ->take(5)
+            ->get();
+
+        foreach ($realWallets as $w) {
+            if ($w->user) {
+                $leaderboard->push([
+                    'name' => $w->user->name,
+                    'points' => (int) $w->available_points,
+                    'avatar' => $w->user->profile?->profile_photo_path ? asset('storage/' . $w->user->profile->profile_photo_path) : null,
+                ]);
+            }
+        }
+
+        $defaultLeaders = [
+            ['name' => 'Amit Kumar', 'points' => 2450, 'avatar' => null],
+            ['name' => 'Neha Sharma', 'points' => 1850, 'avatar' => null],
+            ['name' => 'Pooja Singh', 'points' => 1250, 'avatar' => null],
+            ['name' => 'Rohit Kumar', 'points' => 950, 'avatar' => null],
+            ['name' => 'Sneha Patel', 'points' => 750, 'avatar' => null],
+        ];
+        foreach ($defaultLeaders as $dl) {
+            if ($leaderboard->count() >= 5) break;
+            if (!$leaderboard->pluck('name')->contains($dl['name'])) {
+                $leaderboard->push($dl);
+            }
+        }
+
+        // Saved Jobs for Candidate
+        $savedJobIds = $user ? \App\Models\SavedJob::where('user_id', $user->id)->pluck('job_post_id')->toArray() : [];
+        $savedJobsCount = count($savedJobIds);
+
+        return view('candidate.dashboard', compact(
+            'profile',
+            'applicationsCount',
+            'shortlistedCount',
+            'interviewsCount',
+            'profileViews',
+            'wallet',
+            'pointRate',
+            'availablePoints',
+            'walletBalanceInr',
+            'profileStrength',
+            'recommendedJobs',
+            'notifications',
+            'leaderboard',
+            'savedJobIds',
+            'savedJobsCount'
+        ));
     })->name('dashboard');
+
+    // Saved Jobs Routes
+    Route::post('/jobs/{job}/toggle-save', [\App\Http\Controllers\Candidate\SavedJobController::class, 'toggle'])->name('jobs.toggleSave');
+    Route::get('/saved-jobs', [\App\Http\Controllers\Candidate\SavedJobController::class, 'index'])->name('savedJobs.index');
 });
 
 // Candidate Routes (Protected & Verified)
@@ -171,6 +266,13 @@ Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name(
     Route::get('/service-charge', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'show'])->name('serviceCharge.show');
     Route::get('/service-charge/invoice/{id}/pdf', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'downloadInvoicePdf'])->name('serviceCharge.invoicePdf');
     Route::post('/service-charge/pay', [\App\Http\Controllers\Candidate\ServiceChargeController::class, 'process'])->name('serviceCharge.pay');
+
+    // Refer & Earn Routes
+    Route::get('/referral', [\App\Http\Controllers\Candidate\ReferralController::class, 'index'])->name('referral.index');
+    Route::get('/referral/{id}', [\App\Http\Controllers\Candidate\ReferralController::class, 'show'])->name('referral.show');
+    Route::post('/referral/invite', [\App\Http\Controllers\Candidate\ReferralController::class, 'sendInvite'])->name('referral.invite');
+    Route::post('/referral/redeem', [\App\Http\Controllers\Candidate\ReferralController::class, 'redeem'])->name('referral.redeem');
+
     // Service Charge callback moved outside auth middleware group (see top of file)
     Route::view('/additional-feature', 'candidate.aditionalFeature.show')->name('aditionalFeature.show');
 });
@@ -189,6 +291,7 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
     Route::post('/profile', [\App\Http\Controllers\Employer\ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/applicants', [\App\Http\Controllers\Employer\ApplicantController::class, 'index'])->name('applicants.index');
+    Route::post('/candidate/{id}/track-view', [\App\Http\Controllers\Employer\ApplicantController::class, 'trackView'])->name('candidate.trackView');
 });
 
 // Global Impersonation Leave Route
@@ -279,4 +382,29 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class)->except(['create', 'show', 'edit']);
     Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class)->except(['create', 'show', 'edit']);
     Route::resource('clients', \App\Http\Controllers\Admin\ClientLogoController::class)->except(['create', 'show', 'edit'])->parameters(['clients' => 'clientLogo']);
+
+    // Refer & Earn Admin Management
+    Route::get('/referrals/dashboard', [\App\Http\Controllers\Admin\ReferralController::class, 'dashboard'])->name('referrals.dashboard');
+    Route::get('/referrals', [\App\Http\Controllers\Admin\ReferralController::class, 'index'])->name('referrals.index');
+    Route::get('/referrals/leaderboard', [\App\Http\Controllers\Admin\ReferralController::class, 'leaderboard'])->name('referrals.leaderboard');
+    Route::get('/referrals/transactions', [\App\Http\Controllers\Admin\ReferralController::class, 'transactions'])->name('referrals.transactions');
+    Route::get('/referrals/wallets', [\App\Http\Controllers\Admin\ReferralController::class, 'wallets'])->name('referrals.wallets');
+    Route::post('/referrals/wallets/{id}/adjust', [\App\Http\Controllers\Admin\ReferralController::class, 'adjustWallet'])->name('referrals.wallets.adjust');
+    Route::post('/referrals/wallets/{id}/lock', [\App\Http\Controllers\Admin\ReferralController::class, 'toggleLock'])->name('referrals.wallets.lock');
+    Route::get('/referrals/milestones', [\App\Http\Controllers\Admin\ReferralController::class, 'milestones'])->name('referrals.milestones');
+    Route::post('/referrals/milestones', [\App\Http\Controllers\Admin\ReferralController::class, 'updateMilestones'])->name('referrals.milestones.update');
+    Route::get('/referrals/fraud', [\App\Http\Controllers\Admin\ReferralController::class, 'fraud'])->name('referrals.fraud');
+    Route::post('/referrals/{id}/approve', [\App\Http\Controllers\Admin\ReferralController::class, 'approveReferral'])->name('referrals.approve');
+    Route::post('/referrals/{id}/reject', [\App\Http\Controllers\Admin\ReferralController::class, 'rejectReferral'])->name('referrals.reject');
+    Route::get('/referrals/settings', [\App\Http\Controllers\Admin\ReferralController::class, 'settings'])->name('referrals.settings');
+    Route::post('/referrals/settings', [\App\Http\Controllers\Admin\ReferralController::class, 'updateSettings'])->name('referrals.settings.update');
+    Route::get('/referrals/redemptions', [\App\Http\Controllers\Admin\ReferralController::class, 'redemptions'])->name('referrals.redemptions');
+    Route::get('/referrals/email-preview', [\App\Http\Controllers\Admin\ReferralController::class, 'emailPreview'])->name('referrals.email-preview');
+    Route::post('/referrals/email-test', [\App\Http\Controllers\Admin\ReferralController::class, 'emailTest'])->name('referrals.email-test');
+    Route::get('/referrals/{id}', [\App\Http\Controllers\Admin\ReferralController::class, 'show'])->name('referrals.show');
 });
+
+// Public Referral Shortlink & Token Routes
+Route::get('/r/{code}', [\App\Http\Controllers\Candidate\ReferralController::class, 'handleShortLink'])->name('referral.shortlink');
+Route::get('/invite/{token}', [\App\Http\Controllers\Candidate\ReferralController::class, 'handleInviteToken'])->name('referral.invite.token');
+

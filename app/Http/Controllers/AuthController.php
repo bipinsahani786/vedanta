@@ -10,9 +10,13 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
-        return view('auth.login');
+        $role = $request->query('role', 'candidate');
+        if (!in_array($role, ['candidate', 'employer'])) {
+            $role = 'candidate';
+        }
+        return view('auth.login', compact('role'));
     }
 
     public function login(Request $request)
@@ -31,6 +35,7 @@ class AuthController extends Controller
             } elseif ($user->role === 'employer') {
                 return redirect()->intended('/employer/dashboard');
             } else {
+                session()->flash('candidate_just_logged_in', true);
                 return redirect()->intended('/candidate/dashboard');
             }
         }
@@ -115,6 +120,7 @@ class AuthController extends Controller
             } elseif ($user->role === 'employer') {
                 return redirect()->intended('/employer/dashboard');
             } else {
+                session()->flash('candidate_just_logged_in', true);
                 return redirect()->intended('/candidate/dashboard');
             }
         }

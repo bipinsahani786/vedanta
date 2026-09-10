@@ -83,11 +83,16 @@
                             <span class="bg-red-500/10 text-red-500 px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1 w-max">
                                 <i class="fas fa-times-circle"></i> Rejected
                             </span>
+                        @elseif($app->status === 'hold')
+                            <span class="bg-amber-500/10 text-amber-500 px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1 w-max">
+                                <i class="fas fa-pause-circle"></i> On Hold
+                            </span>
                         @endif
                     </td>
                     <td class="py-4 px-6 text-right">
                         @php
                             $candidateData = [
+                                'candidate_id' => $app->candidate->id,
                                 'name' => $app->candidate->name,
                                 'is_verified' => (bool)($app->candidate->profile?->is_verified ?? false),
                                 'email' => $app->candidate->email,
@@ -298,6 +303,20 @@
         } else {
             resumeBtn.classList.add('hidden');
             noResume.classList.remove('hidden');
+        }
+
+        // Asynchronously track view for candidate
+        if (data.candidate_id) {
+            fetch('{{ url('/employer/candidate') }}/' + data.candidate_id + '/track-view', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            }).catch(function(err) {
+                console.debug('Candidate view tracking error:', err);
+            });
         }
 
         document.getElementById('employerCandidateModal').classList.remove('hidden');

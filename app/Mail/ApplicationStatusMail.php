@@ -33,6 +33,8 @@ class ApplicationStatusMail extends Mailable implements ShouldQueue
             $subject = 'Congratulations! You are Hired: ' . $this->application->jobPost->title;
         } elseif ($this->application->status === 'rejected') {
             $subject = 'Application Status Update: ' . $this->application->jobPost->title;
+        } elseif ($this->application->status === 'hold') {
+            $subject = 'Application Placed On Hold: ' . $this->application->jobPost->title;
         }
 
         return new Envelope(

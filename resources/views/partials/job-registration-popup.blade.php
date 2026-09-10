@@ -51,6 +51,36 @@
                         <input name="phone" type="text" required class="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-accent-blue" placeholder="Phone Number" value="{{ old('phone') }}">
                     </div>
                 </div>
+
+                @php
+                    $popupCategories = \App\Models\Category::with(['subjects' => function($q) {
+                        $q->where('subjects.is_active', true)->orderBy('name');
+                    }])->where('is_active', true)->orderBy('name')->get();
+                @endphp
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"><i class="fas fa-layer-group text-sm"></i></span>
+                        <select name="category_id" id="popup_category_id" required onchange="handlePopupCategoryChange(this.value)"
+                            class="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-7 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-accent-blue appearance-none cursor-pointer">
+                            <option value="">Select Category</option>
+                            @foreach($popupCategories as $cat)
+                                <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+                                    {{ $cat->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                    </div>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"><i class="fas fa-book text-sm"></i></span>
+                        <select name="subject_id" id="popup_subject_id" required
+                            class="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-7 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-accent-blue appearance-none cursor-pointer">
+                            <option value="">Select Subject</option>
+                        </select>
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><i class="fas fa-lock text-sm"></i></span>
@@ -82,6 +112,64 @@
 </div>
 
 <script>
+    const popupCategorySubjectsMap = {
+        @foreach($popupCategories as $cat)
+            "{{ $cat->id }}": [
+                @foreach($cat->subjects as $sub)
+                    { id: "{{ $sub->id }}", name: "{{ addslashes($sub->name) }}" },
+                @endforeach
+            ],
+        @endforeach
+    };
+
+    function populatePopupSubjects(subjects, selectedSubjectId = null) {
+        const subjectSelect = document.getElementById('popup_subject_id');
+        if (!subjectSelect) return;
+
+        subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+
+        if (!subjects || subjects.length === 0) {
+            subjectSelect.innerHTML = '<option value="">No subjects available</option>';
+            return;
+        }
+
+        subjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.id;
+            option.textContent = subject.name;
+            if (selectedSubjectId && String(subject.id) === String(selectedSubjectId)) {
+                option.selected = true;
+            }
+            subjectSelect.appendChild(option);
+        });
+    }
+
+    window.handlePopupCategoryChange = function(categoryId, selectedSubjectId = null) {
+        const subjectSelect = document.getElementById('popup_subject_id');
+        if (!subjectSelect) return;
+
+        if (!categoryId) {
+            subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+            return;
+        }
+
+        if (popupCategorySubjectsMap[categoryId] && popupCategorySubjectsMap[categoryId].length > 0) {
+            populatePopupSubjects(popupCategorySubjectsMap[categoryId], selectedSubjectId);
+            return;
+        }
+
+        subjectSelect.innerHTML = '<option value="">Loading subjects...</option>';
+        fetch("{{ url('/api/categories') }}/" + categoryId + "/subjects")
+            .then(res => res.json())
+            .then(data => {
+                popupCategorySubjectsMap[categoryId] = data;
+                populatePopupSubjects(data, selectedSubjectId);
+            })
+            .catch(() => {
+                populatePopupSubjects([], null);
+            });
+    };
+
     (function() {
         const showPopup = () => {
             const popup = document.getElementById('jobRegPopup');
@@ -134,6 +222,12 @@
                     closeJobPopup();
                 }
             });
+        }
+
+        const categorySelect = document.getElementById('popup_category_id');
+        const oldSubjectId = "{{ old('subject_id') }}";
+        if (categorySelect && categorySelect.value) {
+            window.handlePopupCategoryChange(categorySelect.value, oldSubjectId);
         }
     })();
 </script>

@@ -50,17 +50,55 @@ class PaymentController extends Controller
             }
         }
 
-        if (!$profile->is_profile_complete || !$profile->is_agreement_signed) {
-            return redirect()->route('candidate.dashboard')->with('error', 'Please complete previous steps first.');
-        }
-
-        // Allow standard plan users to upgrade by paying their pending amount as an upgrade fee
+        // Allow candidate to view Payment & Plan dashboard
+        // If renewal with pending amount, guide to service charge
         if ($isRenewal && $profile->pending_amount > 0 && $profile->plan_type !== 'standard') {
             return redirect()->route('candidate.serviceCharge.show')->with('error', 'You must clear your pending dues of ₹' . $profile->pending_amount . ' before renewing your plan.');
         }
 
-        // Removed the check that blocked paid users from viewing their plans
-        return view('candidate.payment.show', compact('user', 'profile', 'isRenewal'));
+        // Referral Wallet
+        $wallet = \App\Services\ReferralService::getWallet($user);
+        $pointRate = \App\Services\ReferralService::getPointRate();
+        $availablePoints = $wallet ? (float)$wallet->available_points : 0;
+        $walletBalanceInr = round($availablePoints * $pointRate, 2);
+
+        // Transactions & Paid Amounts
+        $transactions = \App\Models\PaymentTransaction::where('candidate_id', $user->id)
+            ->latest()
+            ->get();
+        $dbPaidSum = $transactions->where('status', 'success')->sum('amount');
+        $fallbackPaid = ($profile->is_fee_paid ? 1000 : ($profile->initial_fee_paid ? 500 : 0));
+        $totalPaidAmount = max($dbPaidSum, $fallbackPaid);
+
+        // Next Payment Due
+        if ($profile->is_fee_paid) {
+            $nextPaymentDue = (float)($profile->pending_amount ?? 0);
+        } elseif ($profile->initial_fee_paid) {
+            $nextPaymentDue = 500;
+        } else {
+            $nextPaymentDue = 500;
+        }
+
+        // Validity Date & Registration Date
+        $planStartedAt = $profile->plan_started_at ?? $profile->created_at ?? now();
+        $planValidityDate = \Carbon\Carbon::parse($planStartedAt)->addDays(30);
+        $firstSuccessTxn = $transactions->where('status', 'success')->first();
+        $registrationPaidDate = $firstSuccessTxn ? $firstSuccessTxn->created_at->format('d M Y') : ($profile->initial_fee_paid ? ($profile->updated_at ? $profile->updated_at->format('d M Y') : now()->format('d M Y')) : null);
+
+        return view('candidate.payment.show', compact(
+            'user',
+            'profile',
+            'isRenewal',
+            'wallet',
+            'pointRate',
+            'availablePoints',
+            'walletBalanceInr',
+            'transactions',
+            'totalPaidAmount',
+            'nextPaymentDue',
+            'planValidityDate',
+            'registrationPaidDate'
+        ));
     }
 
     public function process(Request $request)
@@ -73,16 +111,35 @@ class PaymentController extends Controller
         $isRenewal = str_starts_with($request->plan, 'renewal');
         $isUpgrade = $request->plan === 'upgrade';
         
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
+
+        // Check if existing plan is expired (after 30 days)
+        $planStartedAt = $profile->plan_started_at ?? $profile->created_at;
+        $isPlanExpired = $planStartedAt ? \Carbon\Carbon::parse($planStartedAt)->addDays(30)->isPast() : false;
+
+        // If candidate already paid ₹500 for Standard plan:
+        if ($profile->plan_type === 'standard' && ($profile->initial_fee_paid || ($profile->paid_amount ?? 0) >= 500)) {
+            if ($isPlanExpired && !$isUpgrade && $request->plan !== 'premium') {
+                // Plan is expired/ended (after 30 days): ₹500 payment is a RENEWAL of Standard plan, NOT an upgrade!
+                $isRenewal = true;
+                $request->merge(['plan' => 'renewal_basic']);
+            } elseif (!$profile->is_fee_paid || $profile->pending_amount > 0) {
+                // Plan is still active (within 30 days): second ₹500 payment upgrades to Premium (total ₹1000)
+                if ($request->plan === 'basic' || $request->plan === 'upgrade' || $request->plan === 'premium') {
+                    $isUpgrade = true;
+                }
+            } else {
+                if ($request->plan === 'basic') {
+                    return back()->with('error', 'You have already paid for the Basic plan.');
+                }
+            }
+        }
+
         $amount = 500;
         if ($request->plan === 'premium' || $request->plan === 'renewal_premium') $amount = 1000;
         if ($isUpgrade) $amount = 500;
-        
-        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
-        // Prevent duplicate payments
-        if ($request->plan === 'basic' && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid)) {
-            return back()->with('error', 'You have already paid for the Basic plan.');
-        }
+        // Prevent duplicate payment if already active Premium
         if (($request->plan === 'premium' || $request->plan === 'upgrade') && $profile->plan_type === 'premium' && $profile->is_fee_paid) {
             return back()->with('error', 'You are already a Premium member.');
         }

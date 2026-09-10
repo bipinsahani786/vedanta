@@ -35,6 +35,10 @@ class ServiceChargeController extends Controller
             }
         }
         
+        if ($profile) {
+            $profile->loadMissing(['category', 'subject']);
+        }
+
         $invoices = ServiceChargeInvoice::where('candidate_id', $candidateId)
             ->latest()
             ->get();
@@ -43,8 +47,14 @@ class ServiceChargeController extends Controller
             ->where('type', 'service_charge')
             ->latest()
             ->get();
+
+        $hiredApp = \App\Models\JobApplication::where('candidate_id', $candidateId)
+            ->where('status', 'hired')
+            ->with('jobPost')
+            ->latest()
+            ->first();
             
-        return view('candidate.serviceCharge.show', compact('invoices', 'paymentHistory', 'profile'));
+        return view('candidate.serviceCharge.show', compact('invoices', 'paymentHistory', 'profile', 'user', 'hiredApp'));
     }
 
     public function process(Request $request)

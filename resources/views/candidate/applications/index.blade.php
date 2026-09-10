@@ -1,9 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.candidate')
 
-@section('content')
-    @include('candidate.partials.nav')
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+@section('candidate_content')
+    <div class="space-y-6">
 
         {{-- Page Header --}}
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 reveal">
@@ -100,6 +98,10 @@
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20">
                                             <i class="fas fa-times mr-1 text-[9px]"></i> Not Selected
                                         </span>
+                                    @elseif($app->status === 'hold')
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                            <i class="fas fa-pause-circle mr-1 text-[9px]"></i> On Hold
+                                        </span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-accent-yellow/10 text-accent-yellow border border-accent-yellow/20">
                                             <i class="fas fa-spinner fa-spin mr-1 text-[9px]"></i> In Progress
@@ -118,12 +120,12 @@
                                         </h4>
 
                                         <div
-                                            class="relative flex flex-col md:flex-row justify-between w-full mb-6 gap-6 md:gap-0">
+                                             class="relative flex flex-col md:flex-row justify-between w-full mb-6 gap-6 md:gap-0">
                                             <!-- Connecting Line -->
                                             <div
                                                 class="absolute top-4 left-[10%] w-[80%] h-1 bg-card-border z-0 hidden md:block">
                                                 <div class="h-full bg-accent-blue transition-all duration-500"
-                                                    style="width: {{ in_array($app->status, ['shortlisted', 'hired', 'rejected']) ? (in_array($app->status, ['hired', 'rejected']) ? '100%' : '50%') : '0%' }}">
+                                                    style="width: {{ in_array($app->status, ['shortlisted', 'hold', 'hired', 'rejected']) ? (in_array($app->status, ['hired', 'rejected', 'hold']) ? '100%' : '50%') : '0%' }}">
                                                 </div>
                                             </div>
 
@@ -142,12 +144,12 @@
                                             <!-- Step 2: Forwarded -->
                                             <div class="relative z-10 flex flex-col items-center flex-1">
                                                 <div
-                                                    class="w-8 h-8 rounded-full flex items-center justify-center border-2 border-card-bg z-10 transition-colors duration-300 {{ in_array($app->status, ['shortlisted', 'hired', 'rejected']) ? 'bg-accent-yellow text-[#031b4e] shadow-[0_0_15px_rgba(255,184,0,0.4)]' : 'bg-card-border text-text-dark/40' }}">
+                                                    class="w-8 h-8 rounded-full flex items-center justify-center border-2 border-card-bg z-10 transition-colors duration-300 {{ in_array($app->status, ['shortlisted', 'hold', 'hired', 'rejected']) ? 'bg-accent-yellow text-[#031b4e] shadow-[0_0_15px_rgba(255,184,0,0.4)]' : 'bg-card-border text-text-dark/40' }}">
                                                     <i
-                                                        class="fas {{ in_array($app->status, ['shortlisted', 'hired', 'rejected']) ? 'fa-check' : 'fa-hourglass-half' }} text-xs"></i>
+                                                        class="fas {{ in_array($app->status, ['shortlisted', 'hold', 'hired', 'rejected']) ? 'fa-check' : 'fa-hourglass-half' }} text-xs"></i>
                                                 </div>
                                                 <div
-                                                    class="mt-3 text-sm font-bold {{ in_array($app->status, ['shortlisted', 'hired', 'rejected']) ? 'text-text-main' : 'text-text-dark/50' }}">
+                                                    class="mt-3 text-sm font-bold {{ in_array($app->status, ['shortlisted', 'hold', 'hired', 'rejected']) ? 'text-text-main' : 'text-text-dark/50' }}">
                                                     Forwarded to School</div>
                                                 @if($app->is_forwarded)
                                                     <div class="text-[10px] text-text-dark/50"><i
@@ -161,23 +163,25 @@
                                             <div class="relative z-10 flex flex-col items-center flex-1">
                                                 <div
                                                     class="w-8 h-8 rounded-full flex items-center justify-center border-2 border-card-bg z-10 transition-colors duration-300 
-                                                                {{ $app->status === 'hired' ? 'bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.4)]' : ($app->status === 'rejected' ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-card-border text-text-dark/40') }}">
+                                                                {{ $app->status === 'hired' ? 'bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.4)]' : ($app->status === 'rejected' ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : ($app->status === 'hold' ? 'bg-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-card-border text-text-dark/40')) }}">
                                                     @if($app->status === 'hired')
                                                         <i class="fas fa-trophy text-xs"></i>
                                                     @elseif($app->status === 'rejected')
                                                         <i class="fas fa-times text-xs"></i>
+                                                    @elseif($app->status === 'hold')
+                                                        <i class="fas fa-pause text-xs"></i>
                                                     @else
                                                         <i class="fas fa-question text-xs"></i>
                                                     @endif
                                                 </div>
                                                 <div
                                                     class="mt-3 text-sm font-bold 
-                                                                {{ $app->status === 'hired' ? 'text-green-400' : ($app->status === 'rejected' ? 'text-red-400' : 'text-text-dark/50') }}">
-                                                    {{ $app->status === 'hired' ? 'Selected / Hired' : ($app->status === 'rejected' ? 'Not Selected' : 'Final Decision') }}
+                                                                {{ $app->status === 'hired' ? 'text-green-400' : ($app->status === 'rejected' ? 'text-red-400' : ($app->status === 'hold' ? 'text-amber-400' : 'text-text-dark/50')) }}">
+                                                    {{ $app->status === 'hired' ? 'Selected / Hired' : ($app->status === 'rejected' ? 'Not Selected' : ($app->status === 'hold' ? 'On Hold' : 'Final Decision')) }}
                                                 </div>
                                                 <div
-                                                    class="text-[10px] {{ in_array($app->status, ['hired', 'rejected']) ? 'text-text-dark/50' : 'text-text-dark/40' }}">
-                                                    {{ in_array($app->status, ['hired', 'rejected']) ? 'Process completed' : 'Awaiting interview feedback' }}
+                                                    class="text-[10px] {{ in_array($app->status, ['hired', 'rejected', 'hold']) ? 'text-text-dark/50' : 'text-text-dark/40' }}">
+                                                    {{ $app->status === 'hired' ? 'Process completed' : ($app->status === 'rejected' ? 'Process completed' : ($app->status === 'hold' ? 'Application paused' : 'Awaiting interview feedback')) }}
                                                 </div>
                                             </div>
                                         </div>

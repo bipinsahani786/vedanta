@@ -21,6 +21,8 @@ class CandidateAuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
             'phone' => 'required|string|max:15',
+            'category_id' => 'nullable|exists:categories,id',
+            'subject_id' => 'nullable|exists:subjects,id',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -59,7 +61,24 @@ class CandidateAuthController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            $user->profile()->firstOrCreate([]);
+            $profileData = [];
+            if ($request->filled('category_id')) $profileData['category_id'] = $request->category_id;
+            if ($request->filled('subject_id')) $profileData['subject_id'] = $request->subject_id;
+
+            $user->profile()->firstOrCreate($profileData);
+
+            // Process Referral — Priority: form input > session > cookie
+            $referralCode = $request->input('referral_code')
+                ?: session('referral_code')
+                ?: $request->cookie('vpa_referral_code');
+
+            if ($referralCode) {
+                $referralSource = $request->input('referral_source')
+                    ?: session('referral_source', 'other');
+                \App\Services\ReferralService::recordReferral($user, $referralCode, $referralSource);
+                // Clear session referral data after consumption
+                session()->forget(['referral_code', 'referral_source']);
+            }
 
             event(new Registered($user));
             Auth::login($user);

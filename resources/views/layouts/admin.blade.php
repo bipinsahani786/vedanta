@@ -145,7 +145,7 @@
             </div>
 
             <!-- Navigation -->
-            <div class="flex-1 overflow-y-auto py-5 px-3 flex flex-col gap-1 no-scrollbar">
+            <div id="admin-sidebar-nav" class="flex-1 overflow-y-auto py-5 px-3 flex flex-col gap-1 no-scrollbar">
                 <a href="{{ route('admin.dashboard') }}"
                     class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }} px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-th-large w-5 text-center text-lg"></i> Dashboard
@@ -235,6 +235,45 @@
                 <a href="{{ route('admin.clients.index') }}"
                     class="sidebar-link {{ request()->routeIs('admin.clients.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-building w-5 text-center"></i> Client Logos
+                </a>
+
+                <div class="text-[10px] uppercase font-bold tracking-widest text-white/30 mt-6 mb-2 px-4">Refer & Earn</div>
+
+                <a href="{{ route('admin.referrals.dashboard') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.dashboard') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm text-emerald-400">
+                    <i class="fas fa-chart-pie w-5 text-center"></i> Referral Dashboard
+                </a>
+                <a href="{{ route('admin.referrals.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.index') || request()->routeIs('admin.referrals.show') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-user-friends w-5 text-center"></i> All Referrals
+                </a>
+                <a href="{{ route('admin.referrals.leaderboard') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.leaderboard*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm text-amber-400">
+                    <i class="fas fa-medal w-5 text-center"></i> Top Leaderboard
+                </a>
+                <a href="{{ route('admin.referrals.wallets') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.wallets*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-wallet w-5 text-center"></i> Candidate Wallets
+                </a>
+                <a href="{{ route('admin.referrals.transactions') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.transactions*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-receipt w-5 text-center"></i> Transactions Ledger
+                </a>
+                <a href="{{ route('admin.referrals.milestones') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.milestones*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm text-amber-400">
+                    <i class="fas fa-trophy w-5 text-center"></i> Milestone Bonuses
+                </a>
+                <a href="{{ route('admin.referrals.fraud') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.fraud*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm text-rose-400">
+                    <i class="fas fa-shield-alt w-5 text-center"></i> Fraud & Security
+                </a>
+                <a href="{{ route('admin.referrals.redemptions') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.redemptions*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-tags w-5 text-center"></i> Point Redemptions
+                </a>
+                <a href="{{ route('admin.referrals.settings') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.referrals.settings*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-gift w-5 text-center"></i> Reward Settings
                 </a>
 
                 <div class="text-[10px] uppercase font-bold tracking-widest text-white/30 mt-6 mb-2 px-4">Communication</div>
@@ -405,20 +444,23 @@
                 
                 <div class="flex-1">
                     {{-- Breadcrumb/Title Area --}}
-                    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                    <div>
-                        <h1 class="text-2xl sm:text-3xl font-bold text-text-main tracking-tight">
-                            @yield('title', 'Dashboard')</h1>
-                        @hasSection('subtitle')
-                            <p class="text-sm text-text-dark/50 mt-1">@yield('subtitle')</p>
-                        @endif
-                    </div>
-                    @hasSection('actions')
-                        <div class="flex items-center gap-3">
-                            @yield('actions')
+                    @hasSection('title')
+                        <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                            <div>
+                                <h1 class="text-2xl sm:text-3xl font-bold text-text-main tracking-tight">
+                                    @yield('title')
+                                </h1>
+                                @hasSection('subtitle')
+                                    <p class="text-sm text-text-dark/50 mt-1">@yield('subtitle')</p>
+                                @endif
+                            </div>
+                            @hasSection('actions')
+                                <div class="flex items-center gap-3">
+                                    @yield('actions')
+                                </div>
+                            @endif
                         </div>
                     @endif
-                </div>
 
                 {{-- Alerts --}}
                 @if(session('success'))
@@ -672,6 +714,39 @@
             mobileMenuBtn.addEventListener('click', toggleSidebar);
             mobileOverlay.addEventListener('click', toggleSidebar);
         }
+
+        // Preserve and restore Admin Sidebar scroll position across navigation
+        (function() {
+            const sidebarNav = document.getElementById('admin-sidebar-nav');
+            if (!sidebarNav) return;
+
+            // 1. Restore saved scroll position from sessionStorage
+            const savedScroll = sessionStorage.getItem('admin_sidebar_scroll_pos');
+            if (savedScroll !== null) {
+                sidebarNav.scrollTop = parseInt(savedScroll, 10);
+            }
+
+            // 2. Ensure active sidebar link is scrolled into visible view
+            const activeLink = sidebarNav.querySelector('.sidebar-link.active');
+            if (activeLink) {
+                const navRect = sidebarNav.getBoundingClientRect();
+                const linkRect = activeLink.getBoundingClientRect();
+                if (linkRect.top < navRect.top || linkRect.bottom > navRect.bottom) {
+                    activeLink.scrollIntoView({ block: 'center', behavior: 'instant' });
+                }
+            }
+
+            // 3. Save scroll position on scroll and on link click
+            sidebarNav.addEventListener('scroll', function() {
+                sessionStorage.setItem('admin_sidebar_scroll_pos', sidebarNav.scrollTop);
+            });
+
+            sidebarNav.querySelectorAll('a').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    sessionStorage.setItem('admin_sidebar_scroll_pos', sidebarNav.scrollTop);
+                });
+            });
+        })();
     </script>
 </body>
 

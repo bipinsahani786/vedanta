@@ -270,10 +270,10 @@
                         </button>
                     </form>
                 @else
-                    <a href="/login"
-                        class="px-5 py-2.5 rounded-xl font-bold text-[15px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200">Login</a>
-                    <a href="/register"
-                        class="px-5 py-2.5 rounded-xl font-bold text-[15px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</a>
+                    <button type="button" onclick="openAuthChoiceModal('login')"
+                        class="px-5 py-2.5 rounded-xl font-bold text-[15px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200">Login</button>
+                    <button type="button" onclick="openAuthChoiceModal('register')"
+                        class="px-5 py-2.5 rounded-xl font-bold text-[15px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</button>
                 @endauth
             </div>
         </nav>
@@ -334,10 +334,10 @@
                         </button>
                     </form>
                 @else
-                    <a href="/login"
-                        class="px-5 py-3.5 rounded-xl font-medium text-center bg-white/10 text-text-main">Login</a>
-                    <a href="/register"
-                        class="px-5 py-3.5 rounded-xl font-medium text-center bg-accent-blue text-white shadow-glow-blue">Register</a>
+                    <button type="button" onclick="closeMobileMenu(); openAuthChoiceModal('login');"
+                        class="px-5 py-3.5 rounded-xl font-medium text-center bg-white/10 text-text-main hover:bg-white/20 transition-colors">Login</button>
+                    <button type="button" onclick="closeMobileMenu(); openAuthChoiceModal('register');"
+                        class="px-5 py-3.5 rounded-xl font-medium text-center bg-accent-blue text-white shadow-glow-blue hover:bg-accent-blue-hover transition-colors">Register</button>
                 @endauth
             </div>
         </div>
@@ -643,6 +643,10 @@
                 closeMobileMenuBtn.addEventListener('click', () => {
                     mobileMenu.classList.add('translate-x-full');
                 });
+
+                window.closeMobileMenu = function () {
+                    mobileMenu.classList.add('translate-x-full');
+                };
             }
         });
 
@@ -731,6 +735,8 @@
             applyFont(savedFont);
         });
     </script>
+
+    @include('partials.auth-choice-modal')
 
     @stack('scripts')
 </body>
