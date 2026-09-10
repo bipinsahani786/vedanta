@@ -226,9 +226,10 @@
                 Invite fellow educators & earn discount points!
             </p>
             <a href="{{ route('candidate.referral.index') }}" 
-               class="inline-flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-extrabold text-[10px] shadow-sm transition-all">
-                <i class="fas fa-share-alt text-[9px]"></i>
-                <span>Refer Friends</span>
+               style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #020617;"
+               class="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] shadow-sm hover:brightness-105 hover:-translate-y-0.5 transition-all whitespace-nowrap">
+                <i class="fas fa-share-alt text-[10px]"></i>
+                <span class="font-black">Refer Friends</span>
             </a>
         </div>
 

@@ -603,17 +603,23 @@
                         <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                             @auth
                                 @if(auth()->user()->role === 'candidate')
-                                    <a href="{{ route('candidate.referral.index') }}" class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg hover:shadow-[0_4px_20px_rgba(245,158,11,0.4)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                    <a href="{{ route('candidate.referral.index') }}" 
+                                       style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #020617;"
+                                       class="w-full py-3 px-6 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md hover:shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
                                         <i class="fas fa-wallet"></i>
                                         <span>Open My Referral Hub</span>
                                     </a>
                                 @else
-                                    <a href="{{ route('candidate.dashboard') }}" class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                    <a href="{{ route('candidate.dashboard') }}" 
+                                       style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #020617;"
+                                       class="w-full py-3 px-6 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md hover:shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
                                         <span>Go to Dashboard</span>
                                     </a>
                                 @endif
                             @else
-                                <button type="button" onclick="openAuthChoiceModal('register')" class="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg hover:shadow-[0_4px_20px_rgba(245,158,11,0.4)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                <button type="button" onclick="openAuthChoiceModal('register')" 
+                                        style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #020617;"
+                                        class="w-full py-3 px-5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md hover:shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
                                     <i class="fas fa-user-plus"></i>
                                     <span>Register & Refer</span>
                                 </button>
