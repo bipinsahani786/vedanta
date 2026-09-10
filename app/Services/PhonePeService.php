@@ -16,10 +16,10 @@ class PhonePeService
 
     public function __construct()
     {
-        $this->clientId = env('PHONEPE_CLIENT_ID', env('PHONEPE_MERCHANT_ID', ''));
-        $this->clientSecret = env('PHONEPE_CLIENT_SECRET', env('PHONEPE_SALT_KEY', ''));
-        $this->clientVersion = env('PHONEPE_CLIENT_VERSION', '1');
-        $this->env = env('PHONEPE_ENV', 'sandbox');
+        $this->clientId = config('services.phonepe.client_id', '');
+        $this->clientSecret = config('services.phonepe.client_secret', '');
+        $this->clientVersion = config('services.phonepe.client_version', '1');
+        $this->env = config('services.phonepe.env', 'sandbox');
         $this->isProd = $this->env === 'production';
     }
 
