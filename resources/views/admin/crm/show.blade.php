@@ -40,6 +40,10 @@
             </a>
         @endif
         
+        <button type="button" onclick="openSendEmailModal()" class="px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 transition-colors flex items-center shadow-sm">
+            <i class="fas fa-paper-plane mr-2"></i> Send Email
+        </button>
+        
         <a href="{{ route('admin.crm.candidate.magic-login', $candidate->id) }}" target="_blank" class="px-4 py-2 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-xl hover:bg-indigo-200 transition-colors flex items-center shadow-sm">
             <i class="fas fa-sign-in-alt mr-2"></i> Login as Candidate
         </a>
@@ -758,7 +762,7 @@
 
             <div>
                 <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Status</label>
-                <select id="edit_invoice_status" name="status" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
+                                        <select id="edit_invoice_status" name="status" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
                     <option value="pending">Pending</option>
                     <option value="overdue">Overdue</option>
                     <option value="paid">Paid</option>
@@ -775,10 +779,142 @@
             </div>
         </form>
     </div>
+
+    <!-- Send Email to Candidate Modal -->
+    <div id="sendEmailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
+                <div>
+                    <h3 class="font-bold text-lg text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-paper-plane text-purple-600"></i> Send Email to Candidate
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Recipient: <span class="font-semibold text-gray-800">{{ $candidate->name }}</span> ({{ $candidate->email }})</p>
+                </div>
+                <button type="button" onclick="closeSendEmailModal()" class="text-gray-400 hover:text-gray-600 text-lg">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('admin.crm.candidate.send-email', $candidate->id) }}" method="POST" class="space-y-4" onsubmit="return handleSendEmailSubmit(this)">
+                @csrf
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Choose Email Template</label>
+                    <select id="crm_template_select" class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-purple-500 focus:border-purple-500" onchange="applySelectedTemplate(this.value)">
+                        <option value="">-- Select a Lifecycle Template (32 Available) --</option>
+                        @foreach($emailTemplates as $tmpl)
+                            <option value="{{ $tmpl->id }}">{{ $tmpl->name }}</option>
+                        @endforeach
+                    </select>
+                    <p class="text-[11px] text-gray-400 mt-1">Selecting a template auto-fills the subject and message with this candidate's details.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Subject <span class="text-red-500">*</span></label>
+                    <input type="text" id="email_subject" name="subject" required placeholder="Email subject..." class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-purple-500 focus:border-purple-500">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Email HTML Body <span class="text-red-500">*</span></label>
+                        <button type="button" onclick="toggleEmailPreview()" class="text-xs font-semibold text-purple-600 hover:underline">
+                            <span id="preview_btn_text">Preview Rendered Email</span>
+                        </button>
+                    </div>
+                    <textarea id="email_body" name="body" rows="10" required class="w-full font-mono text-xs rounded-xl border-gray-300 shadow-sm py-2 px-3 focus:ring-purple-500 focus:border-purple-500" placeholder="Select a template above or type HTML content..."></textarea>
+                    
+                    <div id="email_rendered_preview" class="hidden border border-gray-200 rounded-xl p-4 bg-gray-50 max-h-[350px] overflow-y-auto mt-2"></div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                    <button type="button" onclick="closeSendEmailModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" id="sendEmailSubmitBtn" class="px-6 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-700 transition-colors shadow-sm flex items-center gap-1.5">
+                        <i class="fas fa-paper-plane"></i> Send Email
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
 <script>
+    const candidateData = {
+        name: @json($candidate->name),
+        email: @json($candidate->email),
+        phone: @json($candidate->phone ?? ''),
+        category: @json($candidate->profile->category->name ?? 'Teaching'),
+        subject: @json($candidate->profile->subject->name ?? 'Faculty'),
+        plan_type: @json(ucfirst($candidate->profile->plan_type ?? 'Standard')),
+        payment_amount: @json($candidate->profile->paid_amount ?? '500'),
+        invoice_number: @json($candidate->profile->payment_id ?? 'INV-VPA'),
+        job_title: @json($candidate->applications->first()?->jobPost?->title ?? 'Teaching Position'),
+        school_name: @json($candidate->applications->first()?->jobPost?->school_name ?? 'Partner Educational Institution'),
+        interview_date: @json($candidate->applications->first()?->interview_date ? $candidate->applications->first()->interview_date->format('M d, Y h:i A') : 'To be confirmed'),
+        interview_link: @json($candidate->applications->first()?->interview_link ?? 'https://vedantaplacementagency.in/candidate/applications'),
+        remarks: @json($candidate->applications->first()?->remarks ?? 'None'),
+        action_url: 'https://vedantaplacementagency.in/candidate/dashboard'
+    };
+
+    const emailTemplatesMap = @json($emailTemplates->keyBy('id'));
+
+    function openSendEmailModal() {
+        document.getElementById('sendEmailModal').classList.remove('hidden');
+    }
+
+    function closeSendEmailModal() {
+        document.getElementById('sendEmailModal').classList.add('hidden');
+    }
+
+    function applySelectedTemplate(tmplId) {
+        if (!tmplId || !emailTemplatesMap[tmplId]) return;
+        const tmpl = emailTemplatesMap[tmplId];
+        
+        let subj = tmpl.subject;
+        let body = tmpl.body;
+
+        for (const [key, val] of Object.entries(candidateData)) {
+            const regex = new RegExp('(\\{' + key + '\\}|\\[\\s*' + key + '\\s*\\])', 'gi');
+            subj = subj.replace(regex, val || '');
+            body = body.replace(regex, val || '');
+        }
+
+        document.getElementById('email_subject').value = subj;
+        document.getElementById('email_body').value = body;
+        
+        const previewDiv = document.getElementById('email_rendered_preview');
+        if (!previewDiv.classList.contains('hidden')) {
+            previewDiv.innerHTML = body;
+        }
+    }
+
+    function toggleEmailPreview() {
+        const bodyVal = document.getElementById('email_body').value;
+        const previewDiv = document.getElementById('email_rendered_preview');
+        const btnText = document.getElementById('preview_btn_text');
+
+        if (previewDiv.classList.contains('hidden')) {
+            previewDiv.innerHTML = bodyVal;
+            previewDiv.classList.remove('hidden');
+            btnText.textContent = 'Hide Preview';
+        } else {
+            previewDiv.classList.add('hidden');
+            btnText.textContent = 'Preview Rendered Email';
+        }
+    }
+
+    function handleSendEmailSubmit(form) {
+        const btn = document.getElementById('sendEmailSubmitBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Sending...';
+        }
+        return true;
+    }
+
     function prepareInvoice(appId) {
         const select = document.getElementById('job_application_id');
         if(select) {

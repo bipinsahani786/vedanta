@@ -576,8 +576,9 @@ class CrmController extends Controller
         }
 
         $history = $history->sortByDesc('date')->values();
+        $emailTemplates = \App\Models\EmailTemplate::orderBy('name', 'asc')->get();
 
-        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'rating', 'history', 'availableJobs'));
+        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'rating', 'history', 'availableJobs', 'emailTemplates'));
     }
 
     public function uploadAgreement(Request $request, $id)
@@ -1093,5 +1094,39 @@ class CrmController extends Controller
         $invoice->delete();
 
         return back()->with('success', 'Service charge invoice deleted successfully.');
+    }
+
+    public function sendCandidateEmail(Request $request, $id)
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'body' => 'required|string',
+        ]);
+
+        $candidate = User::findOrFail($id);
+
+        if (!$candidate->email) {
+            return back()->with('error', 'Candidate does not have a registered email address.');
+        }
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($candidate->email)->send(
+                new \App\Mail\DynamicTemplateMail($request->subject, $request->body)
+            );
+
+            // Log communication in Follow-ups
+            \App\Models\CrmFollowUp::create([
+                'candidate_id' => $candidate->id,
+                'admin_id' => auth()->id(),
+                'status' => 'closed',
+                'notes' => 'Sent Email: ' . $request->subject,
+                'next_follow_up_date' => null,
+            ]);
+
+            return back()->with('success', 'Email sent successfully to ' . $candidate->email);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send candidate email: " . $e->getMessage());
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
     }
 }

@@ -111,6 +111,12 @@ class ApplicationController extends Controller
 
         $profile->increment('used_applications');
 
+        // Send Application Submitted confirmation email to Candidate
+        \App\Services\CandidateLifecycleMailService::send($user, 'Application Submitted', [
+            'job_title' => $job->title,
+            'school_name' => $job->school_name ?? $job->user?->name ?? 'Partner Educational Institution',
+        ]);
+
         // Check if they need a warning (1 remaining)
         $remaining = $profile->total_allowed_applications - $profile->used_applications;
         if ($remaining === 1) {
