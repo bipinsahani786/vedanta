@@ -61,7 +61,16 @@ class ApplicationController extends Controller
             $application->remarks = $request->remarks;
         }
 
+        $isNewSchedule = false;
+        $isRescheduled = false;
         if ($request->has('interview_date') && !empty($request->interview_date)) {
+            $formattedNewDate = \Carbon\Carbon::parse($request->interview_date)->format('Y-m-d H:i');
+            $formattedOldDate = $application->interview_date ? $application->interview_date->format('Y-m-d H:i') : null;
+            if ($formattedOldDate === null) {
+                $isNewSchedule = true;
+            } elseif ($formattedOldDate !== $formattedNewDate) {
+                $isRescheduled = true;
+            }
             $application->interview_date = $request->interview_date;
             $application->interview_link = $request->interview_link;
         } else if ($request->status === 'applied') {
@@ -104,6 +113,25 @@ class ApplicationController extends Controller
         }
 
         $application->save();
+
+        // Trigger Interview Scheduled / Rescheduled lifecycle mail if date changed
+        if ($isNewSchedule) {
+            \App\Services\CandidateLifecycleMailService::send($application->candidate, 'Interview Scheduled', [
+                'job_title' => $application->jobPost->title,
+                'school_name' => $application->jobPost->school_name ?? 'Partner Educational Institution',
+                'interview_date' => \Carbon\Carbon::parse($application->interview_date)->format('l, F j, Y \a\t g:i A'),
+                'interview_link' => $application->interview_link ?? route('candidate.applications.index'),
+                'remarks' => $application->remarks ?? 'Please be prepared and join 10 minutes early.',
+            ]);
+        } elseif ($isRescheduled) {
+            \App\Services\CandidateLifecycleMailService::send($application->candidate, 'Interview Rescheduled', [
+                'job_title' => $application->jobPost->title,
+                'school_name' => $application->jobPost->school_name ?? 'Partner Educational Institution',
+                'interview_date' => \Carbon\Carbon::parse($application->interview_date)->format('l, F j, Y \a\t g:i A'),
+                'interview_link' => $application->interview_link ?? route('candidate.applications.index'),
+                'remarks' => $application->remarks ?? 'Updated schedule details.',
+            ]);
+        }
 
         // Advance Referral Funnel Stage
         if ($application->candidate) {
