@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'phonepe' => [
+        'client_id' => env('PHONEPE_CLIENT_ID', env('PHONEPE_MERCHANT_ID', '')),
+        'client_secret' => env('PHONEPE_CLIENT_SECRET', env('PHONEPE_SALT_KEY', '')),
+        'client_version' => env('PHONEPE_CLIENT_VERSION', '1'),
+        'env' => env('PHONEPE_ENV', 'sandbox'),
+    ],
+
 ];
