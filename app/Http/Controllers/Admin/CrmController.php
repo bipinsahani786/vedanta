@@ -252,6 +252,9 @@ class CrmController extends Controller
             if ($request->has('plan_type')) {
                 $updates['plan_type'] = $request->plan_type;
                 $updates['total_allowed_applications'] = $request->plan_type === 'standard' ? 2 : 3;
+                if ($request->plan_type === 'premium') {
+                    $updates['is_fee_paid'] = true;
+                }
             }
 
             if ($request->hasFile('resume')) {

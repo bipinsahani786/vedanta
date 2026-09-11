@@ -67,11 +67,11 @@ class PaymentController extends Controller
             ->latest()
             ->get();
         $dbPaidSum = $transactions->where('status', 'success')->sum('amount');
-        $fallbackPaid = ($profile->is_fee_paid ? 1000 : ($profile->initial_fee_paid ? 500 : 0));
+        $fallbackPaid = (($profile->plan_type === 'premium' || $profile->is_fee_paid) ? 1000 : ($profile->initial_fee_paid ? 500 : 0));
         $totalPaidAmount = max($dbPaidSum, $fallbackPaid);
 
         // Next Payment Due
-        if ($profile->is_fee_paid) {
+        if ($profile->plan_type === 'premium' || $profile->is_fee_paid) {
             $nextPaymentDue = (float)($profile->pending_amount ?? 0);
         } elseif ($profile->initial_fee_paid) {
             $nextPaymentDue = 500;

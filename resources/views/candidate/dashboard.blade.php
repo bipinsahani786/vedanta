@@ -650,9 +650,16 @@
                     </span>
                 </div>
 
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    Upgrade to Premium and unlock exclusive career benefits.
-                </p>
+                @if($profile->plan_type === 'premium')
+                    <p class="text-xs text-emerald-400 font-medium leading-relaxed flex items-center gap-1.5">
+                        <i class="fas fa-check-circle text-xs text-emerald-400"></i>
+                        <span>You are enjoying full Premium benefits & priority placement access.</span>
+                    </p>
+                @else
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Upgrade to Premium and unlock exclusive career benefits.
+                    </p>
+                @endif
 
                 {{-- Plan Features with Circular Check / Cross Icons --}}
                 <div class="space-y-2.5 text-xs">
@@ -682,22 +689,24 @@
                     </div>
                 </div>
 
-                {{-- Upgrade Promo Box --}}
-                <div class="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/20 via-[#0d2258] to-[#120f38] border border-amber-500/30 flex items-center justify-between gap-3 shadow-md">
-                    <div>
-                        <div class="flex items-center gap-1.5 text-xs font-black text-amber-400">
-                            <i class="fas fa-crown"></i>
-                            <span>Upgrade to Premium</span>
+                @if($profile->plan_type !== 'premium')
+                    {{-- Upgrade Promo Box --}}
+                    <div class="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/20 via-[#0d2258] to-[#120f38] border border-amber-500/30 flex items-center justify-between gap-3 shadow-md">
+                        <div>
+                            <div class="flex items-center gap-1.5 text-xs font-black text-amber-400">
+                                <i class="fas fa-crown"></i>
+                                <span>Upgrade to Premium</span>
+                            </div>
+                            <p class="text-[10px] text-slate-300 mt-0.5">Priority calls & dedicated support</p>
                         </div>
-                        <p class="text-[10px] text-slate-300 mt-0.5"></p>
+                        <a href="{{ route('candidate.payment.show') }}" 
+                           style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #020617;"
+                           class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md shadow-amber-500/30 hover:shadow-lg hover:shadow-amber-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all shrink-0 flex items-center gap-1.5 whitespace-nowrap">
+                            <span class="font-black">Upgrade Now</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
                     </div>
-                    <a href="{{ route('candidate.payment.show') }}" 
-                       style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #020617;"
-                       class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md shadow-amber-500/30 hover:shadow-lg hover:shadow-amber-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all shrink-0 flex items-center gap-1.5 whitespace-nowrap">
-                        <span class="font-black">Upgrade Now</span>
-                        <i class="fas fa-arrow-right text-[10px]"></i>
-                    </a>
-                </div>
+                @endif
             </div>
 
         </div>

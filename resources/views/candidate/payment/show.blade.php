@@ -167,7 +167,9 @@
     <div id="plans-section" x-data="{ showCompareModal: false }" class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
         <div>
             <div class="flex items-center justify-between mb-5">
-                <h3 class="text-base font-bold text-white">Upgrade Your Plan</h3>
+                <h3 class="text-base font-bold text-white">
+                    {{ $profile->plan_type === 'premium' ? 'Your Membership Plan' : 'Upgrade Your Plan' }}
+                </h3>
                 <button type="button" @click="showCompareModal = true" class="text-xs font-semibold text-accent-blue hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer">
                     <i class="fas fa-sliders-h text-[10px]"></i>
                     <span>Compare Plans</span>
@@ -235,6 +237,10 @@
                             <button disabled class="w-full py-2 rounded-xl bg-accent-blue/15 border border-accent-blue/30 text-accent-blue font-bold text-xs flex items-center justify-center gap-1.5 cursor-default">
                                 <i class="fas fa-check text-[10px]"></i>
                                 <span>Current Plan</span>
+                            </button>
+                        @elseif($profile->plan_type === 'premium')
+                            <button disabled class="w-full py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 cursor-default">
+                                <span>Included in Premium</span>
                             </button>
                         @else
                             <form action="{{ route('candidate.payment.process') }}" method="POST">
@@ -313,7 +319,7 @@
                             @endif
                         </div>
 
-                        @if($profile->plan_type === 'premium' && $profile->is_fee_paid)
+                        @if($profile->plan_type === 'premium')
                             <button disabled class="w-full py-2 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold text-xs flex items-center justify-center gap-1.5 cursor-default">
                                 <i class="fas fa-check text-[10px]"></i>
                                 <span>Current Plan</span>
@@ -334,8 +340,13 @@
 
             {{-- Footer Note --}}
             <div class="pt-4 mt-4 border-t border-white/[0.08] flex items-center gap-2 text-xs text-slate-300">
-                <i class="fas fa-star text-amber-400 text-xs"></i>
-                <span>Upgrade to Premium Plan and get priority access to top schools.</span>
+                @if($profile->plan_type === 'premium')
+                    <i class="fas fa-crown text-amber-400 text-xs"></i>
+                    <span class="text-emerald-300 font-medium">You are on the Premium Plan with priority access and dedicated placement support.</span>
+                @else
+                    <i class="fas fa-star text-amber-400 text-xs"></i>
+                    <span>Upgrade to Premium Plan and get priority access to top schools.</span>
+                @endif
             </div>
         </div>
 
