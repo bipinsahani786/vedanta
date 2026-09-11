@@ -164,135 +164,170 @@
     </div>
 
     {{-- Upgrade Your Plan Section --}}
-    <div id="plans-section" class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
+    <div id="plans-section" x-data="{ showCompareModal: false }" class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
         <div>
             <div class="flex items-center justify-between mb-5">
                 <h3 class="text-base font-bold text-white">Upgrade Your Plan</h3>
-                <a href="#plans-section" class="text-xs font-semibold text-accent-blue hover:text-white flex items-center gap-1.5 transition-colors">
+                <button type="button" @click="showCompareModal = true" class="text-xs font-semibold text-accent-blue hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer">
                     <i class="fas fa-sliders-h text-[10px]"></i>
                     <span>Compare Plans</span>
-                </a>
+                </button>
             </div>
 
-                {{-- 2 Plan Cards Side-by-Side --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {{-- Standard Plan Card --}}
-                    <div class="rounded-2xl border {{ $profile->plan_type === 'standard' ? 'border-accent-blue/40 bg-accent-blue/[0.04]' : 'border-white/[0.08] bg-white/[0.02]' }} p-4 flex flex-col justify-between transition-all">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <i class="fas fa-crown text-amber-400 text-sm"></i>
-                                <h4 class="text-sm font-black text-white">Standard Plan</h4>
-                            </div>
-                            <p class="text-[10px] text-slate-400 mb-4">Up to 3 applications/interviews</p>
-
-                            <ul class="space-y-2 text-xs mb-5">
-                                <li class="flex items-center gap-2 text-slate-300">
-                                    <i class="fas fa-check text-emerald-400 text-xs"></i>
-                                    <span>Apply to 3 Schools</span>
-                                </li>
-                                <li class="flex items-center gap-2 text-slate-300">
-                                    <i class="fas fa-check text-emerald-400 text-xs"></i>
-                                    <span>Standard Processing</span>
-                                </li>
-                                <li class="flex items-center gap-2 text-slate-300">
-                                    <i class="fas fa-check text-emerald-400 text-xs"></i>
-                                    <span>Email Support</span>
-                                </li>
-                                <li class="flex items-center gap-2 text-slate-300">
-                                    <i class="fas fa-check text-emerald-400 text-xs"></i>
-                                    <span>Profile Visibility</span>
-                                </li>
-                            </ul>
+            {{-- 2 Plan Cards Side-by-Side --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {{-- Standard Plan Card --}}
+                <div class="rounded-2xl border {{ $profile->plan_type === 'standard' ? 'border-accent-blue/40 bg-accent-blue/[0.04]' : 'border-white/[0.08] bg-white/[0.02]' }} p-4 flex flex-col justify-between transition-all">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fas fa-crown text-amber-400 text-sm"></i>
+                            <h4 class="text-sm font-black text-white">Standard Plan</h4>
                         </div>
+                        <p class="text-[10px] text-slate-400 mb-4">Standard Access & Basic Support</p>
 
-                        <div>
-                            <div class="mb-3">
-                                <span class="text-xl font-black text-white">₹500</span>
-                                <span class="text-[10px] text-slate-400 ml-1">Plan Fee</span>
-                            </div>
-
-                            @if($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
-                                <button disabled class="w-full py-2 rounded-xl bg-accent-blue/15 border border-accent-blue/30 text-accent-blue font-bold text-xs flex items-center justify-center gap-1.5 cursor-default">
-                                    <i class="fas fa-check text-[10px]"></i>
-                                    <span>Current Plan</span>
-                                </button>
-                            @else
-                                <form action="{{ route('candidate.payment.process') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="plan" value="{{ $isRenewal ? 'renewal_basic' : 'basic' }}">
-                                    <button type="submit" class="w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
-                                        <span>Select Standard</span>
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
+                        <ul class="space-y-2 text-xs mb-5">
+                            <li class="flex items-center gap-2 text-slate-300">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Up to 2 Applications / Interviews</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-slate-300">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Standard Processing</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-slate-300">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Email Support</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-slate-400">
+                                <i class="fas fa-times text-rose-400 text-xs shrink-0"></i>
+                                <span>WhatsApp Assistance</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-slate-400">
+                                <i class="fas fa-times text-rose-400 text-xs shrink-0"></i>
+                                <span>Call Support</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-slate-400">
+                                <i class="fas fa-times text-rose-400 text-xs shrink-0"></i>
+                                <span>Early Access to New Jobs</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-slate-400">
+                                <i class="fas fa-times text-rose-400 text-xs shrink-0"></i>
+                                <span>Relationship Manager</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-slate-300">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Standard Profile Visibility</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-slate-300">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Regular Process Updates</span>
+                            </li>
+                        </ul>
                     </div>
 
-                    {{-- Premium Plan Card --}}
-                    <div class="rounded-2xl border-2 border-purple-500/40 bg-gradient-to-b from-purple-500/10 to-transparent p-4 flex flex-col justify-between relative shadow-[0_0_20px_rgba(168,85,247,0.15)]">
-                        {{-- Popular Badge --}}
-                        <div class="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[9px] uppercase tracking-wider shadow-md">
-                            Popular
+                    <div>
+                        <div class="mb-3">
+                            <span class="text-xl font-black text-white">₹500</span>
+                            <span class="text-[10px] text-slate-400 ml-1">Plan Fee</span>
                         </div>
 
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <i class="fas fa-crown text-amber-400 text-sm"></i>
-                                <h4 class="text-sm font-black text-white">Premium Plan</h4>
-                            </div>
-                            <p class="text-[10px] text-slate-400 mb-4">Priority Access & More Benefits</p>
-
-                            <ul class="space-y-2 text-xs mb-5">
-                                <li class="flex items-center gap-2 text-white font-medium">
-                                    <i class="fas fa-check text-emerald-400 text-xs"></i>
-                                    <span>Unlimited Applications</span>
-                                </li>
-                                <li class="flex items-center gap-2 text-white font-medium">
-                                    <i class="fas fa-check text-emerald-400 text-xs"></i>
-                                    <span>Priority Processing</span>
-                                </li>
-                                <li class="flex items-center gap-2 text-white font-medium">
-                                    <i class="fas fa-check text-emerald-400 text-xs"></i>
-                                    <span>Profile Highlight</span>
-                                </li>
-                                <li class="flex items-center gap-2 text-white font-medium">
-                                    <i class="fas fa-check text-emerald-400 text-xs"></i>
-                                    <span>WhatsApp Support</span>
-                                </li>
-                                <li class="flex items-center gap-2 text-white font-medium">
-                                    <i class="fas fa-check text-emerald-400 text-xs"></i>
-                                    <span>Early Access to Jobs</span>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <div class="mb-3">
-                                @if($profile->plan_type === 'standard' && ($profile->initial_fee_paid || ($profile->paid_amount ?? 0) >= 500) && !$profile->is_fee_paid)
-                                    <span class="text-xl font-black text-purple-400">₹500</span>
-                                    <span class="text-[10px] text-slate-400 ml-1">Upgrade Fee (₹1,000 Plan)</span>
-                                @else
-                                    <span class="text-xl font-black text-purple-400">₹1,000</span>
-                                    <span class="text-[10px] text-slate-400 ml-1">Plan Fee</span>
-                                @endif
-                            </div>
-
-                            @if($profile->plan_type === 'premium' && $profile->is_fee_paid)
-                                <button disabled class="w-full py-2 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold text-xs flex items-center justify-center gap-1.5 cursor-default">
-                                    <i class="fas fa-check text-[10px]"></i>
-                                    <span>Current Plan</span>
+                        @if($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
+                            <button disabled class="w-full py-2 rounded-xl bg-accent-blue/15 border border-accent-blue/30 text-accent-blue font-bold text-xs flex items-center justify-center gap-1.5 cursor-default">
+                                <i class="fas fa-check text-[10px]"></i>
+                                <span>Current Plan</span>
+                            </button>
+                        @else
+                            <form action="{{ route('candidate.payment.process') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="plan" value="{{ $isRenewal ? 'renewal_basic' : 'basic' }}">
+                                <button type="submit" class="w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
+                                    <span>Select Standard</span>
                                 </button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Premium Plan Card --}}
+                <div class="rounded-2xl border-2 border-purple-500/40 bg-gradient-to-b from-purple-500/10 to-transparent p-4 flex flex-col justify-between relative shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+                    {{-- Popular Badge --}}
+                    <div class="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[9px] uppercase tracking-wider shadow-md">
+                        Popular
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fas fa-crown text-amber-400 text-sm"></i>
+                            <h4 class="text-sm font-black text-white">Premium Plan</h4>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mb-4">Priority Access & More Benefits</p>
+
+                        <ul class="space-y-2 text-xs mb-5">
+                            <li class="flex items-center gap-2 text-white font-medium">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Up to 3 Applications / Interviews</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-white font-medium">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Priority Processing</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-white font-medium">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Email + WhatsApp Support</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-white font-medium">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>WhatsApp Assistance</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-white font-medium">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Priority Call Assistance</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-white font-medium">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Early Access to New Jobs</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-white font-medium">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Dedicated Relationship Manager</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-white font-medium">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Priority Profile Highlight</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-white font-medium">
+                                <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
+                                <span>Priority Process Updates</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <div class="mb-3">
+                            @if($profile->plan_type === 'standard' && ($profile->initial_fee_paid || ($profile->paid_amount ?? 0) >= 500) && !$profile->is_fee_paid)
+                                <span class="text-xl font-black text-purple-400">₹500</span>
+                                <span class="text-[10px] text-slate-400 ml-1">Upgrade Fee (₹1,000 Plan)</span>
                             @else
-                                <form action="{{ route('candidate.payment.process') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="plan" value="{{ ($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid)) ? 'upgrade' : ($isRenewal ? 'renewal_premium' : 'premium') }}">
-                                    <button type="submit" class="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-[0_4px_15px_rgba(168,85,247,0.4)] hover:-translate-y-0.5">
-                                        <span>Upgrade to Premium</span>
-                                        <i class="fas fa-arrow-right text-[10px]"></i>
-                                    </button>
-                                </form>
+                                <span class="text-xl font-black text-purple-400">₹1,000</span>
+                                <span class="text-[10px] text-slate-400 ml-1">Plan Fee</span>
                             @endif
                         </div>
+
+                        @if($profile->plan_type === 'premium' && $profile->is_fee_paid)
+                            <button disabled class="w-full py-2 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold text-xs flex items-center justify-center gap-1.5 cursor-default">
+                                <i class="fas fa-check text-[10px]"></i>
+                                <span>Current Plan</span>
+                            </button>
+                        @else
+                            <form action="{{ route('candidate.payment.process') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="plan" value="{{ ($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid)) ? 'upgrade' : ($isRenewal ? 'renewal_premium' : 'premium') }}">
+                                <button type="submit" class="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-[0_4px_15px_rgba(168,85,247,0.4)] hover:-translate-y-0.5">
+                                    <span>Upgrade to Premium</span>
+                                    <i class="fas fa-arrow-right text-[10px]"></i>
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -301,6 +336,127 @@
             <div class="pt-4 mt-4 border-t border-white/[0.08] flex items-center gap-2 text-xs text-slate-300">
                 <i class="fas fa-star text-amber-400 text-xs"></i>
                 <span>Upgrade to Premium Plan and get priority access to top schools.</span>
+            </div>
+        </div>
+
+        {{-- Compare Plans Modal --}}
+        <div x-show="showCompareModal" 
+             x-cloak 
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+            
+            <div class="bg-[#07173e] border border-white/15 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl relative overflow-hidden"
+                 @click.away="showCompareModal = false">
+                
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                    <h4 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                        <i class="fas fa-sliders-h text-accent-blue text-sm"></i>
+                        <span>Compare Plans</span>
+                    </h4>
+                    <button type="button" @click="showCompareModal = false" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-sm transition-colors cursor-pointer">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead>
+                            <tr class="border-b border-white/10 text-white">
+                                <th class="py-3 px-3 font-black text-xs sm:text-sm">
+                                    STANDARD — ₹500
+                                </th>
+                                <th class="py-3 px-3 font-black text-xs sm:text-sm text-purple-300">
+                                    PREMIUM — ₹1,000 <span class="text-amber-400">👑</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/[0.06]">
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="py-2.5 px-3 text-slate-300">
+                                    <span class="text-emerald-400 font-bold mr-2">✓</span> Up to 2 Applications / Interviews
+                                </td>
+                                <td class="py-2.5 px-3 text-white font-medium">
+                                    <span class="text-emerald-400 font-bold mr-2">✓</span> Up to 3 Applications / Interviews
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="py-2.5 px-3 text-slate-300">
+                                    <span class="text-emerald-400 font-bold mr-2">✓</span> Standard Processing
+                                </td>
+                                <td class="py-2.5 px-3 text-white font-medium">
+                                    <span class="text-emerald-400 font-bold mr-2">✓</span> Priority Processing
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="py-2.5 px-3 text-slate-300">
+                                    <span class="text-emerald-400 font-bold mr-2">✓</span> Email Support
+                                </td>
+                                <td class="py-2.5 px-3 text-white font-medium">
+                                    <span class="text-emerald-400 font-bold mr-2">✓</span> Email + WhatsApp Support
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="py-2.5 px-3 text-slate-400">
+                                    <span class="text-rose-400 font-bold mr-2">✕</span> WhatsApp Assistance
+                                </td>
+                                <td class="py-2.5 px-3 text-white font-medium">
+                                    <span class="text-emerald-400 font-bold mr-2">✓</span> WhatsApp Assistance
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="py-2.5 px-3 text-slate-400">
+                                    <span class="text-rose-400 font-bold mr-2">✕</span> Call Support
+                                </td>
+                                <td class="py-2.5 px-3 text-white font-medium">
+                                    <span class="text-emerald-400 font-bold mr-2">✓</span> Priority Call Assistance
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="py-2.5 px-3 text-slate-400">
+                                    <span class="text-rose-400 font-bold mr-2">✕</span> Early Access to New Jobs
+                                </td>
+                                <td class="py-2.5 px-3 text-white font-medium">
+                                    <span class="text-emerald-400 font-bold mr-2">✓</span> Early Access to New Jobs
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="py-2.5 px-3 text-slate-400">
+                                    <span class="text-rose-400 font-bold mr-2">✕</span> Relationship Manager
+                                </td>
+                                <td class="py-2.5 px-3 text-white font-medium">
+                                    <span class="text-emerald-400 font-bold mr-2">✓</span> Dedicated Relationship Manager
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="py-2.5 px-3 text-slate-300">
+                                    Standard Profile Visibility
+                                </td>
+                                <td class="py-2.5 px-3 text-white font-medium">
+                                    Priority Profile Highlight
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="py-2.5 px-3 text-slate-300">
+                                    Regular Process Updates
+                                </td>
+                                <td class="py-2.5 px-3 text-white font-medium">
+                                    Priority Process Updates
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-5 pt-4 border-t border-white/10 flex justify-end">
+                    <button type="button" @click="showCompareModal = false" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-colors cursor-pointer">
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>
