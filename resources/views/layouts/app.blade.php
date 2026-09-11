@@ -14,13 +14,13 @@
 
     <!-- Google Site Name Structured Data -->
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Vedanta Placement Agency®",
-        "alternateName": ["Vedanta Placement Agency", "VPA"],
-        "url": "{{ url('/') }}"
-    }
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'WebSite',
+        'name' => 'Vedanta Placement Agency®',
+        'alternateName' => ['Vedanta Placement Agency', 'VPA'],
+        'url' => url('/')
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
