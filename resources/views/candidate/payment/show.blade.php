@@ -3,8 +3,9 @@
 @section('candidate_content')
 @php
     $canUpgrade = ($profile->plan_type === 'standard' && ($profile->initial_fee_paid || ($profile->paid_amount ?? 0) >= 500) && !$profile->is_fee_paid);
-    $basicCode = $isRenewal ? 'renewal_basic' : 'basic';
-    $premiumCode = $canUpgrade ? 'upgrade' : ($isRenewal ? 'renewal_premium' : 'premium');
+    $isUserPremium = ($profile->plan_type === 'premium' && $profile->is_fee_paid);
+    $basicCode = ($isRenewal || $isUserPremium) ? 'renewal_basic' : 'basic';
+    $premiumCode = $canUpgrade ? 'upgrade' : (($isRenewal || $isUserPremium) ? 'renewal_premium' : 'premium');
     $basicCost = 500;
     $premiumCost = $canUpgrade ? 500 : 1000;
     $upgradeDifference = $premiumCost;
@@ -814,7 +815,7 @@
                     {{-- Form Submission to Live Payment Gateway --}}
                     <form action="{{ route('candidate.payment.process') }}" method="POST" class="mt-4">
                         @csrf
-                        <input type="hidden" name="plan" :value="selectedPlan">
+                        <input type="hidden" name="plan" :value="selectedPlan" x-model="selectedPlan" value="{{ $premiumCode }}">
                         <button type="submit" 
                                 class="w-full py-4 px-5 rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-[0_4px_25px_rgba(16,185,129,0.35)] hover:shadow-[0_6px_30px_rgba(16,185,129,0.5)] transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer">
                             <i class="fas fa-lock text-sm"></i>

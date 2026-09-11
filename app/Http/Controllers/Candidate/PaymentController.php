@@ -139,9 +139,11 @@ class PaymentController extends Controller
         if ($request->plan === 'premium' || $request->plan === 'renewal_premium') $amount = 1000;
         if ($isUpgrade) $amount = 500;
 
-        // Prevent duplicate payment if already active Premium
+        // If already active Premium, treat paying for Premium as renewal instead of blocking with an error
         if (($request->plan === 'premium' || $request->plan === 'upgrade') && $profile->plan_type === 'premium' && $profile->is_fee_paid) {
-            return back()->with('error', 'You are already a Premium member.');
+            $request->merge(['plan' => 'renewal_premium']);
+            $isRenewal = true;
+            $amount = 1000;
         }
 
         $prefix = 'TXN_';
