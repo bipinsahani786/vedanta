@@ -76,10 +76,22 @@
                         </div>
 
                         {{-- Plan --}}
-                        <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-200 text-[11px] font-semibold backdrop-blur-sm shadow-sm">
-                            <i class="fas fa-crown text-xs text-amber-400"></i>
-                            <span>Plan <strong class="text-white capitalize ml-0.5">{{ $profile->plan_type ?? 'Standard' }}</strong></span>
-                        </div>
+                        @if($profile && $profile->is_plan_active)
+                            <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-200 text-[11px] font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="fas fa-crown text-xs text-amber-400"></i>
+                                <span>Plan <strong class="text-white capitalize ml-0.5">{{ $profile->plan_type ? ucfirst($profile->plan_type) : 'Standard' }}</strong></span>
+                            </div>
+                        @elseif($profile && $profile->is_plan_expired)
+                            <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-[11px] font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="fas fa-clock text-xs text-rose-400"></i>
+                                <span>Plan <strong class="text-rose-300 capitalize ml-0.5">Expired</strong></span>
+                            </div>
+                        @else
+                            <a href="{{ route('candidate.payment.show') }}" class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 hover:bg-amber-500/25 text-amber-200 text-[11px] font-semibold backdrop-blur-sm shadow-sm transition-all group">
+                                <i class="fas fa-bolt text-xs text-amber-400 group-hover:scale-110 transition-transform"></i>
+                                <span>Plan <strong class="text-amber-300 ml-0.5">Activate Now</strong></span>
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -642,55 +654,109 @@
                     <div>
                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Your Current Plan</span>
                         <h4 class="text-xl font-black text-white capitalize mt-0.5 tracking-tight">
-                            {{ $profile->plan_type ?? 'Standard' }}
+                            @if($profile && $profile->has_paid_plan)
+                                {{ $profile->plan_type ? ucfirst($profile->plan_type) . ' Plan' : 'Standard Plan' }}
+                            @else
+                                No Active Plan
+                            @endif
                         </h4>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase tracking-wider shadow-sm">
-                        Active
-                    </span>
+                    @if($profile && $profile->is_plan_active)
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase tracking-wider shadow-sm">
+                            Active
+                        </span>
+                    @elseif($profile && $profile->is_plan_expired)
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30 uppercase tracking-wider shadow-sm">
+                            Expired
+                        </span>
+                    @else
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 uppercase tracking-wider shadow-sm">
+                            Inactive
+                        </span>
+                    @endif
                 </div>
 
-                @if($profile->plan_type === 'premium')
+                @if($profile && $profile->is_plan_active && $profile->plan_type === 'premium')
                     <p class="text-xs text-emerald-400 font-medium leading-relaxed flex items-center gap-1.5">
                         <i class="fas fa-check-circle text-xs text-emerald-400"></i>
                         <span>You are enjoying full Premium benefits & priority placement access.</span>
                     </p>
+                @elseif($profile && $profile->is_plan_active)
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Standard Plan active. Upgrade to Premium and unlock exclusive career benefits.
+                    </p>
+                @elseif($profile && $profile->is_plan_expired)
+                    <p class="text-xs text-rose-300 leading-relaxed">
+                        Your plan membership has expired. Renew your plan to continue applying and receiving interview calls.
+                    </p>
                 @else
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        Upgrade to Premium and unlock exclusive career benefits.
+                    <p class="text-xs text-amber-300/90 leading-relaxed">
+                        No active membership. Choose and activate a plan to unlock job applications and school interview calls.
                     </p>
                 @endif
 
                 {{-- Plan Features with Circular Check / Cross Icons --}}
                 <div class="space-y-2.5 text-xs">
-                    <div class="flex items-center gap-2.5 text-white font-medium">
-                        <i class="fas fa-check-circle text-emerald-400 text-sm"></i>
+                    <div class="flex items-center gap-2.5 {{ ($profile && $profile->has_paid_plan) ? 'text-white font-medium' : 'text-slate-400' }}">
+                        <i class="fas {{ ($profile && $profile->has_paid_plan) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-slate-600 text-[8px] mx-1' }} text-sm"></i>
                         <span>Apply to all available jobs</span>
                     </div>
-                    <div class="flex items-center gap-2.5 text-white font-medium">
-                        <i class="fas fa-check-circle text-emerald-400 text-sm"></i>
+                    <div class="flex items-center gap-2.5 {{ ($profile && $profile->has_paid_plan) ? 'text-white font-medium' : 'text-slate-400' }}">
+                        <i class="fas {{ ($profile && $profile->has_paid_plan) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-slate-600 text-[8px] mx-1' }} text-sm"></i>
                         <span>Profile visibility to schools</span>
                     </div>
-                    <div class="flex items-center gap-2.5 {{ $profile->plan_type === 'premium' ? 'text-white font-medium' : 'text-slate-500' }}">
-                        <i class="fas {{ $profile->plan_type === 'premium' ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
+                    <div class="flex items-center gap-2.5 {{ ($profile && $profile->has_paid_plan && $profile->plan_type === 'premium') ? 'text-white font-medium' : 'text-slate-500' }}">
+                        <i class="fas {{ ($profile && $profile->has_paid_plan && $profile->plan_type === 'premium') ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
                         <span>Dedicated Relationship Manager</span>
                     </div>
-                    <div class="flex items-center gap-2.5 {{ $profile->plan_type === 'premium' ? 'text-white font-medium' : 'text-slate-500' }}">
-                        <i class="fas {{ $profile->plan_type === 'premium' ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
+                    <div class="flex items-center gap-2.5 {{ ($profile && $profile->has_paid_plan && $profile->plan_type === 'premium') ? 'text-white font-medium' : 'text-slate-500' }}">
+                        <i class="fas {{ ($profile && $profile->has_paid_plan && $profile->plan_type === 'premium') ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
                         <span>Guaranteed Interviews</span>
                     </div>
-                    <div class="flex items-center gap-2.5 {{ $profile->plan_type === 'premium' ? 'text-white font-medium' : 'text-slate-500' }}">
-                        <i class="fas {{ $profile->plan_type === 'premium' ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
+                    <div class="flex items-center gap-2.5 {{ ($profile && $profile->has_paid_plan && $profile->plan_type === 'premium') ? 'text-white font-medium' : 'text-slate-500' }}">
+                        <i class="fas {{ ($profile && $profile->has_paid_plan && $profile->plan_type === 'premium') ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
                         <span>Resume Building Assistance</span>
                     </div>
-                    <div class="flex items-center gap-2.5 {{ $profile->plan_type === 'premium' ? 'text-white font-medium' : 'text-slate-500' }}">
-                        <i class="fas {{ $profile->plan_type === 'premium' ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
+                    <div class="flex items-center gap-2.5 {{ ($profile && $profile->has_paid_plan && $profile->plan_type === 'premium') ? 'text-white font-medium' : 'text-slate-500' }}">
+                        <i class="fas {{ ($profile && $profile->has_paid_plan && $profile->plan_type === 'premium') ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400/60' }} text-sm"></i>
                         <span>Priority application processing</span>
                     </div>
                 </div>
 
-                @if($profile->plan_type !== 'premium')
-                    {{-- Upgrade Promo Box --}}
+                @if(!$profile || !$profile->has_paid_plan)
+                    {{-- Activate Plan Box for Unpaid Users --}}
+                    <div class="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-500/20 via-[#0d2258] to-[#120f38] border border-emerald-500/30 flex items-center justify-between gap-3 shadow-md">
+                        <div>
+                            <div class="flex items-center gap-1.5 text-xs font-black text-emerald-400">
+                                <i class="fas fa-bolt"></i>
+                                <span>Activate Membership</span>
+                            </div>
+                            <p class="text-[10px] text-slate-300 mt-0.5">Plans start from ₹500</p>
+                        </div>
+                        <a href="{{ route('candidate.payment.show') }}" 
+                           class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-black text-xs shadow-md shadow-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all shrink-0 flex items-center gap-1.5 whitespace-nowrap">
+                            <span class="font-black">Choose Plan</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                @elseif($profile->is_plan_expired)
+                    {{-- Renew Plan Box --}}
+                    <div class="p-3.5 rounded-2xl bg-gradient-to-br from-rose-500/20 via-[#0d2258] to-[#120f38] border border-rose-500/30 flex items-center justify-between gap-3 shadow-md">
+                        <div>
+                            <div class="flex items-center gap-1.5 text-xs font-black text-rose-400">
+                                <i class="fas fa-redo-alt"></i>
+                                <span>Renew Your Plan</span>
+                            </div>
+                            <p class="text-[10px] text-slate-300 mt-0.5">Extend validity for 30 days</p>
+                        </div>
+                        <a href="{{ route('candidate.payment.show') }}" 
+                           class="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white font-black text-xs shadow-md shadow-rose-500/30 hover:shadow-lg transition-all shrink-0 flex items-center gap-1.5 whitespace-nowrap">
+                            <span class="font-black">Renew Now</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                @elseif($profile->plan_type !== 'premium')
+                    {{-- Upgrade Promo Box for Active Standard Plan --}}
                     <div class="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/20 via-[#0d2258] to-[#120f38] border border-amber-500/30 flex items-center justify-between gap-3 shadow-md">
                         <div>
                             <div class="flex items-center gap-1.5 text-xs font-black text-amber-400">
@@ -703,6 +769,14 @@
                            style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #020617;"
                            class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md shadow-amber-500/30 hover:shadow-lg hover:shadow-amber-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all shrink-0 flex items-center gap-1.5 whitespace-nowrap">
                             <span class="font-black">Upgrade Now</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                @else
+                    {{-- Manage Plan Link for Active Premium --}}
+                    <div class="pt-2 text-center">
+                        <a href="{{ route('candidate.payment.show') }}" class="text-xs font-bold text-accent-blue hover:text-white inline-flex items-center gap-1.5 transition-colors">
+                            <span>Manage Plan & Billing</span>
                             <i class="fas fa-arrow-right text-[10px]"></i>
                         </a>
                     </div>

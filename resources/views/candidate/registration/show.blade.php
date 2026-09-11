@@ -25,14 +25,15 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     @php
                         $profile = auth()->user()->profile;
-                        $registrationPlan = ucfirst($profile->plan_type ?? 'Standard');
+                        $hasPaid = $profile && $profile->has_paid_plan;
+                        $registrationPlan = $hasPaid ? ucfirst($profile->plan_type ?? 'Standard') : 'Not Activated';
                         $isComplete = $profile && $profile->is_profile_complete && $profile->is_agreement_signed && ($profile->initial_fee_paid || $profile->is_fee_paid);
                     @endphp
                     
                     {{-- Registration Plan --}}
                     <div>
                         <p class="text-[10px] font-bold uppercase tracking-widest text-text-dark/40 mb-2">Registration Plan</p>
-                        <div class="text-2xl font-bold {{ $registrationPlan === 'Premium' ? 'text-accent-yellow' : 'text-text-main' }}">
+                        <div class="text-2xl font-bold {{ $registrationPlan === 'Premium' ? 'text-accent-yellow' : ($hasPaid ? 'text-text-main' : 'text-slate-400') }}">
                             {{ $registrationPlan }}
                         </div>
                     </div>

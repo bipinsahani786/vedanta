@@ -81,21 +81,39 @@
                     <div class="w-11 h-11 rounded-2xl bg-purple-500/15 border border-purple-500/25 text-purple-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">
                         <i class="fas fa-crown"></i>
                     </div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                        Active
-                    </span>
+                    @if($isPlanActive)
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                            Active
+                        </span>
+                    @elseif($isPlanExpired)
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                            Expired
+                        </span>
+                    @else
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                            Inactive
+                        </span>
+                    @endif
                 </div>
                 <div class="text-[11px] text-slate-400 font-medium">Current Plan</div>
                 <div class="text-lg lg:text-xl font-black text-white tracking-tight mt-0.5">
-                    {{ ucfirst($profile->plan_type ?? 'Standard') }} Plan
+                    @if($hasPaidPlan)
+                        {{ ucfirst($profile->plan_type ?? 'Standard') }} Plan
+                    @else
+                        No Active Plan
+                    @endif
                 </div>
                 <div class="text-[10px] text-slate-400 mt-1">
-                    Valid till {{ $planValidityDate->format('d M Y') }}
+                    @if($hasPaidPlan && $planValidityDate)
+                        {{ $isPlanExpired ? 'Expired on ' . $planValidityDate->format('d M Y') : 'Valid till ' . $planValidityDate->format('d M Y') }}
+                    @else
+                        Payment pending to activate
+                    @endif
                 </div>
             </div>
             <div class="pt-3 mt-3 border-t border-white/[0.08]">
                 <a href="#plans-section" class="w-full py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
-                    <span>View Plan Details</span>
+                    <span>{{ $hasPaidPlan ? 'View Plan Details' : 'Choose a Plan' }}</span>
                 </a>
             </div>
         </div>
@@ -210,7 +228,13 @@
         <div>
             <div class="flex items-center justify-between mb-5">
                 <h3 class="text-base font-bold text-white">
-                    {{ $profile->plan_type === 'premium' ? 'Your Membership Plan' : 'Upgrade Your Plan' }}
+                    @if(!$hasPaidPlan)
+                        Choose Your Membership Plan
+                    @elseif($profile->plan_type === 'premium')
+                        Your Membership Plan
+                    @else
+                        Upgrade Your Plan
+                    @endif
                 </h3>
                 <button type="button" @click="openFlow(2, '{{ $premiumCode }}')" class="text-xs font-semibold text-accent-blue hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer">
                     <i class="fas fa-sliders-h text-[10px]"></i>
@@ -221,7 +245,7 @@
             {{-- 2 Plan Cards Side-by-Side --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {{-- Standard Plan Card --}}
-                <div class="rounded-2xl border {{ $profile->plan_type === 'standard' ? 'border-accent-blue/40 bg-accent-blue/[0.04]' : 'border-white/[0.08] bg-white/[0.02]' }} p-4 flex flex-col justify-between transition-all">
+                <div class="rounded-2xl border {{ ($hasPaidPlan && $profile->plan_type === 'standard') ? 'border-accent-blue/40 bg-accent-blue/[0.04]' : 'border-white/[0.08] bg-white/[0.02]' }} p-4 flex flex-col justify-between transition-all">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <i class="fas fa-crown text-amber-400 text-sm"></i>
@@ -275,12 +299,12 @@
                             <span class="text-[10px] text-slate-400 ml-1">Plan Fee</span>
                         </div>
 
-                        @if($profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
+                        @if($hasPaidPlan && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $profile->is_fee_paid))
                             <button disabled class="w-full py-2 rounded-xl bg-accent-blue/15 border border-accent-blue/30 text-accent-blue font-bold text-xs flex items-center justify-center gap-1.5 cursor-default">
                                 <i class="fas fa-check text-[10px]"></i>
                                 <span>Current Plan</span>
                             </button>
-                        @elseif($profile->plan_type === 'premium')
+                        @elseif($hasPaidPlan && $profile->plan_type === 'premium')
                             <button disabled class="w-full py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 font-bold text-xs flex items-center justify-center gap-1.5 cursor-default">
                                 <span>Included in Premium</span>
                             </button>
@@ -359,7 +383,7 @@
                             @endif
                         </div>
 
-                        @if($profile->plan_type === 'premium')
+                        @if($hasPaidPlan && $profile->plan_type === 'premium')
                             <button disabled class="w-full py-2 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold text-xs flex items-center justify-center gap-1.5 cursor-default">
                                 <i class="fas fa-check text-[10px]"></i>
                                 <span>Current Plan</span>
@@ -368,7 +392,7 @@
                             <button type="button" 
                                     @click="openFlow(1, 'premium')" 
                                     class="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-[0_4px_15px_rgba(168,85,247,0.4)] hover:-translate-y-0.5 cursor-pointer">
-                                <span>{{ $canUpgrade ? 'Upgrade to Premium' : 'Upgrade to Premium' }}</span>
+                                <span>{{ $canUpgrade ? 'Upgrade to Premium' : ($hasPaidPlan ? 'Upgrade to Premium' : 'Select Premium') }}</span>
                                 <i class="fas fa-arrow-right text-[10px]"></i>
                             </button>
                         @endif
@@ -376,12 +400,15 @@
                 </div>
                   {{-- Footer Note --}}
             <div class="pt-4 mt-4 border-t border-white/[0.08] flex items-center gap-2 text-xs text-slate-300">
-                @if($profile->plan_type === 'premium')
+                @if($hasPaidPlan && $profile->plan_type === 'premium')
                     <i class="fas fa-crown text-amber-400 text-xs"></i>
                     <span class="text-emerald-300 font-medium">You are on the Premium Plan with priority access and dedicated placement support.</span>
-                @else
+                @elseif($hasPaidPlan)
                     <i class="fas fa-star text-amber-400 text-xs"></i>
                     <span>Upgrade to Premium Plan and get priority access to top schools.</span>
+                @else
+                    <i class="fas fa-info-circle text-amber-400 text-xs"></i>
+                    <span class="text-amber-300 font-medium">Your account is not activated yet. Choose either Standard or Premium plan above to activate your membership.</span>
                 @endif
             </div>
         </div>

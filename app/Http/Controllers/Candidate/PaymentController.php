@@ -80,8 +80,11 @@ class PaymentController extends Controller
         }
 
         // Validity Date & Registration Date
-        $planStartedAt = $profile->plan_started_at ?? $profile->created_at ?? now();
-        $planValidityDate = \Carbon\Carbon::parse($planStartedAt)->addDays(30);
+        $hasPaidPlan = $profile->has_paid_plan;
+        $planStartedAt = $profile->plan_started_at;
+        $isPlanExpired = $profile->is_plan_expired;
+        $isPlanActive = $profile->is_plan_active;
+        $planValidityDate = ($hasPaidPlan && $planStartedAt) ? \Carbon\Carbon::parse($planStartedAt)->addDays(30) : null;
         $firstSuccessTxn = $transactions->where('status', 'success')->first();
         $registrationPaidDate = $firstSuccessTxn ? $firstSuccessTxn->created_at->format('d M Y') : ($profile->initial_fee_paid ? ($profile->updated_at ? $profile->updated_at->format('d M Y') : now()->format('d M Y')) : null);
 
@@ -96,6 +99,9 @@ class PaymentController extends Controller
             'transactions',
             'totalPaidAmount',
             'nextPaymentDue',
+            'hasPaidPlan',
+            'isPlanActive',
+            'isPlanExpired',
             'planValidityDate',
             'registrationPaidDate'
         ));

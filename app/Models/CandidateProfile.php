@@ -111,4 +111,41 @@ class CandidateProfile extends Model
         }
         return route('candidate.dashboard');
     }
+
+    public function getHasPaidPlanAttribute(): bool
+    {
+        return (bool) ($this->initial_fee_paid || $this->is_fee_paid || ($this->paid_amount ?? 0) >= 500);
+    }
+
+    public function getIsPlanExpiredAttribute(): bool
+    {
+        if (!$this->has_paid_plan || !$this->plan_started_at) {
+            return false;
+        }
+        return \Carbon\Carbon::parse($this->plan_started_at)->addDays(30)->isPast();
+    }
+
+    public function getIsPlanActiveAttribute(): bool
+    {
+        return $this->has_paid_plan && !$this->is_plan_expired;
+    }
+
+    public function getCurrentPlanNameAttribute(): string
+    {
+        if (!$this->has_paid_plan) {
+            return 'No Active Plan';
+        }
+        return ($this->plan_type ? ucfirst($this->plan_type) : 'Standard') . ' Plan';
+    }
+
+    public function getPlanStatusBadgeAttribute(): string
+    {
+        if (!$this->has_paid_plan) {
+            return 'Inactive';
+        }
+        if ($this->is_plan_expired) {
+            return 'Expired';
+        }
+        return 'Active';
+    }
 }
