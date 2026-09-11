@@ -4,9 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Vedanta Placement Agency®   — The Gold Standard in Education Recruitment')</title>
+    <title>@yield('title', 'Vedanta Placement Agency® — The Gold Standard in Education Recruitment')</title>
     <meta name="description"
-        content="@yield('meta_description', 'Vedanta Placement Agency connects educators and schools across India. Find top teaching jobs or hire expert educators with us.')">
+        content="@yield('meta_description', 'Vedanta Placement Agency® connects educators and schools across India. Find top teaching jobs or hire expert educators with us.')">
+    <meta name="application-name" content="Vedanta Placement Agency®">
+    <meta name="apple-mobile-web-app-title" content="Vedanta Placement Agency®">
+    <meta property="og:site_name" content="Vedanta Placement Agency®">
+    <meta property="og:title" content="@yield('title', 'Vedanta Placement Agency® — The Gold Standard in Education Recruitment')">
+
+    <!-- Google Site Name Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Vedanta Placement Agency®",
+        "alternateName": ["Vedanta Placement Agency", "VPA"],
+        "url": "{{ url('/') }}"
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -191,7 +206,7 @@
     <div
         class="sticky top-0 w-full block bg-gradient-to-r from-[#040e2d] via-[#129aef] to-[#040e2d] text-white text-[11px] md:text-sm py-1.5 md:py-2 px-2 md:px-6 font-semibold tracking-wide shadow-md z-[105] border-b border-white/20">
         <marquee behavior="scroll" direction="left" scrollamount="6" class="flex items-center mt-0.5">
-            ✨ Welcome to Vedanta Placement Agency — India's Most Trusted Education Recruitment Partner! Connecting
+            ✨ Welcome to Vedanta Placement Agency® — India's Most Trusted Education Recruitment Partner! Connecting
             passionate educators with premier institutions across the nation. ✨
         </marquee>
     </div>
@@ -223,7 +238,7 @@
     <header id="main-header"
         class="sticky top-10 md:top-12 w-[96%] lg:w-[90%] max-w-7xl mx-auto bg-[#040e2d]/80 backdrop-blur-md border border-white/20 rounded-full px-6 lg:px-8 py-3 flex justify-between items-center z-[100] transition-all duration-500 shadow-xl mt-2 lg:mt-4">
         <a href="#" class="flex items-center no-underline py-1">
-            <img src="/images/logo.png?v={{ time() }}" alt="Vedanta Placement Agency"
+            <img src="/images/logo.png?v={{ time() }}" alt="Vedanta Placement Agency®"
                 class="logo-img h-10 md:h-12 w-auto object-contain transition-all duration-300">
         </a>
         <nav class="hidden lg:flex items-center">
@@ -352,7 +367,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
             <div>
                 <a href="#" class="flex items-center no-underline mb-5">
-                    <img src="/images/logo.png" alt="Vedanta Placement Agency"
+                    <img src="/images/logo.png" alt="Vedanta Placement Agency®"
                         class="h-20 md:h-24 w-auto object-contain">
                 </a>
                 <p class="text-xs text-text-main opacity-50 leading-relaxed mb-5">

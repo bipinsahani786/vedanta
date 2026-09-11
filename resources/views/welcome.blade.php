@@ -180,10 +180,10 @@
         <div class="relative z-20 flex flex-col md:flex-row rounded-3xl overflow-hidden mt-8 border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.1)]" style="background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
             <div class="md:w-1/2 p-10 lg:p-16 flex flex-col justify-center">
                 <h4 class="text-[#ffb800] text-xl lg:text-2xl font-black tracking-wider uppercase mb-3">Welcome</h4>
-                <h2 class="text-3xl lg:text-5xl font-bold leading-tight mb-2 text-slate-900">Vedanta Placement<br>Agency</h2>
+                <h2 class="text-3xl lg:text-5xl font-bold leading-tight mb-2 text-slate-900">Vedanta Placement<br>Agency<sup>&reg;</sup></h2>
             </div>
             <div class="md:w-1/2 p-10 lg:p-16 text-slate-900 text-sm leading-relaxed flex flex-col justify-center relative border-t md:border-t-0 md:border-l border-white/40">
-                <p class="mb-5 text-[15px] font-medium">Vedanta Placement Agency is an ISO-certified and government-registered education recruitment consultancy operating at a national level across India. We provide structured, compliance-driven, and outcome-focused hiring solutions to schools, colleges, and educational institutions.</p>
+                <p class="mb-5 text-[15px] font-medium">Vedanta Placement Agency® is an ISO-certified and government-registered education recruitment consultancy operating at a national level across India. We provide structured, compliance-driven, and outcome-focused hiring solutions to schools, colleges, and educational institutions.</p>
                 <p class="mb-8 text-[15px] font-medium">With a strong operational presence and an extensive talent network across multiple states, we support institutions in building high-performing academic and administrative teams. Our recruitment methodology is aligned with national education standards, institutional governance requirements, and best practices followed by leading recruitment consultancies in India.</p>
                 <a href="{{ route('about') }}" class="text-[#129aef] font-bold text-base inline-flex items-center gap-2 hover:text-[#031b4e] transition-colors w-fit">Know More <i class="fas fa-chevron-right text-[10px] bg-[#129aef] text-white rounded-full w-5 h-5 flex items-center justify-center ml-1"></i></a>
                 
@@ -479,7 +479,7 @@
 
                     <!-- Subtitle Description -->
                     <p class="text-slate-300 text-sm sm:text-[15px] leading-relaxed max-w-xl mb-6 font-normal">
-                        Know a passionate teacher looking for their dream school? Refer them to Vedanta Placement Agency and earn reward points at every stage of their onboarding and placement!
+                        Know a passionate teacher looking for their dream school? Refer them to Vedanta Placement Agency® and earn reward points at every stage of their onboarding and placement!
                     </p>
 
                     <!-- 3 Feature Bullets Row -->
