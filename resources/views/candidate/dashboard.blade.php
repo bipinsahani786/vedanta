@@ -192,30 +192,9 @@
         </div>
     </div>
 
-    {{-- Metrics / Stat Cards (Row of 5 Cards) --}}
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        {{-- Card 1: Applications --}}
-        <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-purple-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
-            <div class="flex items-center justify-between mb-3">
-                <div class="w-11 h-11 rounded-2xl bg-purple-500/15 border border-purple-500/25 text-purple-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:bg-purple-500/25 transition-all">
-                    <i class="fas fa-paper-plane"></i>
-                </div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Applications</span>
-            </div>
-            <div>
-                <div class="text-2xl lg:text-3xl font-black text-white flex items-baseline gap-1 tracking-tight">
-                    <span>{{ $profile->used_applications }}</span>
-                    <span class="text-xs text-slate-400 font-semibold">/ {{ $profile->total_allowed_applications }}</span>
-                </div>
-                <div class="text-[11px] text-slate-400 font-medium mt-0.5">Used</div>
-                <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-3 shadow-inner">
-                    <div class="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-accent-blue rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(168,85,247,0.5)]"
-                         style="width: {{ $profile->total_allowed_applications > 0 ? min(100, ($profile->used_applications / $profile->total_allowed_applications) * 100) : 0 }}%"></div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Card 2: Shortlisted --}}
+    {{-- Metrics / Stat Cards (Row of 4 Cards) --}}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {{-- Card 1: Shortlisted --}}
         <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-emerald-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:bg-emerald-500/25 transition-all">
@@ -229,7 +208,7 @@
             </div>
         </div>
 
-        {{-- Card 3: Interviews --}}
+        {{-- Card 2: Interviews --}}
         <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/25 text-amber-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:bg-amber-500/25 transition-all">
@@ -243,7 +222,7 @@
             </div>
         </div>
 
-        {{-- Card 4: Profile Views --}}
+        {{-- Card 3: Profile Views --}}
         <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-sky-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-11 h-11 rounded-2xl bg-sky-500/15 border border-sky-500/25 text-sky-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:bg-sky-500/25 transition-all">
@@ -257,9 +236,9 @@
             </div>
         </div>
 
-        {{-- Card 5: Wallet Balance --}}
+        {{-- Card 4: Wallet Balance --}}
         <a href="{{ route('candidate.referral.index') }}"
-           class="col-span-2 sm:col-span-1 bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-pink-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
+           class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-pink-500/40 hover:-translate-y-0.5 transition-all duration-300 group">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-11 h-11 rounded-2xl bg-pink-500/15 border border-pink-500/25 text-pink-400 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:bg-pink-500/25 transition-all">
                     <i class="fas fa-wallet"></i>
