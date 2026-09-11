@@ -437,7 +437,13 @@
     </section>
 
     <!-- Refer & Earn Showcase Section -->
-    <section class="pt-24 pb-32 px-6 lg:px-[5%] relative overflow-hidden bg-gradient-to-b from-[#031b4e] via-[#04153f] to-[#020b22] text-white">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        .font-script {
+            font-family: 'Caveat', cursive;
+        }
+    </style>
+    <section class="pt-16 pb-28 px-4 sm:px-6 lg:px-[5%] relative overflow-hidden bg-[#030e2c] text-white selection:bg-amber-400 selection:text-slate-900">
         <!-- Top Seamless Luminous Boundary -->
         <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 via-amber-400/40 to-transparent"></div>
         
@@ -446,188 +452,303 @@
 
         <!-- Tech Dot-Matrix Texture Overlay -->
         <div class="absolute inset-0 opacity-[0.14] pointer-events-none" 
-             style="background-image: radial-gradient(rgba(255,255,255,0.25) 1px, transparent 1px); background-size: 32px 32px; -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 95%); mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 95%);">
+             style="background-image: radial-gradient(rgba(255,255,255,0.22) 1.2px, transparent 1.2px); background-size: 28px 28px; -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 95%); mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 95%);">
         </div>
 
-        <!-- Vibrant Multi-Color Ambient Mesh Glows -->
-        <div class="absolute top-1/4 -left-32 w-[520px] h-[520px] bg-sky-500/15 rounded-full blur-[140px] pointer-events-none"></div>
-        <div class="absolute top-1/3 -right-32 w-[540px] h-[540px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none"></div>
-        <div class="absolute bottom-20 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-amber-500/12 rounded-full blur-[150px] pointer-events-none"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[400px] bg-blue-600/10 rounded-full blur-[160px] pointer-events-none"></div>
+        <!-- Ambient Mesh Glows -->
+        <div class="absolute top-1/4 -left-28 w-[500px] h-[500px] bg-sky-500/15 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute top-1/3 -right-28 w-[520px] h-[520px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute bottom-24 left-1/2 -translate-x-1/2 w-[650px] h-[320px] bg-amber-500/10 rounded-full blur-[150px] pointer-events-none"></div>
 
-        <div class="max-w-7xl mx-auto relative z-10">
-            <!-- Section Header -->
-            <div class="text-center max-w-3xl mx-auto mb-16 reveal">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-400/20 via-amber-400/10 to-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-black uppercase tracking-wider mb-4 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                    </span>
-                    <i class="fas fa-gift text-sm text-amber-400"></i>
-                    <span>Refer & Earn Program</span>
+        <div class="max-w-[1360px] mx-auto relative z-10">
+            <!-- Top Hero Row: Left Content & Right Teachers Image -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center mb-10 lg:mb-12">
+                <!-- Left Hero Content -->
+                <div class="lg:col-span-7 flex flex-col items-start text-left">
+                    <!-- Pill Badge -->
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0a1b46] border border-amber-400/60 shadow-[0_0_15px_rgba(245,158,11,0.2)] mb-4">
+                        <i class="fas fa-gift text-amber-400 text-xs"></i>
+                        <span class="text-amber-400 font-extrabold text-[11px] sm:text-xs tracking-wider uppercase">REFER & EARN PROGRAM</span>
+                    </div>
+
+                    <!-- Main Title -->
+                    <h2 class="text-3xl sm:text-4xl lg:text-[46px] font-black tracking-tight leading-[1.15] mb-4 text-white">
+                        Invite Fellow Educators,<br>
+                        <span class="text-[#ffb800] drop-shadow-[0_2px_15px_rgba(255,184,0,0.35)]">Earn Amazing Rewards!</span>
+                    </h2>
+
+                    <!-- Subtitle Description -->
+                    <p class="text-slate-300 text-sm sm:text-[15px] leading-relaxed max-w-xl mb-6 font-normal">
+                        Know a passionate teacher looking for their dream school? Refer them to Vedanta Placement Agency and earn reward points at every stage of their onboarding and placement!
+                    </p>
+
+                    <!-- 3 Feature Bullets Row -->
+                    <div class="flex flex-wrap items-center gap-6 sm:gap-8 pt-1">
+                        <!-- Feature 1: Support Educators -->
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-full bg-[#1877f2] text-white flex-shrink-0 flex items-center justify-center text-base shadow-[0_0_15px_rgba(24,119,242,0.45)]">
+                                <i class="fas fa-user-group"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="text-white font-bold text-xs sm:text-[13px] leading-tight block">Support Educators</span>
+                                <span class="text-slate-300 text-[11px] leading-tight block mt-0.5">Build Their Careers</span>
+                            </div>
+                        </div>
+
+                        <!-- Feature 2: Earn Reward Points -->
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-full bg-[#ff3366] text-white flex-shrink-0 flex items-center justify-center text-base shadow-[0_0_15px_rgba(255,51,102,0.45)]">
+                                <i class="fas fa-gift"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="text-white font-bold text-xs sm:text-[13px] leading-tight block">Earn Reward Points</span>
+                                <span class="text-slate-300 text-[11px] leading-tight block mt-0.5">at Every Stage</span>
+                            </div>
+                        </div>
+
+                        <!-- Feature 3: Bigger Network -->
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-full bg-[#ffb800] text-slate-950 flex-shrink-0 flex items-center justify-center text-base shadow-[0_0_15px_rgba(255,184,0,0.45)]">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="text-white font-bold text-xs sm:text-[13px] leading-tight block">Bigger Network</span>
+                                <span class="text-slate-300 text-[11px] leading-tight block mt-0.5">Stronger Community</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
-                    Invite Fellow Educators, <br class="hidden sm:inline">
-                    <span class="bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-300 bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(245,158,11,0.3)]">Earn Reward Points & Save</span>
-                </h2>
-                <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
-                    Know a passionate teacher looking for their dream school? Refer them to Vedanta Placement Agency and earn points at every stage of their onboarding and placement!
-                </p>
+
+                <!-- Right Hero: Teachers Photo & Floating Badges -->
+                <div class="lg:col-span-5 relative flex items-center justify-center lg:justify-end mt-4 lg:mt-0">
+                    <div class="relative w-full max-w-[500px]">
+                        <!-- Tilted Handwritten Script Text on Left -->
+                        <div class="absolute -top-3 sm:top-2 -left-4 sm:-left-8 z-20 -rotate-[14deg] pointer-events-none select-none">
+                            <span class="font-script text-sky-300 text-2xl sm:text-3xl lg:text-[32px] font-bold leading-[1.05] block drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+                                Better<br>Teachers<br>Brighter<br>Futures!
+                            </span>
+                        </div>
+
+                        <!-- Teachers Image Container -->
+                        <div class="relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-sky-500/20 bg-[#061539]">
+                            <img src="{{ asset('images/referral_teachers.jpg') }}" alt="Vedanta Educators" class="w-full h-auto object-cover block">
+                            <!-- Bottom subtle blend -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#030e2c]/50 via-transparent to-transparent pointer-events-none"></div>
+                        </div>
+
+                        <!-- Floating Stat Badge (900+ Educators Placed) at Bottom Right -->
+                        <div class="absolute -bottom-4 right-2 sm:right-4 z-20 bg-[#071f54]/95 border border-sky-400/50 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.6)] flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-sky-500/20 border border-sky-400/40 text-sky-400 flex items-center justify-center text-sm shadow-[0_0_10px_rgba(14,165,233,0.3)]">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <div class="text-lg sm:text-xl font-black text-amber-300 leading-none">900+</div>
+                                <div class="text-[11px] text-sky-100 font-medium leading-tight mt-0.5">Educators Placed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- 3-Step Process Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
-                <!-- Card 1 -->
-                <div class="relative bg-gradient-to-b from-white/[0.08] to-white/[0.02] backdrop-blur-2xl border border-white/[0.12] rounded-3xl p-7 sm:p-8 flex flex-col justify-between hover:border-amber-400/50 hover:bg-white/[0.09] hover:-translate-y-2 transition-all duration-300 shadow-[0_10px_35px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(245,158,11,0.15)] group reveal overflow-hidden">
-                    <div class="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:via-amber-400/60 transition-all"></div>
-                    <div>
-                        <div class="flex items-center justify-between mb-6">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400/20 to-amber-500/10 border border-amber-400/30 text-amber-400 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(245,158,11,0.2)] group-hover:scale-110 transition-transform">
+            <!-- Cards Grid: Left 8 Cols (Step 1, Step 2, Milestone Card) & Right 4 Cols (Step 3, CTA Card) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
+                <!-- LEFT COLUMN (8 cols) -->
+                <div class="lg:col-span-8 flex flex-col gap-5 lg:gap-6">
+                    <!-- Top Row: Step 01 & Step 02 Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-6">
+                        <!-- Step 01 Card -->
+                        <div class="bg-[#061842]/90 border border-[#163a78] hover:border-amber-400/50 transition-all duration-300 rounded-2xl p-5 sm:p-6 flex items-center justify-between gap-4 shadow-lg group relative overflow-hidden">
+                            <!-- Icon Left -->
+                            <div class="w-14 h-14 rounded-full bg-[#ff5722]/15 border border-[#ff5722]/40 text-[#ff7043] flex-shrink-0 flex items-center justify-center text-xl shadow-[0_0_20px_rgba(255,87,34,0.3)] group-hover:scale-105 transition-transform">
                                 <i class="fas fa-share-nodes"></i>
                             </div>
-                            <span class="text-3xl font-black text-white/15 group-hover:text-amber-400/50 transition-colors font-mono">01</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">Share Your Link</h3>
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                            Get your unique referral link and invite fellow teachers via WhatsApp, email, or social media.
-                        </p>
-                    </div>
-                    <div class="pt-6 mt-6 border-t border-white/10 flex items-center gap-2 text-amber-400 text-xs font-bold">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Instant Invitation Link</span>
-                    </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="relative bg-gradient-to-b from-white/[0.08] to-white/[0.02] backdrop-blur-2xl border border-white/[0.12] rounded-3xl p-7 sm:p-8 flex flex-col justify-between hover:border-sky-400/50 hover:bg-white/[0.09] hover:-translate-y-2 transition-all duration-300 shadow-[0_10px_35px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(14,165,233,0.15)] group reveal reveal-delay-1 overflow-hidden">
-                    <div class="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:via-sky-400/60 transition-all"></div>
-                    <div>
-                        <div class="flex items-center justify-between mb-6">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-400/20 to-sky-500/10 border border-sky-400/30 text-sky-400 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(14,165,233,0.2)] group-hover:scale-110 transition-transform">
-                                <i class="fas fa-user-check"></i>
+                            <!-- Content Center -->
+                            <div class="flex-1 min-w-0">
+                                <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black text-amber-300 border border-amber-400/40 bg-amber-400/10 mb-1">01</span>
+                                <h3 class="text-white font-bold text-base sm:text-lg mb-1 leading-snug group-hover:text-amber-300 transition-colors">Share Your Link</h3>
+                                <p class="text-slate-300 text-xs sm:text-[13px] leading-relaxed">
+                                    Get your unique referral link and invite fellow teachers via WhatsApp, email, or social media.
+                                </p>
                             </div>
-                            <span class="text-3xl font-black text-white/15 group-hover:text-sky-400/50 transition-colors font-mono">02</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-sky-300 transition-colors">Friend Joins Vedanta</h3>
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                            Your friend registers, completes their teacher profile, gets verified, and secures a teaching position.
-                        </p>
-                    </div>
-                    <div class="pt-6 mt-6 border-t border-white/10 flex items-center gap-2 text-sky-400 text-xs font-bold">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Track Live Onboarding</span>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="relative bg-gradient-to-b from-white/[0.08] to-white/[0.02] backdrop-blur-2xl border border-white/[0.12] rounded-3xl p-7 sm:p-8 flex flex-col justify-between hover:border-emerald-400/50 hover:bg-white/[0.09] hover:-translate-y-2 transition-all duration-300 shadow-[0_10px_35px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(16,185,129,0.15)] group reveal reveal-delay-2 overflow-hidden">
-                    <div class="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:via-emerald-400/60 transition-all"></div>
-                    <div>
-                        <div class="flex items-center justify-between mb-6">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-emerald-500/10 border border-emerald-400/30 text-emerald-400 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(16,185,129,0.2)] group-hover:scale-110 transition-transform">
-                                <i class="fas fa-coins"></i>
+                            <!-- Arrow Right -->
+                            <div class="w-8 h-8 rounded-full bg-[#082255] border border-sky-500/30 text-sky-400 flex-shrink-0 flex items-center justify-center text-xs group-hover:bg-sky-500 group-hover:text-white transition-all">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                            <span class="text-3xl font-black text-white/15 group-hover:text-emerald-400/50 transition-colors font-mono">03</span>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors">Earn & Save 30%</h3>
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                            Earn up to 900+ points per placement and redeem your reward points against Vedanta service charges.
-                        </p>
-                    </div>
-                    <div class="pt-6 mt-6 border-t border-white/10 flex items-center gap-2 text-emerald-400 text-xs font-bold">
-                        <i class="fas fa-check-circle"></i>
-                        <span>100 Pts = ₹50 Discount</span>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Reward Stages & Milestone Showcase Banner -->
-            <div class="relative bg-gradient-to-br from-white/[0.08] via-white/[0.04] to-white/[0.02] backdrop-blur-2xl border border-white/[0.12] rounded-3xl p-6 sm:p-8 lg:p-10 shadow-[0_25px_60px_rgba(0,0,0,0.4)] reveal overflow-hidden">
-                <!-- Inner subtle ambient highlights -->
-                <div class="absolute -top-20 -right-20 w-72 h-72 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute -bottom-20 -left-20 w-72 h-72 bg-sky-400/10 rounded-full blur-3xl pointer-events-none"></div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-                    <!-- Left: Reward Stages Breakdown -->
-                    <div class="lg:col-span-7 space-y-4">
-                        <div class="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-amber-400">
-                            <i class="fas fa-layer-group"></i>
-                            <span>Points Earned at Every Stage</span>
+                        <!-- Step 02 Card -->
+                        <div class="bg-[#061842]/90 border border-[#163a78] hover:border-sky-400/50 transition-all duration-300 rounded-2xl p-5 sm:p-6 flex items-center justify-between gap-4 shadow-lg group relative overflow-hidden">
+                            <!-- Icon Left -->
+                            <div class="w-14 h-14 rounded-full bg-[#00bcd4]/15 border border-[#00bcd4]/40 text-[#26c6da] flex-shrink-0 flex items-center justify-center text-xl shadow-[0_0_20px_rgba(0,188,212,0.3)] group-hover:scale-105 transition-transform">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <!-- Content Center -->
+                            <div class="flex-1 min-w-0">
+                                <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black text-amber-300 border border-amber-400/40 bg-amber-400/10 mb-1">02</span>
+                                <h3 class="text-white font-bold text-base sm:text-lg mb-1 leading-snug group-hover:text-sky-300 transition-colors">Friend Joins Vedanta</h3>
+                                <p class="text-slate-300 text-xs sm:text-[13px] leading-relaxed">
+                                    Your friend registers, completes their teacher profile, gets verified, and secures a teaching position.
+                                </p>
+                            </div>
+                            <!-- Arrow Right -->
+                            <div class="w-8 h-8 rounded-full bg-[#082255] border border-sky-500/30 text-sky-400 flex-shrink-0 flex items-center justify-center text-xs group-hover:bg-sky-500 group-hover:text-white transition-all">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
                         </div>
-                        <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                    </div>
+
+                    <!-- Bottom Card: Points Earned at Every Stage -->
+                    <div class="bg-[#061842]/90 border border-[#163a78] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
+                        <!-- Subtle glow -->
+                        <div class="absolute -top-12 -right-12 w-48 h-48 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                        <!-- Header -->
+                        <div class="flex items-center gap-2 mb-1 text-amber-400">
+                            <i class="fas fa-trophy text-sm"></i>
+                            <span class="text-[11px] sm:text-xs font-black uppercase tracking-wider">POINTS EARNED AT EVERY STAGE</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight mb-1">
                             Earn Up to <span class="text-amber-400">900 Reward Points (₹450)</span> Per Friend
                         </h3>
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                            You receive rewards incrementally as your friend progresses through registration, profile verification, interview, and placement:
+                        <p class="text-slate-300 text-xs sm:text-[13px] leading-relaxed">
+                            You receive rewards incrementally as your friend progresses through registration, profile verification, interview, and placement.
                         </p>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-                            <div class="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 hover:border-amber-400/30 transition-all text-center group">
-                                <span class="text-[11px] text-slate-400 font-medium block">Registration</span>
-                                <span class="text-sm font-extrabold text-amber-400 mt-0.5 block group-hover:scale-105 transition-transform">+50 Pts</span>
+                        <!-- 6 Milestone Boxes -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 mt-5">
+                            <!-- 1. Registration -->
+                            <div class="p-3 rounded-xl bg-[#040e2c] border border-white/10 hover:border-sky-400/40 transition-all text-center flex flex-col items-center justify-between min-h-[95px] group">
+                                <i class="fas fa-file-lines text-sky-400 text-lg mb-1 group-hover:scale-110 transition-transform"></i>
+                                <div>
+                                    <span class="text-[11px] text-slate-400 font-medium block">Registration</span>
+                                    <span class="text-xs sm:text-sm font-black text-sky-400 block mt-1">+50 Pts</span>
+                                </div>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 hover:border-sky-400/30 transition-all text-center group">
-                                <span class="text-[11px] text-slate-400 font-medium block">Profile Verified</span>
-                                <span class="text-sm font-extrabold text-sky-400 mt-0.5 block group-hover:scale-105 transition-transform">+200 Pts</span>
+                            <!-- 2. Profile Verified -->
+                            <div class="p-3 rounded-xl bg-[#040e2c] border border-white/10 hover:border-cyan-400/40 transition-all text-center flex flex-col items-center justify-between min-h-[95px] group">
+                                <i class="fas fa-shield-halved text-cyan-400 text-lg mb-1 group-hover:scale-110 transition-transform"></i>
+                                <div>
+                                    <span class="text-[11px] text-slate-400 font-medium block">Profile Verified</span>
+                                    <span class="text-xs sm:text-sm font-black text-cyan-400 block mt-1">+200 Pts</span>
+                                </div>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 hover:border-purple-400/30 transition-all text-center group">
-                                <span class="text-[11px] text-slate-400 font-medium block">Interview Done</span>
-                                <span class="text-sm font-extrabold text-purple-400 mt-0.5 block group-hover:scale-105 transition-transform">+150 Pts</span>
+                            <!-- 3. Interview Done -->
+                            <div class="p-3 rounded-xl bg-[#040e2c] border border-white/10 hover:border-purple-400/40 transition-all text-center flex flex-col items-center justify-between min-h-[95px] group">
+                                <i class="fas fa-user-group text-purple-400 text-lg mb-1 group-hover:scale-110 transition-transform"></i>
+                                <div>
+                                    <span class="text-[11px] text-slate-400 font-medium block">Interview Done</span>
+                                    <span class="text-xs sm:text-sm font-black text-purple-400 block mt-1">+150 Pts</span>
+                                </div>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 hover:border-emerald-400/30 transition-all text-center group">
-                                <span class="text-[11px] text-slate-400 font-medium block">Joined School</span>
-                                <span class="text-sm font-extrabold text-emerald-400 mt-0.5 block group-hover:scale-105 transition-transform">+500 Pts</span>
+                            <!-- 4. Joined School -->
+                            <div class="p-3 rounded-xl bg-[#040e2c] border border-white/10 hover:border-emerald-400/40 transition-all text-center flex flex-col items-center justify-between min-h-[95px] group">
+                                <i class="fas fa-school text-emerald-400 text-lg mb-1 group-hover:scale-110 transition-transform"></i>
+                                <div>
+                                    <span class="text-[11px] text-slate-400 font-medium block">Joined School</span>
+                                    <span class="text-xs sm:text-sm font-black text-emerald-400 block mt-1">+500 Pts</span>
+                                </div>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 hover:border-amber-300/30 transition-all text-center group">
-                                <span class="text-[11px] text-slate-400 font-medium block">Friend's Bonus</span>
-                                <span class="text-sm font-extrabold text-amber-300 mt-0.5 block group-hover:scale-105 transition-transform">100 Welcome Pts</span>
+                            <!-- 5. Friend's Bonus -->
+                            <div class="p-3 rounded-xl bg-[#040e2c] border border-white/10 hover:border-pink-400/40 transition-all text-center flex flex-col items-center justify-between min-h-[95px] group">
+                                <i class="fas fa-gift text-pink-400 text-lg mb-1 group-hover:scale-110 transition-transform"></i>
+                                <div>
+                                    <span class="text-[11px] text-pink-300 font-medium block">Friend's Bonus</span>
+                                    <span class="text-xs sm:text-sm font-black text-pink-400 block mt-1">100 Welcome Pts</span>
+                                </div>
                             </div>
-                            <div class="p-3.5 rounded-2xl bg-gradient-to-br from-amber-400/20 to-amber-500/10 border border-amber-400/30 text-center group shadow-sm">
-                                <span class="text-[11px] text-amber-300 font-bold block">Milestone Bonus</span>
-                                <span class="text-sm font-black text-amber-400 mt-0.5 block group-hover:scale-105 transition-transform">Up to +5,000 Pts</span>
+                            <!-- 6. Milestone Bonus -->
+                            <div class="p-3 rounded-xl bg-gradient-to-b from-[#1c1d3b] to-[#040e2c] border border-amber-400/30 hover:border-amber-400 transition-all text-center flex flex-col items-center justify-between min-h-[95px] group shadow-sm">
+                                <i class="fas fa-trophy text-amber-400 text-lg mb-1 group-hover:scale-110 transition-transform"></i>
+                                <div>
+                                    <span class="text-[11px] text-amber-300 font-bold block">Milestone Bonus</span>
+                                    <span class="text-xs sm:text-sm font-black text-amber-400 block mt-1">Up to +5,000 Pts</span>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Right: Call to Action Card -->
-                    <div class="lg:col-span-5 bg-gradient-to-br from-[#0a1f52] via-[#06153d] to-[#020b22] border border-amber-400/30 rounded-3xl p-6 sm:p-7 text-center space-y-4 shadow-[0_15px_40px_rgba(0,0,0,0.4)] relative overflow-hidden group">
-                        <div class="absolute -top-10 -right-10 w-36 h-36 bg-amber-400/15 rounded-full blur-2xl pointer-events-none"></div>
-                        <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 flex items-center justify-center text-2xl shadow-[0_0_25px_rgba(245,158,11,0.35)] group-hover:scale-105 transition-transform">
-                            <i class="fas fa-trophy"></i>
+                <!-- RIGHT COLUMN (4 cols) -->
+                <div class="lg:col-span-4 flex flex-col gap-5 lg:gap-6">
+                    <!-- Step 03 Card (Distinctive Teal / Emerald Accent as in screenshot) -->
+                    <div class="bg-gradient-to-br from-[#052b36]/90 via-[#052136]/90 to-[#061842]/90 border border-teal-500/40 hover:border-teal-400 transition-all duration-300 rounded-2xl p-5 sm:p-6 flex items-center justify-between gap-4 shadow-[0_4px_25px_rgba(20,184,166,0.15)] group relative overflow-hidden">
+                        <!-- Icon Left -->
+                        <div class="w-14 h-14 rounded-full bg-[#00bfa5]/15 border border-[#00bfa5]/40 text-[#1de9b6] flex-shrink-0 flex items-center justify-center text-xl shadow-[0_0_20px_rgba(0,191,165,0.3)] group-hover:scale-105 transition-transform">
+                            <i class="fas fa-coins"></i>
                         </div>
-                        <h4 class="text-xl font-black text-white">Start Earning Rewards Today</h4>
-                        <p class="text-xs text-slate-300 leading-relaxed">
-                            Sign up or log in as a candidate to access your referral code, shareable links, and track your wallet balance in real-time.
-                        </p>
-                        
-                        <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                            @auth
-                                @if(auth()->user()->role === 'candidate')
-                                    <a href="{{ route('candidate.referral.index') }}" 
-                                       style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #020617;"
-                                       class="w-full py-3 px-6 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md hover:shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
-                                        <i class="fas fa-wallet"></i>
-                                        <span>Open My Referral Hub</span>
-                                    </a>
+                        <!-- Content Center -->
+                        <div class="flex-1 min-w-0">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black text-amber-300 border border-amber-400/40 bg-amber-400/10 mb-1">03</span>
+                            <h3 class="text-white font-bold text-base sm:text-lg mb-1 leading-snug group-hover:text-teal-300 transition-colors">Earn & Save 30%</h3>
+                            <p class="text-slate-300 text-xs sm:text-[13px] leading-relaxed">
+                                Earn up to 900+ points per placement and redeem your reward points against Vedanta service charges.
+                            </p>
+                        </div>
+                        <!-- Arrow Right -->
+                        <div class="w-8 h-8 rounded-full bg-[#073042] border border-teal-400/40 text-teal-300 flex-shrink-0 flex items-center justify-center text-xs group-hover:bg-teal-400 group-hover:text-slate-950 transition-all">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Card: Start Earning Rewards Today CTA -->
+                    <div class="bg-[#061842]/90 border border-[#163a78] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden flex flex-col justify-between flex-1">
+                        <div>
+                            <div class="flex items-start gap-3.5 mb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-amber-400/15 border border-amber-400/40 text-amber-400 flex-shrink-0 flex items-center justify-center text-xl shadow-[0_0_20px_rgba(245,158,11,0.25)]">
+                                    <i class="fas fa-gift"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-base sm:text-lg font-black text-white leading-snug">Start Earning Rewards Today</h4>
+                                    <p class="text-slate-300 text-xs leading-relaxed mt-1">
+                                        Sign up or log in as a candidate to access your referral code, shareable links, and track your wallet balance in real-time.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="pt-1 space-y-2.5">
+                                @auth
+                                    @if(auth()->user()->role === 'candidate')
+                                        <a href="{{ route('candidate.referral.index') }}" 
+                                           class="w-full py-3 px-4 rounded-xl bg-[#ffb800] hover:bg-[#ffa000] text-slate-950 font-black text-xs sm:text-sm shadow-[0_4px_15px_rgba(255,184,0,0.3)] transition-all flex items-center justify-center gap-2 hover:scale-[1.01]">
+                                            <i class="fas fa-wallet"></i>
+                                            <span>Open My Referral Hub</span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('candidate.dashboard') }}" 
+                                           class="w-full py-3 px-4 rounded-xl bg-[#ffb800] hover:bg-[#ffa000] text-slate-950 font-black text-xs sm:text-sm shadow-[0_4px_15px_rgba(255,184,0,0.3)] transition-all flex items-center justify-center gap-2 hover:scale-[1.01]">
+                                            <span>Go to Dashboard</span>
+                                        </a>
+                                    @endif
                                 @else
-                                    <a href="{{ route('candidate.dashboard') }}" 
-                                       style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #020617;"
-                                       class="w-full py-3 px-6 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md hover:shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
-                                        <span>Go to Dashboard</span>
-                                    </a>
-                                @endif
-                            @else
-                                <button type="button" onclick="openAuthChoiceModal('register')" 
-                                        style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #020617;"
-                                        class="w-full py-3 px-5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md hover:shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
-                                    <i class="fas fa-user-plus"></i>
-                                    <span>Register & Refer</span>
-                                </button>
-                                <button type="button" onclick="openAuthChoiceModal('login')" class="w-full py-3 px-5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-bold text-xs sm:text-sm hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
-                                    <i class="fas fa-arrow-right-to-bracket"></i>
-                                    <span>Login</span>
-                                </button>
-                            @endauth
+                                    <button type="button" onclick="openAuthChoiceModal('register')" 
+                                            class="w-full py-3 px-4 rounded-xl bg-[#ffb800] hover:bg-[#ffa000] text-slate-950 font-black text-xs sm:text-sm shadow-[0_4px_15px_rgba(255,184,0,0.3)] transition-all flex items-center justify-center gap-2 hover:scale-[1.01]">
+                                        <i class="fas fa-user-plus"></i>
+                                        <span>Register & Refer</span>
+                                    </button>
+                                    <button type="button" onclick="openAuthChoiceModal('login')" 
+                                            class="w-full py-2.5 px-4 rounded-xl bg-[#040e2c] hover:bg-white/10 border border-white/20 text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
+                                        <i class="fas fa-arrow-right-to-bracket"></i>
+                                        <span>Login</span>
+                                    </button>
+                                @endauth
+                            </div>
+                        </div>
+
+                        <!-- Footer Trust Badges -->
+                        <div class="flex items-center justify-between pt-4 mt-4 border-t border-white/10 text-[10px] sm:text-[11px] text-slate-300 font-medium">
+                            <div class="flex items-center gap-1.5">
+                                <i class="fas fa-lock text-sky-400 text-xs"></i>
+                                <span>100% Secure</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i class="fas fa-chart-line text-sky-400 text-xs"></i>
+                                <span>Track in Real-Time</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i class="fas fa-star text-amber-400 text-xs"></i>
+                                <span>Use Points to Save</span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Vedanta Placement Agency — The Gold Standard in Education Recruitment')</title>
+    <title>@yield('title', 'Vedanta Placement Agency®   — The Gold Standard in Education Recruitment')</title>
     <meta name="description"
         content="@yield('meta_description', 'Vedanta Placement Agency connects educators and schools across India. Find top teaching jobs or hire expert educators with us.')">
     <link rel="preconnect" href="https://fonts.googleapis.com">
