@@ -12,11 +12,7 @@ class EmployerAuthController extends Controller
 {
     public function showRegistrationForm()
     {
-        $categories = \App\Models\Category::with(['subjects' => function($q) {
-            $q->where('subjects.is_active', true)->orderBy('name');
-        }])->where('is_active', true)->orderBy('name')->get();
-
-        return view('auth.register_employer', compact('categories'));
+        return view('auth.register_employer');
     }
 
     public function register(Request $request)
@@ -26,8 +22,6 @@ class EmployerAuthController extends Controller
             'contact_person' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
             'phone' => 'required|string|max:15',
-            'category_id' => 'nullable|exists:categories,id',
-            'subject_id' => 'nullable|exists:subjects,id',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
