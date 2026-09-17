@@ -45,8 +45,16 @@
                     <div class="text-gray-800 font-medium">{{ $job->title ?? 'N/A' }}</div>
                 </div>
                 <div>
-                    <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Salary Range</div>
-                    <div class="text-gray-800 font-medium">{{ $job->salary_range ?? 'Not specified' }}</div>
+                    <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Salary & Pay</div>
+                    <div class="text-gray-800 font-semibold text-emerald-600">{{ $job->formatted_salary }}</div>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Experience</div>
+                    <div class="text-gray-800 font-medium">{{ $job->experience ?? 'Preferred' }}</div>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Openings</div>
+                    <div class="text-gray-800 font-medium">{{ $job->openings ?? 'Multiple' }}</div>
                 </div>
                 
                 <div class="col-span-2 mt-2">

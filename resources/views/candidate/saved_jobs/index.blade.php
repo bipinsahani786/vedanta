@@ -98,7 +98,7 @@
                                             {{ $job->title }}
                                         </h3>
                                         <p class="text-xs text-slate-400 line-clamp-1 mt-0.5">
-                                            {{ $job->school_name ?? 'Trusted Education Partner' }}
+                                            {{ $job->getMaskedSchoolName() }}
                                         </p>
                                     </div>
                                 </div>
@@ -134,11 +134,11 @@
                             <div class="space-y-1.5 text-xs text-slate-300 mb-4 bg-white/[0.02] p-3 rounded-xl border border-white/[0.05]">
                                 <div class="flex items-center gap-2 text-slate-400">
                                     <i class="fas fa-map-marker-alt text-amber-400 text-xs w-3 text-center"></i>
-                                    <span>{{ $job->city->name ?? 'Bihar' }}, {{ $job->state->name ?? 'India' }}</span>
+                                    <span>{{ $job->getMaskedLocation() }}</span>
                                 </div>
                                 <div class="flex items-center gap-2 text-white font-bold">
                                     <i class="fas fa-wallet text-emerald-400 text-xs w-3 text-center"></i>
-                                    <span>₹{{ $job->salary_range ?? '25,000 - 35,000 / Month' }}</span>
+                                    <span>{{ $job->formatted_salary }}</span>
                                 </div>
                                 <div class="flex items-center gap-2 text-[11px] text-slate-500">
                                     <i class="fas fa-clock text-sky-400 text-xs w-3 text-center"></i>

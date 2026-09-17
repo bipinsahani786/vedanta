@@ -128,4 +128,39 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(SavedJob::class, 'user_id')->latest();
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isEmployer(): bool
+    {
+        return $this->role === 'employer';
+    }
+
+    public function isCandidate(): bool
+    {
+        return $this->role === 'candidate';
+    }
+
+    public function canViewJobProtectedDetails(?JobPost $job = null): bool
+    {
+        // Admins can always see details
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        // Employer who owns the job can see details
+        if ($this->isEmployer() && $job && $job->user_id === $this->id) {
+            return true;
+        }
+
+        // Candidates must have completed full registration (profile, agreement, payment)
+        if ($this->isCandidate()) {
+            return (bool) ($this->profile && $this->profile->isRegistrationCompleted());
+        }
+
+        return false;
+    }
 }

@@ -18,7 +18,7 @@
             </h3>
         </div>
 
-        <form action="{{ route('admin.jobs.store') }}" method="POST" class="p-8">
+        <form action="{{ route('admin.jobs.store') }}" method="POST" enctype="multipart/form-data" class="p-8">
             @csrf
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -48,6 +48,13 @@
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Phone Number</label>
                     <input type="text" name="phone" value="{{ old('phone') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 9876543210">
                     @error('phone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+                <!-- School Image -->
+                <div>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">School Image / Photo (Optional)</label>
+                    <input type="file" name="school_image" accept="image/*" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue file:text-white hover:file:bg-accent-blue-hover">
+                    <span class="text-[11px] text-text-dark/60 mt-1 block">Protected image displayed when candidate unlocks job details.</span>
+                    @error('school_image') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
 
@@ -97,6 +104,26 @@
                     @error('qualification_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
+                <!-- Experience -->
+                <div>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Experience</label>
+                    <select name="experience" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                        <option value="Preferred" {{ old('experience', 'Preferred') == 'Preferred' ? 'selected' : '' }}>Preferred</option>
+                        <option value="Fresher" {{ old('experience') == 'Fresher' ? 'selected' : '' }}>Fresher</option>
+                        <option value="1 - 3 Years" {{ old('experience') == '1 - 3 Years' ? 'selected' : '' }}>1 - 3 Years</option>
+                        <option value="3 - 5 Years" {{ old('experience') == '3 - 5 Years' ? 'selected' : '' }}>3 - 5 Years</option>
+                        <option value="5+ Years" {{ old('experience') == '5+ Years' ? 'selected' : '' }}>5+ Years</option>
+                    </select>
+                    @error('experience') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <!-- Openings -->
+                <div>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">No. of Openings</label>
+                    <input type="text" name="openings" value="{{ old('openings', 'Multiple') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 1, 2, or Multiple">
+                    @error('openings') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <!-- State -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">State *</label>
@@ -118,11 +145,58 @@
                     @error('city_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- Salary Range -->
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Salary Range</label>
-                    <input type="text" name="salary_range" value="{{ old('salary_range') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 30,000 - 45,000 / month">
-                    @error('salary_range') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                <!-- Salary Configuration (Interactive Section matching Reference Image 5) -->
+                <div class="md:col-span-2 bg-secondary-bg/50 border border-card-border rounded-2xl p-6 shadow-inner">
+                    <div class="flex items-center justify-between mb-4">
+                        <label class="text-xs font-bold text-text-dark/80 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-indian-rupee-sign text-accent-blue"></i> Salary & Compensation (Reference Image 5)
+                        </label>
+                        <div id="salary-preview-badge" class="px-3 py-1 rounded-full bg-accent-blue/10 border border-accent-blue/30 text-accent-blue text-xs font-bold">
+                            Preview: ₹40,000 – ₹55,000 per month
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                        <!-- Show pay by -->
+                        <div>
+                            <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Show pay by</label>
+                            <select name="salary_mode" id="salary_mode" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue font-semibold transition-all">
+                                <option value="range" {{ old('salary_mode', 'range') == 'range' ? 'selected' : '' }}>Range</option>
+                                <option value="starting_amount" {{ old('salary_mode') == 'starting_amount' ? 'selected' : '' }}>Starting amount</option>
+                                <option value="maximum_amount" {{ old('salary_mode') == 'maximum_amount' ? 'selected' : '' }}>Maximum amount</option>
+                                <option value="exact_amount" {{ old('salary_mode') == 'exact_amount' ? 'selected' : '' }}>Exact amount</option>
+                            </select>
+                        </div>
+
+                        <!-- Minimum / Amount -->
+                        <div id="min_salary_wrapper">
+                            <label id="min_salary_label" class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Minimum</label>
+                            <div class="relative">
+                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-dark/60 font-bold">₹</span>
+                                <input type="number" step="100" name="salary_min" id="salary_min" value="{{ old('salary_min', 40000) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all font-semibold" placeholder="e.g. 40,000">
+                            </div>
+                        </div>
+
+                        <!-- Maximum -->
+                        <div id="max_salary_wrapper">
+                            <label id="max_salary_label" class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Maximum</label>
+                            <div class="relative">
+                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-dark/60 font-bold">₹</span>
+                                <input type="number" step="100" name="salary_max" id="salary_max" value="{{ old('salary_max', 55000) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all font-semibold" placeholder="e.g. 55,000">
+                            </div>
+                        </div>
+
+                        <!-- Rate -->
+                        <div>
+                            <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Rate</label>
+                            <select name="salary_rate" id="salary_rate" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue font-semibold transition-all">
+                                <option value="per month" {{ old('salary_rate', 'per month') == 'per month' ? 'selected' : '' }}>per month</option>
+                                <option value="per year" {{ old('salary_rate') == 'per year' ? 'selected' : '' }}>per year</option>
+                                <option value="per hour" {{ old('salary_rate') == 'per hour' ? 'selected' : '' }}>per hour</option>
+                                <option value="per week" {{ old('salary_rate') == 'per week' ? 'selected' : '' }}>per week</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Description -->
@@ -143,6 +217,7 @@
                     @error('status') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
+
 
             <div class="mt-8 flex justify-end gap-3">
                 <a href="{{ route('admin.jobs.index') }}" class="px-6 py-3 rounded-xl font-bold text-sm text-text-main bg-secondary-bg border border-card-border hover:bg-card-border/50 transition-all">Cancel</a>
@@ -203,6 +278,64 @@
             citySelect.innerHTML = '<option value="">Select City</option>';
         }
     });
+
+    // Salary Configuration Logic (Matching Reference Image 5)
+    (function() {
+        const modeSelect = document.getElementById('salary_mode');
+        const minWrapper = document.getElementById('min_salary_wrapper');
+        const maxWrapper = document.getElementById('max_salary_wrapper');
+        const minLabel = document.getElementById('min_salary_label');
+        const maxLabel = document.getElementById('max_salary_label');
+        const minInput = document.getElementById('salary_min');
+        const maxInput = document.getElementById('salary_max');
+        const rateSelect = document.getElementById('salary_rate');
+        const previewBadge = document.getElementById('salary-preview-badge');
+
+        function formatCurrency(val) {
+            const num = parseFloat(val);
+            if (isNaN(num)) return '0';
+            return num.toLocaleString('en-IN');
+        }
+
+        function updateSalaryFields() {
+            const mode = modeSelect.value;
+            const rate = rateSelect.value || 'per month';
+            const minVal = parseFloat(minInput.value) || 0;
+            const maxVal = parseFloat(maxInput.value) || 0;
+
+            if (mode === 'range') {
+                minWrapper.style.display = 'block';
+                maxWrapper.style.display = 'block';
+                minLabel.textContent = 'Minimum';
+                maxLabel.textContent = 'Maximum';
+                previewBadge.textContent = 'Preview: ₹' + formatCurrency(minVal) + ' – ₹' + formatCurrency(maxVal) + ' ' + rate;
+            } else if (mode === 'starting_amount') {
+                minWrapper.style.display = 'block';
+                maxWrapper.style.display = 'none';
+                minLabel.textContent = 'Starting Amount';
+                previewBadge.textContent = 'Preview: From ₹' + formatCurrency(minVal) + ' ' + rate;
+            } else if (mode === 'maximum_amount') {
+                minWrapper.style.display = 'none';
+                maxWrapper.style.display = 'block';
+                maxLabel.textContent = 'Maximum Amount';
+                previewBadge.textContent = 'Preview: Up to ₹' + formatCurrency(maxVal) + ' ' + rate;
+            } else if (mode === 'exact_amount') {
+                minWrapper.style.display = 'block';
+                maxWrapper.style.display = 'none';
+                minLabel.textContent = 'Exact Amount';
+                previewBadge.textContent = 'Preview: ₹' + formatCurrency(minVal) + ' ' + rate;
+            }
+        }
+
+        modeSelect.addEventListener('change', updateSalaryFields);
+        rateSelect.addEventListener('change', updateSalaryFields);
+        minInput.addEventListener('input', updateSalaryFields);
+        maxInput.addEventListener('input', updateSalaryFields);
+
+        // Initial setup
+        updateSalaryFields();
+    })();
 </script>
 @endpush
 @endsection
+

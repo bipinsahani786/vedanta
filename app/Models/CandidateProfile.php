@@ -148,4 +148,16 @@ class CandidateProfile extends Model
         }
         return 'Active';
     }
+
+    public function isRegistrationCompleted(): bool
+    {
+        // 1. If explicitly marked with registration_completed_at, they are registered
+        if (!empty($this->registration_completed_at)) {
+            return true;
+        }
+
+        // 2. Otherwise, requires profile completed, agreement accepted, and paid registration fee/plan
+        $hasPayment = (bool) ($this->initial_fee_paid || $this->is_fee_paid || ($this->paid_amount ?? 0) >= 500);
+        return (bool) ($this->is_profile_complete && $this->is_agreement_signed && $hasPayment);
+    }
 }
