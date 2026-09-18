@@ -53,10 +53,31 @@ class JobController extends Controller
             'jobs.*.qualification_id' => 'required|exists:qualifications,id',
             'jobs.*.state_id' => 'required|exists:states,id',
             'jobs.*.city_id' => 'required|exists:cities,id',
+            'jobs.*.salary_mode' => 'nullable|string|in:range,starting_amount,maximum_amount,exact_amount',
+            'jobs.*.salary_min' => 'nullable|numeric|min:0',
+            'jobs.*.salary_max' => 'nullable|numeric|min:0',
+            'jobs.*.salary_rate' => 'nullable|string|max:50',
             'jobs.*.salary_range' => 'nullable|string|max:255',
         ]);
 
         foreach ($request->jobs as $jobData) {
+            $mode = $jobData['salary_mode'] ?? 'range';
+            $min = isset($jobData['salary_min']) && $jobData['salary_min'] !== '' ? (float) $jobData['salary_min'] : null;
+            $max = isset($jobData['salary_max']) && $jobData['salary_max'] !== '' ? (float) $jobData['salary_max'] : null;
+            $rate = $jobData['salary_rate'] ?? 'per month';
+
+            // Auto-generate formatted salary_range for backwards-compatibility
+            $salaryRange = $jobData['salary_range'] ?? null;
+            if ($mode === 'range' && $min > 0 && $max > 0) {
+                $salaryRange = '₹' . number_format($min) . ' – ₹' . number_format($max) . ' ' . $rate;
+            } elseif ($mode === 'starting_amount' && $min > 0) {
+                $salaryRange = 'From ₹' . number_format($min) . ' ' . $rate;
+            } elseif ($mode === 'maximum_amount' && $max > 0) {
+                $salaryRange = 'Up to ₹' . number_format($max) . ' ' . $rate;
+            } elseif ($mode === 'exact_amount' && $min > 0) {
+                $salaryRange = '₹' . number_format($min) . ' ' . $rate;
+            }
+
             $job = JobPost::create([
                 'user_id' => auth()->id(),
                 'school_name' => $request->school_name,
@@ -70,7 +91,11 @@ class JobController extends Controller
                 'qualification_id' => $jobData['qualification_id'],
                 'state_id' => $jobData['state_id'],
                 'city_id' => $jobData['city_id'],
-                'salary_range' => $jobData['salary_range'] ?? null,
+                'salary_mode' => $mode,
+                'salary_min' => $min,
+                'salary_max' => $max,
+                'salary_rate' => $rate,
+                'salary_range' => $salaryRange,
                 'status' => 'pending',
             ]);
 
@@ -149,12 +174,39 @@ class JobController extends Controller
             'qualification_id' => 'required|exists:qualifications,id',
             'state_id' => 'required|exists:states,id',
             'city_id' => 'required|exists:cities,id',
+            'salary_mode' => 'nullable|string|in:range,starting_amount,maximum_amount,exact_amount',
+            'salary_min' => 'nullable|numeric|min:0',
+            'salary_max' => 'nullable|numeric|min:0',
+            'salary_rate' => 'nullable|string|max:50',
             'salary_range' => 'nullable|string|max:255',
         ]);
 
-        $job->update($request->only([
-            'title', 'description', 'category_id', 'subject_id', 'qualification_id', 'state_id', 'city_id', 'salary_range'
-        ]));
+        $mode = $request->input('salary_mode', 'range');
+        $min = $request->filled('salary_min') ? (float) $request->input('salary_min') : null;
+        $max = $request->filled('salary_max') ? (float) $request->input('salary_max') : null;
+        $rate = $request->input('salary_rate', 'per month');
+
+        $salaryRange = $request->input('salary_range');
+        if ($mode === 'range' && $min > 0 && $max > 0) {
+            $salaryRange = '₹' . number_format($min) . ' – ₹' . number_format($max) . ' ' . $rate;
+        } elseif ($mode === 'starting_amount' && $min > 0) {
+            $salaryRange = 'From ₹' . number_format($min) . ' ' . $rate;
+        } elseif ($mode === 'maximum_amount' && $max > 0) {
+            $salaryRange = 'Up to ₹' . number_format($max) . ' ' . $rate;
+        } elseif ($mode === 'exact_amount' && $min > 0) {
+            $salaryRange = '₹' . number_format($min) . ' ' . $rate;
+        }
+
+        $updateData = $request->only([
+            'title', 'description', 'category_id', 'subject_id', 'qualification_id', 'state_id', 'city_id'
+        ]);
+        $updateData['salary_mode'] = $mode;
+        $updateData['salary_min'] = $min;
+        $updateData['salary_max'] = $max;
+        $updateData['salary_rate'] = $rate;
+        $updateData['salary_range'] = $salaryRange;
+
+        $job->update($updateData);
 
         return redirect()->route('employer.jobs.index')->with('success', 'Job updated successfully.');
     }

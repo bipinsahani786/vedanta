@@ -128,9 +128,62 @@
                                         </template>
                                     </select>
                                 </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Salary Range (Monthly)</label>
-                                    <input type="text" :name="`jobs[${index}][salary_range]`" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors" placeholder="e.g. 40,000 - 60,000">
+                                <!-- Salary Configuration (Interactive Section matching Reference Image 5) -->
+                                <div class="md:col-span-2 bg-secondary-bg/50 border border-card-border rounded-2xl p-6 shadow-inner">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <label class="text-xs font-bold text-text-dark/80 uppercase tracking-wider flex items-center gap-2">
+                                            <i class="fas fa-indian-rupee-sign text-accent-blue"></i> Salary & Compensation (Reference Image 5)
+                                        </label>
+                                        <div class="px-3 py-1 rounded-full bg-accent-blue/10 border border-accent-blue/30 text-accent-blue text-xs font-bold"
+                                             x-text="formatSalaryPreview(job)">
+                                            Preview: ₹40,000 – ₹55,000 per month
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                                        <!-- Show pay by -->
+                                        <div>
+                                            <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Show pay by</label>
+                                            <select :name="`jobs[${index}][salary_mode]`" x-model="job.salary_mode" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue font-semibold transition-all text-sm">
+                                                <option value="range">Range</option>
+                                                <option value="starting_amount">Starting amount</option>
+                                                <option value="maximum_amount">Maximum amount</option>
+                                                <option value="exact_amount">Exact amount</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Minimum / Amount -->
+                                        <div x-show="job.salary_mode !== 'maximum_amount'">
+                                            <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2"
+                                                   x-text="job.salary_mode === 'starting_amount' ? 'Starting Amount' : (job.salary_mode === 'exact_amount' ? 'Exact Amount' : 'Minimum')"></label>
+                                            <div class="relative">
+                                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-dark/60 font-bold">₹</span>
+                                                <input type="number" step="100" :name="`jobs[${index}][salary_min]`" x-model="job.salary_min" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all font-semibold text-sm" placeholder="e.g. 40,000">
+                                            </div>
+                                        </div>
+
+                                        <!-- Maximum -->
+                                        <div x-show="job.salary_mode === 'range' || job.salary_mode === 'maximum_amount'">
+                                            <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2"
+                                                   x-text="job.salary_mode === 'maximum_amount' ? 'Maximum Amount' : 'Maximum'"></label>
+                                            <div class="relative">
+                                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-dark/60 font-bold">₹</span>
+                                                <input type="number" step="100" :name="`jobs[${index}][salary_max]`" x-model="job.salary_max" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all font-semibold text-sm" placeholder="e.g. 55,000">
+                                            </div>
+                                        </div>
+
+                                        <!-- Rate -->
+                                        <div>
+                                            <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Rate</label>
+                                            <select :name="`jobs[${index}][salary_rate]`" x-model="job.salary_rate" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue font-semibold transition-all text-sm">
+                                                <option value="per month">per month</option>
+                                                <option value="per year">per year</option>
+                                                <option value="per hour">per hour</option>
+                                                <option value="per week">per week</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" :name="`jobs[${index}][salary_range]`" :value="computeSalaryRange(job)">
                                 </div>
                             </div>
                             
@@ -160,10 +213,82 @@
 <script>
     function jobRepeater() {
         return {
-            jobs: [ { id: Date.now(), state_id: '', cities: [], category_id: '', subject_id: '', subjects: [] } ],
+            jobs: [
+                {
+                    id: Date.now(),
+                    state_id: '',
+                    cities: [],
+                    category_id: '',
+                    subject_id: '',
+                    subjects: [],
+                    salary_mode: 'range',
+                    salary_min: 40000,
+                    salary_max: 55000,
+                    salary_rate: 'per month'
+                }
+            ],
             
             addJob() {
-                this.jobs.push({ id: Date.now(), state_id: '', cities: [], category_id: '', subject_id: '', subjects: [] });
+                this.jobs.push({
+                    id: Date.now() + Math.random(),
+                    state_id: '',
+                    cities: [],
+                    category_id: '',
+                    subject_id: '',
+                    subjects: [],
+                    salary_mode: 'range',
+                    salary_min: 40000,
+                    salary_max: 55000,
+                    salary_rate: 'per month'
+                });
+            },
+
+            formatSalaryPreview(job) {
+                const minVal = parseFloat(job.salary_min) || 0;
+                const maxVal = parseFloat(job.salary_max) || 0;
+                const rate = job.salary_rate || 'per month';
+                const mode = job.salary_mode || 'range';
+
+                const fmt = (val) => {
+                    const num = parseFloat(val);
+                    if (isNaN(num)) return '0';
+                    return num.toLocaleString('en-IN');
+                };
+
+                if (mode === 'range') {
+                    return 'Preview: ₹' + fmt(minVal) + ' – ₹' + fmt(maxVal) + ' ' + rate;
+                } else if (mode === 'starting_amount') {
+                    return 'Preview: From ₹' + fmt(minVal) + ' ' + rate;
+                } else if (mode === 'maximum_amount') {
+                    return 'Preview: Up to ₹' + fmt(maxVal) + ' ' + rate;
+                } else if (mode === 'exact_amount') {
+                    return 'Preview: ₹' + fmt(minVal) + ' ' + rate;
+                }
+                return 'Preview: ₹' + fmt(minVal) + ' – ₹' + fmt(maxVal) + ' ' + rate;
+            },
+
+            computeSalaryRange(job) {
+                const minVal = parseFloat(job.salary_min) || 0;
+                const maxVal = parseFloat(job.salary_max) || 0;
+                const rate = job.salary_rate || 'per month';
+                const mode = job.salary_mode || 'range';
+
+                const fmt = (val) => {
+                    const num = parseFloat(val);
+                    if (isNaN(num)) return '0';
+                    return num.toLocaleString('en-IN');
+                };
+
+                if (mode === 'range' && minVal > 0 && maxVal > 0) {
+                    return '₹' + fmt(minVal) + ' – ₹' + fmt(maxVal) + ' ' + rate;
+                } else if (mode === 'starting_amount' && minVal > 0) {
+                    return 'From ₹' + fmt(minVal) + ' ' + rate;
+                } else if (mode === 'maximum_amount' && maxVal > 0) {
+                    return 'Up to ₹' + fmt(maxVal) + ' ' + rate;
+                } else if (mode === 'exact_amount' && minVal > 0) {
+                    return '₹' + fmt(minVal) + ' ' + rate;
+                }
+                return '₹' + fmt(minVal) + ' – ₹' + fmt(maxVal) + ' ' + rate;
             },
             
             fetchSubjects(job) {

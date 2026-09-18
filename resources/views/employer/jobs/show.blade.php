@@ -48,7 +48,7 @@
             <div class="p-6 text-center">
                 <div class="w-10 h-10 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center mx-auto mb-3 text-lg"><i class="fas fa-rupee-sign"></i></div>
                 <h4 class="text-xs font-bold text-text-dark/50 uppercase tracking-wider mb-1">Salary Range</h4>
-                <p class="font-semibold text-text-main">{{ $job->salary_range ?? 'Not specified' }}</p>
+                <p class="font-semibold text-text-main">{{ $job->formatted_salary }}</p>
             </div>
         </div>
 

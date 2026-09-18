@@ -105,9 +105,74 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-bold text-text-dark/70 mb-2 uppercase tracking-wider">Salary Range (Monthly)</label>
-                                <input type="text" name="salary_range" value="{{ old('salary_range', $job->salary_range) }}" class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-accent-yellow transition-colors">
+                            @php
+                                // Intelligently parse min and max if salary_min/salary_max are null but salary_range exists
+                                $initMin = $job->salary_min;
+                                $initMax = $job->salary_max;
+                                if (is_null($initMin) && is_null($initMax) && !empty($job->salary_range)) {
+                                    preg_match_all('/\d+/', str_replace(',', '', $job->salary_range), $numMatches);
+                                    if (!empty($numMatches[0])) {
+                                        $initMin = $numMatches[0][0] ?? null;
+                                        $initMax = $numMatches[0][1] ?? null;
+                                    }
+                                }
+                                $initMin = $initMin !== null ? (int)$initMin : 40000;
+                                $initMax = $initMax !== null ? (int)$initMax : 55000;
+                            @endphp
+
+                            <!-- Salary Configuration (Interactive Section matching Reference Image 5) -->
+                            <div class="md:col-span-2 bg-secondary-bg/50 border border-card-border rounded-2xl p-6 shadow-inner">
+                                <div class="flex items-center justify-between mb-4">
+                                    <label class="text-xs font-bold text-text-dark/80 uppercase tracking-wider flex items-center gap-2">
+                                        <i class="fas fa-indian-rupee-sign text-accent-blue"></i> Salary & Compensation (Reference Image 5)
+                                    </label>
+                                    <div id="salary-preview-badge" class="px-3 py-1 rounded-full bg-accent-blue/10 border border-accent-blue/30 text-accent-blue text-xs font-bold">
+                                        Preview: {{ $job->formatted_salary }}
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                                    <!-- Show pay by -->
+                                    <div>
+                                        <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Show pay by</label>
+                                        <select name="salary_mode" id="salary_mode" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue font-semibold transition-all text-sm">
+                                            <option value="range" {{ old('salary_mode', $job->salary_mode ?? 'range') == 'range' ? 'selected' : '' }}>Range</option>
+                                            <option value="starting_amount" {{ old('salary_mode', $job->salary_mode) == 'starting_amount' ? 'selected' : '' }}>Starting amount</option>
+                                            <option value="maximum_amount" {{ old('salary_mode', $job->salary_mode) == 'maximum_amount' ? 'selected' : '' }}>Maximum amount</option>
+                                            <option value="exact_amount" {{ old('salary_mode', $job->salary_mode) == 'exact_amount' ? 'selected' : '' }}>Exact amount</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Minimum / Amount -->
+                                    <div id="min_salary_wrapper">
+                                        <label id="min_salary_label" class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Minimum</label>
+                                        <div class="relative">
+                                            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-dark/60 font-bold">₹</span>
+                                            <input type="number" step="100" name="salary_min" id="salary_min" value="{{ old('salary_min', $initMin) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all font-semibold text-sm" placeholder="e.g. 40,000">
+                                        </div>
+                                    </div>
+
+                                    <!-- Maximum -->
+                                    <div id="max_salary_wrapper">
+                                        <label id="max_salary_label" class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Maximum</label>
+                                        <div class="relative">
+                                            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-dark/60 font-bold">₹</span>
+                                            <input type="number" step="100" name="salary_max" id="salary_max" value="{{ old('salary_max', $initMax) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all font-semibold text-sm" placeholder="e.g. 55,000">
+                                        </div>
+                                    </div>
+
+                                    <!-- Rate -->
+                                    <div>
+                                        <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Rate</label>
+                                        <select name="salary_rate" id="salary_rate" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue font-semibold transition-all text-sm">
+                                            <option value="per month" {{ old('salary_rate', $job->salary_rate ?? 'per month') == 'per month' ? 'selected' : '' }}>per month</option>
+                                            <option value="per year" {{ old('salary_rate', $job->salary_rate) == 'per year' ? 'selected' : '' }}>per year</option>
+                                            <option value="per hour" {{ old('salary_rate', $job->salary_rate) == 'per hour' ? 'selected' : '' }}>per hour</option>
+                                            <option value="per week" {{ old('salary_rate', $job->salary_rate) == 'per week' ? 'selected' : '' }}>per week</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="salary_range" id="salary_range" value="{{ old('salary_range', $job->salary_range) }}">
                             </div>
                         </div>
                         
@@ -177,5 +242,69 @@
             citySelect.innerHTML = '<option value="">Select City</option>';
         }
     });
+
+    // Salary Configuration Logic (Matching Reference Image 5)
+    (function() {
+        const modeSelect = document.getElementById('salary_mode');
+        const minWrapper = document.getElementById('min_salary_wrapper');
+        const maxWrapper = document.getElementById('max_salary_wrapper');
+        const minLabel = document.getElementById('min_salary_label');
+        const maxLabel = document.getElementById('max_salary_label');
+        const minInput = document.getElementById('salary_min');
+        const maxInput = document.getElementById('salary_max');
+        const rateSelect = document.getElementById('salary_rate');
+        const previewBadge = document.getElementById('salary-preview-badge');
+        const rangeHidden = document.getElementById('salary_range');
+
+        if (!modeSelect || !minInput || !maxInput || !rateSelect || !previewBadge) return;
+
+        function formatCurrency(val) {
+            const num = parseFloat(val);
+            if (isNaN(num)) return '0';
+            return num.toLocaleString('en-IN');
+        }
+
+        function updateSalaryFields() {
+            const mode = modeSelect.value;
+            const rate = rateSelect.value || 'per month';
+            const minVal = parseFloat(minInput.value) || 0;
+            const maxVal = parseFloat(maxInput.value) || 0;
+
+            if (mode === 'range') {
+                minWrapper.style.display = 'block';
+                maxWrapper.style.display = 'block';
+                minLabel.textContent = 'Minimum';
+                maxLabel.textContent = 'Maximum';
+                previewBadge.textContent = 'Preview: ₹' + formatCurrency(minVal) + ' – ₹' + formatCurrency(maxVal) + ' ' + rate;
+                if (rangeHidden) rangeHidden.value = '₹' + formatCurrency(minVal) + ' – ₹' + formatCurrency(maxVal) + ' ' + rate;
+            } else if (mode === 'starting_amount') {
+                minWrapper.style.display = 'block';
+                maxWrapper.style.display = 'none';
+                minLabel.textContent = 'Starting Amount';
+                previewBadge.textContent = 'Preview: From ₹' + formatCurrency(minVal) + ' ' + rate;
+                if (rangeHidden) rangeHidden.value = 'From ₹' + formatCurrency(minVal) + ' ' + rate;
+            } else if (mode === 'maximum_amount') {
+                minWrapper.style.display = 'none';
+                maxWrapper.style.display = 'block';
+                maxLabel.textContent = 'Maximum Amount';
+                previewBadge.textContent = 'Preview: Up to ₹' + formatCurrency(maxVal) + ' ' + rate;
+                if (rangeHidden) rangeHidden.value = 'Up to ₹' + formatCurrency(maxVal) + ' ' + rate;
+            } else if (mode === 'exact_amount') {
+                minWrapper.style.display = 'block';
+                maxWrapper.style.display = 'none';
+                minLabel.textContent = 'Exact Amount';
+                previewBadge.textContent = 'Preview: ₹' + formatCurrency(minVal) + ' ' + rate;
+                if (rangeHidden) rangeHidden.value = '₹' + formatCurrency(minVal) + ' ' + rate;
+            }
+        }
+
+        modeSelect.addEventListener('change', updateSalaryFields);
+        rateSelect.addEventListener('change', updateSalaryFields);
+        minInput.addEventListener('input', updateSalaryFields);
+        maxInput.addEventListener('input', updateSalaryFields);
+
+        // Initial setup
+        updateSalaryFields();
+    })();
 </script>
 @endpush
