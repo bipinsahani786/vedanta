@@ -338,12 +338,20 @@ class CrmController extends Controller
                 $q->where('status', 'hired');
             }]);
 
-        // Search text
-        if ($search = $request->input('search')) {
+        // Search text (Name, Email, Phone, Candidate ID / VPA ID)
+        if ($search = trim($request->input('search', ''))) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhereHas('profile', function($pq) use ($search) {
+                      $pq->where('vpa_id', 'like', "%{$search}%");
+                  });
+
+                $cleanNumeric = ltrim($search, '#');
+                if (is_numeric($cleanNumeric)) {
+                    $q->orWhere('users.id', (int) $cleanNumeric);
+                }
             });
         }
 

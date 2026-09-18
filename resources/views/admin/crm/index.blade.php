@@ -55,7 +55,7 @@
     <form action="{{ route('admin.crm.index') }}" method="GET" class="space-y-4">
         <div class="flex items-center relative">
             <i class="fas fa-search absolute left-3 text-text-dark/40 text-sm"></i>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, phone..." 
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, phone, candidate ID..." 
                    class="w-full pl-9 pr-4 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
             @if(request()->anyFilled(['search', 'subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability', 'plan_amount']))
                 <a href="{{ route('admin.crm.index') }}" class="absolute right-3 text-text-dark/40 hover:text-red-400 transition-colors text-sm font-bold flex items-center gap-1">
