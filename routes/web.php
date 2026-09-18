@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/jobs', [\App\Http\Controllers\HomeController::class, 'jobs'])->name('jobs');
 Route::get('/jobs/{job}', [\App\Http\Controllers\JobController::class, 'show'])->name('jobs.show');
+Route::get('/api/jobs/{job}/check-access', [\App\Http\Controllers\JobController::class, 'checkSchoolAccess'])->name('api.jobs.check-access');
 Route::get('/category/{id}/jobs', [\App\Http\Controllers\HomeController::class, 'categoryJobs'])->name('category.jobs');
 
 // Dynamic Subjects and Specializations

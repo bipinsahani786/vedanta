@@ -71,63 +71,180 @@
     <!-- Decorative Pattern -->
     <div class="absolute inset-0 z-0 opacity-[0.02]" style="background-image: radial-gradient(#000000 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
 
-    <!-- Job List -->
-    <div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
-        @forelse($jobs as $job)
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between hover:border-accent-blue/50 hover:shadow-xl transition-all duration-300 group reveal">
-            <div>
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-14 h-14 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($job->school_name) }}&background=random" class="rounded">
+    <!-- Job List (Reference Image 1 & 4) -->
+    <div class="w-full relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @forelse($jobs as $job)
+            @php
+                $isJobUnlocked = $job->canUserViewProtectedDetails();
+            @endphp
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:border-[#129aef]/60 hover:shadow-xl transition-all duration-300 group reveal relative">
+                <div>
+                    <!-- Card Top Meta: Job Code, Status, Bookmark -->
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-md bg-blue-50 text-[#129aef] text-[11px] font-black tracking-wider">
+                                {{ $job->job_code }}
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200/50">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Actively Hiring
+                            </span>
+                        </div>
+                        
+                        <a href="{{ route('jobs.show', $job->id) }}" class="text-slate-400 hover:text-amber-500 transition-colors" title="Save Job">
+                            <i class="far fa-bookmark text-sm"></i>
+                        </a>
                     </div>
-                    <span class="bg-blue-50 text-accent-blue px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">{{ $job->category?->name ?? 'N/A' }}</span>
-                </div>
-                
-                <h3 class="text-lg font-bold text-slate-900 mb-1 group-hover:text-accent-blue transition-colors line-clamp-1">
-                    <a href="{{ route('jobs.show', $job->id) }}">{{ $job->title ?? 'Job Requirement' }}</a>
-                </h3>
-                <p class="text-sm text-slate-500 font-medium mb-3 line-clamp-1">{{ $job->school_name }} • {{ $job->city?->name ?? 'N/A' }}, {{ $job->state?->name ?? 'N/A' }}</p>
-                
-                <p class="text-sm text-slate-600 leading-relaxed mb-5 line-clamp-3">
-                    {{ Str::limit(strip_tags($job->description), 100) }}
-                </p>
-                
-                <div class="flex flex-wrap items-center gap-2 mb-6">
-                    <span class="bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg text-[11px] font-bold text-slate-600 flex items-center gap-1.5 transition-colors">
-                        <i class="fas fa-book text-accent-blue"></i> {{ Str::limit($job->subject?->name ?? 'N/A', 15) }}
-                    </span>
-                    <span class="bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg text-[11px] font-bold text-slate-600 flex items-center gap-1.5 transition-colors">
-                        <i class="fas fa-graduation-cap text-accent-blue"></i> {{ Str::limit($job->qualification?->name ?? 'N/A', 15) }}
-                    </span>
-                </div>
-            </div>
-            
-            <div>
-                <div class="flex justify-between items-center border-t border-slate-100 pt-4">
-                    <div class="flex flex-col">
-                        @if($job->salary_range)
-                        <span class="text-sm font-bold text-slate-700"><i class="fas fa-rupee-sign text-slate-400"></i> {{ $job->salary_range }}</span>
+                    
+                    <!-- Job Title -->
+                    <h3 class="text-lg font-black text-slate-900 mb-1.5 group-hover:text-[#129aef] transition-colors line-clamp-1">
+                        <a href="{{ route('jobs.show', $job->id) }}">{{ $job->title ?? 'Job Requirement' }}</a>
+                    </h3>
+
+                    <!-- School / Confidential Institution & Location (Masked if not unlocked) -->
+                    <div class="text-xs text-slate-500 font-semibold mb-3 flex items-center gap-2">
+                        @if($isJobUnlocked)
+                            <span class="text-slate-800 font-bold line-clamp-1">{{ $job->school_name }}</span>
+                            <span>•</span>
+                            <span class="text-rose-500 shrink-0"><i class="fas fa-map-marker-alt text-[10px]"></i> {{ $job->city?->name }}, {{ $job->state?->name }}</span>
+                        @else
+                            <span class="text-slate-700 font-semibold">Reputed School</span>
+                            <span>•</span>
+                            <span class="text-slate-500 shrink-0"><i class="fas fa-map-marker-alt text-[10px]"></i> {{ $job->state?->name ?? 'India' }}</span>
                         @endif
-                        <span class="text-[10px] text-slate-400 font-medium mt-1">Posted {{ $job->created_at->diffForHumans() }}</span>
                     </div>
-                    <a href="{{ route('jobs.show', $job->id) }}" class="text-white bg-accent-blue px-4 py-2 rounded-lg font-bold text-xs hover:bg-blue-600 transition-colors shadow-glow-blue flex items-center gap-2">Apply</a>
+                    
+                    <!-- Tags: Category, Subject, Qualification -->
+                    <div class="flex flex-wrap items-center gap-1.5 mb-3.5">
+                        @if($job->category)
+                            <span class="bg-blue-50 text-[#129aef] border border-blue-100 px-2 py-0.5 rounded-md text-[10px] font-extrabold">
+                                {{ $job->category->name }}
+                            </span>
+                        @endif
+                        @if($job->subject)
+                            <span class="bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded-md text-[10px] font-extrabold">
+                                {{ $job->subject->name }}
+                            </span>
+                        @endif
+                        @if($job->qualification)
+                            <span class="bg-purple-50 text-purple-700 border border-purple-100 px-2 py-0.5 rounded-md text-[10px] font-extrabold">
+                                {{ $job->qualification->name }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <!-- Description preview -->
+                    <p class="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-2">
+                        {{ Str::limit(strip_tags($job->description), 110) ?: 'Seeking dedicated educators for this position. Candidate should have relevant qualification and experience.' }}
+                    </p>
+
+                    <!-- Salary Section (Formatted) -->
+                    <div class="mb-4">
+                        <span class="text-base font-black text-[#040e2d]">
+                            {{ $job->formatted_salary }}
+                        </span>
+                    </div>
+
+                    <!-- Protected Details Banner (if locked - Image 4) -->
+                    @if(!$isJobUnlocked)
+                    <div class="trigger-school-lock-modal mb-4 p-2.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/70 border border-blue-200/60 text-[#129aef] text-xs font-bold flex items-center justify-between cursor-pointer transition-all">
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-lock text-xs"></i>
+                            <span>Login to view school name & exact location</span>
+                        </span>
+                        <i class="fas fa-chevron-right text-[10px]"></i>
+                    </div>
+                    @endif
+                </div>
+                
+                <!-- Bottom Action Row (Image 1) -->
+                <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+                    @if($isJobUnlocked)
+                        <a href="{{ route('jobs.show', $job->id) }}" class="flex-1 py-2.5 px-4 bg-[#129aef] hover:bg-[#0d85d4] text-white rounded-xl font-extrabold text-xs text-center transition-all shadow-sm">
+                            Apply with Vedanta
+                        </a>
+                    @else
+                        <button type="button" class="trigger-school-lock-modal flex-1 py-2.5 px-4 bg-[#129aef] hover:bg-[#0d85d4] text-white rounded-xl font-extrabold text-xs text-center transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fas fa-lock text-[11px]"></i>
+                            <span>Apply with Vedanta</span>
+                        </button>
+                    @endif
+
+                    <button type="button" onclick="navigator.clipboard.writeText('{{ route('jobs.show', $job->id) }}'); alert('Job link copied!');" class="py-2.5 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer" title="Share Job">
+                        <i class="fas fa-share-alt text-[#129aef]"></i>
+                        <span>Share</span>
+                    </button>
                 </div>
             </div>
+            @empty
+            <div class="col-span-full text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-slate-300 shadow-sm text-2xl mx-auto mb-4"><i class="fas fa-briefcase"></i></div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">No Active Jobs</h3>
+                <p class="text-slate-500 text-sm max-w-md mx-auto">We currently don't have any job openings that match your exact criteria. Please try adjusting your filters.</p>
+            </div>
+            @endforelse
         </div>
-        @empty
-        <div class="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
-            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-slate-300 shadow-sm text-2xl mx-auto mb-4"><i class="fas fa-briefcase"></i></div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">No Active Jobs</h3>
-            <p class="text-slate-500 text-sm max-w-md mx-auto">We currently don't have any job openings that match your exact criteria. Please try adjusting your filters.</p>
-        </div>
-        @endforelse
 
         <div class="mt-12">
             {{ $jobs->links() }}
         </div>
     </div>
 </div>
-@include('partials.job-registration-popup')
+
+<!-- Bottom Credibility & Trust Bar (Reference Image 1) -->
+<div class="bg-white border-t border-b border-slate-100 py-6 px-4 sm:px-6 lg:px-[5%]">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-around gap-6">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-blue-50 text-[#129aef] flex items-center justify-center text-lg">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div>
+                <span class="block text-base font-black text-slate-900 leading-none">10,000+</span>
+                <span class="text-xs text-slate-500 font-medium">Registered Educators</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                <i class="fas fa-school"></i>
+            </div>
+            <div>
+                <span class="block text-base font-black text-slate-900 leading-none">1,500+</span>
+                <span class="text-xs text-slate-500 font-medium">Partner Schools</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                <i class="fas fa-briefcase"></i>
+            </div>
+            <div>
+                <span class="block text-base font-black text-slate-900 leading-none">500+</span>
+                <span class="text-xs text-slate-500 font-medium">Active Vacancies</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+                <span class="block text-base font-black text-slate-900 leading-none">100%</span>
+                <span class="text-xs text-slate-500 font-medium">Verified Opportunities</span>
+            </div>
+        </div>
+
+        <div class="hidden xl:block">
+            <span class="text-sm font-black text-[#129aef] italic" style="font-family: Georgia, serif;">
+                Better Teachers, Brighter Futures
+            </span>
+        </div>
+    </div>
+</div>
+
+@include('partials.school-details-modal')
+
 
 <script>
     (function() {

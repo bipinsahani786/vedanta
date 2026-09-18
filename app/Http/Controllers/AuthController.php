@@ -30,6 +30,24 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
+            if ($request->wantsJson() || $request->ajax()) {
+                $isRegistered = $user->canViewJobProtectedDetails();
+                return response()->json([
+                    'success' => true,
+                    'is_registered' => $isRegistered,
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'role' => $user->role,
+                    ],
+                    'redirect' => $request->input('return_to', $user->role === 'candidate' ? ($isRegistered ? '/candidate/dashboard' : route('candidate.wizard')) : '/admin/dashboard'),
+                ]);
+            }
+
+            if ($request->filled('return_to')) {
+                return redirect($request->input('return_to'));
+            }
+
             if ($user->role === 'admin') {
                 return redirect()->intended('/admin/dashboard');
             } elseif ($user->role === 'employer') {
@@ -38,6 +56,13 @@ class AuthController extends Controller
                 session()->flash('candidate_just_logged_in', true);
                 return redirect()->intended('/candidate/dashboard');
             }
+        }
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The provided credentials do not match our records.'
+            ], 422);
         }
 
         return back()->withErrors([

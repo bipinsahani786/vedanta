@@ -393,32 +393,75 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             @forelse($recentJobs as $job)
+            @php
+                $isJobUnlocked = $job->canUserViewProtectedDetails();
+            @endphp
             <a href="{{ route('jobs.show', $job->id) }}"
-                class="block bg-white border border-slate-200 rounded-2xl p-7 text-slate-800 transition-all duration-300 hover:-translate-y-2 shadow-lg hover:shadow-[0_20px_40px_rgba(18,154,239,0.15)] hover:border-[#129aef]/30 flex flex-col group reveal cursor-pointer">
-                <h3 class="text-xl font-bold mb-3 text-slate-900 group-hover:text-[#129aef] transition-colors">{{ $job->title ?? 'Job Requirement' }}</h3>
-                <p class="text-xs text-slate-500 mb-4 flex items-center gap-3">
-                    <span class="text-red-400"><i class="fas fa-map-marker-alt mr-0.5"></i> {{ $job->city?->name ?? 'N/A' }}, {{ $job->state?->name ?? 'N/A' }}</span>
-                    <span><i class="far fa-calendar-alt mr-0.5"></i> {{ $job->created_at->format('d M Y') }}</span>
-                </p>
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
-                        <i class="fas fa-folder-open text-[9px]"></i> {{ $job->category?->name ?? 'N/A' }}
-                    </span>
-                    <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
-                        <i class="fas fa-book text-[9px]"></i> {{ $job->subject?->name ?? 'N/A' }}
-                    </span>
-                    <span class="bg-accent-blue/8 text-accent-blue px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5">
-                        <i class="fas fa-graduation-cap text-[9px]"></i> {{ $job->qualification?->name ?? 'N/A' }}
-                    </span>
+                class="block bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 text-slate-800 transition-all duration-300 hover:-translate-y-1.5 shadow-lg hover:shadow-[0_20px_40px_rgba(18,154,239,0.15)] hover:border-[#129aef]/40 flex flex-col justify-between group reveal cursor-pointer relative">
+                
+                <div>
+                    <!-- Top ID & Status Badge -->
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <span class="px-2.5 py-0.5 rounded-md bg-blue-50 text-[#129aef] text-[11px] font-black tracking-wider">
+                            {{ $job->job_code }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200/50">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            Actively Hiring
+                        </span>
+                    </div>
+
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 text-slate-900 group-hover:text-[#129aef] transition-colors line-clamp-1">
+                        {{ $job->title ?? 'Job Requirement' }}
+                    </h3>
+
+                    <!-- Location & Date -->
+                    <p class="text-xs text-slate-500 mb-3.5 flex items-center gap-3 font-medium">
+                        <span class="text-slate-600 flex items-center gap-1">
+                            <i class="fas fa-map-marker-alt text-rose-500 text-[11px]"></i> 
+                            {{ $job->getMaskedLocation() }}
+                        </span>
+                        <span>•</span>
+                        <span><i class="far fa-calendar-alt mr-0.5"></i> {{ $job->created_at->format('d M Y') }}</span>
+                    </p>
+
+                    <!-- Criteria Pills -->
+                    <div class="flex flex-wrap gap-1.5 mb-4">
+                        @if($job->category)
+                        <span class="bg-blue-50 text-[#129aef] px-2.5 py-0.5 rounded-md text-[11px] font-bold">
+                            {{ $job->category->name }}
+                        </span>
+                        @endif
+                        @if($job->subject)
+                        <span class="bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-md text-[11px] font-bold">
+                            {{ $job->subject->name }}
+                        </span>
+                        @endif
+                        @if($job->qualification)
+                        <span class="bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-md text-[11px] font-bold">
+                            {{ $job->qualification->name }}
+                        </span>
+                        @endif
+                    </div>
+
+                    <p class="text-xs sm:text-[13px] text-slate-600 leading-relaxed mb-4 line-clamp-2">
+                        {{ Str::limit(strip_tags($job->description), 110) ?: 'Explore verified opportunities from top schools across India with Vedanta Placement Agency.' }}
+                    </p>
                 </div>
-                <p class="text-[13px] text-slate-600 leading-relaxed mb-6 flex-grow">
-                    {{ Str::limit(strip_tags($job->description), 100) }}
-                </p>
-                <div class="text-accent-blue font-semibold text-[13px] inline-flex items-center gap-2 self-start group-hover:gap-3 transition-all mt-auto">
-                    View Details 
-                    <span class="bg-accent-yellow text-slate-900 w-5 h-5 rounded-full flex items-center justify-center text-[9px] transition-transform group-hover:scale-110">
-                        <i class="fas fa-chevron-right"></i>
-                    </span>
+
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto">
+                    <div>
+                        <span class="text-sm sm:text-base font-black text-[#040e2d]">
+                            {{ $job->formatted_salary }}
+                        </span>
+                    </div>
+
+                    <div class="text-[#129aef] font-extrabold text-xs inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                        <span>View Details</span>
+                        <span class="w-5 h-5 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center text-[8px] font-black transition-transform group-hover:scale-110">
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </div>
                 </div>
             </a>
             @empty
@@ -427,6 +470,7 @@
             </div>
             @endforelse
         </div>
+
 
         <div class="text-center mt-12 reveal">
             <a href="{{ route('jobs') }}" class="inline-flex items-center justify-center gap-3 bg-[#129aef] text-white font-bold text-[15px] px-8 py-3.5 rounded-full hover:bg-[#031b4e] hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl group">
@@ -1091,6 +1135,7 @@
     </section>
 
     @include('partials.job-registration-popup')
+    @include('partials.school-details-modal')
 
     @endsection
 

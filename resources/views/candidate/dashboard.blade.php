@@ -450,7 +450,7 @@
                                             <h4 class="text-xs sm:text-sm font-bold text-white group-hover:text-accent-blue transition-colors line-clamp-1">
                                                 {{ $job->title }}
                                             </h4>
-                                            <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{{ $job->school_name }}</p>
+                                            <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{{ $job->getMaskedSchoolName() }}</p>
                                         </div>
                                     </div>
                                     <button type="button" 
@@ -490,10 +490,10 @@
                                 <div class="space-y-1.5 text-xs text-slate-300 mb-3">
                                     <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
                                         <i class="fas fa-map-marker-alt text-amber-400 text-xs w-3 text-center"></i>
-                                        <span>{{ $job->city->name ?? 'Bihar' }}, {{ $job->state->name ?? 'India' }}</span>
+                                        <span>{{ $job->getMaskedLocation() }}</span>
                                     </div>
                                     <div class="text-xs font-bold text-white flex items-center gap-1">
-                                        <span>₹{{ $job->salary_range ?? '25,000 - 35,000 / Month' }}</span>
+                                        <span>{{ $job->formatted_salary }}</span>
                                     </div>
                                 </div>
 

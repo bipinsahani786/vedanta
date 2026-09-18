@@ -230,18 +230,44 @@ class JobController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'school_name' => 'nullable|string|max:255',
+            'school_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
             'qualification_id' => 'required|exists:qualifications,id',
+            'experience' => 'nullable|string|max:100',
+            'openings' => 'nullable|string|max:50',
             'state_id' => 'required|exists:states,id',
             'city_id' => 'required|exists:cities,id',
-            'salary_range' => 'nullable|string|max:255',
+            'salary_mode' => 'required|in:range,starting_amount,maximum_amount,exact_amount',
+            'salary_min' => 'nullable|numeric|min:0',
+            'salary_max' => 'nullable|numeric|min:0',
+            'salary_rate' => 'nullable|string|max:50',
             'description' => 'nullable|string',
             'status' => 'required|in:pending,approved,rejected',
         ]);
+
+        if ($request->hasFile('school_image')) {
+            $validated['school_image'] = $request->file('school_image')->store('schools', 'public');
+        }
+
+        // Auto-generate formatted salary_range for backwards-compatibility
+        $rate = $request->input('salary_rate', 'per month');
+        $min = (float) $request->input('salary_min', 0);
+        $max = (float) $request->input('salary_max', 0);
+        $mode = $request->input('salary_mode', 'range');
+
+        if ($mode === 'range' && $min > 0 && $max > 0) {
+            $validated['salary_range'] = '₹' . number_format($min) . ' – ₹' . number_format($max) . ' ' . $rate;
+        } elseif ($mode === 'starting_amount' && $min > 0) {
+            $validated['salary_range'] = 'From ₹' . number_format($min) . ' ' . $rate;
+        } elseif ($mode === 'maximum_amount' && $max > 0) {
+            $validated['salary_range'] = 'Up to ₹' . number_format($max) . ' ' . $rate;
+        } elseif ($mode === 'exact_amount' && $min > 0) {
+            $validated['salary_range'] = '₹' . number_format($min) . ' ' . $rate;
+        }
 
         $validated['user_id'] = auth()->id();
 
@@ -270,17 +296,43 @@ class JobController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'school_name' => 'nullable|string|max:255',
+            'school_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
             'qualification_id' => 'required|exists:qualifications,id',
+            'experience' => 'nullable|string|max:100',
+            'openings' => 'nullable|string|max:50',
             'state_id' => 'required|exists:states,id',
             'city_id' => 'required|exists:cities,id',
-            'salary_range' => 'nullable|string|max:255',
+            'salary_mode' => 'required|in:range,starting_amount,maximum_amount,exact_amount',
+            'salary_min' => 'nullable|numeric|min:0',
+            'salary_max' => 'nullable|numeric|min:0',
+            'salary_rate' => 'nullable|string|max:50',
             'description' => 'nullable|string',
         ]);
+
+        if ($request->hasFile('school_image')) {
+            $validated['school_image'] = $request->file('school_image')->store('schools', 'public');
+        }
+
+        // Auto-generate formatted salary_range for backwards-compatibility
+        $rate = $request->input('salary_rate', 'per month');
+        $min = (float) $request->input('salary_min', 0);
+        $max = (float) $request->input('salary_max', 0);
+        $mode = $request->input('salary_mode', 'range');
+
+        if ($mode === 'range' && $min > 0 && $max > 0) {
+            $validated['salary_range'] = '₹' . number_format($min) . ' – ₹' . number_format($max) . ' ' . $rate;
+        } elseif ($mode === 'starting_amount' && $min > 0) {
+            $validated['salary_range'] = 'From ₹' . number_format($min) . ' ' . $rate;
+        } elseif ($mode === 'maximum_amount' && $max > 0) {
+            $validated['salary_range'] = 'Up to ₹' . number_format($max) . ' ' . $rate;
+        } elseif ($mode === 'exact_amount' && $min > 0) {
+            $validated['salary_range'] = '₹' . number_format($min) . ' ' . $rate;
+        }
 
         $job->update($validated);
 

@@ -27,8 +27,53 @@ class JobController extends Controller
         if ($job->status !== 'approved') {
             abort(404);
         }
+
+        $user = auth()->user();
+        $isUnlocked = $job->canUserViewProtectedDetails($user);
+        $candidateStatus = !$user ? 'guest' : (!$isUnlocked ? 'registration_pending' : 'unlocked');
+
+        // Fetch similar jobs (same category or latest approved jobs)
+        $similarJobs = JobPost::with(['category', 'subject', 'state', 'city'])
+            ->where('status', 'approved')
+            ->where('id', '!=', $job->id)
+            ->when($job->category_id, function($q) use ($job) {
+                $q->where('category_id', $job->category_id);
+            })
+            ->latest()
+            ->take(4)
+            ->get();
+
+        if ($similarJobs->count() < 2) {
+            $similarJobs = JobPost::with(['category', 'subject', 'state', 'city'])
+                ->where('status', 'approved')
+                ->where('id', '!=', $job->id)
+                ->latest()
+                ->take(4)
+                ->get();
+        }
         
-        return view('jobs.show', compact('job'));
+        return view('jobs.show', compact('job', 'isUnlocked', 'candidateStatus', 'similarJobs'));
+    }
+
+    public function checkSchoolAccess(JobPost $job)
+    {
+        $user = auth()->user();
+        $isUnlocked = $job->canUserViewProtectedDetails($user);
+        $candidateStatus = !$user ? 'guest' : (!$isUnlocked ? 'registration_pending' : 'unlocked');
+
+        return response()->json([
+            'authenticated' => (bool) $user,
+            'is_unlocked' => $isUnlocked,
+            'can_view' => $isUnlocked,
+            'status' => $candidateStatus,
+            'wizard_url' => route('candidate.wizard'),
+            'school' => $isUnlocked ? [
+                'name' => $job->school_name,
+                'city' => $job->city?->name,
+                'state' => $job->state?->name,
+                'image' => $job->getMaskedSchoolImage($user),
+            ] : null
+        ]);
     }
 
     public function storeJobQuery(Request $request)

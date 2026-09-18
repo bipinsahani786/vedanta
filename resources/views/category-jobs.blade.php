@@ -62,7 +62,7 @@
                                         <i class="fas fa-map-marker-alt"></i>
                                     </div>
                                     <span class="truncate">
-                                        {{ $job->city?->name ?? 'Anywhere' }}, {{ $job->state?->name ?? 'Any State' }}
+                                        {{ $job->getMaskedLocation() }}
                                     </span>
                                 </div>
 
@@ -80,9 +80,16 @@
                                         <i class="fas fa-rupee-sign"></i>
                                     </div>
                                     <span class="font-semibold text-gray-900 truncate">
-                                        {{ $job->salary_range ?? 'Not Disclosed' }}
+                                        {{ $job->formatted_salary }}
                                     </span>
                                 </div>
+
+                                @if(!$job->canUserViewProtectedDetails())
+                                <div class="flex items-center gap-1.5 text-[11px] text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200/80">
+                                    <i class="fas fa-lock text-[10px]"></i>
+                                    <span>School name & exact city hidden until registered</span>
+                                </div>
+                                @endif
                             </div>
                         </div>
 
@@ -167,6 +174,5 @@
             });
         });
     </script>
+    @include('partials.school-details-modal')
     @endsection
-
-       

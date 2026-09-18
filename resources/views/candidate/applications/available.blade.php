@@ -47,7 +47,7 @@
                         <h3 class="font-bold text-text-main hover:text-accent-blue transition-colors leading-tight text-sm">
                             <a href="{{ route('jobs.show', $job->id) }}" target="_blank">{{ $job->title ?? 'Teacher Required' }}</a>
                         </h3>
-                        <p class="text-xs text-text-dark/40 mt-0.5">{{ $job->school_name }}</p>
+                        <p class="text-xs text-text-dark/40 mt-0.5">{{ $job->getMaskedSchoolName() }}</p>
                     </div>
                 </div>
                 {{-- Match Score Badge --}}
@@ -72,16 +72,16 @@
             {{-- Tags --}}
             <div class="flex flex-wrap gap-2 mb-5">
                 <span class="bg-secondary-bg border border-card-border text-text-dark/50 px-2.5 py-1 rounded-lg text-[10px] font-medium flex items-center gap-1">
-                    <i class="fas fa-map-marker-alt text-accent-blue/60"></i> {{ $job->city?->name ?? 'N/A' }}
+                    <i class="fas fa-map-marker-alt text-accent-blue/60"></i> {{ $job->getMaskedLocation() }}
                 </span>
+                @if($job->subject)
                 <span class="bg-secondary-bg border border-card-border text-text-dark/50 px-2.5 py-1 rounded-lg text-[10px] font-medium flex items-center gap-1">
                     <i class="fas fa-book text-accent-yellow/60"></i> {{ $job->subject->name }}
                 </span>
-                @if($job->salary_range)
-                <span class="bg-secondary-bg border border-card-border text-text-dark/50 px-2.5 py-1 rounded-lg text-[10px] font-medium flex items-center gap-1">
-                    <i class="fas fa-rupee-sign text-green-400/60"></i> {{ $job->salary_range }}
-                </span>
                 @endif
+                <span class="bg-secondary-bg border border-card-border text-text-dark/50 px-2.5 py-1 rounded-lg text-[10px] font-medium flex items-center gap-1">
+                    <i class="fas fa-rupee-sign text-green-400/60"></i> {{ $job->formatted_salary }}
+                </span>
             </div>
 
             {{-- Apply Button --}}
