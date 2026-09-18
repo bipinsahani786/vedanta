@@ -188,6 +188,47 @@
         .header-scrolled #mobileMenuBtn {
             color: #010127ff !important;
         }
+
+        /* Search bar styling in Header */
+        #main-header:not(.header-scrolled) .nav-search-bar {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        #main-header:not(.header-scrolled) .nav-search-bar input {
+            color: #ffffff;
+        }
+        #main-header:not(.header-scrolled) .nav-search-bar input::placeholder {
+            color: rgba(203, 213, 225, 0.7);
+        }
+        #main-header:not(.header-scrolled) .nav-search-bar .search-icon {
+            color: #cbd5e1;
+        }
+        #main-header:not(.header-scrolled) .nav-search-bar .filter-icon {
+            color: #94a3b8;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .header-scrolled .nav-search-bar {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .header-scrolled .nav-search-bar input {
+            color: #0f172a;
+        }
+        .header-scrolled .nav-search-bar input::placeholder {
+            color: #64748b;
+        }
+        .header-scrolled .nav-search-bar .search-icon {
+            color: #475569;
+        }
+        .header-scrolled .nav-search-bar .filter-icon {
+            color: #64748b;
+            border-color: #cbd5e1;
+        }
+        .header-scrolled .nav-search-bar .filter-icon:hover,
+        .header-scrolled .nav-search-bar .search-icon:hover {
+            color: #129aef;
+        }
     </style>
 </head>
 
@@ -236,41 +277,133 @@
 
     <!-- Header -->
     <header id="main-header"
-        class="sticky top-10 md:top-12 w-[96%] lg:w-[90%] max-w-7xl mx-auto bg-[#040e2d]/80 backdrop-blur-md border border-white/20 rounded-full px-6 lg:px-8 py-3 flex justify-between items-center z-[100] transition-all duration-500 shadow-xl mt-2 lg:mt-4">
-        <a href="#" class="flex items-center no-underline py-1">
+        class="sticky top-10 md:top-12 w-[96%] lg:w-[94%] xl:w-[92%] 2xl:w-[90%] max-w-[1440px] mx-auto bg-[#040e2d]/80 backdrop-blur-md border border-white/20 rounded-full px-5 lg:px-7 py-2.5 flex justify-between items-center z-[100] transition-all duration-500 shadow-xl mt-2 lg:mt-4">
+        <a href="{{ route('home') }}" class="flex items-center no-underline py-1 shrink-0">
             <img src="/images/logo.png?v={{ time() }}" alt="Vedanta Placement Agency®"
-                class="logo-img h-10 md:h-12 w-auto object-contain transition-all duration-300">
+                class="logo-img h-9 md:h-11 w-auto object-contain transition-all duration-300">
         </a>
         <nav class="hidden lg:flex items-center">
-            <ul class="flex gap-6 mr-8 list-none">
+            <ul class="flex gap-3.5 xl:gap-5 2xl:gap-6 mr-3 xl:mr-5 list-none items-center">
                 <li><a href="{{ route('home') }}"
-                        class="{{ request()->routeIs('home') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('home') ? 'after:w-0' : '' }}">Home</a>
+                        class="{{ request()->routeIs('home') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('home') ? 'after:w-0' : '' }}">Home</a>
                 </li>
                 <li><a href="{{ route('about') }}"
-                        class="{{ request()->routeIs('about') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('about') ? 'after:w-0' : '' }}">About
+                        class="{{ request()->routeIs('about') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('about') ? 'after:w-0' : '' }}">About
                         us</a></li>
                 <li><a href="{{ route('services') }}"
-                        class="{{ request()->routeIs('services') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('services') ? 'after:w-0' : '' }}">Our
+                        class="{{ request()->routeIs('services') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('services') ? 'after:w-0' : '' }}">Our
                         Services</a></li>
                 <li><a href="{{ route('jobs') }}"
-                        class="{{ request()->routeIs('jobs') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('jobs') ? 'after:w-0' : '' }}">Jobs</a>
+                        class="{{ request()->routeIs('jobs') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('jobs') ? 'after:w-0' : '' }}">Jobs</a>
                 </li>
                 <li><a href="{{ route('resume.builder') }}"
-                        class="{{ request()->routeIs('resume.builder') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('resume.builder') ? 'after:w-0' : '' }}">Resume
+                        class="{{ request()->routeIs('resume.builder') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('resume.builder') ? 'after:w-0' : '' }}">Resume
                         Builder <span
                             class="bg-accent-yellow text-white text-[9px] px-1.5 py-0.5 rounded uppercase font-extrabold ml-1 relative -top-1">Free</span></a>
                 </li>
                 <li><a href="{{ route('hiring') }}"
-                        class="{{ request()->routeIs('hiring') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('hiring') ? 'after:w-0' : '' }}">Hiring
+                        class="{{ request()->routeIs('hiring') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('hiring') ? 'after:w-0' : '' }}">Hiring
                         Process</a></li>
                 <li><a href="{{ route('contact') }}"
-                        class="{{ request()->routeIs('contact') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact
-                        us</a></li>
+                        class="{{ request()->routeIs('contact') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact
+                        Us</a></li>
             </ul>
-            <div class="flex gap-3 items-center">
+
+            <!-- Navbar Search Bar (Working Search with Live Dropdown) -->
+            <div class="relative mr-3 xl:mr-5"
+                 x-data="{
+                     query: '{{ request('q') }}',
+                     showDropdown: false,
+                     loading: false,
+                     suggestions: [],
+                     fetchSuggestions() {
+                         if (this.query.trim().length < 2) {
+                             this.suggestions = [];
+                             this.showDropdown = false;
+                             return;
+                         }
+                         this.loading = true;
+                         this.showDropdown = true;
+                         fetch('{{ route('api.jobs.suggestions') }}?q=' + encodeURIComponent(this.query))
+                             .then(r => r.json())
+                             .then(data => {
+                                 this.suggestions = data.jobs || [];
+                                 this.loading = false;
+                             })
+                             .catch(() => { this.loading = false; });
+                     }
+                 }"
+                 @click.away="showDropdown = false">
+                <form action="{{ route('jobs') }}" method="GET" class="relative flex items-center m-0">
+                    <div class="nav-search-bar flex items-center border rounded-xl px-3 py-1.5 xl:py-2 transition-all duration-300 w-48 xl:w-60 2xl:w-68 shadow-sm focus-within:ring-2 focus-within:ring-[#129aef]/40">
+                        <input type="text"
+                               name="q"
+                               x-model="query"
+                               @input.debounce.300ms="fetchSuggestions()"
+                               @keydown.escape="showDropdown = false"
+                               @focus="if(query.trim().length >= 2) showDropdown = true"
+                               placeholder="Search jobs, subjects, or locations..."
+                               autocomplete="off"
+                               class="bg-transparent border-none outline-none text-xs xl:text-[13px] w-full pr-1.5 focus:ring-0">
+                        
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="submit" class="search-icon hover:scale-110 transition-transform cursor-pointer" title="Search">
+                                <i class="fas fa-search text-xs"></i>
+                            </button>
+                            <a href="{{ route('jobs') }}" class="filter-icon pl-2 border-l transition-colors" title="Filter Jobs">
+                                <i class="fas fa-sliders-h text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Live Search Suggestions Dropdown -->
+                <div x-show="showDropdown && (suggestions.length > 0 || loading)"
+                     x-cloak
+                     class="absolute top-full left-0 mt-2 w-72 sm:w-80 bg-[#040e2d]/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden z-[110] py-2 text-xs"
+                     style="display: none;">
+                    
+                    <div x-show="loading" class="px-4 py-3 text-slate-300 flex items-center gap-2">
+                        <i class="fas fa-circle-notch fa-spin text-[#129aef]"></i>
+                        <span>Searching jobs...</span>
+                    </div>
+
+                    <div x-show="!loading && suggestions.length > 0">
+                        <div class="px-3.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                            <span>Matching Jobs</span>
+                            <span class="text-[#129aef]" x-text="suggestions.length + ' found'"></span>
+                        </div>
+                        <template x-for="item in suggestions" :key="item.id">
+                            <a :href="item.url" class="flex items-center justify-between px-3.5 py-2 hover:bg-white/10 transition-colors group">
+                                <div class="min-w-0 pr-2">
+                                    <div class="font-bold text-white group-hover:text-[#129aef] transition-colors truncate" x-text="item.title"></div>
+                                    <div class="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                                        <span x-show="item.subject" x-text="item.subject"></span>
+                                        <span x-show="item.subject && item.city">•</span>
+                                        <span x-show="item.city" class="text-rose-400 flex items-center gap-1">
+                                            <i class="fas fa-map-marker-alt text-[9px]"></i>
+                                            <span x-text="item.city"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-arrow-right text-[10px] text-slate-500 group-hover:text-white transition-colors"></i>
+                            </a>
+                        </template>
+
+                        <div class="pt-2 mt-1 border-t border-white/10 px-3.5 pb-1">
+                            <a :href="'{{ route('jobs') }}?q=' + encodeURIComponent(query)" class="text-[11px] font-bold text-[#129aef] hover:text-white flex items-center justify-between transition-colors">
+                                <span>View all results for "<span x-text="query"></span>"</span>
+                                <i class="fas fa-chevron-right text-[9px]"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2.5 xl:gap-3 items-center shrink-0">
                 @auth
                     <a href="{{ auth()->user()->role === 'candidate' ? route('candidate.dashboard') : (auth()->user()->role === 'employer' ? route('employer.dashboard') : route('admin.dashboard')) }}"
-                        class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 flex items-center gap-2">
+                        class="px-3.5 xl:px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 flex items-center gap-2">
                         <div
                             class="w-6 h-6 rounded-full bg-accent-blue text-white flex items-center justify-center text-[10px] font-bold">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
@@ -280,15 +413,15 @@
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit"
-                            class="px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all text-red-500 hover:bg-red-50 border border-red-200 flex items-center gap-1.5">
+                            class="px-3.5 xl:px-4 py-2 rounded-xl font-medium text-[13px] cursor-pointer transition-all text-red-500 hover:bg-red-50 border border-red-200 flex items-center gap-1.5">
                             <i class="fas fa-sign-out-alt text-xs"></i> Logout
                         </button>
                     </form>
                 @else
                     <button type="button" onclick="openAuthChoiceModal('login')"
-                        class="px-5 py-2.5 rounded-xl font-bold text-[15px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200">Login</button>
+                        class="px-4 xl:px-5 py-2 xl:py-2.5 rounded-xl font-bold text-[14px] xl:text-[15px] cursor-pointer transition-all bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200">Login</button>
                     <button type="button" onclick="openAuthChoiceModal('register')"
-                        class="px-5 py-2.5 rounded-xl font-bold text-[15px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</button>
+                        class="px-4 xl:px-5 py-2 xl:py-2.5 rounded-xl font-bold text-[14px] xl:text-[15px] cursor-pointer transition-all bg-accent-blue text-white hover:bg-accent-blue-hover hover:-translate-y-0.5 shadow-glow-blue">Register</button>
                 @endauth
             </div>
         </nav>
@@ -306,7 +439,20 @@
             <button id="closeMobileMenuBtn" class="text-text-main text-2xl focus:outline-none"><i
                     class="fas fa-times"></i></button>
         </div>
-        <div class="flex-grow overflow-y-auto p-6 flex flex-col gap-6">
+        <div class="flex-grow overflow-y-auto p-6 flex flex-col gap-5">
+            <!-- Mobile Search Bar -->
+            <form action="{{ route('jobs') }}" method="GET" class="relative">
+                <div class="flex items-center bg-card-bg border border-card-border rounded-xl px-4 py-2.5 shadow-inner">
+                    <input type="text" 
+                           name="q" 
+                           value="{{ request('q') }}" 
+                           placeholder="Search jobs, subjects, or locations..." 
+                           class="bg-transparent border-none outline-none text-text-main text-xs sm:text-sm w-full placeholder-text-dark/40">
+                    <button type="submit" class="text-accent-blue pl-2 shrink-0">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
             <ul class="flex flex-col gap-5 text-lg font-semibold">
                 <li><a href="{{ route('home') }}"
                         class="{{ request()->routeIs('home') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Home</a>

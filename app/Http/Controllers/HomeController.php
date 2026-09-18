@@ -66,6 +66,38 @@ class HomeController extends Controller
         $query = JobPost::with(['category', 'subject', 'state', 'city', 'qualification'])
             ->where('status', 'approved');
 
+        if ($request->filled('q') || $request->filled('search')) {
+            $searchTerm = trim($request->input('q') ?? $request->input('search'));
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('school_name', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('subject', function($sq) use ($searchTerm) {
+                      $sq->where('name', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('category', function($cq) use ($searchTerm) {
+                      $cq->where('name', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('city', function($cty) use ($searchTerm) {
+                      $cty->where('name', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('state', function($st) use ($searchTerm) {
+                      $st->where('name', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('qualification', function($qq) use ($searchTerm) {
+                      $qq->where('name', 'like', "%{$searchTerm}%");
+                  });
+
+                if (preg_match('/\d+/', $searchTerm, $numMatches)) {
+                    $idNum = (int)$numMatches[0];
+                    $q->orWhere('id', $idNum);
+                    if ($idNum > 1000) {
+                        $q->orWhere('id', $idNum - 1000);
+                    }
+                }
+            });
+        }
+
         if ($request->filled('state')) {
             $query->where('state_id', $request->state);
         }
@@ -86,13 +118,55 @@ class HomeController extends Controller
             $query->where('job_type', $request->job_type);
         }
 
-        $jobs = $query->orderBy('created_at', 'desc')->paginate(12);
+        $jobs = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
 
         $states = \App\Models\State::where('is_active', true)->orderBy('name')->get();
         $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
         $categories = \App\Models\Category::where('is_active', true)->orderBy('name')->get();
             
         return view('jobs', compact('jobs', 'states', 'subjects', 'categories'));
+    }
+
+    public function jobSuggestions(\Illuminate\Http\Request $request)
+    {
+        $q = trim($request->get('q', ''));
+        if (strlen($q) < 2) {
+            return response()->json(['jobs' => []]);
+        }
+
+        $jobs = JobPost::where('status', 'approved')
+            ->where(function($query) use ($q) {
+                $query->where('title', 'like', "%{$q}%")
+                      ->orWhere('description', 'like', "%{$q}%")
+                      ->orWhere('school_name', 'like', "%{$q}%")
+                      ->orWhereHas('subject', fn($sq) => $sq->where('name', 'like', "%{$q}%"))
+                      ->orWhereHas('category', fn($cq) => $cq->where('name', 'like', "%{$q}%"))
+                      ->orWhereHas('city', fn($cty) => $cty->where('name', 'like', "%{$q}%"))
+                      ->orWhereHas('state', fn($st) => $st->where('name', 'like', "%{$q}%"));
+
+                if (preg_match('/\d+/', $q, $numMatches)) {
+                    $idNum = (int)$numMatches[0];
+                    $query->orWhere('id', $idNum);
+                    if ($idNum > 1000) {
+                        $query->orWhere('id', $idNum - 1000);
+                    }
+                }
+            })
+            ->with(['city', 'subject'])
+            ->latest()
+            ->take(6)
+            ->get()
+            ->map(function($job) {
+                return [
+                    'id' => $job->id,
+                    'title' => $job->title ?? 'Teaching Opportunity',
+                    'subject' => $job->subject?->name,
+                    'city' => $job->city?->name,
+                    'url' => route('jobs.show', $job->id)
+                ];
+            });
+
+        return response()->json(['jobs' => $jobs]);
     }
 
     public function storeContact(\Illuminate\Http\Request $request)

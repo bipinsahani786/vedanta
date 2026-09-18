@@ -13,6 +13,9 @@
             <h2 class="text-2xl font-bold text-slate-800 mb-8 relative z-10">Let Your Teaching Career Begin Here</h2>
             
             <form action="{{ route('jobs') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end relative z-10">
+                @if(request('q'))
+                    <input type="hidden" name="q" value="{{ request('q') }}">
+                @endif
                 @if(request('job_type'))
                     <input type="hidden" name="job_type" value="{{ request('job_type') }}">
                 @endif
@@ -73,6 +76,24 @@
 
     <!-- Job List (Reference Image 1 & 4) -->
     <div class="w-full relative z-10">
+        @if(request('q'))
+            <div class="mb-6 p-4 rounded-2xl bg-blue-50/80 border border-blue-200/70 flex flex-wrap items-center justify-between gap-3 text-slate-800 shadow-sm">
+                <div class="flex items-center gap-2.5 text-xs sm:text-sm">
+                    <span class="w-8 h-8 rounded-xl bg-[#129aef]/15 text-[#129aef] flex items-center justify-center font-bold">
+                        <i class="fas fa-search text-xs"></i>
+                    </span>
+                    <div>
+                        <span>Search results for: <strong class="text-[#040e2d]">"{{ request('q') }}"</strong></span>
+                        <span class="text-xs text-slate-500 font-semibold block sm:inline sm:ml-2">({{ $jobs->total() }} {{ Str::plural('job', $jobs->total()) }} found)</span>
+                    </div>
+                </div>
+                <a href="{{ route('jobs') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200/80 font-bold text-xs transition-all shadow-sm">
+                    <i class="fas fa-times text-[10px]"></i>
+                    <span>Clear Search</span>
+                </a>
+            </div>
+        @endif
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($jobs as $job)
             @php
