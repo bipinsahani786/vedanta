@@ -1,71 +1,177 @@
 @extends('layouts.app')
 @section('content')
-<x-page-header title="Find Your Dream Role" :breadcrumbs="['Home' => route('home'), 'Jobs' => null]" />
-<div class="py-12 px-6 lg:px-[5%] bg-gradient-to-r from-[#040e2d] via-[#129aef] to-[#040e2d] border-b border-white/10 relative overflow-hidden">
-    <!-- Decorative Pattern -->
-    <div class="absolute inset-0 z-0 opacity-10" style="background-image: radial-gradient(#ffffff 1.5px, transparent 1.5px); background-size: 24px 24px;"></div>
+<!-- Hero Section (Matches Reference Image) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 
-    <div class="max-w-5xl mx-auto reveal relative z-10">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 relative overflow-hidden">
-            <!-- Subtle accent inside the box -->
-            <div class="absolute top-0 right-0 w-64 h-64 bg-accent-blue/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
+<div class="relative bg-[#040e2d] overflow-hidden text-white border-b border-white/10">
+    <!-- Right Background School Campus Image -->
+    <div class="absolute inset-y-0 right-0 w-full lg:w-[58%] bg-cover bg-right lg:bg-center pointer-events-none"
+         style="background-image: url('{{ asset('images/hero_school.jpg') }}');">
+    </div>
+
+    <!-- Gradient Overlays for Seamless Fade -->
+    <!-- 1. Deep navy overlay fading to transparent from left to right -->
+    <div class="absolute inset-0 bg-gradient-to-r from-[#040e2d] via-[#040e2d]/95 via-[42%] via-[#040e2d]/75 via-[60%] to-[#040e2d]/30 pointer-events-none"></div>
+    <!-- 2. Extra soft ambient vignette on top and bottom -->
+    <div class="absolute inset-0 bg-gradient-to-b from-[#040e2d]/60 via-transparent to-[#040e2d]/80 pointer-events-none"></div>
+
+    <!-- Golden Accent Slash Beam in Bottom-Right -->
+    <svg class="absolute bottom-0 right-[12%] lg:right-[18%] w-44 sm:w-56 h-72 sm:h-80 pointer-events-none overflow-visible opacity-90 hidden md:block" viewBox="0 0 160 240" fill="none">
+        <polygon points="90,240 150,240 60,0 0,0" fill="url(#goldenBeamGrad)" />
+        <defs>
+            <linearGradient id="goldenBeamGrad" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#ea580c" stop-opacity="0.95" />
+                <stop offset="30%" stop-color="#f59e0b" stop-opacity="0.9" />
+                <stop offset="70%" stop-color="#fbbf24" stop-opacity="0.5" />
+                <stop offset="100%" stop-color="#fde047" stop-opacity="0" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 pt-14 pb-16 md:pt-20 md:pb-20 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             
-            <h2 class="text-2xl font-bold text-slate-800 mb-8 relative z-10">Let Your Teaching Career Begin Here</h2>
-            
-            <form action="{{ route('jobs') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end relative z-10">
-                @if(request('q'))
-                    <input type="hidden" name="q" value="{{ request('q') }}">
-                @endif
-                @if(request('job_type'))
-                    <input type="hidden" name="job_type" value="{{ request('job_type') }}">
-                @endif
-                <!-- State -->
-                <div class="flex-1 w-full">
-                    <label class="block text-sm font-medium text-slate-600 mb-2">State</label>
-                    <select name="state" class="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-accent-blue/30 focus:border-accent-blue appearance-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;">
-                        <option value="">Select State</option>
-                        @foreach($states as $st)
-                            <option value="{{ $st->id }}" {{ request('state') == $st->id ? 'selected' : '' }}>{{ $st->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <!-- Category -->
-                <div class="flex-1 w-full">
-                    <label class="block text-sm font-medium text-slate-600 mb-2">Category</label>
-                    <select name="class" id="search_category" class="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-accent-blue/30 focus:border-accent-blue appearance-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;">
-                        <option value="">Select Category</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}" {{ request('class') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <!-- Subject -->
-                <div class="flex-1 w-full">
-                    <label class="block text-sm font-medium text-slate-600 mb-2">Subject</label>
-                    <select name="subject" id="search_subject" class="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-accent-blue/30 focus:border-accent-blue appearance-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;">
-                        <option value="">Select Subject</option>
-                        @foreach($subjects as $sub)
-                            <option value="{{ $sub->id }}" {{ request('subject') == $sub->id ? 'selected' : '' }}>{{ $sub->name }}</option>
-                        @endforeach
-                    </select>
+            <!-- Left Column: Title, Subtitle, Search Form, Popular Tags (8 cols on lg) -->
+            <div class="lg:col-span-8 xl:col-span-8">
+                <!-- Eyebrow -->
+                <div class="text-amber-400 font-extrabold text-xs sm:text-[13px] tracking-[0.16em] uppercase mb-3">
+                    CONNECTING EDUCATORS, BUILDING BRIGHTER FUTURES
                 </div>
 
-                <!-- Specialization (Hidden initially) -->
-                <div class="flex-1 w-full" id="specialization_container" style="display: none;">
-                    <label class="block text-sm font-medium text-slate-600 mb-2">Specialization</label>
-                    <select name="specialization" id="search_specialization" class="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-accent-blue/30 focus:border-accent-blue appearance-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;">
-                        <option value="">Select Specialization</option>
-                    </select>
+                <!-- Main Heading -->
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-black text-white tracking-tight leading-[1.15] mb-4">
+                    Find Your Next <br class="hidden sm:inline" />
+                    <span class="text-[#129aef]">Teaching Opportunity</span>
+                </h1>
+
+                <!-- Subtitle -->
+                <p class="text-slate-300 text-sm sm:text-base md:text-[1.05rem] max-w-2xl leading-relaxed mb-8">
+                    Get placed in reputed schools across India with Vedanta Placement Agency.<br class="hidden sm:inline" />
+                    Your teaching career, our commitment.
+                </p>
+
+                <!-- Floating White Search Capsule Form -->
+                <form action="{{ route('jobs') }}" method="GET" class="bg-white rounded-2xl md:rounded-full p-2 md:p-2 shadow-2xl border border-white/30 flex flex-col md:flex-row items-center gap-2 max-w-2xl relative z-20">
+                    <!-- Keyword input -->
+                    <div class="flex items-center gap-3 w-full flex-1 px-4 py-1.5">
+                        <svg class="w-5 h-5 text-[#129aef] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                        </svg>
+                        <input type="text" name="q" value="{{ request('q') }}" placeholder="Search by job title, subject, or keyword..." class="w-full bg-transparent text-slate-800 placeholder:text-slate-400 text-sm font-medium border-0 focus:ring-0 focus:outline-none p-0">
+                    </div>
+
+                    <!-- Desktop Divider -->
+                    <div class="hidden md:block w-px h-8 bg-slate-200"></div>
+
+                    <!-- Location Selector -->
+                    <div class="flex items-center gap-2.5 w-full md:w-56 px-4 py-1.5 relative">
+                        <svg class="w-5 h-5 text-[#129aef] shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                        </svg>
+                        <select name="state" class="w-full bg-transparent text-slate-700 text-sm font-medium border-0 focus:ring-0 focus:outline-none p-0 appearance-none cursor-pointer pr-6 truncate">
+                            <option value="" class="text-slate-500">Select preferred location</option>
+                            @foreach($states as $st)
+                                <option value="{{ $st->id }}" {{ request('state') == $st->id ? 'selected' : '' }} class="text-slate-800">
+                                    {{ $st->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <svg class="w-4 h-4 text-slate-400 pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full md:w-auto bg-[#129aef] hover:bg-[#0d85d0] active:scale-[0.98] text-white font-bold px-7 py-3 rounded-xl md:rounded-full transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm whitespace-nowrap cursor-pointer">
+                        <span>Search Jobs</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+                </form>
+
+                <!-- Popular Searches -->
+                <div class="mt-6 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+                    <span class="text-slate-300 font-medium">Popular Searches:</span>
+                    @php
+                        $popularTags = ['PRT', 'TGT', 'PGT', 'Principal', 'Pre-Primary', 'NTT', 'Counselor', 'Coaches'];
+                    @endphp
+                    @foreach($popularTags as $tag)
+                        <a href="{{ route('jobs', ['q' => $tag]) }}" 
+                           class="px-3.5 py-1 rounded-full text-xs font-semibold transition-all duration-200 border {{ request('q') === $tag ? 'bg-[#129aef] text-white border-[#129aef] shadow-md' : 'bg-white/10 hover:bg-white/20 text-white/90 hover:text-white border-white/15' }}">
+                            {{ $tag }}
+                        </a>
+                    @endforeach
                 </div>
+            </div>
+
+            <!-- Right Column: Slogan in sky + Vertical Stats (4 cols on lg) -->
+            <div class="lg:col-span-4 xl:col-span-4 flex flex-col justify-between items-center lg:items-end relative">
                 
-                <!-- Search Button -->
-                <div class="w-full md:w-auto flex gap-2">
-                    <a href="{{ route('jobs') }}" class="w-full md:w-auto bg-slate-200 text-slate-700 rounded-lg px-8 py-3 font-bold hover:bg-slate-300 transition-colors shadow-sm text-center">Clear</a>
-                    <button type="submit" class="w-full md:w-auto bg-white border border-slate-200 text-slate-800 rounded-lg px-8 py-3 font-bold hover:border-accent-blue hover:text-accent-blue transition-colors shadow-sm">Search</button>
+                <!-- Floating Slogan in Sky -->
+                <div class="mb-8 lg:mb-12 text-center lg:text-right pr-0 lg:pr-6 rotate-[-5deg] select-none">
+                    <div class="font-['Caveat',cursive] text-2xl sm:text-3xl lg:text-[2.25rem] text-white font-bold leading-tight drop-shadow-md">
+                        <div>Better Teachers</div>
+                        <div>Brighter Futures</div>
+                    </div>
+                    <!-- Golden Swoop Arc Accent Underline -->
+                    <svg class="w-36 sm:w-40 h-4 text-amber-400 mx-auto lg:ml-auto lg:mr-0 -mt-1 drop-shadow" viewBox="0 0 140 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 10C45 17 95 16 134 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
                 </div>
-            </form>
+
+                <!-- Vertical Stats Stack -->
+                <div class="space-y-4 w-full max-w-[240px] sm:max-w-[260px] self-center lg:self-end">
+                    <!-- Stat 1: Educators -->
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shrink-0 shadow-lg">
+                            <i class="fa-solid fa-graduation-cap text-lg"></i>
+                        </div>
+                        <div class="leading-tight">
+                            <div class="text-[11px] text-slate-300 font-medium">Trusted by</div>
+                            <div class="text-sm sm:text-[15px] font-bold text-white tracking-wide">10,000+ Educators</div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 2: Partner Schools -->
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shrink-0 shadow-lg">
+                            <i class="fa-solid fa-school text-lg"></i>
+                        </div>
+                        <div class="leading-tight">
+                            <div class="text-sm sm:text-[15px] font-bold text-white tracking-wide">1,500+</div>
+                            <div class="text-[11px] text-slate-300 font-medium">Partner Schools</div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 3: Active Opportunities -->
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shrink-0 shadow-lg">
+                            <i class="fa-solid fa-file-lines text-lg"></i>
+                        </div>
+                        <div class="leading-tight">
+                            <div class="text-sm sm:text-[15px] font-bold text-white tracking-wide">500+</div>
+                            <div class="text-[11px] text-slate-300 font-medium">Active Opportunities</div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 4: Presence -->
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shrink-0 shadow-lg">
+                            <i class="fa-solid fa-users text-lg"></i>
+                        </div>
+                        <div class="leading-tight">
+                            <div class="text-sm sm:text-[15px] font-bold text-white tracking-wide">Pan India</div>
+                            <div class="text-[11px] text-slate-300 font-medium">Presence</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
     </div>
 </div>
@@ -76,14 +182,17 @@
 
     <!-- Job List (Reference Image 1 & 4) -->
     <div class="w-full relative z-10">
-        @if(request('q'))
+        @if(request('q') || request('state') || request('class') || request('subject'))
             <div class="mb-6 p-4 rounded-2xl bg-blue-50/80 border border-blue-200/70 flex flex-wrap items-center justify-between gap-3 text-slate-800 shadow-sm">
                 <div class="flex items-center gap-2.5 text-xs sm:text-sm">
                     <span class="w-8 h-8 rounded-xl bg-[#129aef]/15 text-[#129aef] flex items-center justify-center font-bold">
                         <i class="fas fa-search text-xs"></i>
                     </span>
                     <div>
-                        <span>Search results for: <strong class="text-[#040e2d]">"{{ request('q') }}"</strong></span>
+                        <span>Showing search results
+                            @if(request('q')) for <strong class="text-[#040e2d]">"{{ request('q') }}"</strong> @endif
+                            @if(request('state')) in <strong class="text-[#040e2d]">{{ $states->firstWhere('id', request('state'))?->name ?? 'State' }}</strong> @endif
+                        </span>
                         <span class="text-xs text-slate-500 font-semibold block sm:inline sm:ml-2">({{ $jobs->total() }} {{ Str::plural('job', $jobs->total()) }} found)</span>
                     </div>
                 </div>
