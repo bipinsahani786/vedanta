@@ -88,6 +88,10 @@ class PaymentController extends Controller
         $firstSuccessTxn = $transactions->where('status', 'success')->first();
         $registrationPaidDate = $firstSuccessTxn ? $firstSuccessTxn->created_at->format('d M Y') : ($profile->initial_fee_paid ? ($profile->updated_at ? $profile->updated_at->format('d M Y') : now()->format('d M Y')) : null);
 
+        $serviceChargeInvoices = \App\Models\ServiceChargeInvoice::where('candidate_id', $user->id)
+            ->latest()
+            ->get();
+
         return view('candidate.payment.show', compact(
             'user',
             'profile',
@@ -97,6 +101,7 @@ class PaymentController extends Controller
             'availablePoints',
             'walletBalanceInr',
             'transactions',
+            'serviceChargeInvoices',
             'totalPaidAmount',
             'nextPaymentDue',
             'hasPaidPlan',

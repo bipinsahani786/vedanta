@@ -126,7 +126,7 @@
         <tbody>
             <tr>
                 <td>Vedanta Platform Subscription / Service Fee</td>
-                <td>{{ ucwords(str_replace('_', ' ', $transaction->type ?? 'Registration Fee')) }}</td>
+                <td>{{ $transaction->formatted_description ?? ucwords(str_replace('_', ' ', $transaction->type ?? 'Registration Fee')) }}</td>
                 <td class="amount-col">Rs. {{ number_format($transaction->amount, 2) }}</td>
             </tr>
             <tr class="total-row">

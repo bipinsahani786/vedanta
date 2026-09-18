@@ -911,96 +911,180 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/[0.06]">
-                        {{-- Row 1: Part 1 Registration Fee --}}
-                        <tr class="hover:bg-white/[0.02] transition-colors">
-                            <td class="py-3 text-slate-300">
-                                {{ $registrationPaidDate ?? '19 Aug 2024' }}
-                            </td>
-                            <td class="py-3 text-white font-medium">
-                                Registration Fee - Part 1
-                            </td>
-                            <td class="py-3 font-bold text-white">
-                                ₹500
-                            </td>
-                            <td class="py-3 text-slate-400">
-                                UPI (PhonePe)
-                            </td>
-                            <td class="py-3">
-                                @if($profile->initial_fee_paid || $profile->is_fee_paid)
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                                        Paid
-                                    </span>
-                                @else
+                        @php
+                            $successfulTxns = $transactions->filter(function($t) {
+                                return in_array(strtolower($t->status ?? ''), ['success', 'completed']);
+                            });
+                            $hasSuccessfulTxns = $successfulTxns->isNotEmpty();
+                            $hasStandardPending = ($profile->plan_type === 'standard' && (!$profile->is_fee_paid || (float)($profile->pending_amount ?? 0) > 0));
+                        @endphp
+
+                        @if($hasSuccessfulTxns)
+                            {{-- Real Successful Transactions from Database --}}
+                            @foreach($successfulTxns as $txn)
+                                <tr class="hover:bg-white/[0.02] transition-colors">
+                                    <td class="py-3 text-slate-300">
+                                        {{ $txn->created_at ? $txn->created_at->format('d M Y') : ($registrationPaidDate ?? now()->format('d M Y')) }}
+                                    </td>
+                                    <td class="py-3 text-white font-medium">
+                                        {{ $txn->formatted_description }}
+                                    </td>
+                                    <td class="py-3 font-bold text-white">
+                                        ₹{{ number_format($txn->amount, 0) }}
+                                    </td>
+                                    <td class="py-3 text-slate-400">
+                                        UPI (PhonePe)
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                            Paid
+                                        </span>
+                                    </td>
+                                    <td class="py-3 text-right">
+                                        <a href="{{ route('candidate.payment.invoice', $txn->id) }}" class="inline-flex items-center gap-1 text-sky-400 hover:text-white font-semibold">
+                                            <span>INV-{{ 1000 + $txn->id }}</span>
+                                            <i class="fas fa-download text-[10px]"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+
+                            {{-- If user only paid Part 1 (500) and Part 2 is pending --}}
+                            @if($hasStandardPending && $successfulTxns->where('amount', '<', 1000)->isNotEmpty() && !$successfulTxns->contains(fn($t) => str_starts_with($t->transaction_id ?? '', 'UPGRADE_')))
+                                <tr class="hover:bg-white/[0.02] transition-colors">
+                                    <td class="py-3 text-slate-400">--</td>
+                                    <td class="py-3 text-white font-medium">Final Registration Fee - Part 2</td>
+                                    <td class="py-3 font-bold text-white">₹{{ number_format($profile->pending_amount > 0 ? $profile->pending_amount : 500, 0) }}</td>
+                                    <td class="py-3 text-slate-400">--</td>
+                                    <td class="py-3">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                                            Pending
+                                        </span>
+                                    </td>
+                                    <td class="py-3 text-right text-slate-500">--</td>
+                                </tr>
+                            @endif
+
+                        @elseif($profile->initial_fee_paid || $profile->is_fee_paid || ($profile->paid_amount ?? 0) > 0)
+                            {{-- Fallback when marked paid in profile but transaction row missing (Legacy/Manual) --}}
+                            @if($profile->is_fee_paid || $profile->plan_type === 'premium' || ($profile->paid_amount ?? 0) >= 1000)
+                                <tr class="hover:bg-white/[0.02] transition-colors">
+                                    <td class="py-3 text-slate-300">{{ $registrationPaidDate ?? now()->format('d M Y') }}</td>
+                                    <td class="py-3 text-white font-medium">Registration Fee (Full / Premium Plan)</td>
+                                    <td class="py-3 font-bold text-white">₹{{ number_format($profile->paid_amount >= 1000 ? $profile->paid_amount : 1000, 0) }}</td>
+                                    <td class="py-3 text-slate-400">UPI / Direct</td>
+                                    <td class="py-3">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                            Paid
+                                        </span>
+                                    </td>
+                                    <td class="py-3 text-right text-slate-500">
+                                        <span class="inline-flex items-center gap-1 text-slate-400 font-semibold">INV-1001</span>
+                                    </td>
+                                </tr>
+                            @else
+                                <tr class="hover:bg-white/[0.02] transition-colors">
+                                    <td class="py-3 text-slate-300">{{ $registrationPaidDate ?? now()->format('d M Y') }}</td>
+                                    <td class="py-3 text-white font-medium">Registration Fee - Part 1</td>
+                                    <td class="py-3 font-bold text-white">₹500</td>
+                                    <td class="py-3 text-slate-400">UPI / Direct</td>
+                                    <td class="py-3">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                            Paid
+                                        </span>
+                                    </td>
+                                    <td class="py-3 text-right text-slate-500">
+                                        <span class="inline-flex items-center gap-1 text-slate-400 font-semibold">INV-1001</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-white/[0.02] transition-colors">
+                                    <td class="py-3 text-slate-400">--</td>
+                                    <td class="py-3 text-white font-medium">Final Registration Fee - Part 2</td>
+                                    <td class="py-3 font-bold text-white">₹500</td>
+                                    <td class="py-3 text-slate-400">--</td>
+                                    <td class="py-3">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                                            Pending
+                                        </span>
+                                    </td>
+                                    <td class="py-3 text-right text-slate-500">--</td>
+                                </tr>
+                            @endif
+
+                        @else
+                            {{-- Not Paid Yet --}}
+                            <tr class="hover:bg-white/[0.02] transition-colors">
+                                <td class="py-3 text-slate-400">--</td>
+                                <td class="py-3 text-white font-medium">Registration Fee - Part 1</td>
+                                <td class="py-3 font-bold text-white">₹500</td>
+                                <td class="py-3 text-slate-400">--</td>
+                                <td class="py-3">
                                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
                                         Pending
                                     </span>
-                                @endif
-                            </td>
-                            <td class="py-3 text-right">
-                                @php
-                                    $firstSuccess = $transactions->where('status', 'success')->first();
-                                @endphp
-                                @if($firstSuccess)
-                                    <a href="{{ route('candidate.payment.invoice', $firstSuccess->id) }}" class="inline-flex items-center gap-1 text-sky-400 hover:text-white font-semibold">
-                                        <span>INV-{{ 1000 + $firstSuccess->id }}</span>
-                                        <i class="fas fa-download text-[10px]"></i>
-                                    </a>
-                                @else
-                                    <span class="inline-flex items-center gap-1 text-sky-400 hover:text-white font-semibold">
-                                        <span>INV-1001</span>
-                                        <i class="fas fa-download text-[10px]"></i>
-                                    </span>
-                                @endif
-                            </td>
-                        </tr>
+                                </td>
+                                <td class="py-3 text-right text-slate-500">--</td>
+                            </tr>
+                        @endif
 
-                        {{-- Row 2: Part 2 Final Registration Fee --}}
-                        <tr class="hover:bg-white/[0.02] transition-colors">
-                            <td class="py-3 text-slate-400">
-                                {{ $profile->is_fee_paid ? ($profile->updated_at ? $profile->updated_at->format('d M Y') : '--') : '--' }}
-                            </td>
-                            <td class="py-3 text-white font-medium">
-                                Final Registration Fee - Part 2
-                            </td>
-                            <td class="py-3 font-bold text-white">
-                                ₹500
-                            </td>
-                            <td class="py-3 text-slate-400">
-                                {{ $profile->is_fee_paid ? 'UPI (PhonePe)' : '--' }}
-                            </td>
-                            <td class="py-3">
-                                @if($profile->is_fee_paid)
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                                        Paid
-                                    </span>
-                                @else
+                        {{-- Service Charge Row(s) --}}
+                        @if(isset($serviceChargeInvoices) && $serviceChargeInvoices->isNotEmpty())
+                            @foreach($serviceChargeInvoices as $sc)
+                                <tr class="hover:bg-white/[0.02] transition-colors">
+                                    <td class="py-3 text-slate-300">
+                                        {{ $sc->payment_date ? \Carbon\Carbon::parse($sc->payment_date)->format('d M Y') : ($sc->due_date ? \Carbon\Carbon::parse($sc->due_date)->format('d M Y') : '--') }}
+                                    </td>
+                                    <td class="py-3 text-white font-medium">
+                                        {{ $sc->description ?? 'Service Charge (After Joining)' }}
+                                    </td>
+                                    <td class="py-3 font-bold text-white">
+                                        ₹{{ number_format($sc->amount, 0) }}
+                                    </td>
+                                    <td class="py-3 text-slate-400">
+                                        {{ $sc->status === 'paid' ? 'UPI (PhonePe)' : '--' }}
+                                    </td>
+                                    <td class="py-3">
+                                        @if($sc->status === 'paid')
+                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                                Paid
+                                            </span>
+                                        @elseif($sc->status === 'overdue')
+                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                                                Overdue
+                                            </span>
+                                        @else
+                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                                                Pending
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="py-3 text-right">
+                                        @if($sc->status === 'paid')
+                                            <a href="{{ route('serviceCharge.invoicePdf', $sc->id) }}" class="inline-flex items-center gap-1 text-sky-400 hover:text-white font-semibold">
+                                                <span>{{ $sc->invoice_number ?? ('INV-' . (2000 + $sc->id)) }}</span>
+                                                <i class="fas fa-download text-[10px]"></i>
+                                            </a>
+                                        @else
+                                            <span class="text-slate-500">--</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            {{-- Future Service Charge Placeholder --}}
+                            <tr class="hover:bg-white/[0.02] transition-colors">
+                                <td class="py-3 text-slate-400">--</td>
+                                <td class="py-3 text-white font-medium">Service Charge (After Joining)</td>
+                                <td class="py-3 text-slate-400">--</td>
+                                <td class="py-3 text-slate-400">--</td>
+                                <td class="py-3">
                                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
                                         Pending
                                     </span>
-                                @endif
-                            </td>
-                            <td class="py-3 text-right text-slate-500">
-                                @if($profile->is_fee_paid)
-                                    <span class="text-sky-400 font-semibold cursor-pointer">INV-1002 <i class="fas fa-download text-[10px]"></i></span>
-                                @else
-                                    --
-                                @endif
-                            </td>
-                        </tr>
-
-                        {{-- Row 3: Service Charge (After Joining) --}}
-                        <tr class="hover:bg-white/[0.02] transition-colors">
-                            <td class="py-3 text-slate-400">--</td>
-                            <td class="py-3 text-white font-medium">Service Charge (After Joining)</td>
-                            <td class="py-3 text-slate-400">--</td>
-                            <td class="py-3 text-slate-400">--</td>
-                            <td class="py-3">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                                    Pending
-                                </span>
-                            </td>
-                            <td class="py-3 text-right text-slate-500">--</td>
-                        </tr>
+                                </td>
+                                <td class="py-3 text-right text-slate-500">--</td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
             </div>
@@ -1017,61 +1101,115 @@
         <div class="lg:col-span-5 bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-base font-bold text-white">Invoices</h3>
-                <a href="#payment-history-section" class="text-xs font-semibold text-accent-blue hover:text-white transition-colors">
-                    View All
-                </a>
+                <span class="text-xs text-slate-400 font-medium">
+                    {{ $successfulTxns->count() + (isset($serviceChargeInvoices) ? $serviceChargeInvoices->where('status', 'paid')->count() : 0) }} Available
+                </span>
             </div>
 
             <div class="space-y-3">
-                {{-- Invoice 1: INV-1001 --}}
-                <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all flex items-center justify-between gap-3 group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center text-sm font-bold shrink-0">
-                            <i class="fas fa-file-pdf"></i>
+                @if($successfulTxns->isNotEmpty() || (isset($serviceChargeInvoices) && $serviceChargeInvoices->where('status', 'paid')->isNotEmpty()))
+                    @foreach($successfulTxns as $txn)
+                        <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all flex items-center justify-between gap-3 group">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center text-sm font-bold shrink-0">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-white truncate">INV-{{ 1000 + $txn->id }}</h4>
+                                    <p class="text-[11px] text-slate-400 mt-0.5 truncate">{{ $txn->formatted_description }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 shrink-0">
+                                <div class="text-right">
+                                    <div class="text-xs font-black text-white">₹{{ number_format($txn->amount, 0) }}</div>
+                                    <div class="text-[10px] text-slate-400">{{ $txn->created_at ? $txn->created_at->format('d M Y') : '' }}</div>
+                                </div>
+                                <a href="{{ route('candidate.payment.invoice', $txn->id) }}" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-accent-blue hover:text-white flex items-center justify-center text-slate-300 text-xs transition-all shadow-sm" title="Download Invoice">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-white">INV-1001</h4>
-                            <p class="text-[11px] text-slate-400 mt-0.5">Registration Fee - Part 1</p>
+                    @endforeach
+
+                    {{-- Service charge paid invoices if any --}}
+                    @if(isset($serviceChargeInvoices))
+                        @foreach($serviceChargeInvoices->where('status', 'paid') as $sc)
+                            <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all flex items-center justify-between gap-3 group">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center text-sm font-bold shrink-0">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h4 class="text-xs font-bold text-white truncate">{{ $sc->invoice_number ?? ('INV-' . (2000 + $sc->id)) }}</h4>
+                                        <p class="text-[11px] text-slate-400 mt-0.5 truncate">{{ $sc->description ?? 'Service Charge' }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <div class="text-right">
+                                        <div class="text-xs font-black text-white">₹{{ number_format($sc->amount, 0) }}</div>
+                                        <div class="text-[10px] text-slate-400">{{ $sc->payment_date ? \Carbon\Carbon::parse($sc->payment_date)->format('d M Y') : '' }}</div>
+                                    </div>
+                                    <a href="{{ route('serviceCharge.invoicePdf', $sc->id) }}" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-accent-blue hover:text-white flex items-center justify-center text-slate-300 text-xs transition-all shadow-sm" title="Download Invoice">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
+                    @endif
+
+                    {{-- If Part 2 is due soon --}}
+                    @if($hasStandardPending && $successfulTxns->where('amount', '<', 1000)->isNotEmpty() && !$successfulTxns->contains(fn($t) => str_starts_with($t->transaction_id ?? '', 'UPGRADE_')))
+                        <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center text-sm font-bold shrink-0">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-white truncate">Registration Balance</h4>
+                                    <p class="text-[11px] text-slate-400 mt-0.5 truncate">Final Registration Fee - Part 2</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 shrink-0">
+                                <div class="text-right">
+                                    <div class="text-xs font-black text-white">₹{{ number_format($profile->pending_amount > 0 ? $profile->pending_amount : 500, 0) }}</div>
+                                    <div class="text-[10px] font-semibold text-amber-400">Due Soon</div>
+                                </div>
+                                <button type="button" @click="openFlow(1, 'upgrade')" class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-slate-950 flex items-center justify-center text-xs transition-all cursor-pointer" title="Pay Balance">
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
-                            <div class="text-xs font-black text-white">₹500</div>
-                            <div class="text-[10px] text-slate-500">{{ $registrationPaidDate ?? '19 Aug 2024' }}</div>
+                    @endif
+
+                @elseif($profile->initial_fee_paid || $profile->is_fee_paid)
+                    {{-- Legacy or Manual Payment invoice --}}
+                    <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all flex items-center justify-between gap-3 group">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center text-sm font-bold shrink-0">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <h4 class="text-xs font-bold text-white truncate">INV-1001</h4>
+                                <p class="text-[11px] text-slate-400 mt-0.5 truncate">Registration Fee</p>
+                            </div>
                         </div>
-                        @if($firstSuccess)
-                            <a href="{{ route('candidate.payment.invoice', $firstSuccess->id) }}" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-accent-blue hover:text-white flex items-center justify-center text-slate-300 text-xs transition-all shadow-sm" title="Download Invoice">
-                                <i class="fas fa-download"></i>
-                            </a>
-                        @else
-                            <button type="button" onclick="alert('Invoice downloaded for INV-1001')" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-accent-blue hover:text-white flex items-center justify-center text-slate-300 text-xs transition-all shadow-sm" title="Download Invoice">
+                        <div class="flex items-center gap-3 shrink-0">
+                            <div class="text-right">
+                                <div class="text-xs font-black text-white">₹{{ number_format($totalPaidAmount, 0) }}</div>
+                                <div class="text-[10px] text-slate-400">{{ $registrationPaidDate ?? now()->format('d M Y') }}</div>
+                            </div>
+                            <button type="button" onclick="alert('Your invoice was recorded under direct account registration.')" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-accent-blue hover:text-white flex items-center justify-center text-slate-300 text-xs transition-all shadow-sm" title="Download Invoice">
                                 <i class="fas fa-download"></i>
                             </button>
-                        @endif
-                    </div>
-                </div>
-
-                {{-- Invoice 2: INV-1002 --}}
-                <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all flex items-center justify-between gap-3 group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-slate-700/40 border border-slate-600/30 text-slate-400 flex items-center justify-center text-sm font-bold shrink-0">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-white">INV-1002</h4>
-                            <p class="text-[11px] text-slate-400 mt-0.5">Final Registration Fee - Part 2</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
-                            <div class="text-xs font-black text-white">₹500</div>
-                            <div class="text-[10px] font-semibold text-amber-400">Due Soon</div>
-                        </div>
-                        <button type="button" onclick="alert('Invoice will be available upon payment.')" class="w-8 h-8 rounded-lg bg-white/5 text-slate-500 flex items-center justify-center text-xs cursor-pointer hover:bg-white/10 hover:text-slate-300 transition-all" title="Download Invoice">
-                            <i class="fas fa-download"></i>
-                        </button>
+                @else
+                    <div class="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center text-slate-400 text-xs">
+                        <i class="fas fa-file-invoice text-2xl text-slate-600 mb-2"></i>
+                        <p>No invoices generated yet.</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Invoices appear here once a payment is completed.</p>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
 
