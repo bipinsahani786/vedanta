@@ -1120,10 +1120,10 @@ class CrmController extends Controller
             // Log communication in Follow-ups
             \App\Models\CrmFollowUp::create([
                 'candidate_id' => $candidate->id,
-                'admin_id' => auth()->id(),
+                'created_by' => auth()->id(),
                 'status' => 'closed',
                 'notes' => 'Sent Email: ' . $request->subject,
-                'next_follow_up_date' => null,
+                'follow_up_date' => null,
             ]);
 
             return back()->with('success', 'Email sent successfully to ' . $candidate->email);

@@ -710,7 +710,7 @@
                                 <i class="fas fa-bolt"></i>
                                 <span>Activate Membership</span>
                             </div>
-                            <p class="text-[10px] text-slate-300 mt-0.5">Plans start from ₹500</p>
+                            <!-- <p class="text-[10px] text-slate-300 mt-0.5">Plans start from ₹500</p> -->
                         </div>
                         <a href="{{ route('candidate.payment.show') }}" 
                            class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-black text-xs shadow-md shadow-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/50 hover:brightness-105 hover:-translate-y-0.5 transition-all shrink-0 flex items-center gap-1.5 whitespace-nowrap">

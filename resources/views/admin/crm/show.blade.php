@@ -781,8 +781,9 @@
     </div>
 
     <!-- Send Email to Candidate Modal -->
-    <div id="sendEmailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div id="sendEmailModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 hidden">
+        <div class="absolute inset-0" onclick="closeSendEmailModal()"></div>
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative z-10 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
                 <div>
                     <h3 class="font-bold text-lg text-gray-900 flex items-center gap-2">
@@ -841,6 +842,16 @@
 
 @push('scripts')
 <script>
+    function openSendEmailModal() {
+        const modal = document.getElementById('sendEmailModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeSendEmailModal() {
+        const modal = document.getElementById('sendEmailModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
     const candidateData = {
         name: @json($candidate->name),
         email: @json($candidate->email),
@@ -852,21 +863,13 @@
         invoice_number: @json($candidate->profile->payment_id ?? 'INV-VPA'),
         job_title: @json($candidate->applications->first()?->jobPost?->title ?? 'Teaching Position'),
         school_name: @json($candidate->applications->first()?->jobPost?->school_name ?? 'Partner Educational Institution'),
-        interview_date: @json($candidate->applications->first()?->interview_date ? $candidate->applications->first()->interview_date->format('M d, Y h:i A') : 'To be confirmed'),
+        interview_date: @json($candidate->applications->first()?->interview_date ? \Carbon\Carbon::parse($candidate->applications->first()->interview_date)->format('M d, Y h:i A') : 'To be confirmed'),
         interview_link: @json($candidate->applications->first()?->interview_link ?? 'https://vedantaplacementagency.in/candidate/applications'),
         remarks: @json($candidate->applications->first()?->remarks ?? 'None'),
         action_url: 'https://vedantaplacementagency.in/candidate/dashboard'
     };
 
     const emailTemplatesMap = @json($emailTemplates->keyBy('id'));
-
-    function openSendEmailModal() {
-        document.getElementById('sendEmailModal').classList.remove('hidden');
-    }
-
-    function closeSendEmailModal() {
-        document.getElementById('sendEmailModal').classList.add('hidden');
-    }
 
     function applySelectedTemplate(tmplId) {
         if (!tmplId || !emailTemplatesMap[tmplId]) return;
@@ -908,9 +911,11 @@
     function handleSendEmailSubmit(form) {
         const btn = document.getElementById('sendEmailSubmitBtn');
         if (btn) {
-            btn.disabled = true;
-            btn.classList.add('opacity-75', 'cursor-not-allowed');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Sending...';
+            setTimeout(() => {
+                btn.disabled = true;
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Sending...';
+            }, 10);
         }
         return true;
     }
