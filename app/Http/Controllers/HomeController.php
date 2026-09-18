@@ -118,7 +118,24 @@ class HomeController extends Controller
             $query->where('job_type', $request->job_type);
         }
 
-        $jobs = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
+        $sort = $request->get('sort', 'latest');
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'salary_high':
+                $query->orderByRaw('COALESCE(salary_max, salary_min, 0) DESC');
+                break;
+            case 'salary_low':
+                $query->orderByRaw('COALESCE(salary_min, salary_max, 0) ASC');
+                break;
+            case 'latest':
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        $jobs = $query->paginate(12)->withQueryString();
 
         $states = \App\Models\State::where('is_active', true)->orderBy('name')->get();
         $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();

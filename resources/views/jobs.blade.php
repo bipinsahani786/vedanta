@@ -180,9 +180,9 @@
     <!-- Decorative Pattern -->
     <div class="absolute inset-0 z-0 opacity-[0.02]" style="background-image: radial-gradient(#000000 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
 
-    <!-- Job List (Reference Image 1 & 4) -->
-    <div class="w-full relative z-10">
-        @if(request('q') || request('state') || request('class') || request('subject'))
+    <!-- Job List Container with Alpine View Mode -->
+    <div x-data="{ viewMode: localStorage.getItem('job_view_mode') || 'grid' }" class="w-full relative z-10">
+        @if(request('q') || request('state') || request('class') || request('subject') || request('sort'))
             <div class="mb-6 p-4 rounded-2xl bg-blue-50/80 border border-blue-200/70 flex flex-wrap items-center justify-between gap-3 text-slate-800 shadow-sm">
                 <div class="flex items-center gap-2.5 text-xs sm:text-sm">
                     <span class="w-8 h-8 rounded-xl bg-[#129aef]/15 text-[#129aef] flex items-center justify-center font-bold">
@@ -198,19 +198,90 @@
                 </div>
                 <a href="{{ route('jobs') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200/80 font-bold text-xs transition-all shadow-sm">
                     <i class="fas fa-times text-[10px]"></i>
-                    <span>Clear Search</span>
+                    <span>Clear Filters</span>
                 </a>
             </div>
         @endif
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Toolbar: Header count, Sort by dropdown, & Grid/List switcher (Matches Reference Image) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+                <h2 class="text-lg sm:text-xl font-black text-slate-900">
+                    Explore Jobs
+                </h2>
+                <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#129aef] text-xs font-bold border border-blue-200/50">
+                    {{ $jobs->total() }} {{ Str::plural('Opportunity', $jobs->total()) }}
+                </span>
+            </div>
+
+            <!-- Right Controls: Sort by + Grid/List Toggle -->
+            <div class="flex items-center gap-3 self-end sm:self-auto">
+                <!-- Sort by Dropdown (Exact match to Reference Image) -->
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-semibold text-slate-700 select-none">Sort by</span>
+                    <div class="relative">
+                        <select id="sort_by_select" 
+                                onchange="updateJobSort(this.value)" 
+                                class="appearance-none bg-white border border-slate-200/90 hover:border-slate-300 rounded-xl pl-3.5 pr-8 py-2 text-xs sm:text-sm font-semibold text-slate-800 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#129aef]/20 cursor-pointer transition-all">
+                            <option value="latest" {{ request('sort', 'latest') == 'latest' ? 'selected' : '' }}>Latest First</option>
+                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest First</option>
+                            <option value="salary_high" {{ request('sort') == 'salary_high' ? 'selected' : '' }}>Salary: High to Low</option>
+                            <option value="salary_low" {{ request('sort') == 'salary_low' ? 'selected' : '' }}>Salary: Low to High</option>
+                        </select>
+                        <div class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Mode Switcher (Exact match to Reference Image) -->
+                <div class="bg-slate-100/90 p-1 rounded-xl flex items-center border border-slate-200/80 shadow-xs">
+                    <!-- Grid View Button -->
+                    <button type="button" 
+                            @click="viewMode = 'grid'; localStorage.setItem('job_view_mode', 'grid')" 
+                            :class="viewMode === 'grid' ? 'bg-white text-[#129aef] shadow-xs' : 'text-slate-400 hover:text-slate-600'" 
+                            class="p-2 rounded-lg transition-all cursor-pointer flex items-center justify-center"
+                            title="Grid View">
+                        <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                            <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2"></rect>
+                            <rect x="9" y="1.5" width="5.5" height="5.5" rx="1.2"></rect>
+                            <rect x="1.5" y="9" width="5.5" height="5.5" rx="1.2"></rect>
+                            <rect x="9" y="9" width="5.5" height="5.5" rx="1.2"></rect>
+                        </svg>
+                    </button>
+                    <!-- List View Button -->
+                    <button type="button" 
+                            @click="viewMode = 'list'; localStorage.setItem('job_view_mode', 'list')" 
+                            :class="viewMode === 'list' ? 'bg-white text-[#129aef] shadow-xs' : 'text-slate-400 hover:text-slate-600'" 
+                            class="p-2 rounded-lg transition-all cursor-pointer flex items-center justify-center"
+                            title="List View">
+                        <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                            <circle cx="2.5" cy="3.5" r="1.2"></circle>
+                            <rect x="5.5" y="2.5" width="9" height="2" rx="1"></rect>
+                            <circle cx="2.5" cy="8" r="1.2"></circle>
+                            <rect x="5.5" y="7" width="9" height="2" rx="1"></rect>
+                            <circle cx="2.5" cy="12.5" r="1.2"></circle>
+                            <rect x="5.5" y="11.5" width="9" height="2" rx="1"></rect>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jobs Grid or List (Adaptive via viewMode) -->
+        <div :class="viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col gap-4'">
             @forelse($jobs as $job)
             @php
                 $isJobUnlocked = $job->canUserViewProtectedDetails();
             @endphp
-            <div class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:border-[#129aef]/60 hover:shadow-xl transition-all duration-300 group reveal relative">
-                <div>
-                    <!-- Card Top Meta: Job Code, Status, Bookmark -->
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 hover:border-[#129aef]/60 hover:shadow-xl transition-all duration-300 group relative flex"
+                 :class="viewMode === 'list' ? 'flex-col md:flex-row md:items-center md:justify-between gap-6' : 'flex-col justify-between'">
+                
+                <!-- Main Content Area -->
+                <div :class="viewMode === 'list' ? 'flex-1 min-w-0' : ''">
+                    <!-- Card Top Meta: Job Code, Status, Bookmark (in Grid view) -->
                     <div class="flex items-center justify-between gap-2 mb-3">
                         <div class="flex items-center gap-2">
                             <span class="px-2.5 py-0.5 rounded-md bg-blue-50 text-[#129aef] text-[11px] font-black tracking-wider">
@@ -222,17 +293,21 @@
                             </span>
                         </div>
                         
-                        <a href="{{ route('jobs.show', $job->id) }}" class="text-slate-400 hover:text-amber-500 transition-colors" title="Save Job">
+                        <a href="{{ route('jobs.show', $job->id) }}" 
+                           class="text-slate-400 hover:text-amber-500 transition-colors" 
+                           :class="viewMode === 'list' ? 'md:hidden' : ''"
+                           title="Save Job">
                             <i class="far fa-bookmark text-sm"></i>
                         </a>
                     </div>
                     
                     <!-- Job Title -->
-                    <h3 class="text-lg font-black text-slate-900 mb-1.5 group-hover:text-[#129aef] transition-colors line-clamp-1">
+                    <h3 class="text-lg font-black text-slate-900 mb-1.5 group-hover:text-[#129aef] transition-colors line-clamp-1"
+                        :class="viewMode === 'list' ? 'md:text-xl' : ''">
                         <a href="{{ route('jobs.show', $job->id) }}">{{ $job->title ?? 'Job Requirement' }}</a>
                     </h3>
 
-                    <!-- School / Confidential Institution & Location (Masked if not unlocked) -->
+                    <!-- School / Location -->
                     <div class="text-xs text-slate-500 font-semibold mb-3 flex items-center gap-2">
                         @if($isJobUnlocked)
                             <span class="text-slate-800 font-bold line-clamp-1">{{ $job->school_name }}</span>
@@ -265,20 +340,22 @@
                     </div>
 
                     <!-- Description preview -->
-                    <p class="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-2">
-                        {{ Str::limit(strip_tags($job->description), 110) ?: 'Seeking dedicated educators for this position. Candidate should have relevant qualification and experience.' }}
+                    <p class="text-xs text-slate-600 leading-relaxed line-clamp-2"
+                       :class="viewMode === 'list' ? 'mb-0 md:max-w-2xl' : 'mb-4'">
+                        {{ Str::limit(strip_tags($job->description), 120) ?: 'Seeking dedicated educators for this position. Candidate should have relevant qualification and experience.' }}
                     </p>
 
-                    <!-- Salary Section (Formatted) -->
-                    <div class="mb-4">
+                    <!-- Salary Section (in Grid mode) -->
+                    <div class="my-4" :class="viewMode === 'list' ? 'md:hidden' : ''">
                         <span class="text-base font-black text-[#040e2d]">
                             {{ $job->formatted_salary }}
                         </span>
                     </div>
 
-                    <!-- Protected Details Banner (if locked - Image 4) -->
+                    <!-- Protected Details Banner (in Grid mode) -->
                     @if(!$isJobUnlocked)
-                    <div class="trigger-school-lock-modal mb-4 p-2.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/70 border border-blue-200/60 text-[#129aef] text-xs font-bold flex items-center justify-between cursor-pointer transition-all">
+                    <div class="trigger-school-lock-modal mb-4 p-2.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/70 border border-blue-200/60 text-[#129aef] text-xs font-bold flex items-center justify-between cursor-pointer transition-all"
+                         :class="viewMode === 'list' ? 'md:hidden' : ''">
                         <span class="flex items-center gap-2">
                             <i class="fas fa-lock text-xs"></i>
                             <span>Login to view school name & exact location</span>
@@ -288,23 +365,45 @@
                     @endif
                 </div>
                 
-                <!-- Bottom Action Row (Image 1) -->
-                <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
-                    @if($isJobUnlocked)
-                        <a href="{{ route('jobs.show', $job->id) }}" class="flex-1 py-2.5 px-4 bg-[#129aef] hover:bg-[#0d85d4] text-white rounded-xl font-extrabold text-xs text-center transition-all shadow-sm">
-                            Apply with Vedanta
+                <!-- Actions Section (Adapts to Grid vs List) -->
+                <div :class="viewMode === 'list' ? 'md:w-64 md:border-l md:border-slate-100 md:pl-6 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 flex flex-col justify-center shrink-0' : 'pt-3 border-t border-slate-100 flex items-center gap-2'">
+                    
+                    <!-- Salary & Bookmark (in List mode) -->
+                    <div class="hidden" :class="viewMode === 'list' ? 'md:flex items-center justify-between mb-3' : ''">
+                        <div class="text-lg font-black text-[#040e2d]">
+                            {{ $job->formatted_salary }}
+                        </div>
+                        <a href="{{ route('jobs.show', $job->id) }}" class="text-slate-400 hover:text-amber-500 transition-colors" title="Save Job">
+                            <i class="far fa-bookmark text-sm"></i>
                         </a>
-                    @else
-                        <button type="button" class="trigger-school-lock-modal flex-1 py-2.5 px-4 bg-[#129aef] hover:bg-[#0d85d4] text-white rounded-xl font-extrabold text-xs text-center transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
-                            <i class="fas fa-lock text-[11px]"></i>
-                            <span>Apply with Vedanta</span>
-                        </button>
+                    </div>
+
+                    @if(!$isJobUnlocked)
+                    <div class="hidden" :class="viewMode === 'list' ? 'md:block trigger-school-lock-modal mb-3 p-2 rounded-lg bg-blue-50/70 hover:bg-blue-100/70 border border-blue-200/60 text-[#129aef] text-[11px] font-bold cursor-pointer transition-all text-center' : ''">
+                        <span class="flex items-center justify-center gap-1.5">
+                            <i class="fas fa-lock text-[10px]"></i>
+                            <span>Login to unlock details</span>
+                        </span>
+                    </div>
                     @endif
 
-                    <button type="button" onclick="navigator.clipboard.writeText('{{ route('jobs.show', $job->id) }}'); alert('Job link copied!');" class="py-2.5 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer" title="Share Job">
-                        <i class="fas fa-share-alt text-[#129aef]"></i>
-                        <span>Share</span>
-                    </button>
+                    <div class="flex items-center gap-2 w-full">
+                        @if($isJobUnlocked)
+                            <a href="{{ route('jobs.show', $job->id) }}" class="flex-1 py-2.5 px-4 bg-[#129aef] hover:bg-[#0d85d4] text-white rounded-xl font-extrabold text-xs text-center transition-all shadow-sm">
+                                Apply with Vedanta
+                            </a>
+                        @else
+                            <button type="button" class="trigger-school-lock-modal flex-1 py-2.5 px-4 bg-[#129aef] hover:bg-[#0d85d4] text-white rounded-xl font-extrabold text-xs text-center transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i class="fas fa-lock text-[11px]"></i>
+                                <span>Apply with Vedanta</span>
+                            </button>
+                        @endif
+
+                        <button type="button" onclick="navigator.clipboard.writeText('{{ route('jobs.show', $job->id) }}'); alert('Job link copied!');" class="py-2.5 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer" title="Share Job">
+                            <i class="fas fa-share-alt text-[#129aef]"></i>
+                            <span class="hidden sm:inline">Share</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             @empty
@@ -377,6 +476,13 @@
 
 
 <script>
+    function updateJobSort(sortVal) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('sort', sortVal);
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
+    }
+
     (function() {
 
         // Dynamic Subjects and Specializations Dropdowns
