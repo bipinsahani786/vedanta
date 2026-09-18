@@ -316,6 +316,8 @@ class JobController extends Controller
 
         if ($request->hasFile('school_image')) {
             $validated['school_image'] = $request->file('school_image')->store('schools', 'public');
+        } elseif ($request->input('remove_school_image') === '1') {
+            $validated['school_image'] = null;
         }
 
         // Auto-generate formatted salary_range for backwards-compatibility

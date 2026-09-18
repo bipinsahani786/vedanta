@@ -221,6 +221,16 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Employer Information</h3>
             
+            @if($job->school_image)
+                <div class="mb-4 rounded-xl overflow-hidden border border-gray-200 h-36 w-full relative group">
+                    <img src="{{ asset('storage/' . $job->school_image) }}" alt="{{ $job->school_name }}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    <span class="absolute bottom-2 left-2 text-[11px] font-bold text-white bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm">
+                        <i class="fas fa-image mr-1"></i> Campus Banner
+                    </span>
+                </div>
+            @endif
+
             <div class="space-y-4">
                 <div>
                     <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Institution Name</div>

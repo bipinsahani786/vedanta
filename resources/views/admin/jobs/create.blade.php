@@ -21,6 +21,53 @@
         <form action="{{ route('admin.jobs.store') }}" method="POST" enctype="multipart/form-data" class="p-8">
             @csrf
             
+            <!-- School / Institution Banner Image Upload -->
+            <div class="mb-8">
+                <label class="block text-xs font-bold text-text-dark/80 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i class="fas fa-image text-accent-blue"></i> School / Institution Banner Image (Optional)
+                </label>
+                
+                <div id="school-image-upload-box" class="relative group border-2 border-dashed border-card-border hover:border-accent-blue/60 rounded-2xl bg-secondary-bg/30 p-6 transition-all duration-200 text-center cursor-pointer">
+                    <input type="file" name="school_image" id="school_image" accept="image/png,image/jpeg,image/jpg,image/webp" class="hidden">
+                    
+                    <!-- Empty State -->
+                    <div id="image-empty-state" class="py-4">
+                        <div class="w-16 h-16 rounded-2xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue flex items-center justify-center mx-auto mb-3 text-2xl group-hover:scale-110 transition-transform shadow-sm">
+                            <i class="fas fa-cloud-arrow-up"></i>
+                        </div>
+                        <p class="text-sm font-bold text-text-main mb-1">
+                            Click or drag &amp; drop to upload School / Campus Photo
+                        </p>
+                        <p class="text-xs text-text-dark/60">
+                            Recommended: 1200×600px landscape photo • PNG, JPG, WEBP (Max 3MB)
+                        </p>
+                    </div>
+
+                    <!-- Preview State -->
+                    <div id="image-preview-state" class="hidden">
+                        <div class="relative max-w-xl mx-auto rounded-xl overflow-hidden border border-card-border shadow-lg">
+                            <img id="image-preview-img" src="" alt="Preview" class="w-full h-48 sm:h-56 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none"></div>
+                            <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-auto">
+                                <span id="image-preview-name" class="text-xs font-bold text-white bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg truncate max-w-[220px]"></span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" id="btn-change-image" class="px-3 py-1.5 bg-white/90 hover:bg-white text-slate-900 rounded-lg text-xs font-bold transition-all shadow-md flex items-center gap-1">
+                                        <i class="fas fa-arrows-rotate text-[10px]"></i> Change
+                                    </button>
+                                    <button type="button" id="btn-remove-image" class="px-3 py-1.5 bg-red-500/90 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition-all shadow-md flex items-center gap-1">
+                                        <i class="fas fa-trash-alt text-[10px]"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <span class="text-[11px] text-text-dark/60 mt-2 block">
+                    <i class="fas fa-shield-halved text-accent-blue mr-1"></i> Displayed as the official verified campus banner when candidates view or unlock job details.
+                </span>
+                @error('school_image') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- School Name -->
                 <div>
@@ -48,13 +95,6 @@
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Phone Number</label>
                     <input type="text" name="phone" value="{{ old('phone') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 9876543210">
                     @error('phone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-                <!-- School Image -->
-                <div>
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">School Image / Photo (Optional)</label>
-                    <input type="file" name="school_image" accept="image/*" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue file:text-white hover:file:bg-accent-blue-hover">
-                    <span class="text-[11px] text-text-dark/60 mt-1 block">Protected image displayed when candidate unlocks job details.</span>
-                    @error('school_image') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
 
@@ -334,6 +374,96 @@
 
         // Initial setup
         updateSalaryFields();
+    })();
+
+    // Dynamic School Image Uploader
+    (function() {
+        const uploadBox = document.getElementById('school-image-upload-box');
+        const fileInput = document.getElementById('school_image');
+        const emptyState = document.getElementById('image-empty-state');
+        const previewState = document.getElementById('image-preview-state');
+        const previewImg = document.getElementById('image-preview-img');
+        const previewName = document.getElementById('image-preview-name');
+        const btnChange = document.getElementById('btn-change-image');
+        const btnRemove = document.getElementById('btn-remove-image');
+
+        if (!uploadBox || !fileInput) return;
+
+        uploadBox.addEventListener('click', function(e) {
+            if (e.target.closest('#btn-remove-image')) return;
+            fileInput.click();
+        });
+
+        if (btnChange) {
+            btnChange.addEventListener('click', function(e) {
+                e.stopPropagation();
+                fileInput.click();
+            });
+        }
+
+        if (btnRemove) {
+            btnRemove.addEventListener('click', function(e) {
+                e.stopPropagation();
+                fileInput.value = '';
+                previewImg.src = '';
+                previewState.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            });
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadBox.classList.add('border-accent-blue', 'bg-accent-blue/5');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadBox.classList.remove('border-accent-blue', 'bg-accent-blue/5');
+            }, false);
+        });
+
+        uploadBox.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files && files.length > 0) {
+                fileInput.files = files;
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                handleFile(this.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file (PNG, JPG, JPEG, WEBP).');
+                return;
+            }
+            if (file.size > 3 * 1024 * 1024) {
+                alert('File size exceeds 3MB limit. Please choose a smaller image.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                if (previewName) {
+                    const sizeKb = (file.size / 1024).toFixed(0);
+                    previewName.textContent = file.name + ' (' + sizeKb + ' KB)';
+                }
+                emptyState.classList.add('hidden');
+                previewState.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
     })();
 </script>
 @endpush

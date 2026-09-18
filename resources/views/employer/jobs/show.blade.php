@@ -7,6 +7,15 @@
     <div class="max-w-4xl mx-auto bg-card-bg border border-card-border rounded-2xl shadow-2xl relative z-10 overflow-hidden reveal">
         <!-- Job Header -->
         <div class="bg-secondary-bg border-b border-card-border p-8 relative">
+            @if($job->school_image)
+                <div class="mb-6 rounded-xl overflow-hidden border border-card-border h-44 sm:h-56 w-full relative group">
+                    <img src="{{ asset('storage/' . $job->school_image) }}" alt="{{ $job->school_name }}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <span class="absolute bottom-3 left-3 px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md text-white text-xs font-bold flex items-center gap-1.5">
+                        <i class="fas fa-university text-accent-yellow"></i> {{ $job->school_name }}
+                    </span>
+                </div>
+            @endif
             <div class="flex justify-between items-start">
                 <div>
                     <h1 class="text-3xl font-bold text-text-main mb-2 relative z-10">{{ $job->title ?? 'Teacher Required' }}</h1>

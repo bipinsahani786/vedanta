@@ -42,9 +42,10 @@ class JobController extends Controller
     {
         $request->validate([
             'school_name' => 'nullable|string|max:255',
+            'school_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:15',
+            'phone' => 'nullable|string|max:20',
             'jobs' => 'required|array|min:1',
             'jobs.*.title' => 'required|string|max:255',
             'jobs.*.description' => 'required|string',
@@ -59,6 +60,11 @@ class JobController extends Controller
             'jobs.*.salary_rate' => 'nullable|string|max:50',
             'jobs.*.salary_range' => 'nullable|string|max:255',
         ]);
+
+        $schoolImagePath = null;
+        if ($request->hasFile('school_image')) {
+            $schoolImagePath = $request->file('school_image')->store('schools', 'public');
+        }
 
         foreach ($request->jobs as $jobData) {
             $mode = $jobData['salary_mode'] ?? 'range';
@@ -81,6 +87,7 @@ class JobController extends Controller
             $job = JobPost::create([
                 'user_id' => auth()->id(),
                 'school_name' => $request->school_name,
+                'school_image' => $schoolImagePath,
                 'contact_person' => $request->contact_person,
                 'email' => $request->email,
                 'phone' => $request->phone,
@@ -168,6 +175,7 @@ class JobController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
+            'school_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'subject_id' => 'required|exists:subjects,id',
@@ -205,6 +213,12 @@ class JobController extends Controller
         $updateData['salary_max'] = $max;
         $updateData['salary_rate'] = $rate;
         $updateData['salary_range'] = $salaryRange;
+
+        if ($request->hasFile('school_image')) {
+            $updateData['school_image'] = $request->file('school_image')->store('schools', 'public');
+        } elseif ($request->input('remove_school_image') === '1') {
+            $updateData['school_image'] = null;
+        }
 
         $job->update($updateData);
 
