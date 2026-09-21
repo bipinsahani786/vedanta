@@ -63,36 +63,36 @@
             </div>
 
             <!-- Primary Action: WhatsApp (Featured) -->
-            <a id="shareModalWaBtn" href="#" target="_blank" class="w-full py-3 px-4 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold text-sm transition-all shadow-md hover:shadow-lg hover:shadow-[#25D366]/30 flex items-center justify-center gap-2.5 mb-3 group active:scale-[0.99]">
-                <i class="fab fa-whatsapp text-lg group-hover:scale-110 transition-transform"></i>
-                <span>Share on WhatsApp</span>
-                <span class="ml-1 text-[10px] uppercase font-black bg-white/20 px-2 py-0.5 rounded-full">Instant</span>
+            <a id="shareModalWaBtn" href="#" target="_blank" style="background-color: #25D366 !important; color: #ffffff !important;" class="w-full py-3 px-4 rounded-2xl bg-[#25d366] hover:bg-[#20bd5a] text-white font-extrabold text-sm transition-all shadow-md hover:shadow-lg hover:shadow-[#25D366]/30 flex items-center justify-center gap-2.5 mb-3 group active:scale-[0.99]">
+                <i class="fab fa-whatsapp text-lg group-hover:scale-110 transition-transform text-white" style="color: #ffffff !important;"></i>
+                <span class="text-white" style="color: #ffffff !important;">Share on WhatsApp</span>
+                <span class="ml-1 text-[10px] uppercase font-black bg-white/20 px-2 py-0.5 rounded-full text-white" style="color: #ffffff !important;">Instant</span>
             </a>
 
             <!-- Other Social Channels Grid (Telegram, LinkedIn, Facebook, More Apps) -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
                 <!-- Telegram -->
-                <a id="shareModalTgBtn" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0">
-                    <i class="fab fa-telegram-plane text-sm"></i>
-                    <span>Telegram</span>
+                <a id="shareModalTgBtn" href="#" target="_blank" style="background-color: #0088cc !important; color: #ffffff !important;" class="py-2.5 px-3 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0">
+                    <i class="fab fa-telegram-plane text-sm text-white" style="color: #ffffff !important;"></i>
+                    <span class="text-white" style="color: #ffffff !important;">Telegram</span>
                 </a>
 
                 <!-- LinkedIn -->
-                <a id="shareModalLiBtn" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-[#0A66C2] hover:bg-[#084e96] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0">
-                    <i class="fab fa-linkedin text-sm"></i>
-                    <span>LinkedIn</span>
+                <a id="shareModalLiBtn" href="#" target="_blank" style="background-color: #0a66c2 !important; color: #ffffff !important;" class="py-2.5 px-3 rounded-xl bg-[#0a66c2] hover:bg-[#084e96] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0">
+                    <i class="fab fa-linkedin text-sm text-white" style="color: #ffffff !important;"></i>
+                    <span class="text-white" style="color: #ffffff !important;">LinkedIn</span>
                 </a>
 
                 <!-- Facebook -->
-                <a id="shareModalFbBtn" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-[#1877F2] hover:bg-[#1465cf] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0">
-                    <i class="fab fa-facebook text-sm"></i>
-                    <span>Facebook</span>
+                <a id="shareModalFbBtn" href="#" target="_blank" style="background-color: #1877f2 !important; color: #ffffff !important;" class="py-2.5 px-3 rounded-xl bg-[#1877f2] hover:bg-[#1465cf] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0">
+                    <i class="fab fa-facebook text-sm text-white" style="color: #ffffff !important;"></i>
+                    <span class="text-white" style="color: #ffffff !important;">Facebook</span>
                 </a>
 
                 <!-- Native Device Share / More Apps -->
-                <button type="button" id="shareModalNativeBtn" onclick="triggerNativeShare()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">
-                    <i class="fas fa-ellipsis-h text-xs"></i>
-                    <span>More Apps</span>
+                <button type="button" id="shareModalNativeBtn" onclick="triggerNativeShare()" style="background-color: #1e293b !important; color: #ffffff !important;" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">
+                    <i class="fas fa-ellipsis-h text-xs text-white" style="color: #ffffff !important;"></i>
+                    <span class="text-white" style="color: #ffffff !important;">More Apps</span>
                 </button>
             </div>
 
@@ -103,9 +103,9 @@
                 </label>
                 <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-1.5 focus-within:border-[#129aef] focus-within:ring-2 focus-within:ring-[#129aef]/20 transition-all">
                     <input type="text" id="shareModalLinkInput" readonly class="bg-transparent border-0 text-slate-700 text-xs font-mono font-medium px-2.5 w-full focus:outline-none select-all truncate" value="">
-                    <button type="button" id="shareModalCopyBtn" onclick="copyJobShareLink()" class="px-4 py-2 rounded-xl bg-[#129aef] hover:bg-[#0d85d4] text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 shrink-0 cursor-pointer">
-                        <i class="far fa-copy text-xs"></i>
-                        <span>Copy Link</span>
+                    <button type="button" id="shareModalCopyBtn" onclick="copyJobShareLink()" style="background-color: #129aef !important; color: #ffffff !important;" class="px-4 py-2 rounded-xl bg-[#129aef] hover:bg-[#0d85d4] text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 shrink-0 cursor-pointer">
+                        <i class="far fa-copy text-xs text-white" style="color: #ffffff !important;"></i>
+                        <span class="text-white" style="color: #ffffff !important;">Copy Link</span>
                     </button>
                 </div>
             </div>
@@ -232,7 +232,9 @@
             const copyBtn = document.getElementById('shareModalCopyBtn');
             if (copyBtn) {
                 copyBtn.className = 'px-4 py-2 rounded-xl bg-[#129aef] hover:bg-[#0d85d4] text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 shrink-0 cursor-pointer';
-                copyBtn.innerHTML = '<i class="far fa-copy text-xs"></i> <span>Copy Link</span>';
+                copyBtn.style.backgroundColor = '#129aef';
+                copyBtn.style.color = '#ffffff';
+                copyBtn.innerHTML = '<i class="far fa-copy text-xs text-white" style="color: #ffffff !important;"></i> <span class="text-white" style="color: #ffffff !important;">Copy Link</span>';
             }
 
             const copyTextBtn = document.getElementById('shareModalCopyTextBtn');
@@ -307,7 +309,9 @@
                 const copyBtn = document.getElementById('shareModalCopyBtn');
                 if (copyBtn) {
                     copyBtn.className = 'px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 shrink-0 cursor-pointer';
-                    copyBtn.innerHTML = '<i class="fas fa-check text-xs"></i> <span>Copied!</span>';
+                    copyBtn.style.backgroundColor = '#059669';
+                    copyBtn.style.color = '#ffffff';
+                    copyBtn.innerHTML = '<i class="fas fa-check text-xs text-white" style="color: #ffffff !important;"></i> <span class="text-white" style="color: #ffffff !important;">Copied!</span>';
                 }
                 showJobShareToast('Job link copied to clipboard!');
             });
