@@ -254,9 +254,9 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Upload Resume <span class="text-red-400">*</span></label>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Upload Resume <span class="text-text-dark/40 text-[10px] normal-case">({{ $profile->resume_path ? 'Uploaded' : 'Optional / Recommended' }})</span></label>
                         <div class="relative">
-                            <input type="file" name="resume" accept=".pdf,.doc,.docx" {{ $profile->resume_path ? '' : 'required' }}
+                            <input type="file" name="resume" accept=".pdf,.doc,.docx"
                                 class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue/10 file:text-accent-blue hover:file:bg-accent-blue/20">
                         </div>
                         @if($profile->resume_path)
@@ -305,10 +305,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current School/Organization <span class="text-red-400">*</span></label>
+                        <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current School/Organization</label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dark/40"><i class="fas fa-building text-sm"></i></span>
-                            <input type="text" name="current_school" required value="{{ old('current_school', $profile->current_school) }}" placeholder="e.g. DPS Patna (or write 'Fresher')"
+                            <input type="text" name="current_school" value="{{ old('current_school', $profile->current_school ?: 'Fresher') }}" placeholder="e.g. DPS Patna (or write 'Fresher')"
                                 class="w-full bg-secondary-bg border border-card-border rounded-xl pl-11 pr-4 py-3 text-sm text-text-main placeholder-text-dark/30 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                         </div>
                     </div>

@@ -107,7 +107,7 @@ class CrmController extends Controller
                 'english_fluency' => $request->english_fluency,
                 'residential_preference' => $request->residential_preference,
                 'availability_to_join' => $request->availability_to_join,
-                'current_school' => $request->current_school,
+                'current_school' => $request->current_school ?: 'Fresher',
                 
                 'resume_path' => $resumePath,
                 'profile_photo_path' => $profilePhotoPath,
@@ -126,7 +126,8 @@ class CrmController extends Controller
                 'registration_completed_at' => now(),
                 
                 'is_terms_agreed' => true,
-                'is_agreement_signed' => $agreementPdfPath ? true : false,
+                'is_agreement_signed' => $request->has('is_agreement_signed') ? $request->boolean('is_agreement_signed') : true,
+                'agreement_signed_at' => now(),
             ]);
 
             // 4. Create Payment Transaction
@@ -246,8 +247,27 @@ class CrmController extends Controller
                 'english_fluency' => $request->english_fluency,
                 'residential_preference' => $request->residential_preference,
                 'availability_to_join' => $request->availability_to_join,
-                'current_school' => $request->current_school,
+                'current_school' => $request->filled('current_school') ? $request->current_school : ($profile?->current_school ?: 'Fresher'),
             ];
+
+            // Determine if profile should be marked complete (explicit flag, or core profile fields are filled by Admin)
+            $isComplete = $request->has('is_profile_complete')
+                ? $request->boolean('is_profile_complete')
+                : (!empty($request->category_id) && !empty($request->subject_id));
+
+            $updates['is_profile_complete'] = $isComplete;
+            if ($isComplete && (!$profile || empty($profile->registration_completed_at))) {
+                $updates['registration_completed_at'] = now();
+            }
+
+            // Agreement status
+            if ($request->has('is_agreement_signed')) {
+                $updates['is_agreement_signed'] = $request->boolean('is_agreement_signed');
+                if ($updates['is_agreement_signed']) {
+                    $updates['is_terms_agreed'] = true;
+                    $updates['agreement_signed_at'] = $profile?->agreement_signed_at ?? now();
+                }
+            }
 
             if ($request->has('plan_type')) {
                 $updates['plan_type'] = $request->plan_type;
@@ -275,10 +295,8 @@ class CrmController extends Controller
             if ($request->hasFile('agreement_pdf')) {
                 $updates['agreement_pdf_path'] = $request->file('agreement_pdf')->store('agreements', 'public');
                 $updates['is_agreement_signed'] = true;
-            }
-
-            if ($profile && !$profile->is_fee_paid && $request->filled('payment_amount') && $request->filled('payment_method') && $request->filled('plan_type')) {
-                // Also allow payment if profile doesn't exist? Wait, if they don't have a profile, is_fee_paid is false by default.
+                $updates['is_terms_agreed'] = true;
+                $updates['agreement_signed_at'] = $profile?->agreement_signed_at ?? now();
             }
 
             // Handle Manual Payment Collection
@@ -294,11 +312,8 @@ class CrmController extends Controller
                 $updates['total_allowed_applications'] = $request->plan_type === 'standard' ? 2 : 3;
                 $updates['plan_started_at'] = now();
                 $updates['payment_id'] = $paymentId;
-                
-                if (!$profile || !$profile->is_profile_complete) {
-                     $updates['is_profile_complete'] = true;
-                     $updates['registration_completed_at'] = now();
-                }
+                $updates['is_profile_complete'] = true;
+                $updates['registration_completed_at'] = now();
 
                 \App\Models\PaymentTransaction::create([
                     'candidate_id' => $user->id,

@@ -154,6 +154,45 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             $q->where('status', 'interviewed')->orWhereNotNull('interview_date');
         })->count() : 0;
 
+        // Auto-heal candidate profile completion if admin filled core details or fee is paid
+        if ($user && $profile) {
+            $hasCoreDetails = !empty($profile->category_id) && !empty($profile->subject_id);
+            $hasPayment = (bool) ($profile->initial_fee_paid || $profile->is_fee_paid || ($profile->paid_amount ?? 0) >= 500);
+            
+            $needsUpdate = false;
+            $updates = [];
+
+            if (!$profile->is_profile_complete && ($hasCoreDetails || $hasPayment || !empty($profile->registration_completed_at))) {
+                $updates['is_profile_complete'] = true;
+                $needsUpdate = true;
+            }
+
+            if (empty($profile->current_school)) {
+                $updates['current_school'] = 'Fresher';
+                $needsUpdate = true;
+            }
+
+            // If fee is paid or marked complete, ensure agreement is marked signed
+            if (($hasPayment || !empty($profile->registration_completed_at) || ($profile->is_profile_complete ?? false)) && !$profile->is_agreement_signed) {
+                $updates['is_agreement_signed'] = true;
+                if (empty($profile->agreement_signed_at)) {
+                    $updates['agreement_signed_at'] = now();
+                }
+                $needsUpdate = true;
+            }
+
+            // If fee is paid and core details exist, ensure registration_completed_at
+            if ($hasPayment && ($profile->is_profile_complete || !empty($updates['is_profile_complete'])) && empty($profile->registration_completed_at)) {
+                $updates['registration_completed_at'] = now();
+                $needsUpdate = true;
+            }
+
+            if ($needsUpdate) {
+                $profile->update($updates);
+                $profile->refresh();
+            }
+        }
+
         // Profile Views (Dynamic from actual views recorded)
         $profileViews = $profile ? (int)($profile->views_count ?? 0) : 0;
 
@@ -169,10 +208,10 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             if (!empty($user->name) && !empty($user->email)) $profileStrength += 20;
             if (!empty($user->phone)) $profileStrength += 10;
             if (!empty($profile->profile_photo_path)) $profileStrength += 15;
-            if ($profile->experience_years > 0 || !empty($profile->category_id)) $profileStrength += 20;
-            if (!empty($profile->resume_path)) $profileStrength += 15;
-            if ($profile->is_agreement_signed) $profileStrength += 10;
-            if ($profile->is_fee_paid || $profile->initial_fee_paid) $profileStrength += 10;
+            if ($profile->experience_years > 0 || !empty($profile->category_id) || !empty($profile->current_school)) $profileStrength += 20;
+            if (!empty($profile->resume_path) || $profile->is_profile_complete) $profileStrength += 15;
+            if ($profile->is_agreement_signed || !empty($profile->agreement_signed_at)) $profileStrength += 10;
+            if ($profile->is_fee_paid || $profile->initial_fee_paid || ($profile->paid_amount ?? 0) >= 500) $profileStrength += 10;
         }
         $profileStrength = min(100, max(20, $profileStrength));
 

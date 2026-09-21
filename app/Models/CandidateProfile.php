@@ -77,19 +77,16 @@ class CandidateProfile extends Model
 
     public function getPendingReasonAttribute()
     {
-        if ($this->is_fee_paid) {
+        if ($this->isRegistrationCompleted()) {
             return 'Completed';
         }
-        if (!$this->is_profile_complete) {
+        if (!$this->is_profile_complete && (empty($this->category_id) || empty($this->subject_id))) {
             return 'Pending Profile Completion';
         }
-        if (!$this->is_terms_agreed) {
-            return 'Pending Terms & Conditions';
-        }
-        if (!$this->is_agreement_signed) {
+        if (!$this->is_agreement_signed && empty($this->agreement_signed_at)) {
             return 'Pending Agreement Upload';
         }
-        if (!$this->is_fee_paid) {
+        if (!$this->has_paid_plan) {
             return 'Pending Registration Fee';
         }
         return 'Completed';
@@ -97,16 +94,16 @@ class CandidateProfile extends Model
 
     public function getPendingActionUrlAttribute()
     {
-        if (!$this->is_profile_complete) {
+        if ($this->isRegistrationCompleted()) {
+            return route('candidate.dashboard');
+        }
+        if (!$this->is_profile_complete && (empty($this->category_id) || empty($this->subject_id))) {
             return route('candidate.wizard');
         }
-        if (!$this->is_terms_agreed) {
-            return route('candidate.wizard', ['step' => 2]); // Usually wizard redirects to the correct step automatically
+        if (!$this->is_agreement_signed && empty($this->agreement_signed_at)) {
+            return route('candidate.wizard', ['step' => 2]);
         }
-        if (!$this->is_agreement_signed) {
-            return route('candidate.wizard', ['step' => 3]);
-        }
-        if (!$this->is_fee_paid) {
+        if (!$this->has_paid_plan) {
             return route('candidate.wizard', ['step' => 4]);
         }
         return route('candidate.dashboard');
@@ -173,8 +170,15 @@ class CandidateProfile extends Model
             return true;
         }
 
-        // 2. Otherwise, requires profile completed, agreement accepted, and paid registration fee/plan
+        // 2. Core profile details exist
+        $hasCoreProfile = (bool) ($this->is_profile_complete || (!empty($this->category_id) && !empty($this->subject_id)));
+
+        // 3. Payment or active plan exists
         $hasPayment = (bool) ($this->initial_fee_paid || $this->is_fee_paid || ($this->paid_amount ?? 0) >= 500);
-        return (bool) ($this->is_profile_complete && $this->is_agreement_signed && $hasPayment);
+
+        // 4. Agreement exists
+        $hasAgreement = (bool) ($this->is_agreement_signed || !empty($this->agreement_signed_at));
+
+        return (bool) ($hasCoreProfile && ($hasAgreement || $hasPayment) && $hasPayment);
     }
 }

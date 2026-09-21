@@ -2,12 +2,16 @@
 @php
     $user = auth()->user();
     $profile = $user ? ($user->profile ?: null) : null;
-    $step1Complete = (bool) ($profile && $profile->is_profile_complete);
-    $step2Complete = (bool) ($profile && $profile->is_agreement_signed);
-    $step3Complete = (bool) ($profile && ($profile->initial_fee_paid || $profile->is_fee_paid));
+    $hasCoreProfile = (bool) ($profile && (!empty($profile->category_id) && !empty($profile->subject_id)));
+    $hasActivePlan = (bool) ($user && $user->subscriptions()->where('status', 'active')->where(function($q) { $q->whereNull('ends_at')->orWhere('ends_at', '>', now()); })->exists());
+    $hasPayment = (bool) ($profile && ($profile->initial_fee_paid || $profile->is_fee_paid || ($profile->paid_amount ?? 0) >= 500 || $hasActivePlan));
+
+    $step1Complete = (bool) ($profile && ($profile->is_profile_complete || $hasCoreProfile || !empty($profile->registration_completed_at)));
+    $step2Complete = (bool) ($profile && ($profile->is_agreement_signed || !empty($profile->agreement_signed_at) || !empty($profile->registration_completed_at) || ($step1Complete && $hasPayment)));
+    $step3Complete = (bool) ($profile && ($hasPayment || !empty($profile->registration_completed_at)));
     
     $completedSteps = ($step1Complete ? 1 : 0) + ($step2Complete ? 1 : 0) + ($step3Complete ? 1 : 0);
-    $isRegistrationComplete = ($completedSteps === 3);
+    $isRegistrationComplete = ($completedSteps === 3) || ($profile && !empty($profile->registration_completed_at)) || ($profile && $step1Complete && $hasPayment);
     $progressPercent = (int) round(($completedSteps / 3) * 100);
 
     // Smart Action CTA & Step Label

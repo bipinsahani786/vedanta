@@ -123,20 +123,20 @@
 
                 {{-- Checklist Items --}}
                 <div class="space-y-1.5 text-xs text-left">
-                    <div class="flex items-center gap-2 {{ $profile->is_profile_complete ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
-                        <i class="fas {{ $profile->is_profile_complete ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
+                    <div class="flex items-center gap-2 {{ ($profile->is_profile_complete || (!empty($profile->category_id) && !empty($profile->subject_id))) ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
+                        <i class="fas {{ ($profile->is_profile_complete || (!empty($profile->category_id) && !empty($profile->subject_id))) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
                         <span>Complete your profile</span>
                     </div>
-                    <div class="flex items-center gap-2 {{ $profile->experience_years > 0 ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
-                        <i class="fas {{ $profile->experience_years > 0 ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
+                    <div class="flex items-center gap-2 {{ ($profile->experience_years > 0 || !empty($profile->current_school)) ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
+                        <i class="fas {{ ($profile->experience_years > 0 || !empty($profile->current_school)) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
                         <span>Add experience details</span>
                     </div>
-                    <div class="flex items-center gap-2 {{ !empty($profile->resume_path) ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
-                        <i class="fas {{ !empty($profile->resume_path) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
-                        <span>Upload documents</span>
+                    <div class="flex items-center gap-2 {{ !empty($profile->resume_path) ? 'text-emerald-300 font-semibold' : ($profile->is_profile_complete ? 'text-emerald-300/90 font-medium' : 'text-white/45') }}">
+                        <i class="fas {{ !empty($profile->resume_path) ? 'fa-check-circle text-emerald-400' : ($profile->is_profile_complete ? 'fa-check text-[10px] text-emerald-400' : 'fa-circle text-[7px] text-white/30') }}"></i>
+                        <span>{{ !empty($profile->resume_path) ? 'Resume on record' : ($profile->is_profile_complete ? 'Profile documents verified' : 'Upload documents') }}</span>
                     </div>
-                    <div class="flex items-center gap-2 {{ ($profile->is_verified || $profile->is_fee_paid) ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
-                        <i class="fas {{ ($profile->is_verified || $profile->is_fee_paid) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
+                    <div class="flex items-center gap-2 {{ ($profile->is_verified || $profile->is_fee_paid || $profile->is_profile_complete) ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
+                        <i class="fas {{ ($profile->is_verified || $profile->is_fee_paid || $profile->is_profile_complete) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
                         <span>Profile is visible to schools</span>
                     </div>
 

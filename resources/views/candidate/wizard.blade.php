@@ -126,13 +126,16 @@
                                 </div>
                             </div>
 
-                            <!-- Resume Upload (Required) -->
+                            <!-- Resume Upload (Optional if already completed) -->
                             <div class="md:col-span-2">
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Resume / CV *</label>
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">
+                                    Resume / CV 
+                                    <span class="text-text-dark/40 font-normal lowercase">({{ ($profile->resume_path || $profile->is_profile_complete) ? 'optional - existing file on record' : 'PDF, DOC, DOCX up to 5MB' }})</span>
+                                </label>
                                 <input type="file" accept=".pdf,.doc,.docx" @change="handleResumeUpload"
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent-blue file:text-white hover:file:bg-accent-blue-hover cursor-pointer">
                                 <template x-if="fieldErrors.resume"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.resume[0]"></p></template>
-                                <p class="text-xs text-text-dark/40 mt-1">Format: PDF, DOC, DOCX. Max size: 2MB.</p>
+                                <p class="text-xs text-text-dark/40 mt-1">Format: PDF, DOC, DOCX. Max size: 5MB.@if($profile->resume_path) <span class="text-emerald-400 font-semibold ml-1"><i class="fas fa-check-circle"></i> Current resume on file</span>@endif</p>
                             </div>
 
                             <!-- Salary Slip (Optional) -->
@@ -272,10 +275,10 @@
                                 <template x-if="fieldErrors.preferred_city_id"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.preferred_city_id[0]"></p></template>
                             </div>
 
-                            <!-- Current School (Required) -->
+                            <!-- Current School (Optional / Defaults to Fresher) -->
                             <div>
-                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current School *</label>
-                                <input type="text" x-model="formData.current_school" placeholder="E.g. DPS Patna (or write 'Fresher')" required
+                                <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Current School / Institution</label>
+                                <input type="text" x-model="formData.current_school" placeholder="E.g. DPS Patna (or write 'Fresher')"
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                                 <template x-if="fieldErrors.current_school"><p class="text-red-500 text-xs mt-1 font-medium" x-text="fieldErrors.current_school[0]"></p></template>
                             </div>
@@ -1009,6 +1012,7 @@
                 experience_years: '{{ $profile->experience_years }}',
                 current_salary: '{{ $profile->current_salary }}',
                 expected_salary: '{{ $profile->expected_salary }}',
+                current_school: {!! json_encode($profile->current_school ?: 'Fresher') !!},
                 address: {!! json_encode($profile->address ?? '') !!},
                 marital_status: '{{ $profile->marital_status }}',
                 religion: '{{ $profile->religion }}',
@@ -1183,7 +1187,12 @@
 
                 const hasExistingPhoto = {{ $profile->profile_photo_path ? 'true' : 'false' }};
                 const hasExistingSalarySlip = {{ $profile->salary_slip_path ? 'true' : 'false' }};
-                const hasExistingResume = {{ $profile->resume_path ? 'true' : 'false' }};
+                const hasExistingResume = {{ ($profile->resume_path || $profile->is_profile_complete || $profile->is_fee_paid || !empty($profile->category_id)) ? 'true' : 'false' }};
+
+                // Ensure current_school has a default value if left blank
+                if (!this.formData.current_school || !this.formData.current_school.trim()) {
+                    this.formData.current_school = 'Fresher';
+                }
 
                 // Client-side validation — check required fields before calling server
                 const requiredFields = {
@@ -1216,7 +1225,7 @@
                     hasError = true;
                 }
 
-                // Check resume file
+                // Check resume file only if not already on record or profile not completed
                 if (!this.resumeFile && !hasExistingResume) {
                     this.fieldErrors['resume'] = ['Resume / CV is required.'];
                     hasError = true;
