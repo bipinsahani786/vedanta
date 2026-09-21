@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use setasign\Fpdi\Fpdi;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AgreementController extends Controller
 {
@@ -58,8 +59,20 @@ class AgreementController extends Controller
         // Update profile
         $profile->update([
             'is_agreement_signed' => true,
-            'agreement_pdf_path' => $fileName
+            'agreement_pdf_path' => $fileName,
+            'signature_type' => 'draw',
+            'signature_data' => $request->signature,
+            'signature_date_time' => now(),
+            'signature_ip_address' => $request->ip(),
+            'signature_device_info' => $request->header('User-Agent'),
         ]);
+
+        // Send signed agreement email to candidate
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send RegistrationSuccessMail on agreement sign: " . $e->getMessage());
+        }
 
         return redirect()->route('candidate.dashboard')->with('success', 'Agreement digitally signed successfully.');
     }
@@ -234,93 +247,141 @@ class AgreementController extends Controller
             }
         }
 
-        // Load the FPDI template
-        $pdf = new Fpdi();
         $templatePath = Storage::disk('public')->path('template/candidate_agreement.pdf');
         
         if (!file_exists($templatePath)) {
-            throw new \Exception('Agreement template PDF missing on server at: ' . $templatePath);
+            return self::generateDomPdfAgreement($user, $profile, $signatureData, $sigType, $tempSignaturePath, $tempPhotoPath);
         }
 
-        $pageCount = $pdf->setSourceFile($templatePath);
+        try {
+            // Load the FPDI template
+            $pdf = new Fpdi();
+            $pageCount = $pdf->setSourceFile($templatePath);
 
-        for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-            $templateId = $pdf->importPage($pageNo);
-            $size = $pdf->getTemplateSize($templateId);
-            
-            $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
-            $pdf->useTemplate($templateId);
-            
-            // On the last page (e.g., page 3), add the signature and photo
-            if ($pageNo == $pageCount) {
-                // Photo on the right side
-                if ($absolutePhotoPath && file_exists($absolutePhotoPath)) {
-                    // Try to catch any exception with unsupported image types
-                    try {
-                        // X: 168, Y: 260, Width: 25, Height: 30
-                        $pdf->Image($absolutePhotoPath, 168, 260, 25, 30);
-                    } catch (\Exception $e) {
-                        \Log::error("FPDF Image Error (Photo): " . $e->getMessage());
+            for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+                $templateId = $pdf->importPage($pageNo);
+                $size = $pdf->getTemplateSize($templateId);
+                
+                $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+                $pdf->useTemplate($templateId);
+                
+                // On the last page (e.g., page 3), add the signature and photo
+                if ($pageNo == $pageCount) {
+                    // Photo on the right side
+                    if ($absolutePhotoPath && file_exists($absolutePhotoPath)) {
+                        // Try to catch any exception with unsupported image types
+                        try {
+                            // X: 168, Y: 260, Width: 25, Height: 30
+                            $pdf->Image($absolutePhotoPath, 168, 260, 25, 30);
+                        } catch (\Exception $e) {
+                            \Log::error("FPDF Image Error (Photo): " . $e->getMessage());
+                        }
                     }
-                }
 
-                // Signature in the box
-                if ($sigType === 'type') {
+                    // Signature in the box
+                    if ($sigType === 'type') {
+                        $pdf->SetAutoPageBreak(false);
+                        $pdf->SetFont('Helvetica', 'I', 16);
+                        $pdf->SetTextColor(10, 10, 100);
+                        $pdf->SetXY(78, 266);
+                        $pdf->Cell(60, 10, $signatureData, 0, 0, 'C');
+                        $pdf->SetAutoPageBreak(true);
+                    } else if ($absoluteSigPath && file_exists($absoluteSigPath)) {
+                        try {
+                            // Adjusted position and size to make room for text below
+                            $pdf->Image($absoluteSigPath, 78, 266, 50, 12);
+                        } catch (\Exception $e) {
+                            \Log::error("FPDF Image Error (Signature): " . $e->getMessage());
+                        }
+                    }
+
+                    // Add text below signature
                     $pdf->SetAutoPageBreak(false);
-                    $pdf->SetFont('Helvetica', 'I', 16);
-                    $pdf->SetTextColor(10, 10, 100);
-                    $pdf->SetXY(78, 266);
-                    $pdf->Cell(60, 10, $signatureData, 0, 0, 'C');
-                    $pdf->SetAutoPageBreak(true);
-                } else if ($absoluteSigPath && file_exists($absoluteSigPath)) {
-                    try {
-                        // Adjusted position and size to make room for text below
-                        $pdf->Image($absoluteSigPath, 78, 266, 50, 12);
-                    } catch (\Exception $e) {
-                        \Log::error("FPDF Image Error (Signature): " . $e->getMessage());
+                    $pdf->SetFont('Helvetica', '', 9);
+                    $pdf->SetTextColor(0, 0, 0);
+                    
+                    $detailsY = 278; 
+                    
+                    $pdf->SetXY(78, $detailsY);
+                    $pdf->Cell(60, 4, 'Signed By: ' . $user->name, 0, 1, 'L');
+                    
+                    $pdf->SetXY(78, $detailsY + 4);
+                    $pdf->Cell(60, 4, 'Date : ' . date('d/m/Y H:i:s') . ' IST', 0, 1, 'L');
+
+                    if ($profile->vpa_id) {
+                        $pdf->SetXY(78, $detailsY + 8);
+                        $pdf->Cell(60, 4, 'Candidate ID: ' . $profile->vpa_id, 0, 1, 'L');
                     }
+                    
+                    $pdf->SetAutoPageBreak(true);
                 }
+            }
+            
+            $tempPdfPath = 'temp/agreement_' . $user->id . '_' . time() . '.pdf';
+            
+            // Save PDF to temp local storage first
+            Storage::disk('local')->put($tempPdfPath, $pdf->Output('S'));
+            
+            // Then use putFile to ensure the correct MIME type (application/pdf) is set, especially for S3
+            $absoluteTempPdfPath = Storage::disk('local')->path($tempPdfPath);
+            $file = new \Illuminate\Http\File($absoluteTempPdfPath);
+            $fileName = Storage::disk('public')->putFileAs('agreements', $file, 'agreement_' . $user->id . '_' . time() . '.pdf');
+            
+            // Clean up temp PDF
+            Storage::disk('local')->delete($tempPdfPath);
 
-                // Add text below signature
-                $pdf->SetAutoPageBreak(false);
-                $pdf->SetFont('Helvetica', '', 9);
-                $pdf->SetTextColor(0, 0, 0);
-                
-                $detailsY = 278; 
-                
-                $pdf->SetXY(78, $detailsY);
-                $pdf->Cell(60, 4, 'Signed By: ' . $user->name, 0, 1, 'L');
-                
-                $pdf->SetXY(78, $detailsY + 4);
-                $pdf->Cell(60, 4, 'Date : ' . date('d/m/Y H:i:s') . ' IST', 0, 1, 'L');
+            // Clean up temp files
+            if ($tempSignaturePath && Storage::disk('local')->exists($tempSignaturePath)) {
+                Storage::disk('local')->delete($tempSignaturePath);
+            }
+            if ($tempPhotoPath && Storage::disk('local')->exists($tempPhotoPath)) {
+                Storage::disk('local')->delete($tempPhotoPath);
+            }
 
-                if ($profile->vpa_id) {
-                    $pdf->SetXY(78, $detailsY + 8);
-                    $pdf->Cell(60, 4, 'Candidate ID: ' . $profile->vpa_id, 0, 1, 'L');
+            return $fileName;
+        } catch (\Throwable $fpdiException) {
+            \Log::warning("FPDI agreement template processing failed, falling back to DomPDF: " . $fpdiException->getMessage());
+            return self::generateDomPdfAgreement($user, $profile, $signatureData, $sigType, $tempSignaturePath, $tempPhotoPath);
+        }
+    }
+
+    public static function generateDomPdfAgreement($user, $profile, $signatureData, $sigType, $tempSignaturePath = null, $tempPhotoPath = null)
+    {
+        $date = $profile->signature_date_time 
+            ? \Carbon\Carbon::parse($profile->signature_date_time)->format('d M Y') 
+            : \Carbon\Carbon::now()->format('d M Y');
+
+        $signatureForView = $signatureData;
+
+        if ($sigType !== 'type') {
+            if (\Illuminate\Support\Str::startsWith($signatureForView, 'data:image')) {
+                // Already data URI format
+            } elseif ($sigType === 'upload') {
+                if (Storage::disk('public')->exists($signatureForView)) {
+                    $path = Storage::disk('public')->path($signatureForView);
+                    $ext = pathinfo($path, PATHINFO_EXTENSION);
+                    $signatureForView = 'data:image/' . $ext . ';base64,' . base64_encode(file_get_contents($path));
                 }
-                
-                $pdf->SetAutoPageBreak(true);
+            } elseif (!empty($signatureForView)) {
+                $signatureForView = 'data:image/jpeg;base64,' . base64_encode($signatureData);
             }
         }
-        
-        $tempPdfPath = 'temp/agreement_' . $user->id . '_' . time() . '.pdf';
-        
-        // Save PDF to temp local storage first
-        Storage::disk('local')->put($tempPdfPath, $pdf->Output('S'));
-        
-        // Then use putFile to ensure the correct MIME type (application/pdf) is set, especially for S3
-        $absoluteTempPdfPath = Storage::disk('local')->path($tempPdfPath);
-        $file = new \Illuminate\Http\File($absoluteTempPdfPath);
-        $fileName = Storage::disk('public')->putFileAs('agreements', $file, 'agreement_' . $user->id . '_' . time() . '.pdf');
-        
-        // Clean up temp PDF
-        Storage::disk('local')->delete($tempPdfPath);
 
-        // Clean up temp files
-        if ($tempSignaturePath) {
+        $pdf = Pdf::loadView('pdf.candidate-agreement', [
+            'user' => $user,
+            'profile' => $profile,
+            'date' => $date,
+            'signature' => $signatureForView,
+            'signature_type' => $sigType,
+        ]);
+
+        $fileName = 'agreements/agreement_' . $user->id . '_' . time() . '.pdf';
+        Storage::disk('public')->put($fileName, $pdf->output());
+
+        if ($tempSignaturePath && Storage::disk('local')->exists($tempSignaturePath)) {
             Storage::disk('local')->delete($tempSignaturePath);
         }
-        if ($tempPhotoPath) {
+        if ($tempPhotoPath && Storage::disk('local')->exists($tempPhotoPath)) {
             Storage::disk('local')->delete($tempPhotoPath);
         }
 

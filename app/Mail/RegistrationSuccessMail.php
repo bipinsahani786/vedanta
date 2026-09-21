@@ -11,7 +11,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class RegistrationSuccessMail extends Mailable implements ShouldQueue
+class RegistrationSuccessMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -54,9 +54,15 @@ class RegistrationSuccessMail extends Mailable implements ShouldQueue
     {
         $attachments = [];
         try {
-            if ($this->user->profile && !empty($this->user->profile->agreement_pdf_path)) {
-                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->user->profile->agreement_pdf_path)) {
-                    $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromStorageDisk('public', $this->user->profile->agreement_pdf_path)
+            $profile = $this->user->profile;
+            if ($profile) {
+                if (empty($profile->agreement_pdf_path) || !\Illuminate\Support\Facades\Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+                    \App\Http\Controllers\Candidate\AgreementController::ensureAgreementPdfExists($profile);
+                    $profile->refresh();
+                }
+
+                if (!empty($profile->agreement_pdf_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+                    $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromStorageDisk('public', $profile->agreement_pdf_path)
                                         ->as('Registration_Agreement.pdf')
                                         ->withMime('application/pdf');
                 } else {

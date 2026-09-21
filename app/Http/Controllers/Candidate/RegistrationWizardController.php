@@ -233,6 +233,22 @@ class RegistrationWizardController extends Controller
             'longitude' => $request->longitude,
         ]);
 
+        // Automatically generate agreement PDF immediately upon signing
+        try {
+            \App\Http\Controllers\Candidate\AgreementController::ensureAgreementPdfExists($profile, true);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Step 3 agreement PDF generation warning: " . $e->getMessage());
+        }
+
+        // If candidate has already paid the fee, send the registration success & agreement email immediately
+        if ($profile->initial_fee_paid || $profile->is_fee_paid) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Step 3 RegistrationSuccessMail error: " . $e->getMessage());
+            }
+        }
+
         return response()->json(['success' => true]);
     }
 

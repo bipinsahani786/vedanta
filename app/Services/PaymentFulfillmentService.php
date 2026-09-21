@@ -362,8 +362,10 @@ class PaymentFulfillmentService
                         Log::warning('Agreement PDF auto-generation warning: ' . $pdfEx->getMessage());
                     }
 
-                    self::sendEmailOnce($transactionId, 'welcome_emails', function() use ($user, $transactionId, $amountPaid) {
+                    self::sendEmailOnce($transactionId, 'payment_receipt', function() use ($user, $transactionId, $amountPaid) {
                         Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Candidate Profile Registration Fee'));
+                    });
+                    self::sendEmailOnce($transactionId, 'registration_agreement', function() use ($user) {
                         Mail::to($user->email)->send(new RegistrationSuccessMail($user));
                     });
                 }
