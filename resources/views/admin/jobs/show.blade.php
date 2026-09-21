@@ -8,7 +8,10 @@
         <a href="{{ route('admin.jobs.index') }}" class="text-gray-500 hover:text-blue-600 transition-colors">
             <i class="fas fa-arrow-left"></i> Back to Jobs
         </a>
-        <h2 class="text-xl font-bold text-gray-800">Review Job Post</h2>
+        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <span>Review Job Post</span>
+            <span class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">({{ $job->job_code }})</span>
+        </h2>
     </div>
     
     <div class="flex items-center space-x-3">
@@ -45,7 +48,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
                 <div>
                     <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Job Title</div>
-                    <div class="text-gray-800 font-medium">{{ $job->title ?? 'N/A' }}</div>
+                    <div class="text-gray-800 font-medium flex items-center gap-2 flex-wrap">
+                        <span>{{ $job->title ?? 'N/A' }}</span>
+                        <span class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">({{ $job->job_code }})</span>
+                    </div>
                 </div>
                 <div>
                     <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Salary & Pay</div>
@@ -339,7 +345,7 @@
                             Send Job Notification
                         </h3>
                         <div class="mt-2">
-                            <p class="text-sm text-gray-500">Select candidates to notify about this job opening.</p>
+                            <p class="text-sm text-gray-500">Select candidates to notify about <strong>{{ $job->title }} ({{ $job->job_code }})</strong>.</p>
                         </div>
                     </div>
                 </div>

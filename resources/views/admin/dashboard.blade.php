@@ -60,7 +60,12 @@
                             <div class="text-xs text-gray-500 mt-1">{{ $app->candidate->email ?? 'N/A' }}</div>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="font-medium text-gray-800">{{ $app->jobPost->title ?? 'Teacher' }}</div>
+                            <div class="font-medium text-gray-800">
+                                {{ $app->jobPost->title ?? 'Teacher' }}
+                                @if($app->jobPost)
+                                    <span class="text-xs font-mono font-semibold text-[#00a8e8] ml-1">({{ $app->jobPost->job_code }})</span>
+                                @endif
+                            </div>
                             <div class="text-xs text-gray-500 mt-1">{{ $app->jobPost->school_name ?? 'School' }}</div>
                         </td>
                         <td class="px-6 py-4 text-gray-600 text-sm">{{ $app->created_at->diffForHumans() }}</td>
@@ -258,7 +263,12 @@
                                 <div class="text-xs text-gray-500 mt-1">{{ $app->candidate->email ?? 'N/A' }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="font-medium text-gray-800">{{ $app->jobPost->title ?? 'Teacher' }}</div>
+                                <div class="font-medium text-gray-800">
+                                    {{ $app->jobPost->title ?? 'Teacher' }}
+                                    @if($app->jobPost)
+                                        <span class="text-xs font-mono font-semibold text-[#00a8e8] ml-1">({{ $app->jobPost->job_code }})</span>
+                                    @endif
+                                </div>
                                 <div class="text-xs text-gray-500 mt-1">{{ $app->jobPost->school_name ?? 'School' }}</div>
                             </td>
                             <td class="px-6 py-4 text-gray-600 text-sm">{{ $app->created_at->diffForHumans() }}</td>

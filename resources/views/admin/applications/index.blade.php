@@ -90,7 +90,12 @@
                     </div>
                 </td>
                 <td>
-                    <div class="font-semibold text-text-main truncate max-w-[200px]" title="{{ $app->jobPost->title }}">{{ $app->jobPost->title }}</div>
+                    <div class="font-semibold text-text-main truncate max-w-[240px]" title="{{ $app->jobPost->title ?? 'N/A' }}">
+                        {{ $app->jobPost->title ?? 'N/A' }}
+                        @if($app->jobPost)
+                            <span class="text-xs font-mono font-bold text-accent-blue ml-1">({{ $app->jobPost->job_code }})</span>
+                        @endif
+                    </div>
                     <div class="text-xs text-text-dark/50">{{ $app->jobPost->user->name ?? 'Unknown School' }}</div>
                 </td>
                 <td>

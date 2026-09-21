@@ -382,7 +382,7 @@
                         <select name="job_post_id" required class="text-sm rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 w-full">
                             <option value="">-- Assign a Job to Candidate --</option>
                             @foreach($availableJobs as $job)
-                                <option value="{{ $job->id }}">{{ $job->title }} ({{ $job->school_name }})</option>
+                                <option value="{{ $job->id }}">{{ $job->title }} ({{ $job->job_code }}) - {{ $job->school_name }}</option>
                             @endforeach
                         </select>
                         <button type="submit" class="px-3 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition shadow-sm w-full text-center">Assign Job</button>
@@ -390,8 +390,13 @@
                 </div>
                 @forelse($candidate->applications as $app)
                     <div class="mb-4 pb-4 border-b border-gray-100 last:border-0 last:mb-0 last:pb-0">
-                        <div class="font-semibold text-gray-800">{{ $app->jobPost->title }}</div>
-                        <div class="text-xs text-gray-500 mb-1">{{ $app->jobPost->school_name }}</div>
+                        <div class="font-semibold text-gray-800">
+                            {{ $app->jobPost->title ?? 'N/A' }}
+                            @if($app->jobPost)
+                                <span class="text-xs font-mono font-bold text-indigo-600 ml-1">({{ $app->jobPost->job_code }})</span>
+                            @endif
+                        </div>
+                        <div class="text-xs text-gray-500 mb-1">{{ $app->jobPost->school_name ?? '' }}</div>
                             <div class="mt-3">
                                 <form action="{{ route('admin.applications.status.update', $app->id) }}" method="POST" class="space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
                                     @csrf
@@ -535,7 +540,12 @@
                         <tbody class="divide-y divide-gray-100">
                             @forelse($invoices as $invoice)
                             <tr>
-                                <td class="py-2 px-4">{{ $invoice->jobApplication?->jobPost?->title ?? 'N/A' }}</td>
+                                <td class="py-2 px-4">
+                                    {{ $invoice->jobApplication?->jobPost?->title ?? 'N/A' }}
+                                    @if($invoice->jobApplication?->jobPost)
+                                        <span class="text-xs font-mono font-semibold text-gray-500 ml-1">({{ $invoice->jobApplication->jobPost->job_code }})</span>
+                                    @endif
+                                </td>
                                 <td class="py-2 px-4">₹{{ number_format($invoice->amount, 2) }}</td>
                                 <td class="py-2 px-4 text-red-600">₹{{ number_format($invoice->late_fee, 2) }}</td>
                                 <td class="py-2 px-4">{{ \Carbon\Carbon::parse($invoice->due_date)->format('M d, Y') }}</td>
@@ -619,7 +629,7 @@
                             <select name="job_application_id" id="job_application_id" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" required>
                                 <option value="">-- Select Application --</option>
                                 @foreach($candidate->applications->where('status', 'hired') as $app)
-                                    <option value="{{ $app->id }}">{{ $app->jobPost->title }} ({{ $app->jobPost->school_name }})</option>
+                                    <option value="{{ $app->id }}">{{ $app->jobPost->title ?? 'Job' }} @if($app->jobPost)({{ $app->jobPost->job_code }}) - {{ $app->jobPost->school_name }}@endif</option>
                                 @endforeach
                             </select>
                         </div>

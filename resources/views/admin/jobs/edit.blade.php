@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Job')
+@section('title', 'Edit Job (' . $job->job_code . ')')
 @section('subtitle', 'Edit job posting details before or after approval.')
 
 @section('actions')
@@ -14,7 +14,7 @@
     <div class="bg-card-bg border border-card-border rounded-2xl shadow-xl overflow-hidden">
         <div class="p-6 border-b border-card-border bg-secondary-bg/30">
             <h3 class="text-lg font-bold text-text-main flex items-center gap-2">
-                <i class="fas fa-edit text-accent-blue"></i> Edit Job Details
+                <i class="fas fa-edit text-accent-blue"></i> <span>Edit Job Details</span> <span class="text-xs font-mono font-bold text-accent-blue bg-accent-blue/10 px-2.5 py-1 rounded-lg">({{ $job->job_code }})</span>
             </h3>
         </div>
 
@@ -107,7 +107,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- Title -->
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Job Title *</label>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Job Title * <span class="text-xs font-mono font-bold text-accent-blue ml-1">({{ $job->job_code }})</span></label>
                     <input type="text" name="title" value="{{ old('title', $job->title) }}" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                     @error('title') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>

@@ -113,7 +113,10 @@
             @forelse($jobs as $job)
             <tr class="group">
                 <td>
-                    <div class="font-semibold text-text-main group-hover:text-accent-blue transition-colors">{{ $job->title ?? 'Untitled Job' }}</div>
+                    <div class="font-semibold text-text-main group-hover:text-accent-blue transition-colors flex items-center gap-1.5 flex-wrap">
+                        <span>{{ $job->title ?? 'Untitled Job' }}</span>
+                        <span class="text-xs font-mono font-bold text-accent-blue">({{ $job->job_code }})</span>
+                    </div>
                     <div class="text-xs text-text-dark/50 flex items-center gap-1 mt-1">
                         <i class="fas fa-building text-[10px]"></i> {{ $job->school_name }}
                     </div>
