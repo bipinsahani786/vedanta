@@ -247,13 +247,10 @@ class PaymentFulfillmentService
                 $currentPaid = (float)($profile->paid_amount ?? 0);
                 $newTotalPaid = $currentPaid + (float)$amountPaid;
 
-                // Check plan validity of existing standard plan
-                $planStartedAt = $profile->plan_started_at ?? $profile->created_at;
-                $isPlanExpired = ($profile->plan_type === 'standard' && $planStartedAt) 
-                    ? \Carbon\Carbon::parse($planStartedAt)->addDays(30)->isPast() 
-                    : false;
+                // Check plan validity of existing plan (3 months for Standard, 6 months for Premium)
+                $isPlanExpired = $profile->is_plan_expired;
 
-                // If candidate had a standard plan that is now EXPIRED (past 30 days), a ₹500 recharge is a renewal of Standard plan for new cycle, NOT an upgrade!
+                // If candidate had a plan that is now EXPIRED, a ₹500 recharge is a renewal of Standard plan for new cycle, NOT an upgrade!
                 if ($isPlanExpired && $amountPaid < 1000 && $pendingPlanType !== 'premium') {
                     $profile->update([
                         'plan_type' => 'standard',
@@ -263,7 +260,7 @@ class PaymentFulfillmentService
                         'paid_amount' => $currentPaid + $amountPaid,
                         'pending_amount' => 500,
                         'payment_id' => $txnId,
-                        'plan_started_at' => now(), // Fresh 30 days cycle
+                        'plan_started_at' => now(), // Fresh plan cycle
                     ]);
                 } else {
                     // Plan is active (within 30 days) OR fresh registration OR single ₹1000 payment
@@ -334,10 +331,7 @@ class PaymentFulfillmentService
                     Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Premium Plan Renewal'));
                 });
             } else {
-                $planStarted = $profile->plan_started_at ?? $profile->created_at;
-                $isExpiredCheck = ($profile->plan_type === 'standard' && $planStarted) 
-                    ? \Carbon\Carbon::parse($planStarted)->addDays(30)->isPast() 
-                    : false;
+                $isExpiredCheck = $profile->is_plan_expired;
                 $isRenewalNotification = $isExpiredCheck && $amountPaid < 1000 && $pendingPlanType !== 'premium';
                 $isUpgradeShift = ($profile->plan_type === 'premium' && $amountPaid < 1000);
 

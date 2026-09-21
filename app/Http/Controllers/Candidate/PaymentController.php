@@ -84,7 +84,7 @@ class PaymentController extends Controller
         $planStartedAt = $profile->plan_started_at;
         $isPlanExpired = $profile->is_plan_expired;
         $isPlanActive = $profile->is_plan_active;
-        $planValidityDate = ($hasPaidPlan && $planStartedAt) ? \Carbon\Carbon::parse($planStartedAt)->addDays(30) : null;
+        $planValidityDate = $profile->plan_validity_date;
         $firstSuccessTxn = $transactions->where('status', 'success')->first();
         $registrationPaidDate = $firstSuccessTxn ? $firstSuccessTxn->created_at->format('d M Y') : ($profile->initial_fee_paid ? ($profile->updated_at ? $profile->updated_at->format('d M Y') : now()->format('d M Y')) : null);
 
@@ -124,18 +124,17 @@ class PaymentController extends Controller
         
         $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
-        // Check if existing plan is expired (after 30 days)
-        $planStartedAt = $profile->plan_started_at ?? $profile->created_at;
-        $isPlanExpired = $planStartedAt ? \Carbon\Carbon::parse($planStartedAt)->addDays(30)->isPast() : false;
+        // Check if existing plan is expired (Standard = 3 months, Premium = 6 months)
+        $isPlanExpired = $profile->is_plan_expired;
 
         // If candidate already paid ₹500 for Standard plan:
         if ($profile->plan_type === 'standard' && ($profile->initial_fee_paid || ($profile->paid_amount ?? 0) >= 500)) {
             if ($isPlanExpired && !$isUpgrade && $request->plan !== 'premium') {
-                // Plan is expired/ended (after 30 days): ₹500 payment is a RENEWAL of Standard plan, NOT an upgrade!
+                // Plan is expired/ended: ₹500 payment is a RENEWAL of Standard plan, NOT an upgrade!
                 $isRenewal = true;
                 $request->merge(['plan' => 'renewal_basic']);
             } elseif (!$profile->is_fee_paid || $profile->pending_amount > 0) {
-                // Plan is still active (within 30 days): second ₹500 payment upgrades to Premium (total ₹1000)
+                // Plan is still active: second ₹500 payment upgrades to Premium (total ₹1000)
                 if ($request->plan === 'basic' || $request->plan === 'upgrade' || $request->plan === 'premium') {
                     $isUpgrade = true;
                 }

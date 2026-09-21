@@ -639,6 +639,11 @@
                                 No Active Plan
                             @endif
                         </h4>
+                        @if($profile && $profile->has_paid_plan && $profile->plan_validity_date)
+                            <p class="text-[11px] {{ $profile->is_plan_expired ? 'text-rose-400 font-medium' : 'text-slate-400' }} mt-0.5">
+                                {{ $profile->is_plan_expired ? 'Expired on ' . $profile->plan_validity_date->format('d M Y') : 'Valid till ' . $profile->plan_validity_date->format('d M Y') }}
+                            </p>
+                        @endif
                     </div>
                     @if($profile && $profile->is_plan_active)
                         <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase tracking-wider shadow-sm">
@@ -726,7 +731,7 @@
                                 <i class="fas fa-redo-alt"></i>
                                 <span>Renew Your Plan</span>
                             </div>
-                            <p class="text-[10px] text-slate-300 mt-0.5">Extend validity for 30 days</p>
+                            <p class="text-[10px] text-slate-300 mt-0.5">Extend validity for {{ ($profile && $profile->plan_type === 'premium') ? '6 Months' : '3 Months' }}</p>
                         </div>
                         <a href="{{ route('candidate.payment.show') }}" 
                            class="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white font-black text-xs shadow-md shadow-rose-500/30 hover:shadow-lg transition-all shrink-0 flex items-center gap-1.5 whitespace-nowrap">

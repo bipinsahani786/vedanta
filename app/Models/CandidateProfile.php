@@ -117,12 +117,29 @@ class CandidateProfile extends Model
         return (bool) ($this->initial_fee_paid || $this->is_fee_paid || ($this->paid_amount ?? 0) >= 500);
     }
 
+    public function getPlanDurationMonthsAttribute(): int
+    {
+        $type = strtolower($this->plan_type ?? '');
+        if ($type === 'premium' || ($this->paid_amount ?? 0) >= 1000) {
+            return 6;
+        }
+        return 3;
+    }
+
+    public function getPlanValidityDateAttribute(): ?\Carbon\Carbon
+    {
+        if (!$this->has_paid_plan || !$this->plan_started_at) {
+            return null;
+        }
+        return \Carbon\Carbon::parse($this->plan_started_at)->addMonths($this->plan_duration_months);
+    }
+
     public function getIsPlanExpiredAttribute(): bool
     {
         if (!$this->has_paid_plan || !$this->plan_started_at) {
             return false;
         }
-        return \Carbon\Carbon::parse($this->plan_started_at)->addDays(30)->isPast();
+        return $this->plan_validity_date ? $this->plan_validity_date->isPast() : false;
     }
 
     public function getIsPlanActiveAttribute(): bool

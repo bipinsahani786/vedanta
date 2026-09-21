@@ -617,7 +617,7 @@
                                 </li>
                                 <li class="flex items-center gap-2.5">
                                     <span class="text-purple-400 text-xs shrink-0"><i class="fas fa-users"></i></span>
-                                    <span>Valid for up to 3 job applications/interviews</span>
+                                    <span>Valid for 6 Months (up to 3 job applications/interviews)</span>
                                 </li>
                                 <li class="flex items-center gap-2.5">
                                     <span class="text-amber-400 text-xs shrink-0"><i class="fas fa-star"></i></span>
@@ -657,7 +657,7 @@
                                         Standard Registration
                                     </div>
                                     <div class="text-xs text-text-dark/50 mt-0.5">
-                                        Process starts within 24 hours
+                                        Valid for 3 Months (Starts within 24 hours)
                                     </div>
                                 </div>
                             </div>
@@ -731,7 +731,7 @@
                                     <ul class="space-y-2 mt-3 text-text-dark/80 font-medium">
                                         <li class="flex items-center gap-2">
                                             <i class="fas fa-user text-text-dark/40 text-[10px] w-3.5 text-center"></i>
-                                            <span>Up to 2 Applications</span>
+                                            <span>3 Months Validity (Up to 2 Applications)</span>
                                         </li>
                                         <li class="flex items-center gap-2">
                                             <i class="fas fa-rocket text-text-dark/40 text-[10px] w-3.5 text-center"></i>
@@ -784,7 +784,7 @@
                                     <ul class="space-y-2 mt-3 text-text-main font-semibold">
                                         <li class="flex items-center gap-2 text-white">
                                             <i class="fas fa-check-circle text-emerald-400 text-[10px] w-3.5 text-center"></i>
-                                            <span>Up to 3 Applications</span>
+                                            <span>6 Months Validity (Up to 3 Applications)</span>
                                         </li>
                                         <li class="flex items-center gap-2 text-white">
                                             <i class="fas fa-check-circle text-emerald-400 text-[10px] w-3.5 text-center"></i>
@@ -887,8 +887,8 @@
                                     <i class="fas fa-calendar-alt text-text-dark/40 w-4 text-center"></i>
                                     <span>Validity</span>
                                 </div>
-                                <div class="font-bold text-text-main" x-text="selectedPlan === 'standard' ? 'Up to 2 applications' : 'Up to 3 applications'">
-                                    Up to 3 applications
+                                <div class="font-bold text-text-main" x-text="selectedPlan === 'standard' ? '3 Months (Up to 2 applications)' : '6 Months (Up to 3 applications)'">
+                                    6 Months (Up to 3 applications)
                                 </div>
                             </div>
                             <div class="flex items-center justify-between py-2.5 px-4">

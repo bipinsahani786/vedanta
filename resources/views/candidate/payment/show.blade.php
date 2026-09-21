@@ -256,7 +256,7 @@
                         <ul class="space-y-2 text-xs mb-5">
                             <li class="flex items-center gap-2 text-slate-300">
                                 <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
-                                <span>Up to 2 Applications / Interviews</span>
+                                <span>3 Months Validity (Up to 2 Applications)</span>
                             </li>
                             <li class="flex items-center gap-2 text-slate-300">
                                 <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
@@ -335,7 +335,7 @@
                         <ul class="space-y-2 text-xs mb-5">
                             <li class="flex items-center gap-2 text-white font-medium">
                                 <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
-                                <span>Up to 3 Applications / Interviews</span>
+                                <span>6 Months Validity (Up to 3 Applications)</span>
                             </li>
                             <li class="flex items-center gap-2 text-white font-medium">
                                 <i class="fas fa-check text-emerald-400 text-xs shrink-0"></i>
@@ -634,7 +634,7 @@
                                 <ul class="space-y-2 mt-3 text-slate-300 font-medium">
                                     <li class="flex items-center gap-2">
                                         <i class="fas fa-user text-slate-400 text-[10px] w-3.5 text-center"></i>
-                                        <span>Up to 2 Applications</span>
+                                        <span>3 Months Validity (Up to 2 Applications)</span>
                                     </li>
                                     <li class="flex items-center gap-2">
                                         <i class="fas fa-rocket text-slate-400 text-[10px] w-3.5 text-center"></i>
@@ -687,7 +687,7 @@
                                 <ul class="space-y-2 mt-3 text-slate-200 font-semibold">
                                     <li class="flex items-center gap-2 text-white">
                                         <i class="fas fa-check-circle text-emerald-400 text-[10px] w-3.5 text-center"></i>
-                                        <span>Up to 3 Applications</span>
+                                        <span>6 Months Validity (Up to 3 Applications)</span>
                                     </li>
                                     <li class="flex items-center gap-2 text-white">
                                         <i class="fas fa-check-circle text-emerald-400 text-[10px] w-3.5 text-center"></i>
@@ -789,8 +789,8 @@
                                 <i class="fas fa-calendar-alt text-slate-400 w-4 text-center"></i>
                                 <span>Validity</span>
                             </div>
-                            <div class="font-bold text-white" x-text="selectedPlan === '{{ $basicCode }}' ? 'Up to 2 applications' : 'Up to 3 applications'">
-                                Up to 3 applications
+                            <div class="font-bold text-white" x-text="selectedPlan === '{{ $basicCode }}' ? '3 Months (Up to 2 applications)' : '6 Months (Up to 3 applications)'">
+                                6 Months (Up to 3 applications)
                             </div>
                         </div>
                         <div class="flex items-center justify-between py-2.5 px-4">
