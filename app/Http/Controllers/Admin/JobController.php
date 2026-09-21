@@ -152,7 +152,7 @@ class JobController extends Controller
                     'notifiable_id' => $candidate->id,
                     'data' => json_encode([
                         'title' => 'New Matching Job: ' . $job->title,
-                        'message' => 'A new job at ' . $job->school_name . ' matches your profile (' . $candidateProfile->match_percentage . '% match).',
+                        'message' => 'A new job for ' . $job->title . ' matches your profile (' . $candidateProfile->match_percentage . '% match).',
                         'job_id' => $job->id
                     ]),
                     'created_at' => now(),
@@ -161,7 +161,7 @@ class JobController extends Controller
 
                 // Send Email Notification
                 try {
-                    \Illuminate\Support\Facades\Mail::to($candidate->email)->queue(new \App\Mail\CandidateJobMatchNotification($job, $candidateProfile->match_percentage));
+                    \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\CandidateJobMatchNotification($job, $candidateProfile->match_percentage));
                 } catch (\Exception $e) {
                     \Log::error('Failed to send Job Match email to: ' . $candidate->email . '. Error: ' . $e->getMessage());
                 }
@@ -273,8 +273,40 @@ class JobController extends Controller
 
         $job = JobPost::create($validated);
 
-        if (!empty($job->email)) {
-            // \Illuminate\Support\Facades\Mail::to($job->email)->send(new \App\Mail\JobApprovedMail($job));
+        if ($job->status === 'approved') {
+            try {
+                $suggestedCandidates = $job->getSuggestedCandidates(50);
+                foreach ($suggestedCandidates as $candidateProfile) {
+                    if ($candidateProfile->match_percentage < 80 || !in_array('subject', $candidateProfile->matched_criteria) || !in_array('category', $candidateProfile->matched_criteria)) {
+                        continue;
+                    }
+
+                    $candidate = $candidateProfile->user;
+                    if ($candidate) {
+                        \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                            'id' => Str::uuid(),
+                            'type' => 'App\Notifications\JobMatched',
+                            'notifiable_type' => 'App\Models\User',
+                            'notifiable_id' => $candidate->id,
+                            'data' => json_encode([
+                                'title' => 'New Matching Job: ' . $job->title,
+                                'message' => 'A new job for ' . $job->title . ' matches your profile (' . $candidateProfile->match_percentage . '% match).',
+                                'job_id' => $job->id
+                            ]),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                        try {
+                            \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\CandidateJobMatchNotification($job, $candidateProfile->match_percentage));
+                        } catch (\Exception $e) {
+                            \Log::error('Failed to send Job Match email to: ' . $candidate->email . '. Error: ' . $e->getMessage());
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                \Log::warning('Auto matching candidates notification warning: ' . $e->getMessage());
+            }
         }
 
         return redirect()->route('admin.jobs.index')->with('success', 'Job posted successfully.');
@@ -494,16 +526,16 @@ class JobController extends Controller
                 'notifiable_id' => $candidate->id,
                 'data' => json_encode([
                     'title' => 'New Job Alert: ' . $job->title,
-                    'message' => 'A new job at ' . $job->school_name . ' has been shared with you.',
+                    'message' => 'A new job opportunity for ' . $job->title . ' has been shared with you.',
                     'job_id' => $job->id
                 ]),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            // Send Email Notification (Queued)
+            // Send Email Notification
             try {
-                \Illuminate\Support\Facades\Mail::to($candidate->email)->queue(new \App\Mail\CandidateJobMatchNotification($job, $matchScore));
+                \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\CandidateJobMatchNotification($job, $matchScore));
                 $sentCount++;
             } catch (\Exception $e) {
                 \Log::error('Failed to send job match email to: ' . $candidate->email . '. Error: ' . $e->getMessage());

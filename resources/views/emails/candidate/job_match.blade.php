@@ -10,11 +10,6 @@ Hi there,
 We have a new open position that aligns with your profile preferences. Please review the details below:
 
 @php
-    $institutionName = !empty(trim($job->school_name ?? '')) 
-        ? $job->school_name 
-        : ($job->user?->employerProfile?->school_name 
-            ?: ($job->user?->name ?: 'Vedanta Partner School'));
-
     $locationParts = array_filter([$job->city?->name ?? null, $job->state?->name ?? null]);
     $locationStr = !empty($locationParts) ? implode(', ', $locationParts) : 'Location Not Specified';
 @endphp
@@ -23,8 +18,13 @@ We have a new open position that aligns with your profile preferences. Please re
 ### Job Details
 
 **Position:** {{ $job->title ?? 'Teacher / Faculty' }}  
-**Institution:** {{ $institutionName }}  
 **Subject:** {{ $job->subject?->name ?? 'General / All Subjects' }}  
+@if(!empty($job->category?->name))
+**Category:** {{ $job->category->name }}  
+@endif
+@if(!empty($job->salary_range))
+**Salary Range:** {{ $job->salary_range }}  
+@endif
 **Location:** {{ $locationStr }}
 </x-mail::panel>
 

@@ -8,9 +8,8 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class CandidateJobMatchNotification extends Mailable implements ShouldQueue
+class CandidateJobMatchNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -22,7 +21,7 @@ class CandidateJobMatchNotification extends Mailable implements ShouldQueue
      */
     public function __construct(JobPost $job, $matchScore)
     {
-        $job->loadMissing(['city', 'state', 'subject', 'user.employerProfile']);
+        $job->loadMissing(['city', 'state', 'subject', 'category']);
         $this->job = $job;
         $this->matchScore = $matchScore;
     }
@@ -42,7 +41,7 @@ class CandidateJobMatchNotification extends Mailable implements ShouldQueue
      */
     public function content(): Content
     {
-        $this->job->loadMissing(['city', 'state', 'subject', 'user.employerProfile']);
+        $this->job->loadMissing(['city', 'state', 'subject', 'category']);
 
         return new Content(
             markdown: 'emails.candidate.job_match',
