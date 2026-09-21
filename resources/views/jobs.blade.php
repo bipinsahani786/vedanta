@@ -399,7 +399,22 @@
                             </button>
                         @endif
 
-                        <button type="button" onclick="navigator.clipboard.writeText('{{ route('jobs.show', $job->id) }}'); alert('Job link copied!');" class="py-2.5 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer" title="Share Job">
+                        @php
+                            $jobShareData = [
+                                'id' => $job->id,
+                                'code' => $job->job_code,
+                                'title' => $job->title ?? 'Teaching Opportunity',
+                                'location' => $job->getMaskedLocation(),
+                                'salary' => $job->formatted_salary,
+                                'category' => $job->category?->name ?? '',
+                                'subject' => $job->subject?->name ?? '',
+                                'url' => route('jobs.show', $job->id),
+                            ];
+                        @endphp
+                        <button type="button" 
+                                onclick="openJobShare({{ json_encode($jobShareData) }})" 
+                                class="py-2.5 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-[#129aef] rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95 shadow-xs" 
+                                title="Share Job">
                             <i class="fas fa-share-alt text-[#129aef]"></i>
                             <span class="hidden sm:inline">Share</span>
                         </button>

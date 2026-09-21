@@ -146,7 +146,22 @@
                             @endauth
 
                             <!-- Share Button -->
-                            <button type="button" onclick="navigator.clipboard.writeText(window.location.href); alert('Job link copied to clipboard!');" class="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer">
+                            @php
+                                $detailJobShareData = [
+                                    'id' => $job->id,
+                                    'code' => $job->job_code,
+                                    'title' => $job->title ?? 'Teaching Opportunity',
+                                    'location' => $job->getMaskedLocation(),
+                                    'salary' => $job->formatted_salary,
+                                    'category' => $job->category?->name ?? '',
+                                    'subject' => $job->subject?->name ?? '',
+                                    'url' => route('jobs.show', $job->id),
+                                ];
+                            @endphp
+                            <button type="button" 
+                                    onclick="openJobShare({{ json_encode($detailJobShareData) }})" 
+                                    class="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:text-[#129aef] hover:bg-slate-100 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+                                    title="Share Job">
                                 <i class="fas fa-share-alt text-[#129aef]"></i>
                                 <span>Share</span>
                             </button>

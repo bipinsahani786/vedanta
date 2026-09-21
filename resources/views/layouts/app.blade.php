@@ -898,6 +898,7 @@
     </script>
 
     @include('partials.auth-choice-modal')
+    @include('partials.job-share-modal')
 
     @stack('scripts')
 </body>
