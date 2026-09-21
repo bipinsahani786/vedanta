@@ -215,14 +215,19 @@ class JobController extends Controller
         return redirect()->route('admin.jobs.index')->with('success', 'Job has been rejected.');
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $categories = \App\Models\Category::where('is_active', true)->get();
         $subjects = \App\Models\Subject::where('is_active', true)->get();
         $qualifications = \App\Models\Qualification::where('is_active', true)->get();
         $states = \App\Models\State::where('is_active', true)->get();
 
-        return view('admin.jobs.create', compact('categories', 'subjects', 'qualifications', 'states'));
+        $selectedStateId = old('state_id', $request->query('state_id'));
+        $cities = $selectedStateId 
+            ? \App\Models\City::where('state_id', $selectedStateId)->where('is_active', true)->get() 
+            : collect();
+
+        return view('admin.jobs.create', compact('categories', 'subjects', 'qualifications', 'states', 'cities'));
     }
 
     public function store(Request $request)
@@ -247,11 +252,15 @@ class JobController extends Controller
             'salary_rate' => 'nullable|string|max:50',
             'description' => 'nullable|string',
             'status' => 'required|in:pending,approved,rejected',
+            'retained_image' => 'nullable|string|max:255',
         ]);
 
         if ($request->hasFile('school_image')) {
             $validated['school_image'] = $request->file('school_image')->store('schools', 'public');
+        } elseif ($request->filled('retained_image')) {
+            $validated['school_image'] = $request->input('retained_image');
         }
+        unset($validated['retained_image']);
 
         // Auto-generate formatted salary_range for backwards-compatibility
         $rate = $request->input('salary_rate', 'per month');
@@ -307,6 +316,26 @@ class JobController extends Controller
             } catch (\Throwable $e) {
                 \Log::warning('Auto matching candidates notification warning: ' . $e->getMessage());
             }
+        }
+
+        $action = $request->input('action', 'save');
+        if ($action === 'save_and_add_another' || $request->has('add_another')) {
+            $queryParams = [
+                'school_name' => $job->school_name,
+                'contact_person' => $job->contact_person,
+                'email' => $job->email,
+                'phone' => $job->phone,
+                'state_id' => $job->state_id,
+                'city_id' => $job->city_id,
+                'status' => $job->status,
+            ];
+            if ($job->school_image) {
+                $queryParams['retained_image'] = $job->school_image;
+            }
+
+            return redirect()->route('admin.jobs.create', $queryParams)
+                ->with('success', 'Job "' . $job->title . '" posted successfully! You can now add another job for ' . ($job->school_name ?: 'this institution') . '.')
+                ->with('retained_school', $job->school_name ?: 'Same Institution');
         }
 
         return redirect()->route('admin.jobs.index')->with('success', 'Job posted successfully.');

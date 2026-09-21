@@ -148,6 +148,9 @@
                 </td>
                 <td>
                     <div class="flex items-center justify-end gap-2">
+                        <a href="{{ route('admin.jobs.create', ['school_name' => $job->school_name, 'contact_person' => $job->contact_person, 'email' => $job->email, 'phone' => $job->phone, 'state_id' => $job->state_id, 'city_id' => $job->city_id, 'retained_image' => $job->school_image, 'status' => $job->status]) }}" class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-colors tooltip" title="Add Another Job for this School">
+                            <i class="fas fa-plus text-xs"></i>
+                        </a>
                         <a href="{{ route('admin.jobs.show', $job) }}" class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center hover:bg-accent-blue hover:text-white transition-colors tooltip" title="Review Job">
                             <i class="fas fa-eye text-xs"></i>
                         </a>

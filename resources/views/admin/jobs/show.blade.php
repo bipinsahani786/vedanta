@@ -12,6 +12,9 @@
     </div>
     
     <div class="flex items-center space-x-3">
+        <a href="{{ route('admin.jobs.create', ['school_name' => $job->school_name, 'contact_person' => $job->contact_person, 'email' => $job->email, 'phone' => $job->phone, 'state_id' => $job->state_id, 'city_id' => $job->city_id, 'retained_image' => $job->school_image, 'status' => $job->status]) }}" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-sm font-semibold transition-colors border border-emerald-200 flex items-center gap-1.5">
+            <i class="fas fa-plus text-xs"></i> Add Another Job for this School
+        </a>
         <a href="{{ route('admin.jobs.edit', $job->id) }}" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-semibold transition-colors border border-blue-200">
             <i class="fas fa-edit mr-1"></i> Edit Job
         </a>

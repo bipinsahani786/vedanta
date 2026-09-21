@@ -11,6 +11,26 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto">
+    @if(session('retained_school') || request('school_name'))
+        <div class="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <i class="fas fa-layer-group text-sm"></i>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Adding Another Job</div>
+                    <div class="text-sm font-semibold text-white">
+                        School &amp; location details prefilled for <span class="text-emerald-300 font-bold">{{ session('retained_school') ?? request('school_name') }}</span>.
+                    </div>
+                </div>
+            </div>
+            <a href="{{ route('admin.jobs.create') }}" class="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 hover:text-white border border-white/10 transition-all shrink-0 flex items-center gap-1.5">
+                <i class="fas fa-rotate-left text-[10px]"></i>
+                <span>Clear &amp; New School</span>
+            </a>
+        </div>
+    @endif
+
     <div class="bg-card-bg border border-card-border rounded-2xl shadow-xl overflow-hidden">
         <div class="p-6 border-b border-card-border bg-secondary-bg/30">
             <h3 class="text-lg font-bold text-text-main flex items-center gap-2">
@@ -27,11 +47,17 @@
                     <i class="fas fa-image text-accent-blue"></i> School / Institution Banner Image (Optional)
                 </label>
                 
+                <input type="hidden" name="retained_image" id="retained_image" value="{{ old('retained_image', request('retained_image')) }}">
+
+                @php
+                    $retainedImg = old('retained_image', request('retained_image'));
+                @endphp
+
                 <div id="school-image-upload-box" class="relative group border-2 border-dashed border-card-border hover:border-accent-blue/60 rounded-2xl bg-secondary-bg/30 p-6 transition-all duration-200 text-center cursor-pointer">
                     <input type="file" name="school_image" id="school_image" accept="image/png,image/jpeg,image/jpg,image/webp" class="hidden">
                     
                     <!-- Empty State -->
-                    <div id="image-empty-state" class="py-4">
+                    <div id="image-empty-state" class="py-4 {{ $retainedImg ? 'hidden' : '' }}">
                         <div class="w-16 h-16 rounded-2xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue flex items-center justify-center mx-auto mb-3 text-2xl group-hover:scale-110 transition-transform shadow-sm">
                             <i class="fas fa-cloud-arrow-up"></i>
                         </div>
@@ -44,12 +70,14 @@
                     </div>
 
                     <!-- Preview State -->
-                    <div id="image-preview-state" class="hidden">
+                    <div id="image-preview-state" class="{{ $retainedImg ? '' : 'hidden' }}">
                         <div class="relative max-w-xl mx-auto rounded-xl overflow-hidden border border-card-border shadow-lg">
-                            <img id="image-preview-img" src="" alt="Preview" class="w-full h-48 sm:h-56 object-cover">
+                            <img id="image-preview-img" src="{{ $retainedImg ? asset('storage/' . $retainedImg) : '' }}" alt="Preview" class="w-full h-48 sm:h-56 object-cover">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none"></div>
                             <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-auto">
-                                <span id="image-preview-name" class="text-xs font-bold text-white bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg truncate max-w-[220px]"></span>
+                                <span id="image-preview-name" class="text-xs font-bold text-white bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg truncate max-w-[220px]">
+                                    {{ $retainedImg ? 'Retained Campus Photo' : '' }}
+                                </span>
                                 <div class="flex items-center gap-2">
                                     <button type="button" id="btn-change-image" class="px-3 py-1.5 bg-white/90 hover:bg-white text-slate-900 rounded-lg text-xs font-bold transition-all shadow-md flex items-center gap-1">
                                         <i class="fas fa-arrows-rotate text-[10px]"></i> Change
@@ -72,28 +100,28 @@
                 <!-- School Name -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">School/Institution Name</label>
-                    <input type="text" name="school_name" value="{{ old('school_name') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Delhi Public School">
+                    <input type="text" name="school_name" value="{{ old('school_name', request('school_name')) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Delhi Public School">
                     @error('school_name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Contact Person -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Contact Person</label>
-                    <input type="text" name="contact_person" value="{{ old('contact_person') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Mr. Sharma">
+                    <input type="text" name="contact_person" value="{{ old('contact_person', request('contact_person')) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Mr. Sharma">
                     @error('contact_person') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Email -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Email Address</label>
-                    <input type="email" name="email" value="{{ old('email') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. hr@school.com">
+                    <input type="email" name="email" value="{{ old('email', request('email')) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. hr@school.com">
                     @error('email') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Phone -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Phone Number</label>
-                    <input type="text" name="phone" value="{{ old('phone') }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 9876543210">
+                    <input type="text" name="phone" value="{{ old('phone', request('phone')) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 9876543210">
                     @error('phone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -170,7 +198,7 @@
                     <select name="state_id" id="state_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                         <option value="">Select State</option>
                         @foreach($states as $state)
-                            <option value="{{ $state->id }}" {{ old('state_id') == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
+                            <option value="{{ $state->id }}" {{ old('state_id', request('state_id')) == $state->id ? 'selected' : '' }}>{{ $state->name }}</option>
                         @endforeach
                     </select>
                     @error('state_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
@@ -181,6 +209,11 @@
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">City *</label>
                     <select name="city_id" id="city_id" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
                         <option value="">Select City</option>
+                        @if(isset($cities))
+                            @foreach($cities as $city)
+                                <option value="{{ $city->id }}" {{ old('city_id', request('city_id')) == $city->id ? 'selected' : '' }}>{{ $city->name }}</option>
+                            @endforeach
+                        @endif
                     </select>
                     @error('city_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
@@ -250,20 +283,33 @@
                 <div class="md:col-span-2">
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Publishing Status *</label>
                     <select name="status" required class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
-                        <option value="approved" selected>Live / Approved (Publish Immediately)</option>
-                        <option value="pending">Pending Review (Save as Draft)</option>
-                        <option value="rejected">Rejected / Closed</option>
+                        <option value="approved" {{ old('status', request('status', 'approved')) == 'approved' ? 'selected' : '' }}>Live / Approved (Publish Immediately)</option>
+                        <option value="pending" {{ old('status', request('status')) == 'pending' ? 'selected' : '' }}>Pending Review (Save as Draft)</option>
+                        <option value="rejected" {{ old('status', request('status')) == 'rejected' ? 'selected' : '' }}>Rejected / Closed</option>
                     </select>
                     @error('status') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
 
 
-            <div class="mt-8 flex justify-end gap-3">
-                <a href="{{ route('admin.jobs.index') }}" class="px-6 py-3 rounded-xl font-bold text-sm text-text-main bg-secondary-bg border border-card-border hover:bg-card-border/50 transition-all">Cancel</a>
-                <button type="submit" class="px-6 py-3 rounded-xl font-bold text-sm text-white bg-accent-blue hover:bg-accent-blue-hover shadow-lg shadow-accent-blue/30 transition-all">
-                    Post Job Now
-                </button>
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-card-border">
+                <a href="{{ route('admin.jobs.index') }}" class="px-6 py-3 rounded-xl font-bold text-sm text-text-main bg-secondary-bg border border-card-border hover:bg-card-border/50 transition-all order-3 sm:order-1">
+                    <i class="fas fa-arrow-left mr-1.5"></i> Cancel
+                </a>
+
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto order-1 sm:order-2">
+                    <!-- Post & Add Another Button -->
+                    <button type="submit" name="action" value="save_and_add_another" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fas fa-plus-circle text-emerald-400"></i>
+                        <span>Post &amp; Add Another Job</span>
+                    </button>
+
+                    <!-- Post Job Now Button -->
+                    <button type="submit" name="action" value="save" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-white bg-accent-blue hover:bg-accent-blue-hover shadow-lg shadow-accent-blue/30 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fas fa-check"></i>
+                        <span>Post Job Now</span>
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -405,6 +451,8 @@
             btnRemove.addEventListener('click', function(e) {
                 e.stopPropagation();
                 fileInput.value = '';
+                const retainedInput = document.getElementById('retained_image');
+                if (retainedInput) retainedInput.value = '';
                 previewImg.src = '';
                 previewState.classList.add('hidden');
                 emptyState.classList.remove('hidden');
