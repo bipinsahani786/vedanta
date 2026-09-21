@@ -127,7 +127,7 @@ class CrmController extends Controller
                 
                 'is_terms_agreed' => true,
                 'is_agreement_signed' => $request->has('is_agreement_signed') ? $request->boolean('is_agreement_signed') : true,
-                'agreement_signed_at' => now(),
+                'signature_date_time' => now(),
             ]);
 
             // 4. Create Payment Transaction
@@ -265,7 +265,7 @@ class CrmController extends Controller
                 $updates['is_agreement_signed'] = $request->boolean('is_agreement_signed');
                 if ($updates['is_agreement_signed']) {
                     $updates['is_terms_agreed'] = true;
-                    $updates['agreement_signed_at'] = $profile?->agreement_signed_at ?? now();
+                    $updates['signature_date_time'] = $profile?->signature_date_time ?? now();
                 }
             }
 
@@ -296,7 +296,7 @@ class CrmController extends Controller
                 $updates['agreement_pdf_path'] = $request->file('agreement_pdf')->store('agreements', 'public');
                 $updates['is_agreement_signed'] = true;
                 $updates['is_terms_agreed'] = true;
-                $updates['agreement_signed_at'] = $profile?->agreement_signed_at ?? now();
+                $updates['signature_date_time'] = $profile?->signature_date_time ?? now();
             }
 
             // Handle Manual Payment Collection

@@ -175,8 +175,8 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             // If fee is paid or marked complete, ensure agreement is marked signed
             if (($hasPayment || !empty($profile->registration_completed_at) || ($profile->is_profile_complete ?? false)) && !$profile->is_agreement_signed) {
                 $updates['is_agreement_signed'] = true;
-                if (empty($profile->agreement_signed_at)) {
-                    $updates['agreement_signed_at'] = now();
+                if (empty($profile->signature_date_time)) {
+                    $updates['signature_date_time'] = now();
                 }
                 $needsUpdate = true;
             }
@@ -210,7 +210,7 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             if (!empty($profile->profile_photo_path)) $profileStrength += 15;
             if ($profile->experience_years > 0 || !empty($profile->category_id) || !empty($profile->current_school)) $profileStrength += 20;
             if (!empty($profile->resume_path) || $profile->is_profile_complete) $profileStrength += 15;
-            if ($profile->is_agreement_signed || !empty($profile->agreement_signed_at)) $profileStrength += 10;
+            if ($profile->is_agreement_signed || !empty($profile->signature_date_time) || !empty($profile->agreement_signed_at)) $profileStrength += 10;
             if ($profile->is_fee_paid || $profile->initial_fee_paid || ($profile->paid_amount ?? 0) >= 500) $profileStrength += 10;
         }
         $profileStrength = min(100, max(20, $profileStrength));

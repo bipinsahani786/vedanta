@@ -38,6 +38,7 @@ class CandidateProfile extends Model
         'registration_completed_at' => 'datetime',
         'signature_date_time' => 'datetime',
         'plan_started_at' => 'datetime',
+        'agreement_signed_at' => 'datetime',
     ];
 
     public function user()
@@ -75,6 +76,23 @@ class CandidateProfile extends Model
         return $this->belongsTo(City::class, 'preferred_city_id');
     }
 
+    public function getAgreementSignedAtAttribute()
+    {
+        if (!empty($this->attributes['agreement_signed_at'])) {
+            return $this->asDateTime($this->attributes['agreement_signed_at']);
+        }
+        return $this->signature_date_time;
+    }
+
+    public function setAgreementSignedAtAttribute($value)
+    {
+        $dt = $value ? $this->fromDateTime($value) : null;
+        if (array_key_exists('agreement_signed_at', $this->attributes)) {
+            $this->attributes['agreement_signed_at'] = $dt;
+        }
+        $this->attributes['signature_date_time'] = $dt;
+    }
+
     public function getPendingReasonAttribute()
     {
         if ($this->isRegistrationCompleted()) {
@@ -83,7 +101,7 @@ class CandidateProfile extends Model
         if (!$this->is_profile_complete && (empty($this->category_id) || empty($this->subject_id))) {
             return 'Pending Profile Completion';
         }
-        if (!$this->is_agreement_signed && empty($this->agreement_signed_at)) {
+        if (!$this->is_agreement_signed && empty($this->signature_date_time) && empty($this->agreement_signed_at)) {
             return 'Pending Agreement Upload';
         }
         if (!$this->has_paid_plan) {
@@ -100,7 +118,7 @@ class CandidateProfile extends Model
         if (!$this->is_profile_complete && (empty($this->category_id) || empty($this->subject_id))) {
             return route('candidate.wizard');
         }
-        if (!$this->is_agreement_signed && empty($this->agreement_signed_at)) {
+        if (!$this->is_agreement_signed && empty($this->signature_date_time) && empty($this->agreement_signed_at)) {
             return route('candidate.wizard', ['step' => 2]);
         }
         if (!$this->has_paid_plan) {
@@ -177,7 +195,7 @@ class CandidateProfile extends Model
         $hasPayment = (bool) ($this->initial_fee_paid || $this->is_fee_paid || ($this->paid_amount ?? 0) >= 500);
 
         // 4. Agreement exists
-        $hasAgreement = (bool) ($this->is_agreement_signed || !empty($this->agreement_signed_at));
+        $hasAgreement = (bool) ($this->is_agreement_signed || !empty($this->signature_date_time) || !empty($this->agreement_signed_at));
 
         return (bool) ($hasCoreProfile && ($hasAgreement || $hasPayment) && $hasPayment);
     }

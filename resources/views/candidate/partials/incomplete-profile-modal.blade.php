@@ -13,7 +13,7 @@
     }
 
     $step1Complete = (bool) ($profile && ($profile->is_profile_complete || $hasCoreProfile || !empty($profile->registration_completed_at)));
-    $step2Complete = (bool) ($profile && ($profile->is_agreement_signed || !empty($profile->agreement_signed_at) || !empty($profile->registration_completed_at) || ($step1Complete && $hasPayment)));
+    $step2Complete = (bool) ($profile && ($profile->is_agreement_signed || !empty($profile->signature_date_time) || !empty($profile->agreement_signed_at) || !empty($profile->registration_completed_at) || ($step1Complete && $hasPayment)));
     $step3Complete = (bool) ($profile && ($hasPayment || !empty($profile->registration_completed_at)));
     
     $completedSteps = ($step1Complete ? 1 : 0) + ($step2Complete ? 1 : 0) + ($step3Complete ? 1 : 0);
