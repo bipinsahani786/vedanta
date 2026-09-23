@@ -546,7 +546,15 @@
                 <div class="grid grid-cols-2 gap-y-2.5 text-xs text-gray-400">
                     <a href="{{ route('home') }}" class="hover:text-accent-blue transition-colors">Home</a>
                     <a href="{{ route('about') }}" class="hover:text-accent-blue transition-colors">About us</a>
-                    <a href="{{ route('post-job') }}" class="hover:text-accent-blue transition-colors">Post your Job</a>
+                    @auth
+                        @if(auth()->user()->role === 'admin')
+                            <a href="{{ route('admin.jobs.create') }}" class="hover:text-accent-blue transition-colors">Post your Job</a>
+                        @else
+                            <a href="{{ route('employer.jobs.create') }}" class="hover:text-accent-blue transition-colors">Post your Job</a>
+                        @endif
+                    @else
+                        <a href="{{ route('employer.jobs.create') }}" class="hover:text-accent-blue transition-colors">Post your Job</a>
+                    @endauth
                     <a href="{{ route('contact') }}" class="hover:text-accent-blue transition-colors">Contact us</a>
                     <a href="{{ route('terms') }}" class="hover:text-accent-blue transition-colors">Terms &
                         Conditions</a>

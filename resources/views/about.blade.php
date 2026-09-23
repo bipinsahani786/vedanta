@@ -143,20 +143,20 @@
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center relative z-10">
             <div>
-                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="85">0</span><span class="text-slate-900">+</span></div>
+                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="500">500</span><span class="text-slate-900">+</span></div>
                 <div class="text-sm lg:text-sm font-bold tracking-wide uppercase text-slate-900">Current Openings</div>
             </div>
             <div>
-                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="95">0</span><span class="text-slate-900">%</span></div>
+                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="95">95</span><span class="text-slate-900">%</span></div>
                 <div class="text-sm lg:text-sm font-bold tracking-wide uppercase text-slate-900">Jobs Fulfillment Rate</div>
             </div>
             <div>
-                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="75">0</span><span class="text-slate-900">K</span></div>
+                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="2500">2,500</span><span class="text-slate-900">+</span></div>
                 <div class="text-sm lg:text-sm font-bold tracking-wide uppercase text-slate-900">Jobs Applied</div>
             </div>
             <div>
-                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="95">0</span><span class="text-slate-900"> %</span></div>
-                <div class="text-sm lg:text-sm font-bold tracking-wide uppercase text-slate-900">Satisfied school</div>
+                <div class="text-4xl lg:text-5xl font-black mb-2 text-accent-blue"><span class="stat-counter" data-count="150">150</span><span class="text-slate-900">+</span></div>
+                <div class="text-sm lg:text-sm font-bold tracking-wide uppercase text-slate-900">Satisfied Schools</div>
             </div>
         </div>
     </div>
@@ -285,14 +285,15 @@
                         if(counter.dataset.isAnimating !== 'true') return;
                         
                         const target = +counter.getAttribute('data-count');
-                        const count = +counter.innerText;
+                        const count = +(counter.innerText.replace(/,/g, '')) || 0;
                         const inc = target / speed;
 
                         if (count < target) {
-                            counter.innerText = Math.ceil(count + inc);
+                            const next = Math.ceil(count + inc);
+                            counter.innerText = (next > target ? target : next).toLocaleString();
                             counter.timeoutId = setTimeout(updateCount, 40);
                         } else {
-                            counter.innerText = target;
+                            counter.innerText = target.toLocaleString();
                             counter.dataset.isAnimating = 'false';
                         }
                     };

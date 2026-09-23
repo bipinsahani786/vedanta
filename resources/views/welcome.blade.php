@@ -198,21 +198,19 @@
     <section class="bg-gradient-to-r from-[#129aef] to-[#031b4e] py-12 px-6 lg:px-[5%] text-white">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/20">
             <div>
-                <!-- <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="{{ $totalJobs }}">0</span><span class="text-[#ffb800]">+</span></h3> -->
-                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="20000">20,000</span><span class="text-[#ffb800]">+</span></h3>
+                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="500">500</span><span class="text-[#ffb800]">+</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Current Openings</p>
             </div>
             <div>
-                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="95">0</span><span class="text-[#ffb800]">%</span></h3>
+                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="95">95</span><span class="text-[#ffb800]">%</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Jobs Fulfillment Rate</p>
             </div>
             <div>
-                <!-- <h3 class="text-4xl lg:text-6xl font-bold mb-2 text-slate-200"><span class="stat-counter" data-count="{{ $totalApplications }}">0</span><span class="text-[#ffb800]">+</span></h3> -->
-                 <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="85000">85,000</span><span class="text-[#ffb800]">+</span></h3>
+                 <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="2500">2,500</span><span class="text-[#ffb800]">+</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Jobs Applied</p>
             </div>
             <div>
-                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="3500">3,500</span><span class="text-[#ffb800]">+</span></h3>
+                <h3 class="text-4xl lg:text-6xl font-bold mb-2"><span class="stat-counter" data-count="150">150</span><span class="text-[#ffb800]">+</span></h3>
                 <p class="text-sm font-medium text-white/80 uppercase tracking-wide mt-3">Satisfied Schools</p>
             </div>
         </div>
@@ -1205,14 +1203,15 @@
                         if(counter.dataset.isAnimating !== 'true') return;
                         
                         const target = +counter.getAttribute('data-count');
-                        const count = +counter.innerText;
+                        const count = +(counter.innerText.replace(/,/g, '')) || 0;
                         const inc = target / speed;
 
                         if (count < target) {
-                            counter.innerText = Math.ceil(count + inc);
+                            const next = Math.ceil(count + inc);
+                            counter.innerText = (next > target ? target : next).toLocaleString();
                             counter.timeoutId = setTimeout(updateCount, 40);
                         } else {
-                            counter.innerText = target;
+                            counter.innerText = target.toLocaleString();
                             counter.dataset.isAnimating = 'false';
                         }
                     };

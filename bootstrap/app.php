@@ -13,6 +13,15 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
+        $middleware->redirectGuestsTo(function (Request $request) {
+            if ($request->is('employer*')) {
+                return route('login', ['role' => 'employer']);
+            }
+            if ($request->is('admin*')) {
+                return route('login', ['role' => 'admin']);
+            }
+            return route('login');
+        });
         $middleware->alias([
             'admin' => \App\Http\Middleware\IsAdmin::class,
             'employer' => \App\Http\Middleware\IsEmployer::class,

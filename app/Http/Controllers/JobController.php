@@ -14,12 +14,11 @@ class JobController extends Controller
 {
     public function showPostJobForm()
     {
-        $categories = Category::where('is_active', true)->get();
-        $subjects = Subject::where('is_active', true)->get();
-        $qualifications = Qualification::where('is_active', true)->get();
-        $states = State::where('is_active', true)->get();
+        if (auth()->check() && auth()->user()->role === 'admin') {
+            return redirect()->route('admin.jobs.create');
+        }
 
-        return view('post-job', compact('categories', 'subjects', 'qualifications', 'states'));
+        return redirect()->route('employer.jobs.create');
     }
 
     public function show(JobPost $job)
