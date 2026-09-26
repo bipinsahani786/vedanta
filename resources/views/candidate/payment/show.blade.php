@@ -825,7 +825,7 @@
                                 <i class="fas fa-file-invoice text-slate-400 w-4 text-center"></i>
                                 <span>Additional Payment</span>
                             </div>
-                            <div class="font-bold text-white">
+                            <div class="font-bold text-white" x-text="(selectedPlan === '{{ $basicCode }}' || selectedPlan === 'standard' || selectedPlan === 'basic') ? '₹500 required after selection' : 'Not required after selection'">
                                 Not required after selection
                             </div>
                         </div>
