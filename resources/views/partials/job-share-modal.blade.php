@@ -166,13 +166,13 @@
         }
 
         function buildJobShareMessage(data) {
-            let msg = `🎓 *Teacher Job Vacancy - Vedanta Placement Agency*\n\n`;
-            msg += `📌 *Role:* ${data.title || 'Teaching Faculty'} (${data.code || ''})\n`;
-            if (data.location) msg += `📍 *Location:* ${data.location}\n`;
-            if (data.salary && data.salary !== 'Not disclosed') msg += `💰 *Salary:* ${data.salary}\n`;
-            if (data.category) msg += `🏷️ *Category:* ${data.category}\n`;
-            if (data.subject) msg += `📚 *Subject:* ${data.subject}\n`;
-            msg += `\n🔗 *View Details & Apply Here:*\n${data.url}\n\n`;
+            let msg = `*Teacher Job Vacancy - Vedanta Placement Agency*\n\n`;
+            msg += `*Role:* ${data.title || 'Teaching Faculty'} (${data.code || ''})\n`;
+            if (data.location) msg += `*Location:* ${data.location}\n`;
+            if (data.salary && data.salary !== 'Not disclosed') msg += `*Salary:* ${data.salary}\n`;
+            if (data.category) msg += `*Category:* ${data.category}\n`;
+            if (data.subject) msg += `*Subject:* ${data.subject}\n`;
+            msg += `\n*View Details & Apply Here:*\n${data.url}\n\n`;
             msg += `_Vedanta Placement Agency - India's Premier Educational Recruitment Agency_`;
             return msg;
         }
