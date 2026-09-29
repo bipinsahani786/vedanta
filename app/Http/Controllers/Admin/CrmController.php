@@ -682,6 +682,23 @@ class CrmController extends Controller
         }
     }
 
+    public function previewAgreement($id)
+    {
+        try {
+            $candidate = User::findOrFail($id);
+            $profile = $candidate->profile;
+
+            if (!$profile) {
+                return back()->with('error', 'Candidate profile not found.');
+            }
+
+            return \App\Http\Controllers\Candidate\AgreementController::renderAgreementStream($candidate, $profile);
+        } catch (\Throwable $e) {
+            \Log::error("Admin agreement preview failed for Candidate ID {$id}: " . $e->getMessage());
+            return back()->with('error', 'Could not preview agreement PDF: ' . $e->getMessage());
+        }
+    }
+
     public function storeFollowUp(Request $request, $id)
     {
         $request->validate([

@@ -312,11 +312,14 @@
                             <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agreement Status</h4>
                             @if($candidate->profile && ($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_date_time || $candidate->profile->signature_data))
                                 <div class="flex items-center gap-2">
-                                    <a href="{{ route('admin.crm.candidate.download-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200 hover:bg-green-100 transition-colors" title="View/Download Agreement (auto-generates if missing)">
-                                        <i class="fas fa-download"></i> Signed & Valid (PDF)
+                                    <a href="{{ route('admin.crm.candidate.preview-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200 hover:bg-blue-100 transition-colors" title="Live Preview Agreement PDF">
+                                        <i class="fas fa-eye"></i> Live Preview
+                                    </a>
+                                    <a href="{{ route('admin.crm.candidate.download-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200 hover:bg-green-100 transition-colors" title="Download Agreement">
+                                        <i class="fas fa-download"></i> Download PDF
                                     </a>
                                     <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-600 hover:text-indigo-600 rounded-full text-[11px] font-bold border border-gray-300 hover:bg-indigo-50 transition-colors" title="Force regenerate PDF">
-                                        <i class="fas fa-sync-alt"></i> Regenerate
+                                        <i class="fas fa-sync-alt"></i> Re-generate
                                     </a>
                                 </div>
                             @else

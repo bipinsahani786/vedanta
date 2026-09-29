@@ -292,6 +292,7 @@ Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name(
     Route::post('/password', [\App\Http\Controllers\Candidate\ProfileController::class, 'updatePassword'])->name('password.update');
 
     Route::get('/agreement', [\App\Http\Controllers\Candidate\AgreementController::class, 'show'])->name('agreement.show');
+    Route::get('/agreement/preview', [\App\Http\Controllers\Candidate\AgreementController::class, 'preview'])->name('agreement.preview');
     Route::post('/agreement/sign', [\App\Http\Controllers\Candidate\AgreementController::class, 'sign'])->name('agreement.sign');
     Route::get('/agreement/download', [\App\Http\Controllers\Candidate\AgreementController::class, 'download'])->name('agreement.download');
 
@@ -379,6 +380,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/candidate/{id}/upload-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'uploadAgreement'])->name('crm.candidate.upload-agreement');
     Route::post('/crm/candidate/{id}/send-agreement-link', [\App\Http\Controllers\Admin\CrmController::class, 'sendAgreementLink'])->name('crm.candidate.send-agreement-link');
     Route::get('/crm/candidate/{id}/download-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'downloadAgreement'])->name('crm.candidate.download-agreement');
+    Route::get('/crm/candidate/{id}/preview-agreement', [\App\Http\Controllers\Admin\CrmController::class, 'previewAgreement'])->name('crm.candidate.preview-agreement');
     Route::post('/crm/candidate/{id}/fulfill-payment', [\App\Http\Controllers\Admin\CrmController::class, 'manualPaymentFulfill'])->name('crm.candidate.fulfill-payment');
     Route::post('/crm/candidate/{id}/send-email', [\App\Http\Controllers\Admin\CrmController::class, 'sendCandidateEmail'])->name('crm.candidate.send-email');
 

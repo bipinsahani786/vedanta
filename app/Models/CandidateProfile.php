@@ -28,6 +28,18 @@ class CandidateProfile extends Model
                 $profile->vpa_id = sprintf("VPA-%s-%03d", $year, $nextSequence);
             }
         });
+
+        static::updating(function ($profile) {
+            if ($profile->is_agreement_signed && empty($profile->agreement_id)) {
+                if (!empty($profile->vpa_id)) {
+                    $profile->agreement_id = str_replace('VPA-', 'VPA-AGR-', $profile->vpa_id);
+                    // Ensure CAN is replaced if it exists
+                    $profile->agreement_id = str_replace('VPA-AGR-CAN-', 'VPA-AGR-', $profile->agreement_id);
+                } else {
+                    $profile->agreement_id = 'VPA-AGR-' . date('Y') . '-' . str_pad($profile->id, 6, '0', STR_PAD_LEFT);
+                }
+            }
+        });
     }
 
     protected $casts = [
