@@ -290,8 +290,18 @@
             $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
         }
 
-        $candidateId = $profile->vpa_id ?: ('VPA-CAN-' . date('Y') . '-' . str_pad($user->id, 6, '0', STR_PAD_LEFT));
-        $agreementId = $profile->agreement_id ?: ('VPA-AGR-' . date('Y') . '-' . str_pad($user->id, 6, '0', STR_PAD_LEFT));
+        $adminSignPath = public_path('images/aditya_rajveer_signature.png');
+        $adminSignBase64 = '';
+        if (file_exists($adminSignPath)) {
+            $adminSignBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($adminSignPath));
+        }
+
+        if (empty($profile->vpa_id) || ($profile->is_agreement_signed && empty($profile->agreement_id))) {
+            $profile->ensureIdsAssigned();
+        }
+
+        $candidateId = $profile->vpa_id ?: ('VPA-' . date('Y') . '-' . str_pad($user->id, 3, '0', STR_PAD_LEFT));
+        $agreementId = $profile->agreement_id ?: str_replace('VPA-', 'VPA-AGR-', $candidateId);
         
         $agreementDateTime = $profile->signature_date_time 
             ? \Carbon\Carbon::parse($profile->signature_date_time)->format('d/m/Y H:i:s') . ' IST' 
@@ -755,10 +765,14 @@
                 <div style="font-size: 5.8pt; color: #6b7280; text-align: center; margin-top: 2px;">{{ $user->name }} &bull; Digital Signature</div>
             </td>
             <td class="signature-box">
-                <div style="text-align: center; min-height: 38px;">
-                    <div class="cursive-signature" style="font-size: 22px; color: #004d99; margin-bottom: 1px;">
-                        Aditya Rajveer
-                    </div>
+                <div style="text-align: center; min-height: 38px; padding-top: 1px;">
+                    @if(!empty($adminSignBase64))
+                        <img src="{{ $adminSignBase64 }}" style="max-height: 38px; max-width: 170px; height: auto; width: auto; display: inline-block; vertical-align: middle;" alt="Aditya Rajveer Signature">
+                    @else
+                        <div class="cursive-signature" style="font-size: 22px; color: #004d99; margin-bottom: 1px;">
+                            Aditya Rajveer
+                        </div>
+                    @endif
                 </div>
                 <div style="font-size: 6.5pt; font-weight: bold; color: #111827; text-align: center;">Digital Signature &mdash; Aditya Rajveer</div>
                 <div style="font-size: 6.2pt; color: #374151; margin-top: 3px; line-height: 1.2;">

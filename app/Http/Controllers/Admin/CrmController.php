@@ -2,28 +2,54 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Candidate\AgreementController;
 use App\Http\Controllers\Controller;
-use App\Models\CrmFollowUp;
-use App\Models\JobApplication;
-use App\Models\ServiceChargeInvoice;
-use App\Models\User;
+use App\Mail\AgreementLinkMail;
+use App\Mail\CandidateReminderMail;
+use App\Mail\DynamicTemplateMail;
+use App\Mail\InvoiceUpdatedMail;
+use App\Mail\PaymentReceiptMail;
+use App\Mail\PaymentReminderMail;
+use App\Mail\ProfileApprovedMail;
+use App\Mail\RegistrationSuccessMail;
+use App\Mail\ServiceChargeInvoiceMail;
 use App\Models\CandidateProfile;
 use App\Models\CandidateRating;
+use App\Models\Category;
+use App\Models\City;
+use App\Models\CrmFollowUp;
+use App\Models\EmailTemplate;
+use App\Models\JobApplication;
+use App\Models\JobPost;
 use App\Models\PaymentTransaction;
+use App\Models\Qualification;
+use App\Models\ServiceChargeInvoice;
+use App\Models\State;
+use App\Models\Subject;
+use App\Models\User;
+use App\Services\PaymentFulfillmentService;
+use App\Services\ReferralService;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class CrmController extends Controller
 {
     public function create()
     {
-        $categories = \App\Models\Category::all();
-        $subjects = \App\Models\Subject::all();
-        $qualifications = \App\Models\Qualification::all();
-        $states = \App\Models\State::where('is_active', true)->get();
-        $cities = \App\Models\City::where('is_active', true)->get();
+        $categories = Category::all();
+        $subjects = Subject::all();
+        $qualifications = Qualification::all();
+        $states = State::where('is_active', true)->get();
+        $cities = City::where('is_active', true)->get();
 
         return view('admin.crm.create', compact('categories', 'subjects', 'qualifications', 'states', 'cities'));
     }
@@ -81,7 +107,7 @@ class CrmController extends Controller
             $offerLetterPath = $request->hasFile('offer_letter') ? $request->file('offer_letter')->store('offer_letters', 'public') : null;
             $agreementPdfPath = $request->hasFile('agreement_pdf') ? $request->file('agreement_pdf')->store('agreements', 'public') : null;
 
-            $paymentId = $request->payment_method . '-ADMIN-' . strtoupper(uniqid());
+            $paymentId = $request->payment_method.'-ADMIN-'.strtoupper(uniqid());
 
             $otherQualsArray = is_array($request->other_qualifications) ? $request->other_qualifications : ($request->other_qualifications ? explode(',', $request->other_qualifications) : []);
             if ($request->filled('custom_qualification')) {
@@ -108,7 +134,7 @@ class CrmController extends Controller
                 'residential_preference' => $request->residential_preference,
                 'availability_to_join' => $request->availability_to_join,
                 'current_school' => $request->current_school ?: 'Fresher',
-                
+
                 'resume_path' => $resumePath,
                 'profile_photo_path' => $profilePhotoPath,
                 'live_photo_path' => $livePhotoPath,
@@ -124,7 +150,7 @@ class CrmController extends Controller
                 'plan_started_at' => now(),
                 'payment_id' => $paymentId,
                 'registration_completed_at' => now(),
-                
+
                 'is_terms_agreed' => true,
                 'is_agreement_signed' => $request->has('is_agreement_signed') ? $request->boolean('is_agreement_signed') : true,
                 'signature_date_time' => now(),
@@ -138,38 +164,39 @@ class CrmController extends Controller
                 'type' => 'registration_fee',
                 'status' => 'success',
                 'gateway_response' => [
-                    'note' => 'Manually collected by Admin', 
+                    'note' => 'Manually collected by Admin',
                     'admin_notes' => $request->payment_notes,
-                    'payment_method' => $request->payment_method
+                    'payment_method' => $request->payment_method,
                 ],
             ]);
 
             // 5. Send Welcome Email with Invoice & Agreement
             try {
-                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
-            } catch (\Exception $mailException) {
-                \Log::error('Manual Onboard Mail Error: ' . $mailException->getMessage());
+                Mail::to($user->email)->send(new RegistrationSuccessMail($user));
+            } catch (Exception $mailException) {
+                Log::error('Manual Onboard Mail Error: '.$mailException->getMessage());
                 // Proceed without breaking if email fails
             }
 
             return redirect()->route('admin.crm.show', $user->id)->with('success', 'Candidate manually onboarded successfully and welcome email sent.');
-            
-        } catch (\Exception $e) {
-            \Log::error('Manual Onboard Error: ' . $e->getMessage());
-            return back()->withInput()->withErrors(['error' => 'Failed to onboard candidate: ' . $e->getMessage()]);
+
+        } catch (Exception $e) {
+            Log::error('Manual Onboard Error: '.$e->getMessage());
+
+            return back()->withInput()->withErrors(['error' => 'Failed to onboard candidate: '.$e->getMessage()]);
         }
     }
 
     public function edit($id)
     {
         $user = User::where('role', 'candidate')->findOrFail($id);
-        $profile = $user->profile ?? new \App\Models\CandidateProfile();
+        $profile = $user->profile ?? new CandidateProfile;
 
-        $categories = \App\Models\Category::all();
-        $subjects = \App\Models\Subject::all();
-        $qualifications = \App\Models\Qualification::all();
-        $states = \App\Models\State::where('is_active', true)->get();
-        $cities = \App\Models\City::where('is_active', true)->get();
+        $categories = Category::all();
+        $subjects = Subject::all();
+        $qualifications = Qualification::all();
+        $states = State::where('is_active', true)->get();
+        $cities = City::where('is_active', true)->get();
 
         return view('admin.crm.edit', compact('user', 'profile', 'categories', 'subjects', 'qualifications', 'states', 'cities'));
     }
@@ -181,8 +208,8 @@ class CrmController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'required|string|max:20|unique:users,phone,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'phone' => 'required|string|max:20|unique:users,phone,'.$user->id,
             'password' => 'nullable|string|min:6',
             'gender' => 'required|in:Male,Female,Other',
             'date_of_birth' => 'required|date',
@@ -218,11 +245,11 @@ class CrmController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
             ];
-            
+
             if ($request->filled('password')) {
                 $userData['password'] = Hash::make($request->password);
             }
-            
+
             $user->update($userData);
 
             $otherQualsArray = is_array($request->other_qualifications) ? $request->other_qualifications : ($request->other_qualifications ? explode(',', $request->other_qualifications) : []);
@@ -253,10 +280,10 @@ class CrmController extends Controller
             // Determine if profile should be marked complete (explicit flag, or core profile fields are filled by Admin)
             $isComplete = $request->has('is_profile_complete')
                 ? $request->boolean('is_profile_complete')
-                : (!empty($request->category_id) && !empty($request->subject_id));
+                : (! empty($request->category_id) && ! empty($request->subject_id));
 
             $updates['is_profile_complete'] = $isComplete;
-            if ($isComplete && (!$profile || empty($profile->registration_completed_at))) {
+            if ($isComplete && (! $profile || empty($profile->registration_completed_at))) {
                 $updates['registration_completed_at'] = now();
             }
 
@@ -301,10 +328,10 @@ class CrmController extends Controller
 
             // Handle Manual Payment Collection
             $isFeePaid = $profile ? $profile->is_fee_paid : false;
-            
-            if (!$isFeePaid && $request->filled('payment_amount') && $request->filled('payment_method') && $request->filled('plan_type')) {
-                $paymentId = $request->payment_method . '-ADMIN-' . strtoupper(uniqid());
-                
+
+            if (! $isFeePaid && $request->filled('payment_amount') && $request->filled('payment_method') && $request->filled('plan_type')) {
+                $paymentId = $request->payment_method.'-ADMIN-'.strtoupper(uniqid());
+
                 $updates['initial_fee_paid'] = true;
                 $updates['is_fee_paid'] = true;
                 $updates['paid_amount'] = $request->payment_amount;
@@ -315,16 +342,16 @@ class CrmController extends Controller
                 $updates['is_profile_complete'] = true;
                 $updates['registration_completed_at'] = now();
 
-                \App\Models\PaymentTransaction::create([
+                PaymentTransaction::create([
                     'candidate_id' => $user->id,
                     'transaction_id' => $paymentId,
                     'amount' => $request->payment_amount,
                     'type' => 'registration_fee',
                     'status' => 'success',
                     'gateway_response' => [
-                        'note' => 'Manually collected by Admin', 
+                        'note' => 'Manually collected by Admin',
                         'admin_notes' => $request->payment_notes,
-                        'payment_method' => $request->payment_method
+                        'payment_method' => $request->payment_method,
                     ],
                 ]);
             }
@@ -335,33 +362,34 @@ class CrmController extends Controller
                 $updates['user_id'] = $user->id;
                 $updates['is_profile_complete'] = $updates['is_profile_complete'] ?? true;
                 $updates['is_fee_paid'] = $updates['is_fee_paid'] ?? false;
-                \App\Models\CandidateProfile::create($updates);
+                CandidateProfile::create($updates);
             }
 
             return redirect()->route('admin.crm.show', $user->id)->with('success', 'Candidate profile updated successfully.');
-            
-        } catch (\Exception $e) {
-            \Log::error('Profile Update Error: ' . $e->getMessage());
-            return back()->withInput()->withErrors(['error' => 'Failed to update candidate profile: ' . $e->getMessage()]);
+
+        } catch (Exception $e) {
+            Log::error('Profile Update Error: '.$e->getMessage());
+
+            return back()->withInput()->withErrors(['error' => 'Failed to update candidate profile: '.$e->getMessage()]);
         }
     }
 
     public function index(Request $request)
     {
         $query = User::where('role', 'candidate')
-            ->with(['profile', 'applications.jobPost', 'applications' => function($q) {
+            ->with(['profile', 'applications.jobPost', 'applications' => function ($q) {
                 $q->where('status', 'hired');
             }]);
 
         // Search text (Name, Email, Phone, Candidate ID / VPA ID)
         if ($search = trim($request->input('search', ''))) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhereHas('profile', function($pq) use ($search) {
-                      $pq->where('vpa_id', 'like', "%{$search}%");
-                  });
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhereHas('profile', function ($pq) use ($search) {
+                        $pq->where('vpa_id', 'like', "%{$search}%");
+                    });
 
                 $cleanNumeric = ltrim($search, '#');
                 if (is_numeric($cleanNumeric)) {
@@ -372,62 +400,62 @@ class CrmController extends Controller
 
         // Advanced Filters
         if ($subjectId = $request->input('subject_id')) {
-            $query->whereHas('profile', function($q) use ($subjectId) {
+            $query->whereHas('profile', function ($q) use ($subjectId) {
                 $q->where('subject_id', $subjectId);
             });
         }
 
         if ($experience = $request->input('experience')) {
-            $query->whereHas('profile', function($q) use ($experience) {
+            $query->whereHas('profile', function ($q) use ($experience) {
                 $q->where('experience_years', '>=', $experience);
             });
         }
 
         if ($qualificationId = $request->input('qualification_id')) {
-            $query->whereHas('profile', function($q) use ($qualificationId) {
+            $query->whereHas('profile', function ($q) use ($qualificationId) {
                 $q->where('highest_qualification_id', $qualificationId);
             });
         }
 
         if ($stateId = $request->input('state_id')) {
-            $query->whereHas('profile', function($q) use ($stateId) {
+            $query->whereHas('profile', function ($q) use ($stateId) {
                 $q->where('preferred_state_id', $stateId);
             });
         }
 
         if ($cityId = $request->input('city_id')) {
-            $query->whereHas('profile', function($q) use ($cityId) {
+            $query->whereHas('profile', function ($q) use ($cityId) {
                 $q->where('preferred_city_id', $cityId);
             });
         }
 
         if ($gender = $request->input('gender')) {
-            $query->whereHas('profile', function($q) use ($gender) {
+            $query->whereHas('profile', function ($q) use ($gender) {
                 $q->where('gender', $gender);
             });
         }
 
         if ($englishFluency = $request->input('english_fluency')) {
-            $query->whereHas('profile', function($q) use ($englishFluency) {
+            $query->whereHas('profile', function ($q) use ($englishFluency) {
                 $q->where('english_fluency', $englishFluency);
             });
         }
 
         if ($availability = $request->input('availability')) {
-            $query->whereHas('profile', function($q) use ($availability) {
-                $q->where('availability', $availability);
+            $query->whereHas('profile', function ($q) use ($availability) {
+                $q->where('availability_to_join', $availability);
             });
         }
 
         if ($salary = $request->input('salary')) {
-            $query->whereHas('profile', function($q) use ($salary) {
+            $query->whereHas('profile', function ($q) use ($salary) {
                 $q->where('expected_salary', 'like', "%{$salary}%")
-                  ->orWhere('current_salary', 'like', "%{$salary}%");
+                    ->orWhere('current_salary', 'like', "%{$salary}%");
             });
         }
 
         if ($planAmount = $request->input('plan_amount')) {
-            $query->whereHas('profile', function($q) use ($planAmount) {
+            $query->whereHas('profile', function ($q) use ($planAmount) {
                 $q->where('paid_amount', $planAmount);
             });
         }
@@ -438,13 +466,13 @@ class CrmController extends Controller
         // Analytics based on base query
         $stats = [
             'total' => (clone $baseQuery)->count(),
-            'active_paid' => (clone $baseQuery)->whereHas('profile', function($q) {
+            'active_paid' => (clone $baseQuery)->whereHas('profile', function ($q) {
                 $q->where('is_fee_paid', true);
             })->count(),
-            'signed' => (clone $baseQuery)->whereHas('profile', function($q) {
+            'signed' => (clone $baseQuery)->whereHas('profile', function ($q) {
                 $q->where('is_fee_paid', false)->where('is_agreement_signed', true);
             })->count(),
-            'pending_dues' => (clone $baseQuery)->whereHas('profile', function($q) {
+            'pending_dues' => (clone $baseQuery)->whereHas('profile', function ($q) {
                 $q->where('pending_amount', '>', 0);
             })->count(),
         ];
@@ -453,23 +481,23 @@ class CrmController extends Controller
         // Status Filter
         if ($status = $request->input('status')) {
             if ($status === 'active_paid') {
-                $query->whereHas('profile', function($q) {
+                $query->whereHas('profile', function ($q) {
                     $q->where('is_fee_paid', true);
                 });
             } elseif ($status === 'signed') {
-                $query->whereHas('profile', function($q) {
+                $query->whereHas('profile', function ($q) {
                     $q->where('is_fee_paid', false)->where('is_agreement_signed', true);
                 });
             } elseif ($status === 'pending_dues') {
-                $query->whereHas('profile', function($q) {
+                $query->whereHas('profile', function ($q) {
                     $q->where('pending_amount', '>', 0);
                 });
             } elseif ($status === 'incomplete') {
-                $query->whereDoesntHave('profile', function($pq) {
+                $query->whereDoesntHave('profile', function ($pq) {
                     $pq->where('is_fee_paid', true)
-                       ->orWhere(function($q2) {
-                           $q2->where('is_fee_paid', false)->where('is_agreement_signed', true);
-                       });
+                        ->orWhere(function ($q2) {
+                            $q2->where('is_fee_paid', false)->where('is_agreement_signed', true);
+                        });
                 });
             }
         }
@@ -477,7 +505,7 @@ class CrmController extends Controller
         // Sorting
         $sortField = $request->input('sort_by', 'created_at');
         $sortDirection = $request->input('order', 'desc');
-        
+
         $allowedFields = ['id', 'name', 'email', 'created_at'];
         if (in_array($sortField, $allowedFields)) {
             $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');
@@ -488,10 +516,10 @@ class CrmController extends Controller
         $candidates = $query->with('rating')->paginate(15)->withQueryString();
 
         // Pass master data for filters
-        $subjects = \App\Models\Subject::all();
-        $qualifications = \App\Models\Qualification::all();
-        $states = \App\Models\State::all();
-        $cities = \App\Models\City::all();
+        $subjects = Subject::all();
+        $qualifications = Qualification::all();
+        $states = State::all();
+        $cities = City::all();
 
         return view('admin.crm.index', compact('candidates', 'stats', 'sortField', 'sortDirection', 'subjects', 'qualifications', 'states', 'cities'));
     }
@@ -505,9 +533,9 @@ class CrmController extends Controller
         $followUps = CrmFollowUp::where('candidate_id', $id)->with('admin')->orderBy('created_at', 'desc')->get();
         $invoices = ServiceChargeInvoice::where('candidate_id', $id)->with('jobApplication.jobPost')->orderBy('created_at', 'desc')->get();
         $rating = CandidateRating::where('candidate_id', $id)->first();
-        $payments = \App\Models\PaymentTransaction::where('candidate_id', $id)->where('status', 'success')->get();
+        $payments = PaymentTransaction::where('candidate_id', $id)->where('status', 'success')->get();
 
-        $availableJobs = \App\Models\JobPost::where('status', 'approved')
+        $availableJobs = JobPost::where('status', 'approved')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -520,18 +548,23 @@ class CrmController extends Controller
             'title' => 'Profile Created',
             'description' => 'Candidate registered on the platform.',
             'icon' => 'fas fa-user-plus',
-            'color' => 'bg-blue-500'
+            'color' => 'bg-blue-500',
         ]);
 
         // 2. Payments
         foreach ($payments as $payment) {
+            $isManual = str_starts_with($payment->transaction_id ?? '', 'MANUAL_');
+            $modeLabel = $isManual ? 'Manual / Offline' : 'Online / Auto';
+            $isServiceCharge = ($payment->type === 'service_charge' || $payment->type === 'placement_fee' || str_contains($payment->transaction_id ?? '', 'SC_'));
+            $title = $isServiceCharge ? "Service Charge Paid ({$modeLabel})" : "Payment Received ({$modeLabel})";
+
             $history->push([
                 'date' => $payment->created_at,
                 'type' => 'payment',
-                'title' => 'Payment Received',
-                'description' => 'Payment of ₹' . number_format($payment->amount, 2) . ' was successful.',
-                'icon' => 'fas fa-rupee-sign',
-                'color' => 'bg-green-500'
+                'title' => $title,
+                'description' => 'Payment of ₹'.number_format($payment->amount, 2)." recorded via {$modeLabel}. (Txn: {$payment->transaction_id})",
+                'icon' => $isManual ? 'fas fa-user-check' : 'fas fa-globe',
+                'color' => $isManual ? 'bg-purple-600' : 'bg-green-600',
             ]);
         }
 
@@ -541,28 +574,28 @@ class CrmController extends Controller
                 'date' => $app->created_at,
                 'type' => 'job_applied',
                 'title' => 'Applied for Job',
-                'description' => 'Applied for ' . ($app->jobPost->title ?? 'a job') . ' at ' . ($app->jobPost->school_name ?? 'a school') . '.',
+                'description' => 'Applied for '.($app->jobPost->title ?? 'a job').' at '.($app->jobPost->school_name ?? 'a school').'.',
                 'icon' => 'fas fa-briefcase',
-                'color' => 'bg-indigo-500'
+                'color' => 'bg-indigo-500',
             ]);
-            
+
             if ($app->status === 'hired') {
-                 $history->push([
+                $history->push([
                     'date' => $app->updated_at,
                     'type' => 'job_hired',
                     'title' => 'Hired',
-                    'description' => 'Candidate was hired for ' . ($app->jobPost->title ?? 'a job') . '.',
+                    'description' => 'Candidate was hired for '.($app->jobPost->title ?? 'a job').'.',
                     'icon' => 'fas fa-check-circle',
-                    'color' => 'bg-emerald-500'
+                    'color' => 'bg-emerald-500',
                 ]);
             } elseif ($app->status === 'waitlisted') {
                 $history->push([
                     'date' => $app->updated_at,
                     'type' => 'job_waitlisted',
                     'title' => 'Waitlisted',
-                    'description' => 'Candidate was waitlisted for ' . ($app->jobPost->title ?? 'a job') . '.',
+                    'description' => 'Candidate was waitlisted for '.($app->jobPost->title ?? 'a job').'.',
                     'icon' => 'fas fa-hourglass-half',
-                    'color' => 'bg-amber-500'
+                    'color' => 'bg-amber-500',
                 ]);
             }
         }
@@ -573,9 +606,9 @@ class CrmController extends Controller
                 'date' => $fu->created_at,
                 'type' => 'follow_up',
                 'title' => 'Follow-up Added',
-                'description' => 'Notes: ' . $fu->notes,
+                'description' => 'Notes: '.$fu->notes,
                 'icon' => 'fas fa-phone-alt',
-                'color' => 'bg-yellow-500'
+                'color' => 'bg-yellow-500',
             ]);
         }
 
@@ -585,26 +618,32 @@ class CrmController extends Controller
                 'date' => $invoice->created_at,
                 'type' => 'invoice_generated',
                 'title' => 'Invoice Generated',
-                'description' => 'Invoice for ₹' . number_format($invoice->amount, 2) . ' generated.',
+                'description' => 'Invoice for ₹'.number_format($invoice->amount, 2).' generated.',
                 'icon' => 'fas fa-file-invoice-dollar',
-                'color' => 'bg-purple-500'
+                'color' => 'bg-purple-500',
             ]);
-            if ($invoice->status === 'paid' && $invoice->payment_date) {
+
+            // Avoid duplicate entry if payment transaction is already recorded in history above
+            $hasMatchingPayment = $payments->contains(function ($p) use ($invoice) {
+                return $p->transaction_id === 'MANUAL_SC_'.$invoice->id || str_starts_with($p->transaction_id ?? '', 'SC_'.$invoice->id.'_');
+            });
+
+            if ($invoice->status === 'paid' && $invoice->payment_date && ! $hasMatchingPayment) {
                 $history->push([
                     'date' => $invoice->payment_date,
                     'type' => 'invoice_paid',
                     'title' => 'Invoice Paid',
-                    'description' => 'Service charge invoice for ₹' . number_format($invoice->amount, 2) . ' was paid.',
+                    'description' => 'Service charge invoice for ₹'.number_format($invoice->amount, 2).' was paid.',
                     'icon' => 'fas fa-check-double',
-                    'color' => 'bg-green-600'
+                    'color' => 'bg-green-600',
                 ]);
             }
         }
 
         $history = $history->sortByDesc('date')->values();
-        $emailTemplates = \App\Models\EmailTemplate::orderBy('name', 'asc')->get();
+        $emailTemplates = EmailTemplate::orderBy('name', 'asc')->get();
 
-        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'rating', 'history', 'availableJobs', 'emailTemplates'));
+        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'payments', 'rating', 'history', 'availableJobs', 'emailTemplates'));
     }
 
     public function uploadAgreement(Request $request, $id)
@@ -616,16 +655,16 @@ class CrmController extends Controller
         $candidate = User::findOrFail($id);
         $profile = $candidate->profile;
 
-        if (!$profile) {
+        if (! $profile) {
             return back()->with('error', 'Candidate profile not found.');
         }
 
         if ($request->hasFile('agreement_pdf')) {
             $file = $request->file('agreement_pdf');
-            $fileName = 'agreements/admin_uploaded_' . $candidate->id . '_' . time() . '.pdf';
-            
+            $fileName = 'agreements/admin_uploaded_'.$candidate->id.'_'.time().'.pdf';
+
             // Store the file in public disk
-            \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, file_get_contents($file));
+            Storage::disk('public')->put($fileName, file_get_contents($file));
 
             // Update profile
             $profile->update([
@@ -642,16 +681,18 @@ class CrmController extends Controller
     public function sendAgreementLink($id)
     {
         $candidate = User::where('role', 'candidate')->findOrFail($id);
-        
+
         $signUrl = route('candidate.agreement.show');
-        
+
         try {
-            \Illuminate\Support\Facades\Mail::to($candidate->email)->send(
-                new \App\Mail\AgreementLinkMail($candidate, $signUrl)
+            Mail::to($candidate->email)->send(
+                new AgreementLinkMail($candidate, $signUrl)
             );
+
             return back()->with('success', 'Agreement signature link has been emailed to the candidate.');
-        } catch (\Exception $e) {
-            \Log::error('Send Agreement Link Error: ' . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Send Agreement Link Error: '.$e->getMessage());
+
             return back()->with('error', 'Failed to send email. Please check your email configuration.');
         }
     }
@@ -662,23 +703,24 @@ class CrmController extends Controller
             $candidate = User::findOrFail($id);
             $profile = $candidate->profile;
 
-            if (!$profile) {
+            if (! $profile) {
                 return back()->with('error', 'Candidate profile not found.');
             }
 
-            $forceRegenerate = $request->has('regenerate') && $request->regenerate == '1';
-            
-            $filePath = \App\Http\Controllers\Candidate\AgreementController::ensureAgreementPdfExists($profile, $forceRegenerate);
+            // Always force fresh regeneration so changes in template, signature and IDs are immediately reflected
+            $filePath = AgreementController::ensureAgreementPdfExists($profile, true);
 
-            if (!$filePath || !\Illuminate\Support\Facades\Storage::disk('public')->exists($filePath)) {
+            if (! $filePath || ! Storage::disk('public')->exists($filePath)) {
                 return back()->with('error', 'Could not generate agreement PDF. Please verify candidate details.');
             }
 
-            $fullFilePath = \Illuminate\Support\Facades\Storage::disk('public')->path($filePath);
-            return response()->download($fullFilePath, 'Candidate_Agreement_' . str_replace(' ', '_', $candidate->name ?? 'Candidate') . '.pdf');
-        } catch (\Throwable $e) {
-            \Log::error("Admin agreement download failed for Candidate ID {$id}: " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
-            return back()->with('error', 'Could not generate or download agreement PDF: ' . $e->getMessage());
+            $fullFilePath = Storage::disk('public')->path($filePath);
+
+            return response()->download($fullFilePath, 'Candidate_Agreement_'.str_replace(' ', '_', $candidate->name ?? 'Candidate').'.pdf');
+        } catch (Throwable $e) {
+            Log::error("Admin agreement download failed for Candidate ID {$id}: ".$e->getMessage()."\nTrace: ".$e->getTraceAsString());
+
+            return back()->with('error', 'Could not generate or download agreement PDF: '.$e->getMessage());
         }
     }
 
@@ -688,14 +730,15 @@ class CrmController extends Controller
             $candidate = User::findOrFail($id);
             $profile = $candidate->profile;
 
-            if (!$profile) {
+            if (! $profile) {
                 return back()->with('error', 'Candidate profile not found.');
             }
 
-            return \App\Http\Controllers\Candidate\AgreementController::renderAgreementStream($candidate, $profile);
-        } catch (\Throwable $e) {
-            \Log::error("Admin agreement preview failed for Candidate ID {$id}: " . $e->getMessage());
-            return back()->with('error', 'Could not preview agreement PDF: ' . $e->getMessage());
+            return AgreementController::renderAgreementStream($candidate, $profile);
+        } catch (Throwable $e) {
+            Log::error("Admin agreement preview failed for Candidate ID {$id}: ".$e->getMessage());
+
+            return back()->with('error', 'Could not preview agreement PDF: '.$e->getMessage());
         }
     }
 
@@ -704,7 +747,7 @@ class CrmController extends Controller
         $request->validate([
             'notes' => 'required|string',
             'follow_up_date' => 'nullable|date',
-            'status' => 'required|in:open,closed'
+            'status' => 'required|in:open,closed',
         ]);
 
         CrmFollowUp::create([
@@ -712,7 +755,7 @@ class CrmController extends Controller
             'notes' => $request->notes,
             'follow_up_date' => $request->follow_up_date,
             'status' => $request->status,
-            'created_by' => auth()->id()
+            'created_by' => auth()->id(),
         ]);
 
         return back()->with('success', 'Follow-up added successfully.');
@@ -723,38 +766,43 @@ class CrmController extends Controller
         $request->validate([
             'job_application_id' => 'required|exists:job_applications,id',
             'amount' => 'required|numeric|min:0',
-            'due_date' => 'required|date'
+            'due_date' => 'required|date',
         ]);
+
+        $application = JobApplication::findOrFail($request->job_application_id);
+        if ($application->status !== 'hired') {
+            $application->update(['status' => 'hired']);
+        }
 
         $invoice = ServiceChargeInvoice::create([
             'candidate_id' => $id,
             'job_application_id' => $request->job_application_id,
             'amount' => $request->amount,
             'due_date' => $request->due_date,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         $candidate = User::findOrFail($id);
-        $candidate->profile->increment('pending_amount', $request->amount);
+        $candidate->profile?->increment('pending_amount', $request->amount);
 
         // Notify Candidate
-        \Illuminate\Support\Facades\DB::table('notifications')->insert([
-            'id' => \Illuminate\Support\Str::uuid()->toString(),
+        DB::table('notifications')->insert([
+            'id' => Str::uuid()->toString(),
             'type' => 'App\Notifications\ServiceChargeInvoiceGenerated',
             'notifiable_type' => 'App\Models\User',
             'notifiable_id' => $id,
             'data' => json_encode([
                 'title' => 'New Service Charge Invoice',
-                'message' => 'An invoice for ₹' . number_format($request->amount, 2) . ' has been generated for your recent job placement.',
+                'message' => 'An invoice for ₹'.number_format($request->amount, 2).' has been generated for your recent job placement.',
                 'amount' => $request->amount,
-                'invoice_id' => $invoice->id
+                'invoice_id' => $invoice->id,
             ]),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         // Send Email
-        \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\ServiceChargeInvoiceMail($invoice));
+        Mail::to($candidate->email)->send(new ServiceChargeInvoiceMail($invoice));
 
         return back()->with('success', 'Invoice created successfully.');
     }
@@ -762,16 +810,16 @@ class CrmController extends Controller
     public function updateInvoiceStatus(Request $request, $invoiceId)
     {
         $invoice = ServiceChargeInvoice::findOrFail($invoiceId);
-        
+
         $request->validate([
-            'status' => 'required|in:pending,paid,overdue'
+            'status' => 'required|in:pending,paid,overdue',
         ]);
 
         $oldStatus = $invoice->status;
 
         $invoice->update([
             'status' => $request->status,
-            'payment_date' => $request->status === 'paid' ? now() : null
+            'payment_date' => $request->status === 'paid' ? now() : null,
         ]);
 
         $candidate = User::find($invoice->candidate_id);
@@ -779,34 +827,43 @@ class CrmController extends Controller
         if ($request->status === 'paid' && $oldStatus !== 'paid') {
             if ($candidate && $candidate->profile) {
                 $candidate->profile->decrement('pending_amount', $invoice->amount);
-                
-                // Create transaction log for exact match on Transactions Page & Dashboard
-                \App\Models\PaymentTransaction::updateOrCreate(
-                    [
-                        'transaction_id' => 'MANUAL_SC_' . $invoice->id,
-                    ],
-                    [
-                        'candidate_id' => $candidate->id,
-                        'amount' => $invoice->amount,
-                        'type' => 'placement_fee',
-                        'status' => 'success',
-                        'gateway_response' => [
-                            'note' => 'Marked as Paid manually by Admin',
-                            'invoice_id' => $invoice->id,
-                        ]
-                    ]
-                );
 
-                // Dispatch Invoice Email
-                \Illuminate\Support\Facades\Mail::to($candidate->email)->send(
-                    new \App\Mail\PaymentReceiptMail($candidate, 'MANUAL_SC_' . $invoice->id, $invoice->amount, 'Service Charge Invoice Payment (Manual)')
-                );
+                // Anti-duplicate check: if an online payment already succeeded for this invoice, don't create MANUAL_SC_
+                $existingSuccessTxn = PaymentTransaction::where('candidate_id', $candidate->id)
+                    ->where('transaction_id', 'LIKE', 'SC_'.$invoice->id.'_%')
+                    ->where('status', 'success')
+                    ->first();
+
+                if (! $existingSuccessTxn) {
+                    // Create transaction log for exact match on Transactions Page & Dashboard
+                    PaymentTransaction::updateOrCreate(
+                        [
+                            'transaction_id' => 'MANUAL_SC_'.$invoice->id,
+                        ],
+                        [
+                            'candidate_id' => $candidate->id,
+                            'amount' => $invoice->amount,
+                            'type' => 'placement_fee',
+                            'status' => 'success',
+                            'gateway_response' => [
+                                'note' => 'Marked as Paid manually by Admin',
+                                'invoice_id' => $invoice->id,
+                                'payment_mode' => 'manual',
+                            ],
+                        ]
+                    );
+
+                    // Dispatch Invoice Email
+                    Mail::to($candidate->email)->send(
+                        new PaymentReceiptMail($candidate, 'MANUAL_SC_'.$invoice->id, $invoice->amount, 'Service Charge Invoice Payment (Manual)')
+                    );
+                }
             }
         } elseif ($request->status !== 'paid' && $oldStatus === 'paid') {
             if ($candidate && $candidate->profile) {
                 $candidate->profile->increment('pending_amount', $invoice->amount);
             }
-            \App\Models\PaymentTransaction::where('transaction_id', 'MANUAL_SC_' . $invoice->id)->delete();
+            PaymentTransaction::where('transaction_id', 'MANUAL_SC_'.$invoice->id)->delete();
         }
 
         return back()->with('success', 'Invoice status updated.');
@@ -815,7 +872,7 @@ class CrmController extends Controller
     public function updateInvoiceDetails(Request $request, $invoiceId)
     {
         $invoice = ServiceChargeInvoice::findOrFail($invoiceId);
-        
+
         $request->validate([
             'amount' => 'required|numeric|min:0',
             'due_date' => 'required|date',
@@ -837,23 +894,31 @@ class CrmController extends Controller
 
         // Create or remove PaymentTransaction log
         if ($newStatus === 'paid') {
-            \App\Models\PaymentTransaction::updateOrCreate(
-                [
-                    'transaction_id' => 'MANUAL_SC_' . $invoice->id,
-                ],
-                [
-                    'candidate_id' => $invoice->candidate_id,
-                    'amount' => $newAmount,
-                    'type' => 'placement_fee',
-                    'status' => 'success',
-                    'gateway_response' => [
-                        'note' => 'Invoice payment updated by Admin',
-                        'invoice_id' => $invoice->id,
+            $existingSuccessTxn = PaymentTransaction::where('candidate_id', $invoice->candidate_id)
+                ->where('transaction_id', 'LIKE', 'SC_'.$invoice->id.'_%')
+                ->where('status', 'success')
+                ->first();
+
+            if (! $existingSuccessTxn) {
+                PaymentTransaction::updateOrCreate(
+                    [
+                        'transaction_id' => 'MANUAL_SC_'.$invoice->id,
+                    ],
+                    [
+                        'candidate_id' => $invoice->candidate_id,
+                        'amount' => $newAmount,
+                        'type' => 'placement_fee',
+                        'status' => 'success',
+                        'gateway_response' => [
+                            'note' => 'Invoice payment updated by Admin',
+                            'invoice_id' => $invoice->id,
+                            'payment_mode' => 'manual',
+                        ],
                     ]
-                ]
-            );
+                );
+            }
         } else {
-            \App\Models\PaymentTransaction::where('transaction_id', 'MANUAL_SC_' . $invoice->id)->delete();
+            PaymentTransaction::where('transaction_id', 'MANUAL_SC_'.$invoice->id)->delete();
         }
 
         // Sync candidate profile pending amount
@@ -862,7 +927,7 @@ class CrmController extends Controller
             $totalPending = ServiceChargeInvoice::where('candidate_id', $candidate->id)
                 ->where('status', '!=', 'paid')
                 ->get()
-                ->sum(fn($inv) => $inv->amount + $inv->late_fee);
+                ->sum(fn ($inv) => $inv->amount + $inv->late_fee);
 
             $candidate->profile->update([
                 'pending_amount' => $totalPending,
@@ -871,11 +936,11 @@ class CrmController extends Controller
 
         $invoice->load('candidate');
         try {
-            \Illuminate\Support\Facades\Mail::to($invoice->candidate->email)->send(
-                new \App\Mail\InvoiceUpdatedMail($invoice)
+            Mail::to($invoice->candidate->email)->send(
+                new InvoiceUpdatedMail($invoice)
             );
-        } catch (\Exception $e) {
-            \Log::error('Failed to send Invoice Updated mail: ' . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Failed to send Invoice Updated mail: '.$e->getMessage());
         }
 
         return back()->with('success', 'Invoice details updated successfully and candidate notified.');
@@ -884,14 +949,14 @@ class CrmController extends Controller
     public function sendInvoiceReminder(Request $request, $invoiceId)
     {
         $invoice = ServiceChargeInvoice::with(['candidate'])->findOrFail($invoiceId);
-        
+
         if ($invoice->status === 'paid') {
             return back()->with('error', 'Cannot send reminder for a paid invoice.');
         }
 
         $candidate = $invoice->candidate;
         if ($candidate) {
-            \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\PaymentReminderMail($candidate, $invoice));
+            Mail::to($candidate->email)->send(new PaymentReminderMail($candidate, $invoice));
         }
 
         return back()->with('success', 'Payment reminder sent successfully to the candidate.');
@@ -900,15 +965,15 @@ class CrmController extends Controller
     public function adjustInvoice(Request $request, $invoiceId)
     {
         $invoice = ServiceChargeInvoice::findOrFail($invoiceId);
-         $request->validate([
-            'deduction' => 'required|numeric|min:0|max:' . $invoice->late_fee
+        $request->validate([
+            'deduction' => 'required|numeric|min:0|max:'.$invoice->late_fee,
         ]);
 
         $deduction = $request->deduction;
-        
+
         if ($deduction > 0) {
             $invoice->update([
-                'late_fee' => $invoice->late_fee - $deduction
+                'late_fee' => $invoice->late_fee - $deduction,
             ]);
 
             $candidate = User::find($invoice->candidate_id);
@@ -925,17 +990,17 @@ class CrmController extends Controller
         $candidate = User::where('role', 'candidate')->findOrFail($id);
         $profile = $candidate->profile;
 
-        if (!$profile) {
+        if (! $profile) {
             return back()->with('error', 'Profile not found.');
         }
 
-        $profile->is_verified = !$profile->is_verified;
+        $profile->is_verified = ! $profile->is_verified;
         $profile->save();
 
         if ($profile->is_verified) {
             // DB Notification
-            \Illuminate\Support\Facades\DB::table('notifications')->insert([
-                'id' => \Illuminate\Support\Str::uuid(),
+            DB::table('notifications')->insert([
+                'id' => Str::uuid()->toString(),
                 'type' => 'App\Notifications\ProfileVerified',
                 'notifiable_type' => 'App\Models\User',
                 'notifiable_id' => $candidate->id,
@@ -948,10 +1013,10 @@ class CrmController extends Controller
             ]);
 
             // Email Notification
-            \Illuminate\Support\Facades\Mail::to($candidate->email)->send(new \App\Mail\ProfileApprovedMail($candidate));
+            Mail::to($candidate->email)->send(new ProfileApprovedMail($candidate));
 
             // Advance referral funnel to 'verified' stage (+100 pts for referrer)
-            \App\Services\ReferralService::advanceStage($candidate, 'verified');
+            ReferralService::advanceStage($candidate, 'verified');
 
             return back()->with('success', 'Candidate profile has been verified and notified.');
         }
@@ -962,20 +1027,20 @@ class CrmController extends Controller
     public function assignJob(Request $request, $id)
     {
         $request->validate([
-            'job_post_id' => 'required|exists:job_posts,id'
+            'job_post_id' => 'required|exists:job_posts,id',
         ]);
 
         $candidate = User::findOrFail($id);
 
-        if (\App\Models\JobApplication::where('job_post_id', $request->job_post_id)->where('candidate_id', $candidate->id)->exists()) {
+        if (JobApplication::where('job_post_id', $request->job_post_id)->where('candidate_id', $candidate->id)->exists()) {
             return back()->with('error', 'Candidate is already applied to this job.');
         }
 
-        \App\Models\JobApplication::create([
+        JobApplication::create([
             'job_post_id' => $request->job_post_id,
             'candidate_id' => $candidate->id,
             'status' => 'applied',
-            'match_score' => 0 // Manually assigned by admin
+            'match_score' => 0, // Manually assigned by admin
         ]);
 
         if ($candidate->profile) {
@@ -993,7 +1058,7 @@ class CrmController extends Controller
             'demo_performance' => 'required|integer|min:1|max:5',
             'english_fluency' => 'required|integer|min:1|max:5',
             'discipline' => 'required|integer|min:1|max:5',
-            'remarks' => 'nullable|string'
+            'remarks' => 'nullable|string',
         ]);
 
         $overall = ($request->communication + $request->subject_knowledge + $request->demo_performance + $request->english_fluency + $request->discipline) / 5;
@@ -1008,7 +1073,7 @@ class CrmController extends Controller
                 'discipline' => $request->discipline,
                 'overall_rating' => $overall,
                 'remarks' => $request->remarks,
-                'rated_by' => auth()->id()
+                'rated_by' => auth()->id(),
             ]
         );
 
@@ -1018,11 +1083,12 @@ class CrmController extends Controller
     public function magicLogin($id)
     {
         $candidate = User::where('role', 'candidate')->findOrFail($id);
-        
+
         // Store admin id in session so they can switch back if needed (optional)
         session(['admin_id' => auth()->id()]);
-        
+
         Auth::login($candidate);
+
         return redirect()->route('candidate.dashboard');
     }
 
@@ -1038,9 +1104,9 @@ class CrmController extends Controller
             return back()->with('error', 'Candidate onboarding is already completed.');
         }
 
-        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\CandidateReminderMail($user, $reason, $actionUrl));
+        Mail::to($user->email)->send(new CandidateReminderMail($user, $reason, $actionUrl));
 
-        return back()->with('success', 'Reminder email sent successfully for: ' . $reason);
+        return back()->with('success', 'Reminder email sent successfully for: '.$reason);
     }
 
     public function sendBulkOnboardingReminder(Request $request)
@@ -1058,9 +1124,9 @@ class CrmController extends Controller
 
         foreach ($candidates as $user) {
             if ($request->notification_type === 'custom_email') {
-                \Illuminate\Support\Facades\Mail::raw($request->custom_message, function($message) use ($user, $request) {
+                Mail::raw($request->custom_message, function ($message) use ($user, $request) {
                     $message->to($user->email)
-                            ->subject($request->custom_subject);
+                        ->subject($request->custom_subject);
                 });
                 $sentCount++;
             } else {
@@ -1068,7 +1134,7 @@ class CrmController extends Controller
                 $reason = $profile ? $profile->pending_reason : 'Pending Profile Completion';
                 $actionUrl = $profile ? $profile->pending_action_url : route('candidate.wizard');
 
-                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\CandidateReminderMail($user, $reason, $actionUrl));
+                Mail::to($user->email)->send(new CandidateReminderMail($user, $reason, $actionUrl));
                 $sentCount++;
             }
         }
@@ -1082,13 +1148,13 @@ class CrmController extends Controller
             'plan_type' => 'required|in:standard,premium',
             'amount' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
-            'admin_notes' => 'nullable|string'
+            'admin_notes' => 'nullable|string',
         ]);
 
         $user = User::findOrFail($id);
 
         // Anti-duplicate protection: check if a manual payment was already processed for this user in the last 30 seconds
-        $recentTxn = \App\Models\PaymentTransaction::where('candidate_id', $user->id)
+        $recentTxn = PaymentTransaction::where('candidate_id', $user->id)
             ->where('transaction_id', 'LIKE', 'MANUAL_%')
             ->where('created_at', '>=', now()->subSeconds(30))
             ->where('status', 'success')
@@ -1096,26 +1162,26 @@ class CrmController extends Controller
             ->first();
 
         if ($recentTxn) {
-            return back()->with('warning', 'A manual payment for this candidate was already processed a few seconds ago (' . $recentTxn->transaction_id . '). Duplicate submission prevented.');
+            return back()->with('warning', 'A manual payment for this candidate was already processed a few seconds ago ('.$recentTxn->transaction_id.'). Duplicate submission prevented.');
         }
 
-        $transactionId = 'MANUAL_' . strtoupper($request->payment_method) . '_' . $user->id . '_' . time();
+        $transactionId = 'MANUAL_'.strtoupper($request->payment_method).'_'.$user->id.'_'.time();
 
-        $result = \App\Services\PaymentFulfillmentService::fulfill(
+        $result = PaymentFulfillmentService::fulfill(
             $transactionId,
             true,
             (float) $request->amount,
             [
                 'note' => 'Manually processed by Admin from CRM',
                 'admin_notes' => $request->admin_notes,
-                'payment_method' => $request->payment_method
+                'payment_method' => $request->payment_method,
             ],
             $transactionId,
             $request->plan_type
         );
 
         if ($result['success']) {
-            return back()->with('success', 'Plan upgraded and payment marked successfully for candidate: ' . $user->name);
+            return back()->with('success', 'Plan upgraded and payment marked successfully for candidate: '.$user->name);
         }
 
         return back()->with('error', 'Failed to process payment fulfillment.');
@@ -1132,7 +1198,7 @@ class CrmController extends Controller
         }
 
         // Delete associated MANUAL_SC_ payment transaction if exists
-        \App\Models\PaymentTransaction::where('transaction_id', 'MANUAL_SC_' . $invoice->id)->delete();
+        PaymentTransaction::where('transaction_id', 'MANUAL_SC_'.$invoice->id)->delete();
 
         $invoice->delete();
 
@@ -1144,32 +1210,107 @@ class CrmController extends Controller
         $request->validate([
             'subject' => 'required|string|max:255',
             'body' => 'required|string',
+            'invoice_id' => 'nullable|integer',
         ]);
 
-        $candidate = User::findOrFail($id);
+        $candidate = User::with(['profile.category', 'profile.subject', 'applications.jobPost'])->findOrFail($id);
 
-        if (!$candidate->email) {
+        if (! $candidate->email) {
             return back()->with('error', 'Candidate does not have a registered email address.');
         }
 
+        $latestInv = null;
+        if ($request->filled('invoice_id')) {
+            $latestInv = ServiceChargeInvoice::where('candidate_id', $candidate->id)->find($request->invoice_id);
+        }
+        if (! $latestInv) {
+            $latestInv = ServiceChargeInvoice::where('candidate_id', $candidate->id)->latest()->first();
+        }
+
+        $latestPay = null;
+        if ($latestInv) {
+            $latestPay = PaymentTransaction::where('candidate_id', $candidate->id)
+                ->where('transaction_id', 'MANUAL_SC_'.$latestInv->id)
+                ->first();
+        }
+        if (! $latestPay) {
+            $latestPay = PaymentTransaction::where('candidate_id', $candidate->id)->where('status', 'success')->latest()->first();
+        }
+
+        $rawInvAmt = $latestInv ? (float) $latestInv->amount : 0;
+        $rawPaidAmt = $candidate->profile ? (float) $candidate->profile->paid_amount : 0;
+        $rawPayTxnAmt = $latestPay ? (float) $latestPay->amount : 0;
+
+        $computedAmt = $rawInvAmt > 0 ? $rawInvAmt : ($rawPayTxnAmt > 0 ? $rawPayTxnAmt : ($rawPaidAmt > 0 ? $rawPaidAmt : 500));
+        $formattedAmt = number_format($computedAmt, 2);
+
+        $invNum = $latestInv ? 'INV-SC-'.str_pad($latestInv->id, 5, '0', STR_PAD_LEFT) : ($latestPay ? ($latestPay->transaction_id ?? 'INV-PAY') : ($candidate->profile?->payment_id ?? 'INV-VPA'));
+        $invDueDate = $latestInv && $latestInv->due_date ? Carbon::parse($latestInv->due_date)->format('M d, Y') : now()->addDays(7)->format('M d, Y');
+        $invStatus = $latestInv ? ucfirst($latestInv->status) : ($candidate->profile?->is_fee_paid ? 'Paid' : 'Pending');
+
+        $replacements = [
+            '{name}' => $candidate->name,
+            '[name]' => $candidate->name,
+            '{candidate_name}' => $candidate->name,
+            '[candidate_name]' => $candidate->name,
+            '{email}' => $candidate->email,
+            '[email]' => $candidate->email,
+            '{phone}' => $candidate->phone ?? '',
+            '[phone]' => $candidate->phone ?? '',
+            '{category}' => $candidate->profile?->category?->name ?? 'Teaching',
+            '[category]' => $candidate->profile?->category?->name ?? 'Teaching',
+            '{subject}' => $candidate->profile?->subject?->name ?? 'Faculty',
+            '[subject]' => $candidate->profile?->subject?->name ?? 'Faculty',
+            '{plan_type}' => ucfirst($candidate->profile?->plan_type ?? 'Standard'),
+            '[plan_type]' => ucfirst($candidate->profile?->plan_type ?? 'Standard'),
+            '{payment_amount}' => $formattedAmt,
+            '[payment_amount]' => $formattedAmt,
+            '{amount}' => $formattedAmt,
+            '[amount]' => $formattedAmt,
+            '{invoice_amount}' => $formattedAmt,
+            '[invoice_amount]' => $formattedAmt,
+            '{service_charge}' => $formattedAmt,
+            '[service_charge]' => $formattedAmt,
+            '{service_charge_amount}' => $formattedAmt,
+            '[service_charge_amount]' => $formattedAmt,
+            '{pending_amount}' => $latestInv ? number_format($latestInv->amount + $latestInv->late_fee, 2) : number_format($candidate->profile?->pending_amount ?? 0, 2),
+            '[pending_amount]' => $latestInv ? number_format($latestInv->amount + $latestInv->late_fee, 2) : number_format($candidate->profile?->pending_amount ?? 0, 2),
+            '{invoice_number}' => $invNum,
+            '[invoice_number]' => $invNum,
+            '{due_date}' => $invDueDate,
+            '[due_date]' => $invDueDate,
+            '{status}' => $invStatus,
+            '[status]' => $invStatus,
+            '{job_title}' => $candidate->applications->first()?->jobPost?->title ?? 'Teaching Position',
+            '[job_title]' => $candidate->applications->first()?->jobPost?->title ?? 'Teaching Position',
+            '{school_name}' => $candidate->applications->first()?->jobPost?->school_name ?? 'Partner Educational Institution',
+            '[school_name]' => $candidate->applications->first()?->jobPost?->school_name ?? 'Partner Educational Institution',
+            '{action_url}' => route('candidate.dashboard'),
+            '[action_url]' => route('candidate.dashboard'),
+        ];
+
+        $subject = str_replace(array_keys($replacements), array_values($replacements), $request->subject);
+        $body = str_replace(array_keys($replacements), array_values($replacements), $request->body);
+
         try {
-            \Illuminate\Support\Facades\Mail::to($candidate->email)->send(
-                new \App\Mail\DynamicTemplateMail($request->subject, $request->body)
+            Mail::to($candidate->email)->send(
+                new DynamicTemplateMail($subject, $body)
             );
 
             // Log communication in Follow-ups
-            \App\Models\CrmFollowUp::create([
+            CrmFollowUp::create([
                 'candidate_id' => $candidate->id,
                 'created_by' => auth()->id(),
                 'status' => 'closed',
-                'notes' => 'Sent Email: ' . $request->subject,
+                'notes' => 'Sent Email: '.$subject,
                 'follow_up_date' => null,
             ]);
 
-            return back()->with('success', 'Email sent successfully to ' . $candidate->email);
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send candidate email: " . $e->getMessage());
-            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+            return back()->with('success', 'Email sent successfully to '.$candidate->email);
+        } catch (Exception $e) {
+            Log::error('Failed to send candidate email: '.$e->getMessage());
+
+            return back()->with('error', 'Failed to send email: '.$e->getMessage());
         }
     }
 }

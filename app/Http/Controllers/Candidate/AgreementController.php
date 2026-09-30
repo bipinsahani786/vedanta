@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Candidate;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
-use Illuminate\Support\Str;
+use App\Mail\RegistrationSuccessMail;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AgreementController extends Controller
 {
@@ -17,11 +19,11 @@ class AgreementController extends Controller
         $user = auth()->user();
         $profile = $user->profile;
 
-        if (!$profile || !$profile->is_profile_complete) {
+        if (! $profile || ! $profile->is_profile_complete) {
             return redirect()->route('candidate.profile.edit')->with('error', 'Please complete your profile first before signing the agreement.');
         }
 
-        if (!$profile->is_agreement_signed) {
+        if (! $profile->is_agreement_signed) {
             return redirect()->route('candidate.wizard')->with('info', 'Please complete your live camera photo and agreement signature.');
         }
 
@@ -33,7 +35,7 @@ class AgreementController extends Controller
         $user = auth()->user();
         $profile = $user ? $user->profile : null;
 
-        if (!$profile) {
+        if (! $profile) {
             return redirect()->route('candidate.dashboard')->with('error', 'Candidate profile not found.');
         }
 
@@ -44,7 +46,7 @@ class AgreementController extends Controller
     {
         $request->validate([
             'signature' => 'required|string',
-            'terms_accepted' => 'required|accepted'
+            'terms_accepted' => 'required|accepted',
         ]);
 
         $user = auth()->user();
@@ -68,9 +70,9 @@ class AgreementController extends Controller
 
         // Send signed agreement email
         try {
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\RegistrationSuccessMail($user));
+            Mail::to($user->email)->send(new RegistrationSuccessMail($user));
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send RegistrationSuccessMail on agreement sign: " . $e->getMessage());
+            Log::error('Failed to send RegistrationSuccessMail on agreement sign: '.$e->getMessage());
         }
 
         return redirect()->route('candidate.dashboard')->with('success', 'Agreement digitally signed successfully.');
@@ -82,44 +84,47 @@ class AgreementController extends Controller
             $user = auth()->user();
             $profile = $user ? $user->profile : null;
 
-            if (!$profile || (!$profile->is_agreement_signed && !$profile->signature_data)) {
+            if (! $profile || (! $profile->is_agreement_signed && ! $profile->signature_data)) {
                 return redirect()->route('candidate.dashboard')->with('error', 'Agreement not signed yet.');
             }
 
             // Always force fresh regeneration so changes in template/details are immediately reflected
             $fileName = self::ensureAgreementPdfExists($profile, true);
 
-            if (!$fileName || !Storage::disk('public')->exists($fileName)) {
+            if (! $fileName || ! Storage::disk('public')->exists($fileName)) {
                 return redirect()->route('candidate.dashboard')->with('error', 'Agreement PDF file could not be generated.');
             }
 
             $fullFilePath = Storage::disk('public')->path($fileName);
             $cleanName = preg_replace('/[^A-Za-z0-9_]/', '_', $user->name ?? 'Candidate');
-            return response()->download($fullFilePath, 'Candidate_Agreement_' . $cleanName . '.pdf');
+
+            return response()->download($fullFilePath, 'Candidate_Agreement_'.$cleanName.'.pdf');
         } catch (\Throwable $e) {
-            \Log::error("Agreement download failed: " . $e->getMessage());
-            return redirect()->route('candidate.dashboard')->with('error', 'Could not generate or download agreement PDF: ' . $e->getMessage());
+            \Log::error('Agreement download failed: '.$e->getMessage());
+
+            return redirect()->route('candidate.dashboard')->with('error', 'Could not generate or download agreement PDF: '.$e->getMessage());
         }
     }
 
     public static function ensureAgreementPdfExists($profile, $forceRegenerate = false)
     {
-        if (!$profile) {
+        if (! $profile) {
             return null;
         }
+        $profile->ensureIdsAssigned();
         $user = $profile->user;
-        if (!$user) {
+        if (! $user) {
             return null;
         }
 
-        if (!$forceRegenerate && $profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+        if (! $forceRegenerate && $profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path)) {
             return $profile->agreement_pdf_path;
         }
 
         $fileName = self::generateDomPdfAgreement($user, $profile);
         $profile->update([
             'is_agreement_signed' => true,
-            'agreement_pdf_path' => $fileName
+            'agreement_pdf_path' => $fileName,
         ]);
 
         return $fileName;
@@ -127,10 +132,13 @@ class AgreementController extends Controller
 
     public static function renderAgreementStream($user, $profile)
     {
+        if ($profile) {
+            $profile->ensureIdsAssigned();
+        }
         $sigInfo = self::getSignatureDataForPdf($user, $profile);
 
-        $date = $profile->signature_date_time 
-            ? Carbon::parse($profile->signature_date_time)->format('d M Y') 
+        $date = $profile->signature_date_time
+            ? Carbon::parse($profile->signature_date_time)->format('d M Y')
             : Carbon::now()->format('d M Y');
 
         $pdf = Pdf::loadView('pdf.candidate-agreement', [
@@ -149,15 +157,16 @@ class AgreementController extends Controller
         ]);
 
         $cleanName = preg_replace('/[^A-Za-z0-9_]/', '_', $user->name ?? 'Candidate');
-        return $pdf->stream('Candidate_Agreement_' . $cleanName . '.pdf');
+
+        return $pdf->stream('Candidate_Agreement_'.$cleanName.'.pdf');
     }
 
     public static function generateDomPdfAgreement($user, $profile)
     {
         $sigInfo = self::getSignatureDataForPdf($user, $profile);
 
-        $date = $profile->signature_date_time 
-            ? Carbon::parse($profile->signature_date_time)->format('d M Y') 
+        $date = $profile->signature_date_time
+            ? Carbon::parse($profile->signature_date_time)->format('d M Y')
             : Carbon::now()->format('d M Y');
 
         $pdf = Pdf::loadView('pdf.candidate-agreement', [
@@ -175,7 +184,7 @@ class AgreementController extends Controller
             'defaultFont' => 'DejaVu Sans',
         ]);
 
-        $fileName = 'agreements/agreement_' . $user->id . '_' . time() . '.pdf';
+        $fileName = 'agreements/agreement_'.$user->id.'_'.time().'.pdf';
         Storage::disk('public')->put($fileName, $pdf->output());
 
         return $fileName;
@@ -191,7 +200,7 @@ class AgreementController extends Controller
         $signatureDataRaw = $profile->signature_data;
         $signatureType = $profile->signature_type ?: 'type';
 
-        if (!$signatureDataRaw) {
+        if (! $signatureDataRaw) {
             return [
                 'signature' => $user->name ?? 'Candidate',
                 'type' => 'type',
@@ -216,8 +225,9 @@ class AgreementController extends Controller
             $path = Storage::disk('public')->path($signatureDataRaw);
             if (file_exists($path)) {
                 $ext = pathinfo($path, PATHINFO_EXTENSION);
+
                 return [
-                    'signature' => 'data:image/' . $ext . ';base64,' . base64_encode(file_get_contents($path)),
+                    'signature' => 'data:image/'.$ext.';base64,'.base64_encode(file_get_contents($path)),
                     'type' => 'upload',
                 ];
             }
@@ -227,7 +237,7 @@ class AgreementController extends Controller
         $decoded = @base64_decode($signatureDataRaw, true);
         if ($decoded !== false && strlen($decoded) > 50) {
             return [
-                'signature' => 'data:image/png;base64,' . base64_encode($decoded),
+                'signature' => 'data:image/png;base64,'.base64_encode($decoded),
                 'type' => 'draw',
             ];
         }

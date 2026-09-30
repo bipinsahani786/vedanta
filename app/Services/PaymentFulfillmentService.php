@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\CandidateProfile;
-use App\Models\PaymentTransaction;
-use App\Models\ServiceChargeInvoice;
+use App\Http\Controllers\Candidate\AgreementController;
 use App\Mail\PaymentReceiptMail;
 use App\Mail\RegistrationSuccessMail;
+use App\Models\PaymentTransaction;
+use App\Models\ServiceChargeInvoice;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PaymentFulfillmentService
@@ -18,13 +18,8 @@ class PaymentFulfillmentService
     /**
      * Fulfill a payment transaction reliably from Callback, Webhook, or Repair command.
      *
-     * @param string $transactionId
-     * @param bool $isSuccess
-     * @param float $amountPaid Amount in rupees
-     * @param array $gatewayResponse
-     * @param string|null $gatewayTxnId
-     * @param string|null $pendingPlanType Optional override for wizard plan choice ('standard' or 'premium')
-     * @param bool $forceReFulfill
+     * @param  float  $amountPaid  Amount in rupees
+     * @param  string|null  $pendingPlanType  Optional override for wizard plan choice ('standard' or 'premium')
      * @return array ['success' => bool, 'is_pending' => bool, 'message' => string, 'user' => User|null]
      */
     public static function fulfill(
@@ -43,20 +38,20 @@ class PaymentFulfillmentService
             'is_success' => $isSuccess,
             'is_pending' => $isPending,
             'amount' => $amountPaid,
-            'force' => $forceReFulfill
+            'force' => $forceReFulfill,
         ]);
 
         // Find candidate ID from transaction record or ID pattern
         $candidateId = self::extractCandidateId($transactionId);
-        
+
         $existingTxn = PaymentTransaction::where('transaction_id', $transactionId)->first();
-        
-        if (!$candidateId && $existingTxn) {
+
+        if (! $candidateId && $existingTxn) {
             $candidateId = $existingTxn->candidate_id;
         }
 
         // Recover stored plan_type metadata if not passed explicitly
-        if (!$pendingPlanType && $existingTxn && is_array($existingTxn->gateway_response)) {
+        if (! $pendingPlanType && $existingTxn && is_array($existingTxn->gateway_response)) {
             $pendingPlanType = $existingTxn->gateway_response['plan_type'] ?? null;
         }
 
@@ -64,12 +59,12 @@ class PaymentFulfillmentService
 
         // IDEMPOTENCY GUARD: If this transaction was already processed as 'success', skip everything.
         // Bypassed if forceReFulfill is true (e.g. from payments:repair command).
-        $alreadyFulfilled = !$forceReFulfill && $existingTxn && $existingTxn->status === 'success';
+        $alreadyFulfilled = ! $forceReFulfill && $existingTxn && $existingTxn->status === 'success';
 
         // 1. Record or update PaymentTransaction
         $newStatus = $isSuccess ? 'success' : ($isPending ? 'pending' : 'failed');
 
-        if (!$existingTxn) {
+        if (! $existingTxn) {
             $type = 'registration_fee';
             if (str_starts_with($transactionId, 'SC_')) {
                 $type = 'service_charge';
@@ -80,15 +75,15 @@ class PaymentFulfillmentService
                 'transaction_id' => $transactionId,
                 'type' => $type,
                 'status' => $newStatus,
-                'gateway_response' => !empty($gatewayResponse) ? $gatewayResponse : ['plan_type' => $pendingPlanType]
+                'gateway_response' => ! empty($gatewayResponse) ? $gatewayResponse : ['plan_type' => $pendingPlanType],
             ]);
-        } else if (!$alreadyFulfilled) {
+        } elseif (! $alreadyFulfilled) {
             // Only update if not already successfully processed
             $mergedResponse = is_array($existingTxn->gateway_response) ? $existingTxn->gateway_response : [];
-            if (!empty($gatewayResponse)) {
+            if (! empty($gatewayResponse)) {
                 $mergedResponse = array_merge($mergedResponse, $gatewayResponse);
             }
-            if ($pendingPlanType && !isset($mergedResponse['plan_type'])) {
+            if ($pendingPlanType && ! isset($mergedResponse['plan_type'])) {
                 $mergedResponse['plan_type'] = $pendingPlanType;
             }
 
@@ -96,7 +91,7 @@ class PaymentFulfillmentService
                 'candidate_id' => $existingTxn->candidate_id ?? $candidateId,
                 'status' => $newStatus,
                 'amount' => $amountPaid > 0 ? $amountPaid : $existingTxn->amount,
-                'gateway_response' => $mergedResponse
+                'gateway_response' => $mergedResponse,
             ]);
         }
 
@@ -106,43 +101,45 @@ class PaymentFulfillmentService
                 'success' => false,
                 'is_pending' => true,
                 'message' => 'Payment is processing. Please wait a moment.',
-                'user' => $user
+                'user' => $user,
             ];
         }
 
         // Handle Failed State
-        if (!$isSuccess) {
+        if (! $isSuccess) {
             return [
                 'success' => false,
                 'is_pending' => false,
                 'message' => 'Payment failed or was cancelled.',
-                'user' => $user
+                'user' => $user,
             ];
         }
 
         // If already fulfilled, return success but skip duplicate profile updates & emails
         if ($alreadyFulfilled) {
             Log::info('PaymentFulfillmentService: Transaction already fulfilled, skipping duplicate update.', [
-                'txn_id' => $transactionId
+                'txn_id' => $transactionId,
             ]);
+
             return [
                 'success' => true,
                 'is_pending' => false,
                 'message' => 'Payment already fulfilled.',
-                'user' => $user
+                'user' => $user,
             ];
         }
 
-        if (!$user || !$user->profile) {
+        if (! $user || ! $user->profile) {
             Log::error('PaymentFulfillmentService: User or Profile not found for transaction', [
                 'txn_id' => $transactionId,
-                'candidate_id' => $candidateId
+                'candidate_id' => $candidateId,
             ]);
+
             return [
                 'success' => true,
                 'is_pending' => false,
                 'message' => 'Payment recorded, but user profile not found.',
-                'user' => null
+                'user' => null,
             ];
         }
 
@@ -157,7 +154,7 @@ class PaymentFulfillmentService
                 $invoiceId = (count($parts) >= 2) ? $parts[1] : null;
                 $invoice = $invoiceId ? ServiceChargeInvoice::find($invoiceId) : null;
 
-                if (!$invoice) {
+                if (! $invoice) {
                     $invoice = ServiceChargeInvoice::where('candidate_id', $user->id)
                         ->whereIn('status', ['pending', 'overdue'])
                         ->latest()
@@ -167,8 +164,13 @@ class PaymentFulfillmentService
                 if ($invoice && $invoice->status !== 'paid') {
                     $invoice->update([
                         'status' => 'paid',
-                        'payment_date' => now()
+                        'payment_date' => now(),
                     ]);
+
+                    // Remove any previous manual transaction for this invoice to prevent duplicates
+                    PaymentTransaction::where('candidate_id', $user->id)
+                        ->where('transaction_id', 'MANUAL_SC_'.$invoice->id)
+                        ->delete();
 
                     $otherPendingCount = ServiceChargeInvoice::where('candidate_id', $user->id)
                         ->where('id', '!=', $invoice->id)
@@ -192,7 +194,7 @@ class PaymentFulfillmentService
                     $profile->save();
 
                     // Advance referral stage to joined & complete
-                    \App\Services\ReferralService::advanceStage($user, 'joined');
+                    ReferralService::advanceStage($user, 'joined');
                 }
 
             } elseif (str_starts_with($transactionId, 'UPGRADE_')) {
@@ -244,8 +246,8 @@ class PaymentFulfillmentService
 
             } else {
                 // --- INITIAL REGISTRATION / WIZARD / GENERAL PAYMENT (TXN_ / MANUAL_) ---
-                $currentPaid = (float)($profile->paid_amount ?? 0);
-                $newTotalPaid = $currentPaid + (float)$amountPaid;
+                $currentPaid = (float) ($profile->paid_amount ?? 0);
+                $newTotalPaid = $currentPaid + (float) $amountPaid;
 
                 // Check plan validity of existing plan (3 months for Standard, 6 months for Premium)
                 $isPlanExpired = $profile->is_plan_expired;
@@ -264,10 +266,10 @@ class PaymentFulfillmentService
                     ]);
                 } else {
                     // Plan is active (within 30 days) OR fresh registration OR single ₹1000 payment
-                    $isPremium = ($pendingPlanType === 'premium') 
-                        || ($amountPaid >= 1000) 
-                        || (!$isPlanExpired && $newTotalPaid >= 1000)
-                        || (!$isPlanExpired && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $currentPaid >= 500) && $amountPaid >= 500);
+                    $isPremium = ($pendingPlanType === 'premium')
+                        || ($amountPaid >= 1000)
+                        || (! $isPlanExpired && $newTotalPaid >= 1000)
+                        || (! $isPlanExpired && $profile->plan_type === 'standard' && ($profile->initial_fee_paid || $currentPaid >= 500) && $amountPaid >= 500);
 
                     if ($isPremium) {
                         $profile->update([
@@ -312,22 +314,22 @@ class PaymentFulfillmentService
         try {
             if (str_starts_with($transactionId, 'SC_')) {
                 self::sendNotification($user, 'Service Charge Received', "₹{$amountPaid} was received for Service Charge.");
-                self::sendEmailOnce($transactionId, 'receipt', function() use ($user, $transactionId, $amountPaid) {
+                self::sendEmailOnce($transactionId, 'receipt', function () use ($user, $transactionId, $amountPaid) {
                     Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Service Charge Invoice Payment'));
                 });
             } elseif (str_starts_with($transactionId, 'UPGRADE_')) {
                 self::sendNotification($user, 'Plan Upgraded to Premium', 'Your plan has been upgraded to Premium with 3 application slots.');
-                self::sendEmailOnce($transactionId, 'upgrade_receipt', function() use ($user, $transactionId, $amountPaid) {
+                self::sendEmailOnce($transactionId, 'upgrade_receipt', function () use ($user, $transactionId, $amountPaid) {
                     Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Upgrade to Premium Plan'));
                 });
             } elseif (str_starts_with($transactionId, 'RENEW_BASIC_')) {
                 self::sendNotification($user, 'Plan Renewed Successfully', 'Basic Plan renewed with 2 application slots.');
-                self::sendEmailOnce($transactionId, 'renew_basic_receipt', function() use ($user, $transactionId, $amountPaid) {
+                self::sendEmailOnce($transactionId, 'renew_basic_receipt', function () use ($user, $transactionId, $amountPaid) {
                     Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Basic Plan Renewal'));
                 });
             } elseif (str_starts_with($transactionId, 'RENEW_PREMIUM_')) {
                 self::sendNotification($user, 'Plan Renewed Successfully', 'Premium Plan renewed with 3 application slots.');
-                self::sendEmailOnce($transactionId, 'renew_premium_receipt', function() use ($user, $transactionId, $amountPaid) {
+                self::sendEmailOnce($transactionId, 'renew_premium_receipt', function () use ($user, $transactionId, $amountPaid) {
                     Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Premium Plan Renewal'));
                 });
             } else {
@@ -337,42 +339,42 @@ class PaymentFulfillmentService
 
                 if ($isRenewalNotification) {
                     self::sendNotification($user, 'Plan Renewed Successfully', 'Basic Plan renewed with 2 application slots.');
-                    self::sendEmailOnce($transactionId, 'renew_basic_receipt', function() use ($user, $transactionId, $amountPaid) {
+                    self::sendEmailOnce($transactionId, 'renew_basic_receipt', function () use ($user, $transactionId, $amountPaid) {
                         Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Basic Plan Renewal'));
                     });
                 } elseif ($isUpgradeShift) {
                     self::sendNotification($user, 'Plan Upgraded to Premium', 'Your plan has been upgraded to Premium with 3 application slots.');
-                    self::sendEmailOnce($transactionId, 'upgrade_receipt', function() use ($user, $transactionId, $amountPaid) {
+                    self::sendEmailOnce($transactionId, 'upgrade_receipt', function () use ($user, $transactionId, $amountPaid) {
                         Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Upgrade to Premium Plan'));
                     });
                 } else {
                     self::sendNotification($user, 'Registration Successful', 'Welcome to Vedanta! Your registration plan is now active.');
-                    
+
                     try {
                         // Ensure the agreement PDF is generated before sending the welcome email
-                        \App\Http\Controllers\Candidate\AgreementController::ensureAgreementPdfExists($profile);
+                        AgreementController::ensureAgreementPdfExists($profile);
                         $user->refresh();
                     } catch (\Throwable $pdfEx) {
-                        Log::warning('Agreement PDF auto-generation warning: ' . $pdfEx->getMessage());
+                        Log::warning('Agreement PDF auto-generation warning: '.$pdfEx->getMessage());
                     }
 
-                    self::sendEmailOnce($transactionId, 'payment_receipt', function() use ($user, $transactionId, $amountPaid) {
+                    self::sendEmailOnce($transactionId, 'payment_receipt', function () use ($user, $transactionId, $amountPaid) {
                         Mail::to($user->email)->send(new PaymentReceiptMail($user, $transactionId, $amountPaid, 'Candidate Profile Registration Fee'));
                     });
-                    self::sendEmailOnce($transactionId, 'registration_agreement', function() use ($user) {
+                    self::sendEmailOnce($transactionId, 'registration_agreement', function () use ($user) {
                         Mail::to($user->email)->send(new RegistrationSuccessMail($user));
                     });
                 }
             }
         } catch (\Throwable $e) {
-            Log::error('Post-fulfillment notification/mail error (plan remains upgraded): ' . $e->getMessage());
+            Log::error('Post-fulfillment notification/mail error (plan remains upgraded): '.$e->getMessage());
         }
 
         return [
             'success' => true,
             'is_pending' => false,
             'message' => 'Payment fulfilled successfully.',
-            'user' => $user
+            'user' => $user,
         ];
     }
 
@@ -388,7 +390,7 @@ class PaymentFulfillmentService
                 return (int) $txn->candidate_id;
             }
         } catch (\Throwable $e) {
-            Log::warning('extractCandidateId DB check error: ' . $e->getMessage());
+            Log::warning('extractCandidateId DB check error: '.$e->getMessage());
         }
 
         $parts = explode('_', $transactionId);
@@ -397,8 +399,10 @@ class PaymentFulfillmentService
         if (str_starts_with($transactionId, 'SC_')) {
             if (count($parts) >= 2 && is_numeric($parts[1])) {
                 $invoice = ServiceChargeInvoice::find($parts[1]);
+
                 return $invoice ? (int) $invoice->candidate_id : null;
             }
+
             return null;
         }
 
@@ -431,28 +435,27 @@ class PaymentFulfillmentService
                     'data' => json_encode([
                         'title' => $title,
                         'message' => "{$message} (Candidate: {$user->name})",
-                        'candidate_id' => $user->id
+                        'candidate_id' => $user->id,
                     ]),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             }
         } catch (\Throwable $e) {
-            Log::warning('sendNotification failed: ' . $e->getMessage());
+            Log::warning('sendNotification failed: '.$e->getMessage());
         }
     }
 
     private static function sendEmailOnce(string $transactionId, string $emailType, callable $sendCallable)
     {
         $cacheKey = "email_sent_{$transactionId}_{$emailType}";
-        if (!cache()->has($cacheKey)) {
+        if (! cache()->has($cacheKey)) {
             cache()->put($cacheKey, true, now()->addDays(7));
             try {
                 $sendCallable();
             } catch (\Throwable $e) {
-                Log::error("Failed to send email {$emailType} for transaction {$transactionId}: " . $e->getMessage());
+                Log::error("Failed to send email {$emailType} for transaction {$transactionId}: ".$e->getMessage());
             }
         }
     }
 }
-
