@@ -88,23 +88,40 @@ class AgreementController extends Controller
                 return redirect()->route('candidate.dashboard')->with('error', 'Agreement not signed yet.');
             }
 
-            $forceRegenerate = $request->has('regenerate');
+            // If a manual agreement was uploaded by admin, download it directly (same as preview)
+            if ($profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path) && $profile->is_manual_agreement) {
+                $fullFilePath = Storage::disk('public')->path($profile->agreement_pdf_path);
+                $cleanName = preg_replace('/[^A-Za-z0-9_]/', '_', $user->name ?? 'Candidate');
 
-            // If a manual agreement was uploaded by admin and not forced to regenerate, download it directly
-            if ($profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path) && $profile->is_manual_agreement && ! $forceRegenerate) {
-                $fileName = $profile->agreement_pdf_path;
-            } else {
-                $fileName = self::ensureAgreementPdfExists($profile, $forceRegenerate);
+                return response()->download($fullFilePath, 'Candidate_Agreement_'.$cleanName.'.pdf');
             }
 
-            if (! $fileName || ! Storage::disk('public')->exists($fileName)) {
-                return redirect()->route('candidate.dashboard')->with('error', 'Agreement PDF file could not be generated.');
-            }
-
-            $fullFilePath = Storage::disk('public')->path($fileName);
+            // Always generate a fresh PDF (same as what the agreement preview section shows)
+            // This ensures the downloaded PDF matches exactly what is displayed in the agreement section
             $cleanName = preg_replace('/[^A-Za-z0-9_]/', '_', $user->name ?? 'Candidate');
 
-            return response()->download($fullFilePath, 'Candidate_Agreement_'.$cleanName.'.pdf');
+            $sigInfo = self::getSignatureDataForPdf($user, $profile);
+
+            $date = $profile->signature_date_time
+                ? \Carbon\Carbon::parse($profile->signature_date_time)->format('d M Y')
+                : \Carbon\Carbon::now()->format('d M Y');
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.candidate-agreement', [
+                'user'           => $user,
+                'profile'        => $profile,
+                'date'           => $date,
+                'signature'      => $sigInfo['signature'],
+                'signature_type' => $sigInfo['type'],
+            ]);
+
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled'      => true,
+                'defaultFont'          => 'DejaVu Sans',
+            ]);
+
+            return $pdf->download('Candidate_Agreement_'.$cleanName.'.pdf');
         } catch (\Throwable $e) {
             \Log::error('Agreement download failed: '.$e->getMessage());
 

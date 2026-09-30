@@ -741,28 +741,47 @@ class CrmController extends Controller
                 return back()->with('error', 'Candidate profile not found.');
             }
 
-            $forceRegenerate = $request->has('regenerate');
+            // If manual agreement uploaded by admin exists, download it directly
+            if ($profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path) && $profile->is_manual_agreement && ! $request->has('regenerate')) {
+                $fullFilePath = Storage::disk('public')->path($profile->agreement_pdf_path);
+                $cleanName = str_replace(' ', '_', $candidate->name ?? 'Candidate');
 
-            // If manual agreement uploaded by admin exists and not explicitly forced to re-generate from template
-            if ($profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path) && $profile->is_manual_agreement && ! $forceRegenerate) {
-                $filePath = $profile->agreement_pdf_path;
-            } else {
-                $filePath = AgreementController::ensureAgreementPdfExists($profile, $forceRegenerate);
+                return response()->download($fullFilePath, 'Candidate_Agreement_'.$cleanName.'.pdf');
             }
 
-            if (! $filePath || ! Storage::disk('public')->exists($filePath)) {
-                return back()->with('error', 'Could not generate agreement PDF. Please verify candidate details.');
-            }
+            // Always generate a fresh PDF (same as what the candidate agreement section/preview shows)
+            $profile->ensureIdsAssigned();
+            $sigInfo = AgreementController::getSignatureDataForPdf($candidate, $profile);
 
-            $fullFilePath = Storage::disk('public')->path($filePath);
+            $date = $profile->signature_date_time
+                ? \Carbon\Carbon::parse($profile->signature_date_time)->format('d M Y')
+                : \Carbon\Carbon::now()->format('d M Y');
 
-            return response()->download($fullFilePath, 'Candidate_Agreement_'.str_replace(' ', '_', $candidate->name ?? 'Candidate').'.pdf');
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.candidate-agreement', [
+                'user'           => $candidate,
+                'profile'        => $profile,
+                'date'           => $date,
+                'signature'      => $sigInfo['signature'],
+                'signature_type' => $sigInfo['type'],
+            ]);
+
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled'      => true,
+                'defaultFont'          => 'DejaVu Sans',
+            ]);
+
+            $cleanName = str_replace(' ', '_', $candidate->name ?? 'Candidate');
+
+            return $pdf->download('Candidate_Agreement_'.$cleanName.'.pdf');
         } catch (Throwable $e) {
             Log::error("Admin agreement download failed for Candidate ID {$id}: ".$e->getMessage()."\nTrace: ".$e->getTraceAsString());
 
             return back()->with('error', 'Could not generate or download agreement PDF: '.$e->getMessage());
         }
     }
+
 
     public function previewAgreement($id)
     {
