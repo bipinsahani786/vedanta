@@ -308,22 +308,42 @@
 
                     <!-- Manual Agreement Upload -->
                     <div class="mt-6 pt-6 border-t border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agreement Status</h4>
+                        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                            <div>
+                                <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agreement Status</h4>
+                                @if($candidate->profile && $candidate->profile->is_manual_agreement)
+                                    <div class="text-[11px] text-purple-700 font-bold flex items-center gap-1 mt-0.5">
+                                        <i class="fas fa-file-pdf"></i> Custom Admin-Uploaded PDF Active
+                                    </div>
+                                @elseif($candidate->profile && $candidate->profile->has_uploaded_manual_backup)
+                                    <div class="text-[11px] text-amber-600 font-bold flex items-center gap-1 mt-0.5">
+                                        <i class="fas fa-info-circle"></i> System Template Active (Uploaded Backup Available)
+                                    </div>
+                                @endif
+                            </div>
                             @if($candidate->profile && ($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_date_time || $candidate->profile->signature_data))
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    @if($candidate->profile->has_uploaded_manual_backup && ! $candidate->profile->is_manual_agreement)
+                                        <form action="{{ route('admin.crm.candidate.restore-agreement', $candidate->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-xs font-bold border border-amber-300 hover:bg-amber-100 transition-colors shadow-sm" title="Restore previously uploaded custom agreement" onclick="return confirm('Restore your previously uploaded custom agreement PDF as active for this candidate?')">
+                                                <i class="fas fa-undo-alt text-amber-600"></i> Restore Uploaded PDF
+                                            </button>
+                                        </form>
+                                    @endif
+
                                     <a href="{{ route('admin.crm.candidate.preview-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200 hover:bg-blue-100 transition-colors" title="Live Preview Agreement PDF">
                                         <i class="fas fa-eye"></i> Live Preview
                                     </a>
                                     <a href="{{ route('admin.crm.candidate.download-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200 hover:bg-green-100 transition-colors" title="Download Agreement">
                                         <i class="fas fa-download"></i> Download PDF
                                     </a>
-                                    <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-600 hover:text-indigo-600 rounded-full text-[11px] font-bold border border-gray-300 hover:bg-indigo-50 transition-colors" title="Force regenerate PDF">
+                                    <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-600 hover:text-indigo-600 rounded-full text-[11px] font-bold border border-gray-300 hover:bg-indigo-50 transition-colors" title="Force regenerate PDF from template" onclick="return confirm('Attention: Re-generate will switch the active agreement to the system auto-generated template. You can restore your custom uploaded PDF anytime with the \'Restore Uploaded PDF\' button. Proceed?')">
                                         <i class="fas fa-sync-alt"></i> Re-generate
                                     </a>
                                 </div>
                             @else
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200">
                                         <i class="fas fa-clock"></i> Not Signed
                                     </span>
@@ -342,13 +362,19 @@
 
                         <form action="{{ route('admin.crm.candidate.upload-agreement', $candidate->id) }}" method="POST" enctype="multipart/form-data" class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
                             @csrf
-                            <label class="block text-xs font-bold text-gray-700 mb-2">Manually Upload Agreement (PDF)</label>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-xs font-bold text-gray-700">Manually Upload Agreement (PDF)</label>
+                                <span class="text-[11px] text-gray-400">Replaces current agreement for candidate</span>
+                            </div>
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <input type="file" name="agreement_pdf" accept="application/pdf" required class="flex-1 block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
-                                <button type="submit" class="shrink-0 px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm">
-                                    Upload & Send
+                                <button type="submit" class="shrink-0 px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                                    <i class="fas fa-cloud-upload-alt"></i> Upload & Send
                                 </button>
                             </div>
+                            <p class="text-[11px] text-gray-400 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i> Uploading will immediately update candidate's agreement view and email a copy.
+                            </p>
                         </form>
                     </div>
 

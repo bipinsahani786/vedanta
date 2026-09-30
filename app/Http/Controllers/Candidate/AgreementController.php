@@ -84,12 +84,18 @@ class AgreementController extends Controller
             $user = auth()->user();
             $profile = $user ? $user->profile : null;
 
-            if (! $profile || (! $profile->is_agreement_signed && ! $profile->signature_data)) {
+            if (! $profile || (! $profile->is_agreement_signed && ! $profile->signature_data && ! $profile->agreement_pdf_path)) {
                 return redirect()->route('candidate.dashboard')->with('error', 'Agreement not signed yet.');
             }
 
-            // Always force fresh regeneration so changes in template/details are immediately reflected
-            $fileName = self::ensureAgreementPdfExists($profile, true);
+            $forceRegenerate = $request->has('regenerate');
+
+            // If a manual agreement was uploaded by admin and not forced to regenerate, download it directly
+            if ($profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path) && $profile->is_manual_agreement && ! $forceRegenerate) {
+                $fileName = $profile->agreement_pdf_path;
+            } else {
+                $fileName = self::ensureAgreementPdfExists($profile, $forceRegenerate);
+            }
 
             if (! $fileName || ! Storage::disk('public')->exists($fileName)) {
                 return redirect()->route('candidate.dashboard')->with('error', 'Agreement PDF file could not be generated.');
@@ -117,8 +123,15 @@ class AgreementController extends Controller
             return null;
         }
 
-        if (! $forceRegenerate && $profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path)) {
-            return $profile->agreement_pdf_path;
+        // Never overwrite a manual admin upload unless explicitly forced with regenerate parameter
+        if ($profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+            if ($profile->is_manual_agreement && ! request()->has('regenerate')) {
+                return $profile->agreement_pdf_path;
+            }
+
+            if (! $forceRegenerate) {
+                return $profile->agreement_pdf_path;
+            }
         }
 
         $fileName = self::generateDomPdfAgreement($user, $profile);
@@ -135,6 +148,20 @@ class AgreementController extends Controller
         if ($profile) {
             $profile->ensureIdsAssigned();
         }
+
+        // If a manual agreement was uploaded by admin, stream the exact uploaded PDF file directly
+        if ($profile && $profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path)) {
+            if ($profile->is_manual_agreement && ! request()->has('regenerate')) {
+                $fullPath = Storage::disk('public')->path($profile->agreement_pdf_path);
+                $cleanName = preg_replace('/[^A-Za-z0-9_]/', '_', $user->name ?? 'Candidate');
+
+                return response()->file($fullPath, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="Candidate_Agreement_'.$cleanName.'.pdf"',
+                ]);
+            }
+        }
+
         $sigInfo = self::getSignatureDataForPdf($user, $profile);
 
         $date = $profile->signature_date_time

@@ -666,16 +666,50 @@ class CrmController extends Controller
             // Store the file in public disk
             Storage::disk('public')->put($fileName, file_get_contents($file));
 
+            // Delete old uploaded manual file if it existed
+            if ($profile->manual_agreement_path && Storage::disk('public')->exists($profile->manual_agreement_path) && $profile->manual_agreement_path !== $fileName) {
+                Storage::disk('public')->delete($profile->manual_agreement_path);
+            }
+
             // Update profile
             $profile->update([
                 'is_agreement_signed' => true,
                 'agreement_pdf_path' => $fileName,
+                'manual_agreement_path' => $fileName,
+                'agreement_signed_at' => now(),
             ]);
 
-            return back()->with('success', 'Agreement PDF uploaded successfully. The candidate can now view and download it.');
+            // Ensure unique Candidate and Agreement IDs are linked
+            $profile->ensureIdsAssigned();
+
+            // Send notification / email with updated agreement to candidate
+            try {
+                Mail::to($candidate->email)->send(new RegistrationSuccessMail($candidate));
+            } catch (Throwable $e) {
+                Log::warning('Email delivery failed during manual agreement upload: '.$e->getMessage());
+            }
+
+            return back()->with('success', 'Agreement PDF uploaded successfully and sent to candidate.');
         }
 
         return back()->with('error', 'Failed to upload agreement.');
+    }
+
+    public function restoreAgreement($id)
+    {
+        $candidate = User::findOrFail($id);
+        $profile = $candidate->profile;
+
+        if (! $profile || ! $profile->manual_agreement_path || ! Storage::disk('public')->exists($profile->manual_agreement_path)) {
+            return back()->with('error', 'No previously uploaded custom agreement found to restore.');
+        }
+
+        $profile->update([
+            'is_agreement_signed' => true,
+            'agreement_pdf_path' => $profile->manual_agreement_path,
+        ]);
+
+        return back()->with('success', 'Your custom uploaded agreement has been restored successfully as active.');
     }
 
     public function sendAgreementLink($id)
@@ -707,8 +741,14 @@ class CrmController extends Controller
                 return back()->with('error', 'Candidate profile not found.');
             }
 
-            // Always force fresh regeneration so changes in template, signature and IDs are immediately reflected
-            $filePath = AgreementController::ensureAgreementPdfExists($profile, true);
+            $forceRegenerate = $request->has('regenerate');
+
+            // If manual agreement uploaded by admin exists and not explicitly forced to re-generate from template
+            if ($profile->agreement_pdf_path && Storage::disk('public')->exists($profile->agreement_pdf_path) && $profile->is_manual_agreement && ! $forceRegenerate) {
+                $filePath = $profile->agreement_pdf_path;
+            } else {
+                $filePath = AgreementController::ensureAgreementPdfExists($profile, $forceRegenerate);
+            }
 
             if (! $filePath || ! Storage::disk('public')->exists($filePath)) {
                 return back()->with('error', 'Could not generate agreement PDF. Please verify candidate details.');

@@ -22,17 +22,47 @@
     {{-- Agreement Card --}}
     <div class="bg-card-bg rounded-2xl border border-card-border overflow-hidden shadow-xl reveal reveal-delay-1">
 
-        {{-- Terms Section --}}
+        {{-- Terms / Document Section --}}
         <div class="p-6 md:p-8 border-b border-card-border">
-            <div class="flex items-center gap-3 mb-5">
-                <span class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xs"><i class="fas fa-scroll"></i></span>
-                <h2 class="text-lg font-bold text-text-main">Terms and Conditions</h2>
-            </div>
-            <div class="h-96 overflow-y-auto pr-4 text-sm text-text-dark/80 space-y-4 custom-scrollbar bg-secondary-bg/30 rounded-xl p-6 border border-card-border">
-                @include('candidate.partials.agreement-text')
-                
-                <p class="mt-8 font-semibold text-accent-yellow italic border-l-2 border-accent-yellow/40 pl-4">By signing below, you acknowledge that you have read, understood, and agree to be bound by these terms.</p>
-            </div>
+            @if($profile->is_manual_agreement && $profile->agreement_pdf_path)
+                <div class="flex items-center justify-between gap-4 mb-5 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <span class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-lg border border-purple-500/20 shadow-sm">
+                            <i class="fas fa-file-contract"></i>
+                        </span>
+                        <div>
+                            <h2 class="text-lg font-bold text-text-main flex items-center gap-2">
+                                Official Placement Agreement
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">Admin Uploaded</span>
+                            </h2>
+                            <p class="text-xs text-text-dark/60 mt-0.5">Official agreement document assigned and uploaded by Vedanta Placement Agency Administration.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('candidate.agreement.preview') }}" target="_blank" class="px-4 py-2 bg-accent-blue hover:bg-accent-blue/90 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-accent-blue/20">
+                            <i class="fas fa-external-link-alt text-[10px]"></i> Open in New Tab
+                        </a>
+                        <a href="{{ route('candidate.agreement.download') }}" class="px-4 py-2 bg-secondary-bg hover:bg-card-border/50 text-text-main rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-card-border">
+                            <i class="fas fa-download text-[10px]"></i> Download PDF
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Embedded PDF Viewer --}}
+                <div class="rounded-xl overflow-hidden border border-card-border shadow-inner bg-secondary-bg/60">
+                    <iframe src="{{ route('candidate.agreement.preview') }}#toolbar=0" class="w-full h-[650px] border-0" title="Candidate Agreement PDF"></iframe>
+                </div>
+            @else
+                <div class="flex items-center gap-3 mb-5">
+                    <span class="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center text-xs"><i class="fas fa-scroll"></i></span>
+                    <h2 class="text-lg font-bold text-text-main">Terms and Conditions</h2>
+                </div>
+                <div class="h-96 overflow-y-auto pr-4 text-sm text-text-dark/80 space-y-4 custom-scrollbar bg-secondary-bg/30 rounded-xl p-6 border border-card-border">
+                    @include('candidate.partials.agreement-text')
+                    
+                    <p class="mt-8 font-semibold text-accent-yellow italic border-l-2 border-accent-yellow/40 pl-4">By signing below, you acknowledge that you have read, understood, and agree to be bound by these terms.</p>
+                </div>
+            @endif
         </div>
 
         {{-- Signature Section --}}
@@ -43,17 +73,32 @@
                         <i class="fas fa-check-double"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-text-main mb-1">Agreement Digitally Signed</h3>
-                        <p class="text-sm text-text-dark/60 mb-6">You have accepted the terms and conditions.</p>
+                        <h3 class="text-xl font-bold text-text-main mb-1">
+                            {{ $profile->is_manual_agreement ? 'Official Agreement Active & Binding' : 'Agreement Digitally Signed' }}
+                        </h3>
+                        <p class="text-sm text-text-dark/60 mb-6">
+                            {{ $profile->is_manual_agreement ? 'Your official agreement has been verified and uploaded by the administration.' : 'You have accepted the terms and conditions.' }}
+                        </p>
                         
                         <div class="flex flex-col sm:flex-row gap-6 mb-6">
-                            {{-- Digital Signature --}}
+                            {{-- Digital Signature / Agreement Status --}}
                             <div class="bg-card-bg border border-card-border rounded-xl p-5 flex-1">
                                 <h4 class="text-xs font-semibold text-text-main/50 uppercase tracking-wider mb-3">
-                                    {{ $profile->signature_data ? 'Your Digital Signature' : 'Agreement Status' }}
+                                    Agreement Verification Status
                                 </h4>
                                 
-                                @if($profile->signature_data)
+                                @if($profile->is_manual_agreement)
+                                    <div class="flex items-center gap-2 text-purple-400 font-semibold mb-2 text-sm">
+                                        <i class="fas fa-file-pdf text-base"></i> Custom Official Agreement PDF
+                                    </div>
+                                    <p class="text-xs text-text-dark/60 mb-3">
+                                        This agreement has been verified, approved, and officially uploaded by Vedanta Administration.
+                                    </p>
+                                    <div class="text-xs text-text-dark/50 mt-4 pt-4 border-t border-card-border">
+                                        <span class="block text-text-dark/30 mb-0.5">Uploaded / Effective Date</span>
+                                        <span class="font-medium text-text-main/80">{{ $profile->agreement_signed_at ? \Carbon\Carbon::parse($profile->agreement_signed_at)->format('d M Y, h:i A') : $profile->updated_at->format('d M Y, h:i A') }}</span>
+                                    </div>
+                                @elseif($profile->signature_data)
                                     @if($profile->signature_type === 'draw' || Str::startsWith($profile->signature_data, 'data:image'))
                                         <img src="{{ $profile->signature_data }}" alt="Digital Signature" class="h-20 bg-white rounded object-contain px-2 mb-3">
                                     @elseif($profile->signature_type === 'type')
@@ -70,10 +115,10 @@
                                     </div>
                                 @else
                                     <p class="text-sm font-medium text-text-main mb-3">
-                                        <i class="fas fa-file-pdf text-accent-blue mr-1"></i> Agreement manually uploaded by Admin.
+                                        <i class="fas fa-file-pdf text-accent-blue mr-1"></i> Agreement recorded in system.
                                     </p>
                                     <div class="text-xs text-text-dark/50 mt-4 pt-4 border-t border-card-border">
-                                        <span class="block text-text-dark/30 mb-0.5">Uploaded On</span>
+                                        <span class="block text-text-dark/30 mb-0.5">Recorded On</span>
                                         <span class="font-medium text-text-main/80">{{ $profile->updated_at->format('d M Y, h:i A') }}</span>
                                     </div>
                                 @endif

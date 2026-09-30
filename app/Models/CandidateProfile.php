@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Database\Factories\CandidateProfileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class CandidateProfile extends Model
 {
@@ -96,6 +97,21 @@ class CandidateProfile extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getIsManualAgreementAttribute(): bool
+    {
+        return ! empty($this->agreement_pdf_path) && (
+            str_contains($this->agreement_pdf_path, 'admin_uploaded') ||
+            str_contains($this->agreement_pdf_path, 'manual') ||
+            (! empty($this->manual_agreement_path) && $this->agreement_pdf_path === $this->manual_agreement_path)
+        );
+    }
+
+    public function getHasUploadedManualBackupAttribute(): bool
+    {
+        return ! empty($this->manual_agreement_path) &&
+            Storage::disk('public')->exists($this->manual_agreement_path);
     }
 
     public function category()
