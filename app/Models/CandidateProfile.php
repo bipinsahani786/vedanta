@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Database\Factories\CandidateProfileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class CandidateProfile extends Model
 {
-    /** @use HasFactory<\Database\Factories\CandidateProfileFactory> */
+    /** @use HasFactory<CandidateProfileFactory> */
     use HasFactory;
 
     protected $guarded = [];
@@ -25,9 +28,59 @@ class CandidateProfile extends Model
                         $nextSequence = intval($parts[2]) + 1;
                     }
                 }
-                $profile->vpa_id = sprintf("VPA-%s-%03d", $year, $nextSequence);
+                $profile->vpa_id = sprintf('VPA-%s-%03d', $year, $nextSequence);
             }
         });
+
+        static::updating(function ($profile) {
+            if ($profile->is_agreement_signed && empty($profile->agreement_id)) {
+                if (! empty($profile->vpa_id)) {
+                    $profile->agreement_id = str_replace('VPA-', 'VPA-AGR-', $profile->vpa_id);
+                    // Ensure CAN is replaced if it exists
+                    $profile->agreement_id = str_replace('VPA-AGR-CAN-', 'VPA-AGR-', $profile->agreement_id);
+                } else {
+                    $profile->agreement_id = 'VPA-AGR-'.date('Y').'-'.str_pad($profile->id, 6, '0', STR_PAD_LEFT);
+                }
+            }
+        });
+    }
+
+    public function ensureIdsAssigned(): void
+    {
+        $dirty = false;
+        $year = $this->created_at ? $this->created_at->format('Y') : date('Y');
+
+        if (empty($this->vpa_id)) {
+            $lastProfile = self::where('vpa_id', 'like', "VPA-{$year}-%")->orderBy('id', 'desc')->first();
+            $nextSequence = 1;
+            if ($lastProfile && $lastProfile->vpa_id) {
+                $parts = explode('-', $lastProfile->vpa_id);
+                if (count($parts) === 3 && is_numeric($parts[2])) {
+                    $nextSequence = intval($parts[2]) + 1;
+                }
+            }
+            $this->vpa_id = sprintf('VPA-%s-%03d', $year, $nextSequence);
+            $dirty = true;
+        }
+
+        $isSigned = $this->is_agreement_signed
+            || ! empty($this->agreement_pdf_path)
+            || ! empty($this->signature_data);
+
+        if ($isSigned) {
+            if (! $this->is_agreement_signed) {
+                $this->is_agreement_signed = true;
+                $dirty = true;
+            }
+            if (empty($this->agreement_id)) {
+                $this->agreement_id = str_replace('VPA-', 'VPA-AGR-', $this->vpa_id);
+                $dirty = true;
+            }
+        }
+
+        if ($dirty) {
+            $this->saveQuietly();
+        }
     }
 
     protected $casts = [
@@ -44,6 +97,21 @@ class CandidateProfile extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getIsManualAgreementAttribute(): bool
+    {
+        return ! empty($this->agreement_pdf_path) && (
+            str_contains($this->agreement_pdf_path, 'admin_uploaded') ||
+            str_contains($this->agreement_pdf_path, 'manual') ||
+            (! empty($this->manual_agreement_path) && $this->agreement_pdf_path === $this->manual_agreement_path)
+        );
+    }
+
+    public function getHasUploadedManualBackupAttribute(): bool
+    {
+        return ! empty($this->manual_agreement_path) &&
+            Storage::disk('public')->exists($this->manual_agreement_path);
     }
 
     public function category()
@@ -78,9 +146,10 @@ class CandidateProfile extends Model
 
     public function getAgreementSignedAtAttribute()
     {
-        if (!empty($this->attributes['agreement_signed_at'])) {
+        if (! empty($this->attributes['agreement_signed_at'])) {
             return $this->asDateTime($this->attributes['agreement_signed_at']);
         }
+
         return $this->signature_date_time;
     }
 
@@ -98,15 +167,16 @@ class CandidateProfile extends Model
         if ($this->isRegistrationCompleted()) {
             return 'Completed';
         }
-        if (!$this->is_profile_complete && (empty($this->category_id) || empty($this->subject_id))) {
+        if (! $this->is_profile_complete && (empty($this->category_id) || empty($this->subject_id))) {
             return 'Pending Profile Completion';
         }
-        if (!$this->is_agreement_signed && empty($this->signature_date_time) && empty($this->agreement_signed_at)) {
+        if (! $this->is_agreement_signed && empty($this->signature_date_time) && empty($this->agreement_signed_at)) {
             return 'Pending Agreement Upload';
         }
-        if (!$this->has_paid_plan) {
+        if (! $this->has_paid_plan) {
             return 'Pending Registration Fee';
         }
+
         return 'Completed';
     }
 
@@ -115,15 +185,16 @@ class CandidateProfile extends Model
         if ($this->isRegistrationCompleted()) {
             return route('candidate.dashboard');
         }
-        if (!$this->is_profile_complete && (empty($this->category_id) || empty($this->subject_id))) {
+        if (! $this->is_profile_complete && (empty($this->category_id) || empty($this->subject_id))) {
             return route('candidate.wizard');
         }
-        if (!$this->is_agreement_signed && empty($this->signature_date_time) && empty($this->agreement_signed_at)) {
+        if (! $this->is_agreement_signed && empty($this->signature_date_time) && empty($this->agreement_signed_at)) {
             return route('candidate.wizard', ['step' => 2]);
         }
-        if (!$this->has_paid_plan) {
+        if (! $this->has_paid_plan) {
             return route('candidate.wizard', ['step' => 4]);
         }
+
         return route('candidate.dashboard');
     }
 
@@ -138,64 +209,69 @@ class CandidateProfile extends Model
         if ($type === 'premium' || ($this->paid_amount ?? 0) >= 1000) {
             return 6;
         }
+
         return 3;
     }
 
-    public function getPlanValidityDateAttribute(): ?\Carbon\Carbon
+    public function getPlanValidityDateAttribute(): ?Carbon
     {
-        if (!$this->has_paid_plan || !$this->plan_started_at) {
+        if (! $this->has_paid_plan || ! $this->plan_started_at) {
             return null;
         }
-        return \Carbon\Carbon::parse($this->plan_started_at)->addMonths($this->plan_duration_months);
+
+        return Carbon::parse($this->plan_started_at)->addMonths($this->plan_duration_months);
     }
 
     public function getIsPlanExpiredAttribute(): bool
     {
-        if (!$this->has_paid_plan || !$this->plan_started_at) {
+        if (! $this->has_paid_plan || ! $this->plan_started_at) {
             return false;
         }
+
         return $this->plan_validity_date ? $this->plan_validity_date->isPast() : false;
     }
 
     public function getIsPlanActiveAttribute(): bool
     {
-        return $this->has_paid_plan && !$this->is_plan_expired;
+        return $this->has_paid_plan && ! $this->is_plan_expired;
     }
 
     public function getCurrentPlanNameAttribute(): string
     {
-        if (!$this->has_paid_plan) {
+        if (! $this->has_paid_plan) {
             return 'No Active Plan';
         }
-        return ($this->plan_type ? ucfirst($this->plan_type) : 'Standard') . ' Plan';
+
+        return ($this->plan_type ? ucfirst($this->plan_type) : 'Standard').' Plan';
     }
 
     public function getPlanStatusBadgeAttribute(): string
     {
-        if (!$this->has_paid_plan) {
+        if (! $this->has_paid_plan) {
             return 'Inactive';
         }
         if ($this->is_plan_expired) {
             return 'Expired';
         }
+
         return 'Active';
     }
 
     public function isRegistrationCompleted(): bool
     {
         // 1. If explicitly marked with registration_completed_at, they are registered
-        if (!empty($this->registration_completed_at)) {
+        if (! empty($this->registration_completed_at)) {
             return true;
         }
 
         // 2. Core profile details exist
-        $hasCoreProfile = (bool) ($this->is_profile_complete || (!empty($this->category_id) && !empty($this->subject_id)));
+        $hasCoreProfile = (bool) ($this->is_profile_complete || (! empty($this->category_id) && ! empty($this->subject_id)));
 
         // 3. Payment or active plan exists
         $hasPayment = (bool) ($this->initial_fee_paid || $this->is_fee_paid || ($this->paid_amount ?? 0) >= 500);
 
         // 4. Agreement exists
-        $hasAgreement = (bool) ($this->is_agreement_signed || !empty($this->signature_date_time) || !empty($this->agreement_signed_at));
+        $hasAgreement = (bool) ($this->is_agreement_signed || ! empty($this->signature_date_time) || ! empty($this->agreement_signed_at));
 
         return (bool) ($hasCoreProfile && ($hasAgreement || $hasPayment) && $hasPayment);
     }

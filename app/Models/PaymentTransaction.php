@@ -38,14 +38,23 @@ class PaymentTransaction extends Model
             return 'Plan Renewal (Standard Plan)';
         }
 
-        if ((float)$this->amount >= 1000) {
+        if ((float) $this->amount >= 1000) {
             return 'Registration Fee (Full / Premium Plan)';
         }
 
-        if ((float)$this->amount == 500) {
+        if ((float) $this->amount == 500) {
             return 'Registration Fee - Part 1';
         }
 
         return 'Registration Fee';
+    }
+
+    public function getPaymentMethodAttribute(): string
+    {
+        if (str_starts_with($this->transaction_id ?? '', 'MANUAL_')) {
+            return 'Manual';
+        }
+
+        return 'Online';
     }
 }

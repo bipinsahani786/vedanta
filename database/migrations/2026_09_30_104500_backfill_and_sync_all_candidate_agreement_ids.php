@@ -1,40 +1,24 @@
 <?php
 
-namespace App\Console\Commands;
-
 use App\Models\CandidateProfile;
-use Illuminate\Console\Command;
+use Illuminate\Database\Migrations\Migration;
 
-class BackfillVpaIds extends Command
+return new class extends Migration
 {
     /**
-     * The name and signature of the console command.
-     *
-     * @var string
+     * Run the migrations.
+     * Automatically assigns sequential Candidate ID (vpa_id) and Agreement ID (agreement_id)
+     * to all existing/old candidates who registered before these fields were added.
      */
-    protected $signature = 'vpa:sync-ids {--force : Re-sync even if partially assigned}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Sync and backfill Candidate VPA IDs and Agreement IDs for all profiles';
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function up(): void
     {
         $profiles = CandidateProfile::orderBy('created_at', 'asc')
             ->orderBy('id', 'asc')
             ->get();
 
-        $this->info("Scanning {$profiles->count()} total candidate profiles...");
-
         $sequences = [];
 
-        // 1. Identify highest existing sequence per year
+        // 1. Identify highest existing sequence per year to avoid collisions
         foreach ($profiles as $profile) {
             if (! empty($profile->vpa_id)) {
                 $parts = explode('-', $profile->vpa_id);
@@ -48,14 +32,12 @@ class BackfillVpaIds extends Command
             }
         }
 
-        $vpaAssigned = 0;
-        $agrAssigned = 0;
-
+        // 2. Assign unique Candidate ID and Agreement ID to all profiles
         foreach ($profiles as $profile) {
             $dirty = false;
             $year = $profile->created_at ? $profile->created_at->format('Y') : date('Y');
 
-            // Assign Candidate VPA ID if missing
+            // Assign VPA Candidate ID if missing
             if (empty($profile->vpa_id)) {
                 if (! isset($sequences[$year])) {
                     $sequences[$year] = 1;
@@ -64,11 +46,9 @@ class BackfillVpaIds extends Command
                 }
                 $profile->vpa_id = sprintf('VPA-%s-%03d', $year, $sequences[$year]);
                 $dirty = true;
-                $vpaAssigned++;
-                $this->line("Assigned Candidate ID: {$profile->vpa_id} to Candidate #{$profile->user_id}");
             }
 
-            // Assign Agreement ID if agreement was signed
+            // Normalize or assign Agreement ID if agreement was signed
             $isSigned = $profile->is_agreement_signed
                 || ! empty($profile->agreement_pdf_path)
                 || ! empty($profile->signature_data);
@@ -81,8 +61,6 @@ class BackfillVpaIds extends Command
                 if (empty($profile->agreement_id)) {
                     $profile->agreement_id = str_replace('VPA-', 'VPA-AGR-', $profile->vpa_id);
                     $dirty = true;
-                    $agrAssigned++;
-                    $this->line("Assigned Agreement ID: {$profile->agreement_id} to Candidate #{$profile->user_id}");
                 }
             }
 
@@ -90,7 +68,13 @@ class BackfillVpaIds extends Command
                 $profile->saveQuietly();
             }
         }
-
-        $this->info("Sync complete! Newly assigned: {$vpaAssigned} Candidate IDs, {$agrAssigned} Agreement IDs.");
     }
-}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        // Safe: Do not delete generated IDs on rollback
+    }
+};

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Invoice</title>
+    <title>Payment Invoice</title>
     <style>
         body {
             font-family: 'DejaVu Sans', sans-serif;
@@ -14,7 +14,7 @@
             position: absolute;
             top: 30%;
             left: 20%;
-            opacity: 0.1;
+            opacity: 0.08;
             z-index: -1;
             width: 400px;
         }
@@ -90,10 +90,14 @@
 <body>
 
     <!-- Watermark -->
-    <img src="{{ public_path('images/logo.png') }}" class="watermark" alt="Vedanta Watermark">
+    @if(file_exists(public_path('images/logo.png')))
+        <img src="{{ public_path('images/logo.png') }}" class="watermark" alt="Vedanta Watermark">
+    @endif
 
     <div class="header">
-        <img src="{{ public_path('images/logo.png') }}" class="logo" alt="Vedanta Logo">
+        @if(file_exists(public_path('images/logo.png')))
+            <img src="{{ public_path('images/logo.png') }}" class="logo" alt="Vedanta Logo">
+        @endif
         <h1>PAYMENT INVOICE</h1>
         <p>Vedanta Placement Agency</p>
     </div>
@@ -103,13 +107,16 @@
             <td>
                 <h3>Invoice To:</h3>
                 <p><strong>Name:</strong> {{ $user->name }}</p>
+                @if($user->profile && $user->profile->vpa_id)
+                    <p><strong>Candidate ID:</strong> {{ $user->profile->vpa_id }}</p>
+                @endif
                 <p><strong>Email:</strong> {{ $user->email }}</p>
                 <p><strong>Phone:</strong> {{ $user->phone ?? 'N/A' }}</p>
             </td>
             <td>
                 <h3>Payment Details:</h3>
-                <p><strong>Transaction ID:</strong> {{ $transaction->transaction_id }}</p>
-                <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($transaction->created_at)->format('d F Y, h:i A') }}</p>
+                <p><strong>Transaction ID:</strong> {{ $transaction->transaction_id ?? $transactionId ?? 'N/A' }}</p>
+                <p><strong>Date:</strong> {{ isset($transaction->created_at) ? \Carbon\Carbon::parse($transaction->created_at)->format('d F Y, h:i A') : now()->format('d F Y, h:i A') }}</p>
                 <p><strong>Status:</strong> Successful</p>
             </td>
         </tr>
@@ -125,19 +132,20 @@
         </thead>
         <tbody>
             <tr>
-                <td>Vedanta Platform Subscription / Service Fee</td>
+                <td>{{ $description ?? $transaction->formatted_description ?? 'Vedanta Platform Subscription / Service Fee' }}</td>
                 <td>{{ $transaction->formatted_description ?? ucwords(str_replace('_', ' ', $transaction->type ?? 'Registration Fee')) }}</td>
-                <td class="amount-col">Rs. {{ number_format($transaction->amount, 2) }}</td>
+                <td class="amount-col">Rs. {{ number_format($amount ?? $transaction->amount ?? 0, 2) }}</td>
             </tr>
             <tr class="total-row">
                 <td colspan="2" style="text-align: right;">Total Amount Paid</td>
-                <td class="amount-col">Rs. {{ number_format($transaction->amount, 2) }}</td>
+                <td class="amount-col">Rs. {{ number_format($amount ?? $transaction->amount ?? 0, 2) }}</td>
             </tr>
         </tbody>
     </table>
 
     <div class="footer">
-        <p>Thank you for using Vedanta Educational Services.</p>
+        <p><strong>Vedanta Placement Agency</strong> — Empowering Educational Leadership across India</p>
+        <p>Career Point Building, 2nd floor, Patna, 800001, Bihar | Email: info@vedantaplacementagency.in | Phone: +91-7070938975</p>
         <p>This is a computer-generated document and does not require a physical signature.</p>
     </div>
 

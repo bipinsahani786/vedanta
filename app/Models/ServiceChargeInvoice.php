@@ -43,6 +43,37 @@ class ServiceChargeInvoice extends Model
     {
         $gross = $this->gross_amount;
         $discount = (float) ($this->discount_amount ?? 0);
+
         return max(0, $gross - $discount);
+    }
+
+    public function getPaymentTransactionAttribute()
+    {
+        return PaymentTransaction::where('candidate_id', $this->candidate_id)
+            ->where('status', 'success')
+            ->where(function ($q) {
+                $q->where('transaction_id', 'MANUAL_SC_'.$this->id)
+                    ->orWhere('transaction_id', 'LIKE', 'SC_'.$this->id.'_%');
+            })
+            ->latest()
+            ->first();
+    }
+
+    public function getPaymentMethodAttribute(): string
+    {
+        if ($this->status !== 'paid') {
+            return 'Unpaid';
+        }
+
+        $txn = $this->payment_transaction;
+        if ($txn) {
+            if (str_starts_with($txn->transaction_id ?? '', 'MANUAL_')) {
+                return 'Manual';
+            }
+
+            return 'Online';
+        }
+
+        return 'Manual';
     }
 }

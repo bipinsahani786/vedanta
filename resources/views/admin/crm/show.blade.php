@@ -308,19 +308,42 @@
 
                     <!-- Manual Agreement Upload -->
                     <div class="mt-6 pt-6 border-t border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agreement Status</h4>
+                        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                            <div>
+                                <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agreement Status</h4>
+                                @if($candidate->profile && $candidate->profile->is_manual_agreement)
+                                    <div class="text-[11px] text-purple-700 font-bold flex items-center gap-1 mt-0.5">
+                                        <i class="fas fa-file-pdf"></i> Custom Admin-Uploaded PDF Active
+                                    </div>
+                                @elseif($candidate->profile && $candidate->profile->has_uploaded_manual_backup)
+                                    <div class="text-[11px] text-amber-600 font-bold flex items-center gap-1 mt-0.5">
+                                        <i class="fas fa-info-circle"></i> System Template Active (Uploaded Backup Available)
+                                    </div>
+                                @endif
+                            </div>
                             @if($candidate->profile && ($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_date_time || $candidate->profile->signature_data))
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ route('admin.crm.candidate.download-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200 hover:bg-green-100 transition-colors" title="View/Download Agreement (auto-generates if missing)">
-                                        <i class="fas fa-download"></i> Signed & Valid (PDF)
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    @if($candidate->profile->has_uploaded_manual_backup && ! $candidate->profile->is_manual_agreement)
+                                        <form action="{{ route('admin.crm.candidate.restore-agreement', $candidate->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-xs font-bold border border-amber-300 hover:bg-amber-100 transition-colors shadow-sm" title="Restore previously uploaded custom agreement" onclick="return confirm('Restore your previously uploaded custom agreement PDF as active for this candidate?')">
+                                                <i class="fas fa-undo-alt text-amber-600"></i> Restore Uploaded PDF
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    <a href="{{ route('admin.crm.candidate.preview-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200 hover:bg-blue-100 transition-colors" title="Live Preview Agreement PDF">
+                                        <i class="fas fa-eye"></i> Live Preview
                                     </a>
-                                    <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-600 hover:text-indigo-600 rounded-full text-[11px] font-bold border border-gray-300 hover:bg-indigo-50 transition-colors" title="Force regenerate PDF">
-                                        <i class="fas fa-sync-alt"></i> Regenerate
+                                    <a href="{{ route('admin.crm.candidate.download-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200 hover:bg-green-100 transition-colors" title="Download Agreement">
+                                        <i class="fas fa-download"></i> Download PDF
+                                    </a>
+                                    <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-600 hover:text-indigo-600 rounded-full text-[11px] font-bold border border-gray-300 hover:bg-indigo-50 transition-colors" title="Force regenerate PDF from template" onclick="return confirm('Attention: Re-generate will switch the active agreement to the system auto-generated template. You can restore your custom uploaded PDF anytime with the \'Restore Uploaded PDF\' button. Proceed?')">
+                                        <i class="fas fa-sync-alt"></i> Re-generate
                                     </a>
                                 </div>
                             @else
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200">
                                         <i class="fas fa-clock"></i> Not Signed
                                     </span>
@@ -339,13 +362,19 @@
 
                         <form action="{{ route('admin.crm.candidate.upload-agreement', $candidate->id) }}" method="POST" enctype="multipart/form-data" class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
                             @csrf
-                            <label class="block text-xs font-bold text-gray-700 mb-2">Manually Upload Agreement (PDF)</label>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-xs font-bold text-gray-700">Manually Upload Agreement (PDF)</label>
+                                <span class="text-[11px] text-gray-400">Replaces current agreement for candidate</span>
+                            </div>
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <input type="file" name="agreement_pdf" accept="application/pdf" required class="flex-1 block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
-                                <button type="submit" class="shrink-0 px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm">
-                                    Upload & Send
+                                <button type="submit" class="shrink-0 px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                                    <i class="fas fa-cloud-upload-alt"></i> Upload & Send
                                 </button>
                             </div>
+                            <p class="text-[11px] text-gray-400 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i> Uploading will immediately update candidate's agreement view and email a copy.
+                            </p>
                         </form>
                     </div>
 
@@ -534,6 +563,7 @@
                                 <th class="py-2 px-4 text-left font-medium">Late Fee</th>
                                 <th class="py-2 px-4 text-left font-medium">Due Date</th>
                                 <th class="py-2 px-4 text-left font-medium">Status</th>
+                                <th class="py-2 px-4 text-left font-medium">Payment Mode</th>
                                 <th class="py-2 px-4 text-left font-medium">Action</th>
                             </tr>
                         </thead>
@@ -555,8 +585,30 @@
                                         {{ ucfirst($invoice->status) }}
                                     </span>
                                 </td>
+                                <td class="py-2 px-4">
+                                    @if($invoice->status === 'paid')
+                                        @if($invoice->payment_method === 'Online')
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                                <i class="fas fa-globe text-[10px]"></i> Online (Auto)
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                                <i class="fas fa-user-check text-[10px]"></i> Manual (Admin)
+                                            </span>
+                                        @endif
+                                    @else
+                                        <span class="text-xs text-gray-400 font-medium">&mdash;</span>
+                                    @endif
+                                </td>
                                 <td class="py-2 px-4 space-y-2">
                                     <div class="flex items-center flex-wrap gap-2">
+                                        <button type="button" 
+                                                class="text-xs text-purple-700 hover:text-purple-900 font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2 py-1 rounded transition-colors inline-flex items-center gap-1"
+                                                onclick="openSendEmailForSpecificInvoice({{ $invoice->id }})"
+                                                title="Send email or payment receipt for this specific invoice">
+                                            <i class="fas fa-paper-plane text-[10px]"></i> Send Email
+                                        </button>
+
                                         <button type="button" 
                                                 class="text-xs text-amber-600 hover:text-amber-900 font-bold bg-amber-50 px-2 py-1 rounded transition-colors" 
                                                 onclick="openEditInvoiceModal({{ $invoice->id }}, {{ $invoice->amount }}, {{ $invoice->late_fee }}, '{{ \Carbon\Carbon::parse($invoice->due_date)->format('Y-m-d') }}', '{{ $invoice->status }}')">
@@ -601,7 +653,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="py-4 text-center text-gray-500">No invoices generated yet.</td>
+                                <td colspan="7" class="py-4 text-center text-gray-500">No invoices generated yet.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -628,10 +680,28 @@
                             <label class="block text-xs font-medium text-gray-700 mb-1">Select Hired Job Application</label>
                             <select name="job_application_id" id="job_application_id" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" required>
                                 <option value="">-- Select Application --</option>
-                                @foreach($candidate->applications->where('status', 'hired') as $app)
-                                    <option value="{{ $app->id }}">{{ $app->jobPost->title ?? 'Job' }} @if($app->jobPost)({{ $app->jobPost->job_code }}) - {{ $app->jobPost->school_name }}@endif</option>
-                                @endforeach
+                                @php
+                                    $hiredApps = $candidate->applications->where('status', 'hired');
+                                    $otherApps = $candidate->applications->where('status', '!=', 'hired');
+                                @endphp
+                                @if($hiredApps->isNotEmpty())
+                                    <optgroup label="Hired Applications (Ready for Invoicing)">
+                                        @foreach($hiredApps as $app)
+                                            <option value="{{ $app->id }}" selected>{{ $app->jobPost->title ?? 'Job' }} @if($app->jobPost)({{ $app->jobPost->job_code }}) - {{ $app->jobPost->school_name }}@endif [Hired]</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+                                @if($otherApps->isNotEmpty())
+                                    <optgroup label="Other Assigned Applications">
+                                        @foreach($otherApps as $app)
+                                            <option value="{{ $app->id }}">{{ $app->jobPost->title ?? 'Job' }} @if($app->jobPost)({{ $app->jobPost->job_code }}) - {{ $app->jobPost->school_name }}@endif [{{ ucfirst($app->status) }}]</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
                             </select>
+                            @if($candidate->applications->isEmpty())
+                                <p class="text-[11px] text-amber-600 mt-1 font-medium"><i class="fas fa-exclamation-circle mr-1"></i>No applications found. Please assign a job using the form above first.</p>
+                            @endif
                         </div>
                         <div class="w-24">
                             <label class="block text-xs font-medium text-gray-700 mb-1">Amount (₹)</label>
@@ -810,10 +880,27 @@
             <form action="{{ route('admin.crm.candidate.send-email', $candidate->id) }}" method="POST" class="space-y-4" onsubmit="return handleSendEmailSubmit(this)">
                 @csrf
 
+                @if($invoices->isNotEmpty())
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Select Related Invoice</label>
+                        <span class="text-[11px] text-purple-600 font-semibold"><i class="fas fa-sync-alt mr-1"></i>Switch invoice anytime</span>
+                    </div>
+                    <select id="crm_invoice_select" name="invoice_id" class="w-full rounded-xl border-purple-200 bg-purple-50/50 shadow-sm text-sm py-2 px-3 focus:ring-purple-500 focus:border-purple-500 font-medium" onchange="switchEmailInvoice(this.value)">
+                        @foreach($invoices as $inv)
+                            <option value="{{ $inv->id }}" {{ $loop->first ? 'selected' : '' }}>
+                                #INV-SC-{{ str_pad($inv->id, 5, '0', STR_PAD_LEFT) }} &mdash; ₹{{ number_format($inv->amount, 2) }} ({{ ucfirst($inv->status) }}) &mdash; {{ $inv->jobApplication?->jobPost?->title ?? 'Placement' }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="text-[11px] text-gray-400 mt-1">If candidate has multiple invoices, choose which one to include in this email.</p>
+                </div>
+                @endif
+
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Choose Email Template</label>
                     <select id="crm_template_select" class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-purple-500 focus:border-purple-500" onchange="applySelectedTemplate(this.value)">
-                        <option value="">-- Select a Lifecycle Template (32 Available) --</option>
+                        <option value="">-- Select an Email Template ({{ $emailTemplates->count() }} Available) --</option>
                         @foreach($emailTemplates as $tmpl)
                             <option value="{{ $tmpl->id }}">{{ $tmpl->name }}</option>
                         @endforeach
@@ -863,6 +950,42 @@
         if (modal) modal.classList.add('hidden');
     }
 
+    @php
+        $latestInv = isset($invoices) && $invoices ? $invoices->first() : null;
+        $latestPay = isset($payments) && $payments ? $payments->first() : null;
+
+        $rawInvAmt = $latestInv ? (float) $latestInv->amount : 0;
+        $rawPaidAmt = $candidate->profile ? (float) $candidate->profile->paid_amount : 0;
+        $rawPayTxnAmt = $latestPay ? (float) $latestPay->amount : 0;
+
+        $computedAmt = $rawInvAmt > 0 ? $rawInvAmt : ($rawPayTxnAmt > 0 ? $rawPayTxnAmt : ($rawPaidAmt > 0 ? $rawPaidAmt : 500));
+        $formattedAmt = number_format($computedAmt, 2);
+
+        $invNum = $latestInv ? 'INV-SC-'.str_pad($latestInv->id, 5, '0', STR_PAD_LEFT) : ($latestPay ? ($latestPay->transaction_id ?? 'INV-PAY') : ($candidate->profile?->payment_id ?? 'INV-VPA'));
+        $invDueDate = $latestInv && $latestInv->due_date ? \Carbon\Carbon::parse($latestInv->due_date)->format('M d, Y') : now()->addDays(7)->format('M d, Y');
+        $invStatus = $latestInv ? ucfirst($latestInv->status) : ($candidate->profile?->is_fee_paid ? 'Paid' : 'Pending');
+
+        $invoicesMapData = ($invoices ?? collect())->mapWithKeys(function($inv) {
+            $formattedInvAmt = number_format((float) $inv->amount, 2);
+            return [$inv->id => [
+                'id' => $inv->id,
+                'amount' => $formattedInvAmt,
+                'payment_amount' => $formattedInvAmt,
+                'invoice_amount' => $formattedInvAmt,
+                'service_charge' => $formattedInvAmt,
+                'service_charge_amount' => $formattedInvAmt,
+                'pending_amount' => number_format((float) ($inv->amount + ($inv->late_fee ?? 0)), 2),
+                'invoice_number' => 'INV-SC-' . str_pad($inv->id, 5, '0', STR_PAD_LEFT),
+                'due_date' => $inv->due_date ? \Carbon\Carbon::parse($inv->due_date)->format('M d, Y') : now()->addDays(7)->format('M d, Y'),
+                'status' => ucfirst($inv->status),
+                'job_title' => $inv->jobApplication?->jobPost?->title ?? 'Teaching Position',
+                'school_name' => $inv->jobApplication?->jobPost?->school_name ?? 'Partner Educational Institution',
+            ]];
+        });
+    @endphp
+
+    const invoicesMap = @json($invoicesMapData);
+
     const candidateData = {
         name: @json($candidate->name),
         email: @json($candidate->email),
@@ -870,8 +993,15 @@
         category: @json($candidate->profile->category->name ?? 'Teaching'),
         subject: @json($candidate->profile->subject->name ?? 'Faculty'),
         plan_type: @json(ucfirst($candidate->profile->plan_type ?? 'Standard')),
-        payment_amount: @json($candidate->profile->paid_amount ?? '500'),
-        invoice_number: @json($candidate->profile->payment_id ?? 'INV-VPA'),
+        payment_amount: @json($formattedAmt),
+        amount: @json($formattedAmt),
+        invoice_amount: @json($formattedAmt),
+        service_charge: @json($formattedAmt),
+        service_charge_amount: @json($formattedAmt),
+        pending_amount: @json($latestInv ? number_format($latestInv->amount + $latestInv->late_fee, 2) : number_format($candidate->profile->pending_amount ?? 0, 2)),
+        invoice_number: @json($invNum),
+        due_date: @json($invDueDate),
+        status: @json($invStatus),
         job_title: @json($candidate->applications->first()?->jobPost?->title ?? 'Teaching Position'),
         school_name: @json($candidate->applications->first()?->jobPost?->school_name ?? 'Partner Educational Institution'),
         interview_date: @json($candidate->applications->first()?->interview_date ? \Carbon\Carbon::parse($candidate->applications->first()->interview_date)->format('M d, Y h:i A') : 'To be confirmed'),
@@ -881,6 +1011,49 @@
     };
 
     const emailTemplatesMap = @json($emailTemplates->keyBy('id'));
+
+    function switchEmailInvoice(invId) {
+        if (!invId || !invoicesMap[invId]) return;
+        const inv = invoicesMap[invId];
+        candidateData.payment_amount = inv.payment_amount;
+        candidateData.amount = inv.amount;
+        candidateData.invoice_amount = inv.invoice_amount;
+        candidateData.service_charge = inv.service_charge;
+        candidateData.service_charge_amount = inv.service_charge_amount;
+        candidateData.pending_amount = inv.pending_amount;
+        candidateData.invoice_number = inv.invoice_number;
+        candidateData.due_date = inv.due_date;
+        candidateData.status = inv.status;
+        if (inv.job_title) candidateData.job_title = inv.job_title;
+        if (inv.school_name) candidateData.school_name = inv.school_name;
+
+        const tmplSelect = document.getElementById('crm_template_select');
+        if (tmplSelect && tmplSelect.value) {
+            applySelectedTemplate(tmplSelect.value);
+        }
+    }
+
+    function openSendEmailForSpecificInvoice(invId) {
+        openSendEmailModal();
+        const invSelect = document.getElementById('crm_invoice_select');
+        if (invSelect) {
+            invSelect.value = invId;
+        }
+        switchEmailInvoice(invId);
+
+        const tmplSelect = document.getElementById('crm_template_select');
+        if (tmplSelect) {
+            const inv = invoicesMap[invId];
+            const targetName = (inv && inv.status === 'Paid') ? 'Payment Confirmation' : 'Service Charge Invoice Generated';
+            for (let i = 0; i < tmplSelect.options.length; i++) {
+                if (tmplSelect.options[i].text.toLowerCase().includes(targetName.toLowerCase())) {
+                    tmplSelect.selectedIndex = i;
+                    applySelectedTemplate(tmplSelect.value);
+                    break;
+                }
+            }
+        }
+    }
 
     function applySelectedTemplate(tmplId) {
         if (!tmplId || !emailTemplatesMap[tmplId]) return;
