@@ -161,6 +161,20 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
         $user = auth()->user();
         $profile = $user ? ($user->profile ?: $user->profile()->firstOrCreate([])) : null;
 
+        // Block entry to dashboard until agreement is signed
+        $hasSigned = $profile && (
+            $profile->is_agreement_signed ||
+            ! empty($profile->signature_data) ||
+            ! empty($profile->signature_date_time) ||
+            ! empty($profile->agreement_signed_at) ||
+            ! empty($profile->agreement_pdf_path) ||
+            $profile->is_manual_agreement
+        );
+
+        if (! $hasSigned) {
+            return redirect()->route('candidate.wizard')->with('warning', 'Please complete your registration and sign the agreement to access your dashboard.');
+        }
+
         // Auto-heal pending payment transaction if any exists in last 2 hours
         if ($user) {
             $pendingTxn = PaymentTransaction::where('candidate_id', $user->id)
@@ -216,12 +230,9 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
                 $needsUpdate = true;
             }
 
-            // If fee is paid or marked complete, ensure agreement is marked signed
-            if (($hasPayment || ! empty($profile->registration_completed_at) || ($profile->is_profile_complete ?? false)) && ! $profile->is_agreement_signed) {
+            // Ensure agreement is only considered signed if candidate actually signed or admin uploaded agreement
+            if ($profile->is_manual_agreement && ! $profile->is_agreement_signed) {
                 $updates['is_agreement_signed'] = true;
-                if (empty($profile->signature_date_time)) {
-                    $updates['signature_date_time'] = now();
-                }
                 $needsUpdate = true;
             }
 

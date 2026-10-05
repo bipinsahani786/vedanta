@@ -291,7 +291,7 @@ class ReferralService
     public static function checkAndAwardMilestoneBonuses(User $referrer): void
     {
         $successfulCount = Referral::where('referrer_id', $referrer->id)
-            ->where('stage', 'placed')
+            ->whereIn('stage', ['joined', 'placed'])
             ->count();
 
         $milestones = ReferralMilestone::where('is_active', true)

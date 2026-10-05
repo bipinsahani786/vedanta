@@ -89,25 +89,13 @@ class CrmController extends Controller
         ]);
 
         try {
-            // 1. Create User
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'role' => 'candidate',
-                'password' => Hash::make($request->password),
-                'email_verified_at' => now(),
-            ]);
-
-            // 2. Handle File Uploads
-            $resumePath = $request->hasFile('resume') ? $request->file('resume')->store('resumes', 'public') : null;
+            // Handle File Uploads first (outside DB transaction — filesystem operations cannot be rolled back)
+            $resumePath       = $request->hasFile('resume')        ? $request->file('resume')->store('resumes', 'public')              : null;
             $profilePhotoPath = $request->hasFile('profile_photo') ? $request->file('profile_photo')->store('profile_photos', 'public') : null;
-            $livePhotoPath = $request->hasFile('live_photo') ? $request->file('live_photo')->store('live_photos', 'public') : null;
-            $salarySlipPath = $request->hasFile('salary_slip') ? $request->file('salary_slip')->store('salary_slips', 'public') : null;
-            $offerLetterPath = $request->hasFile('offer_letter') ? $request->file('offer_letter')->store('offer_letters', 'public') : null;
-            $agreementPdfPath = $request->hasFile('agreement_pdf') ? $request->file('agreement_pdf')->store('agreements', 'public') : null;
-
-            $paymentId = $request->payment_method.'-ADMIN-'.strtoupper(uniqid());
+            $livePhotoPath    = $request->hasFile('live_photo')    ? $request->file('live_photo')->store('live_photos', 'public')       : null;
+            $salarySlipPath   = $request->hasFile('salary_slip')   ? $request->file('salary_slip')->store('salary_slips', 'public')    : null;
+            $offerLetterPath  = $request->hasFile('offer_letter')  ? $request->file('offer_letter')->store('offer_letters', 'public')  : null;
+            $agreementPdfPath = $request->hasFile('agreement_pdf') ? $request->file('agreement_pdf')->store('agreements', 'public')    : null;
 
             $otherQualsArray = is_array($request->other_qualifications) ? $request->other_qualifications : ($request->other_qualifications ? explode(',', $request->other_qualifications) : []);
             if ($request->filled('custom_qualification')) {
@@ -115,75 +103,109 @@ class CrmController extends Controller
             }
             $otherQualsStr = implode(', ', array_unique(array_filter(array_map('trim', $otherQualsArray))));
 
-            // 3. Create Candidate Profile
-            $profile = CandidateProfile::create([
-                'user_id' => $user->id,
-                'gender' => $request->gender,
-                'date_of_birth' => $request->date_of_birth,
-                'address' => $request->address,
-                'category_id' => $request->category_id,
-                'subject_id' => $request->subject_id,
-                'highest_qualification_id' => $request->highest_qualification_id,
-                'other_qualifications' => $otherQualsStr,
-                'experience_years' => $request->experience_years,
-                'current_salary' => $request->current_salary,
-                'expected_salary' => $request->expected_salary,
-                'preferred_state_id' => $request->preferred_state_id,
-                'preferred_city_id' => $request->preferred_city_id,
-                'english_fluency' => $request->english_fluency,
-                'residential_preference' => $request->residential_preference,
-                'availability_to_join' => $request->availability_to_join,
-                'current_school' => $request->current_school ?: 'Fresher',
+            // BUG FIX: Only mark fee as paid when actual money (amount > 0) was collected.
+            // Previously this was always true, giving free access even on ₹0 entries.
+            $isFeePaid = (float) $request->payment_amount > 0;
+            $paymentId = $isFeePaid ? ($request->payment_method . '-ADMIN-' . strtoupper(uniqid())) : null;
 
-                'resume_path' => $resumePath,
-                'profile_photo_path' => $profilePhotoPath,
-                'live_photo_path' => $livePhotoPath,
-                'salary_slip_path' => $salarySlipPath,
-                'offer_letter_path' => $offerLetterPath,
-                'agreement_pdf_path' => $agreementPdfPath,
+            $user = null;
 
-                'is_profile_complete' => true,
-                'is_fee_paid' => true,
-                'paid_amount' => $request->payment_amount,
-                'plan_type' => $request->plan_type,
-                'total_allowed_applications' => $request->plan_type === 'standard' ? 2 : 3,
-                'plan_started_at' => now(),
-                'payment_id' => $paymentId,
-                'registration_completed_at' => now(),
+            // BUG FIX: Wrap all DB writes in a single transaction so a failure in any step
+            // leaves no orphan User/Profile records in the database.
+            DB::transaction(function () use (
+                $request, &$user,
+                $resumePath, $profilePhotoPath, $livePhotoPath,
+                $salarySlipPath, $offerLetterPath, $agreementPdfPath,
+                $otherQualsStr, $isFeePaid, $paymentId
+            ) {
+                // 1. Create User
+                $user = User::create([
+                    'name'              => $request->name,
+                    'email'             => $request->email,
+                    'phone'             => $request->phone,
+                    'role'              => 'candidate',
+                    'password'          => Hash::make($request->password),
+                    'email_verified_at' => now(),
+                ]);
 
-                'is_terms_agreed' => true,
-                'is_agreement_signed' => $request->has('is_agreement_signed') ? $request->boolean('is_agreement_signed') : true,
-                'signature_date_time' => now(),
-            ]);
+                // 2. Create Candidate Profile
+                CandidateProfile::create([
+                    'user_id'                  => $user->id,
+                    'gender'                   => $request->gender,
+                    'date_of_birth'            => $request->date_of_birth,
+                    'address'                  => $request->address,
+                    'category_id'              => $request->category_id,
+                    'subject_id'               => $request->subject_id,
+                    'highest_qualification_id' => $request->highest_qualification_id,
+                    'other_qualifications'     => $otherQualsStr,
+                    'experience_years'         => $request->experience_years,
+                    'current_salary'           => $request->current_salary,
+                    'expected_salary'          => $request->expected_salary,
+                    'preferred_state_id'       => $request->preferred_state_id,
+                    'preferred_city_id'        => $request->preferred_city_id,
+                    'english_fluency'          => $request->english_fluency,
+                    'residential_preference'   => $request->residential_preference,
+                    'availability_to_join'     => $request->availability_to_join,
+                    'current_school'           => $request->current_school ?: 'Fresher',
 
-            // 4. Create Payment Transaction
-            PaymentTransaction::create([
-                'candidate_id' => $user->id,
-                'transaction_id' => $paymentId,
-                'amount' => $request->payment_amount,
-                'type' => 'registration_fee',
-                'status' => 'success',
-                'gateway_response' => [
-                    'note' => 'Manually collected by Admin',
-                    'admin_notes' => $request->payment_notes,
-                    'payment_method' => $request->payment_method,
-                ],
-            ]);
+                    'resume_path'        => $resumePath,
+                    'profile_photo_path' => $profilePhotoPath,
+                    'live_photo_path'    => $livePhotoPath,
+                    'salary_slip_path'   => $salarySlipPath,
+                    'offer_letter_path'  => $offerLetterPath,
+                    'agreement_pdf_path' => $agreementPdfPath,
 
-            // 5. Send Welcome Email with Invoice & Agreement
+                    // Payment-aware fields: only truthy when money was actually collected
+                    'is_profile_complete'        => true,
+                    'is_fee_paid'                => $isFeePaid,
+                    'paid_amount'                => $isFeePaid ? (float) $request->payment_amount : 0,
+                    'plan_type'                  => $request->plan_type,
+                    'total_allowed_applications' => $request->plan_type === 'standard' ? 2 : 3,
+                    'plan_started_at'            => $isFeePaid ? now() : null,
+                    'payment_id'                 => $paymentId,
+                    'registration_completed_at'  => $isFeePaid ? now() : null,
+
+                    'is_terms_agreed'     => true,
+                    'is_agreement_signed' => $request->has('is_agreement_signed') ? $request->boolean('is_agreement_signed') : true,
+                    'signature_date_time' => now(),
+                ]);
+
+                // 3. Create Payment Transaction ONLY when actual money was collected (amount > 0).
+                // BUG FIX: Previously a ₹0 "success" transaction was always inserted.
+                if ($isFeePaid) {
+                    PaymentTransaction::create([
+                        'candidate_id'     => $user->id,
+                        'transaction_id'   => $paymentId,
+                        'amount'           => $request->payment_amount,
+                        'type'             => 'registration_fee',
+                        'status'           => 'success',
+                        'gateway_response' => [
+                            'note'           => 'Manually collected by Admin',
+                            'admin_notes'    => $request->payment_notes,
+                            'payment_method' => $request->payment_method,
+                        ],
+                    ]);
+                }
+            });
+
+            // 4. Send Welcome Email (outside transaction — mail failures must not roll back DB changes)
             try {
                 Mail::to($user->email)->send(new RegistrationSuccessMail($user));
             } catch (Exception $mailException) {
-                Log::error('Manual Onboard Mail Error: '.$mailException->getMessage());
+                Log::error('Manual Onboard Mail Error: ' . $mailException->getMessage());
                 // Proceed without breaking if email fails
             }
 
-            return redirect()->route('admin.crm.show', $user->id)->with('success', 'Candidate manually onboarded successfully and welcome email sent.');
+            $successMsg = $isFeePaid
+                ? 'Candidate manually onboarded successfully and welcome email sent.'
+                : 'Candidate profile created. Note: No payment recorded as amount was zero or not provided.';
+
+            return redirect()->route('admin.crm.show', $user->id)->with('success', $successMsg);
 
         } catch (Exception $e) {
-            Log::error('Manual Onboard Error: '.$e->getMessage());
+            Log::error('Manual Onboard Error: ' . $e->getMessage());
 
-            return back()->withInput()->withErrors(['error' => 'Failed to onboard candidate: '.$e->getMessage()]);
+            return back()->withInput()->withErrors(['error' => 'Failed to onboard candidate: ' . $e->getMessage()]);
         }
     }
 
@@ -277,13 +299,25 @@ class CrmController extends Controller
                 'current_school' => $request->filled('current_school') ? $request->current_school : ($profile?->current_school ?: 'Fresher'),
             ];
 
+            // BUG FIX: Pre-compute whether a payment is being collected in this same request.
+            // This is used below to guard registration_completed_at against being set without a payment.
+            $isPayingNow = ! ($profile ? $profile->is_fee_paid : false)
+                && $request->filled('payment_amount')
+                && (float) $request->payment_amount > 0
+                && $request->filled('payment_method')
+                && $request->filled('plan_type');
+
             // Determine if profile should be marked complete (explicit flag, or core profile fields are filled by Admin)
             $isComplete = $request->has('is_profile_complete')
                 ? $request->boolean('is_profile_complete')
                 : (! empty($request->category_id) && ! empty($request->subject_id));
 
             $updates['is_profile_complete'] = $isComplete;
-            if ($isComplete && (! $profile || empty($profile->registration_completed_at))) {
+
+            // BUG FIX: Only stamp registration_completed_at when the fee is already paid OR is being
+            // paid right now. Previously it was stamped on every profile save, bypassing the payment gate.
+            $feeIsPaidOrBeingPaid = ($profile && $profile->is_fee_paid) || $isPayingNow;
+            if ($isComplete && $feeIsPaidOrBeingPaid && (! $profile || empty($profile->registration_completed_at))) {
                 $updates['registration_completed_at'] = now();
             }
 
@@ -299,9 +333,9 @@ class CrmController extends Controller
             if ($request->has('plan_type')) {
                 $updates['plan_type'] = $request->plan_type;
                 $updates['total_allowed_applications'] = $request->plan_type === 'standard' ? 2 : 3;
-                if ($request->plan_type === 'premium') {
-                    $updates['is_fee_paid'] = true;
-                }
+                // BUG FIX: is_fee_paid is intentionally NOT set here.
+                // It is only set via the manual payment block below when actual money (amount > 0) is collected.
+                // Previously selecting Premium in the dropdown alone would mark fee as paid with no payment.
             }
 
             if ($request->hasFile('resume')) {
@@ -329,28 +363,30 @@ class CrmController extends Controller
             // Handle Manual Payment Collection
             $isFeePaid = $profile ? $profile->is_fee_paid : false;
 
-            if (! $isFeePaid && $request->filled('payment_amount') && $request->filled('payment_method') && $request->filled('plan_type')) {
-                $paymentId = $request->payment_method.'-ADMIN-'.strtoupper(uniqid());
+            // BUG FIX: Added (float) $request->payment_amount > 0 guard.
+            // Previously a ₹0 amount with filled fields would also create a fake success transaction.
+            if (! $isFeePaid && $request->filled('payment_amount') && (float) $request->payment_amount > 0 && $request->filled('payment_method') && $request->filled('plan_type')) {
+                $paymentId = $request->payment_method . '-ADMIN-' . strtoupper(uniqid());
 
-                $updates['initial_fee_paid'] = true;
-                $updates['is_fee_paid'] = true;
-                $updates['paid_amount'] = $request->payment_amount;
-                $updates['plan_type'] = $request->plan_type;
+                $updates['initial_fee_paid']           = true;
+                $updates['is_fee_paid']                = true;
+                $updates['paid_amount']                = (float) $request->payment_amount;
+                $updates['plan_type']                  = $request->plan_type;
                 $updates['total_allowed_applications'] = $request->plan_type === 'standard' ? 2 : 3;
-                $updates['plan_started_at'] = now();
-                $updates['payment_id'] = $paymentId;
-                $updates['is_profile_complete'] = true;
-                $updates['registration_completed_at'] = now();
+                $updates['plan_started_at']            = now();
+                $updates['payment_id']                 = $paymentId;
+                $updates['is_profile_complete']        = true;
+                $updates['registration_completed_at']  = now();
 
                 PaymentTransaction::create([
-                    'candidate_id' => $user->id,
-                    'transaction_id' => $paymentId,
-                    'amount' => $request->payment_amount,
-                    'type' => 'registration_fee',
-                    'status' => 'success',
+                    'candidate_id'     => $user->id,
+                    'transaction_id'   => $paymentId,
+                    'amount'           => (float) $request->payment_amount,
+                    'type'             => 'registration_fee',
+                    'status'           => 'success',
                     'gateway_response' => [
-                        'note' => 'Manually collected by Admin',
-                        'admin_notes' => $request->payment_notes,
+                        'note'           => 'Manually collected by Admin',
+                        'admin_notes'    => $request->payment_notes,
                         'payment_method' => $request->payment_method,
                     ],
                 ]);
@@ -359,9 +395,15 @@ class CrmController extends Controller
             if ($profile) {
                 $profile->update($updates);
             } else {
-                $updates['user_id'] = $user->id;
-                $updates['is_profile_complete'] = $updates['is_profile_complete'] ?? true;
-                $updates['is_fee_paid'] = $updates['is_fee_paid'] ?? false;
+                // BUG FIX: Added safe defaults for all required/important columns so a fresh profile
+                // created via the edit route never has unexpected null values.
+                $updates['user_id']             = $user->id;
+                $updates['is_profile_complete'] = $updates['is_profile_complete'] ?? false;
+                $updates['is_fee_paid']         = $updates['is_fee_paid'] ?? false;
+                $updates['is_terms_agreed']     = $updates['is_terms_agreed'] ?? false;
+                $updates['is_agreement_signed'] = $updates['is_agreement_signed'] ?? false;
+                $updates['paid_amount']         = $updates['paid_amount'] ?? 0;
+                $updates['pending_amount']      = $updates['pending_amount'] ?? 0;
                 CandidateProfile::create($updates);
             }
 
@@ -553,7 +595,10 @@ class CrmController extends Controller
 
         // 2. Payments
         foreach ($payments as $payment) {
-            $isManual = str_starts_with($payment->transaction_id ?? '', 'MANUAL_');
+            // BUG FIX: store() generates IDs like "CASH-ADMIN-XXXXX" (dash format), not "MANUAL_" prefix.
+            // Both patterns must be recognised as manual/offline payments.
+            $isManual = str_starts_with($payment->transaction_id ?? '', 'MANUAL_')
+                || str_contains($payment->transaction_id ?? '', '-ADMIN-');
             $modeLabel = $isManual ? 'Manual / Offline' : 'Online / Auto';
             $isServiceCharge = ($payment->type === 'service_charge' || $payment->type === 'placement_fee' || str_contains($payment->transaction_id ?? '', 'SC_'));
             $title = $isServiceCharge ? "Service Charge Paid ({$modeLabel})" : "Payment Received ({$modeLabel})";
@@ -1203,6 +1248,8 @@ class CrmController extends Controller
 
     public function manualPaymentFulfill(Request $request, $id)
     {
+        @set_time_limit(120);
+
         $request->validate([
             'plan_type' => 'required|in:standard,premium',
             'amount' => 'required|numeric|min:0',
@@ -1210,18 +1257,24 @@ class CrmController extends Controller
             'admin_notes' => 'nullable|string',
         ]);
 
-        $user = User::findOrFail($id);
+        $user = User::with('profile')->findOrFail($id);
+        $profile = $user->profile;
 
-        // Anti-duplicate protection: check if a manual payment was already processed for this user in the last 30 seconds
+        // Anti-duplicate protection 1: check if a manual payment was already processed for this user in the last 5 minutes
         $recentTxn = PaymentTransaction::where('candidate_id', $user->id)
             ->where('transaction_id', 'LIKE', 'MANUAL_%')
-            ->where('created_at', '>=', now()->subSeconds(30))
+            ->where('created_at', '>=', now()->subMinutes(5))
             ->where('status', 'success')
             ->latest()
             ->first();
 
         if ($recentTxn) {
-            return back()->with('warning', 'A manual payment for this candidate was already processed a few seconds ago ('.$recentTxn->transaction_id.'). Duplicate submission prevented.');
+            return back()->with('warning', 'A manual payment for this candidate was already processed recently ('.$recentTxn->transaction_id.'). Duplicate submission prevented.');
+        }
+
+        // Anti-duplicate protection 2: If candidate already has an active paid plan of this type and not expired
+        if ($profile && $profile->is_fee_paid && $profile->plan_type === $request->plan_type && ! $profile->is_plan_expired) {
+            return back()->with('info', "Candidate {$user->name} already has an active {$request->plan_type} plan with payment completed.");
         }
 
         $transactionId = 'MANUAL_'.strtoupper($request->payment_method).'_'.$user->id.'_'.time();

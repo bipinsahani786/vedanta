@@ -31,6 +31,8 @@ class PaymentFulfillmentService
         ?string $pendingPlanType = null,
         bool $forceReFulfill = false
     ): array {
+        @set_time_limit(120);
+
         $isPending = $gatewayResponse['is_pending'] ?? false;
 
         Log::info('PaymentFulfillmentService: Processing fulfillment', [
