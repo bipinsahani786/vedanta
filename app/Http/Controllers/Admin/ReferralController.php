@@ -33,15 +33,15 @@ class ReferralController extends Controller
         // 6 Top KPI Metrics with Month-over-Month calculations
         $totalReferrers = Referral::distinct('referrer_id')->count('referrer_id');
         $totalReferrals = Referral::count();
-        $successfulReferrals = Referral::where('stage', 'joined')->count();
-        $pendingReferrals = Referral::where('stage', '!=', 'joined')->where('status', 'active')->count();
+        $successfulReferrals = Referral::whereIn('stage', ['joined', 'placed'])->count();
+        $pendingReferrals = Referral::whereNotIn('stage', ['joined', 'placed'])->where('status', 'active')->count();
         $pointsIssued = ReferralWalletTransaction::where('type', 'credit')->sum('points');
         $pointsRedeemed = ReferralWalletTransaction::where('type', 'debit')->where('source', 'service_charge_redemption')->sum('points');
 
         // This month diffs
         $thisMonthReferrers = Referral::whereBetween('created_at', [$startDate, $endDate])->distinct('referrer_id')->count('referrer_id');
         $thisMonthReferrals = Referral::whereBetween('created_at', [$startDate, $endDate])->count();
-        $thisMonthSuccessful = Referral::where('stage', 'joined')->whereBetween('updated_at', [$startDate, $endDate])->count();
+        $thisMonthSuccessful = Referral::whereIn('stage', ['joined', 'placed'])->whereBetween('updated_at', [$startDate, $endDate])->count();
         $thisMonthPointsIssued = ReferralWalletTransaction::where('type', 'credit')->whereBetween('created_at', [$startDate, $endDate])->sum('points');
         $thisMonthPointsRedeemed = ReferralWalletTransaction::where('type', 'debit')->where('source', 'service_charge_redemption')->whereBetween('created_at', [$startDate, $endDate])->sum('points');
 
@@ -50,10 +50,10 @@ class ReferralController extends Controller
         $funnel = [
             'clicks' => $totalClicks,
             'registered' => Referral::count(),
-            'profile_completed' => Referral::whereIn('stage', ['profile_completed', 'verified', 'interview_scheduled', 'selected', 'joined'])->count(),
-            'interview_scheduled' => Referral::whereIn('stage', ['interview_scheduled', 'selected', 'joined'])->count(),
-            'selected' => Referral::whereIn('stage', ['selected', 'joined'])->count(),
-            'joined' => Referral::where('stage', 'joined')->count(),
+            'profile_completed' => Referral::whereIn('stage', ['profile_completed', 'verified', 'interview_scheduled', 'selected', 'joined', 'placed'])->count(),
+            'interview_scheduled' => Referral::whereIn('stage', ['interview_scheduled', 'selected', 'joined', 'placed'])->count(),
+            'selected' => Referral::whereIn('stage', ['selected', 'joined', 'placed'])->count(),
+            'joined' => Referral::whereIn('stage', ['joined', 'placed'])->count(),
         ];
 
         // Growth Chart Data (Last 30 Days or Days in Range)
@@ -67,8 +67,8 @@ class ReferralController extends Controller
             $dayEnd = now()->subDays($i * 5)->endOfDay();
             $growthLabels[] = $dayStart->format('d M');
             $growthTotal[] = Referral::where('created_at', '<=', $dayEnd)->count();
-            $growthSuccessful[] = Referral::where('stage', 'joined')->where('created_at', '<=', $dayEnd)->count();
-            $growthPending[] = Referral::where('stage', '!=', 'joined')->where('created_at', '<=', $dayEnd)->count();
+            $growthSuccessful[] = Referral::whereIn('stage', ['joined', 'placed'])->where('created_at', '<=', $dayEnd)->count();
+            $growthPending[] = Referral::whereNotIn('stage', ['joined', 'placed'])->where('created_at', '<=', $dayEnd)->count();
         }
 
         // Recent Referrals Table (10 records)
@@ -80,7 +80,7 @@ class ReferralController extends Controller
         // Top Referrers Leaderboard (This Month)
         $topReferrers = User::whereHas('referralsMade')
             ->withCount(['referralsMade as total_referred', 'referralsMade as joined_count' => function ($q) {
-                $q->where('stage', 'joined');
+                $q->whereIn('stage', ['joined', 'placed']);
             }])
             ->with('referralWallet')
             ->orderByDesc('joined_count')
@@ -106,6 +106,15 @@ class ReferralController extends Controller
             'telegram' => Referral::where('source', 'telegram')->count(),
             'copy_link' => Referral::where('source', 'copy_link')->count(),
             'other' => Referral::whereNotIn('source', ['whatsapp', 'email', 'telegram', 'copy_link'])->count(),
+        ];
+
+        // Points Issued Breakdown by Type
+        $pointsByType = [
+            'registration' => (float) ReferralWalletTransaction::where('type', 'credit')->whereIn('source', ['referral_registration', 'registration', 'welcome_bonus'])->sum('points'),
+            'profile' => (float) ReferralWalletTransaction::where('type', 'credit')->where('source', 'referral_profile')->sum('points'),
+            'verification' => (float) ReferralWalletTransaction::where('type', 'credit')->where('source', 'referral_verification')->sum('points'),
+            'interview' => (float) ReferralWalletTransaction::where('type', 'credit')->where('source', 'referral_interview')->sum('points'),
+            'joining' => (float) ReferralWalletTransaction::where('type', 'credit')->whereIn('source', ['referral_placement', 'referral_joining'])->sum('points'),
         ];
 
         return view('admin.referrals.dashboard', compact(
@@ -134,7 +143,8 @@ class ReferralController extends Controller
             'pointRate',
             'startDate',
             'endDate',
-            'sourceStats'
+            'sourceStats',
+            'pointsByType'
         ));
     }
 

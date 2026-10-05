@@ -54,6 +54,20 @@ class AuthController extends Controller
                 return redirect()->intended('/employer/dashboard');
             } else {
                 session()->flash('candidate_just_logged_in', true);
+                $profile = $user->profile;
+                $hasSigned = $profile && (
+                    $profile->is_agreement_signed ||
+                    ! empty($profile->signature_data) ||
+                    ! empty($profile->signature_date_time) ||
+                    ! empty($profile->agreement_signed_at) ||
+                    ! empty($profile->agreement_pdf_path) ||
+                    $profile->is_manual_agreement
+                );
+
+                if (! $hasSigned) {
+                    return redirect()->route('candidate.wizard')->with('warning', 'Please complete your registration and sign the agreement to access your dashboard.');
+                }
+
                 return redirect()->intended('/candidate/dashboard');
             }
         }

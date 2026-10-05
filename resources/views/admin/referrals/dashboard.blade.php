@@ -521,14 +521,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 2. Points by Type Donut
+    // 2. Points by Type Donut (Dynamic from Database)
     const typeCtx = document.getElementById('pointsTypeChart').getContext('2d');
+    @php
+        $ptReg = (float)($pointsByType['registration'] ?? 0);
+        $ptProf = (float)($pointsByType['profile'] ?? 0);
+        $ptVer = (float)($pointsByType['verification'] ?? 0);
+        $ptInt = (float)($pointsByType['interview'] ?? 0);
+        $ptJoin = (float)($pointsByType['joining'] ?? 0);
+        $totalPt = $ptReg + $ptProf + $ptVer + $ptInt + $ptJoin;
+        if ($totalPt == 0) { $ptReg = 1; $ptProf = 1; $ptVer = 1; $ptInt = 1; $ptJoin = 1; }
+    @endphp
     new Chart(typeCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Registration', 'Profile', 'Verification', 'Interview', 'Joining'],
+            labels: [
+                'Registration ({{ number_format($pointsByType['registration'] ?? 0) }})',
+                'Profile ({{ number_format($pointsByType['profile'] ?? 0) }})',
+                'Verification ({{ number_format($pointsByType['verification'] ?? 0) }})',
+                'Interview ({{ number_format($pointsByType['interview'] ?? 0) }})',
+                'Joining ({{ number_format($pointsByType['joining'] ?? 0) }})'
+            ],
             datasets: [{
-                data: [8.5, 12.4, 12.6, 15.7, 50.8],
+                data: [{{ $ptReg }}, {{ $ptProf }}, {{ $ptVer }}, {{ $ptInt }}, {{ $ptJoin }}],
                 backgroundColor: ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#10b981']
             }]
         },

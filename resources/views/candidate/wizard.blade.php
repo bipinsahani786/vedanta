@@ -332,10 +332,7 @@
                             </div>
                         </div>
 
-                        <div class="mt-8 flex justify-end gap-4">
-                            <button type="button" @click="window.location.href = '{{ route('candidate.dashboard') }}'" class="text-text-dark font-semibold hover:text-accent-blue px-4 py-3 transition-colors">
-                                Skip for now
-                            </button>
+                        <div class="mt-8 flex justify-end">
                             <button type="submit" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2">
                                 Next Step <i class="fas fa-arrow-right"></i>
                             </button>

@@ -1060,7 +1060,7 @@
                                     </td>
                                     <td class="py-3 text-right">
                                         @if($sc->status === 'paid')
-                                            <a href="{{ route('serviceCharge.invoicePdf', $sc->id) }}" class="inline-flex items-center gap-1 text-sky-400 hover:text-white font-semibold">
+                                            <a href="{{ route('candidate.serviceCharge.invoicePdf', $sc->id) }}" class="inline-flex items-center gap-1 text-sky-400 hover:text-white font-semibold">
                                                 <span>{{ $sc->invoice_number ?? ('INV-' . (2000 + $sc->id)) }}</span>
                                                 <i class="fas fa-download text-[10px]"></i>
                                             </a>
@@ -1149,7 +1149,7 @@
                                         <div class="text-xs font-black text-white">₹{{ number_format($sc->amount, 0) }}</div>
                                         <div class="text-[10px] text-slate-400">{{ $sc->payment_date ? \Carbon\Carbon::parse($sc->payment_date)->format('d M Y') : '' }}</div>
                                     </div>
-                                    <a href="{{ route('serviceCharge.invoicePdf', $sc->id) }}" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-accent-blue hover:text-white flex items-center justify-center text-slate-300 text-xs transition-all shadow-sm" title="Download Invoice">
+                                    <a href="{{ route('candidate.serviceCharge.invoicePdf', $sc->id) }}" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-accent-blue hover:text-white flex items-center justify-center text-slate-300 text-xs transition-all shadow-sm" title="Download Invoice">
                                         <i class="fas fa-download"></i>
                                     </a>
                                 </div>
