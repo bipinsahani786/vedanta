@@ -332,7 +332,11 @@
                             </div>
                         </div>
 
-                        <div class="mt-8 flex justify-end">
+                        <div class="mt-8 flex justify-between items-center">
+                            <a href="{{ route('candidate.dashboard') }}" class="text-text-dark hover:text-text-main font-semibold transition-all px-4 py-2.5 rounded-xl border border-card-border/60 hover:border-card-border hover:bg-secondary-bg/80 flex items-center gap-2 text-sm">
+                                <span>Skip for now</span>
+                                <i class="fas fa-chevron-right text-xs opacity-60"></i>
+                            </a>
                             <button type="submit" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2">
                                 Next Step <i class="fas fa-arrow-right"></i>
                             </button>
@@ -363,10 +367,15 @@
 
                     <!-- Signature Options moved to step 3 -->
 
-                    <div class="mt-8 flex justify-between">
-                        <button type="button" @click="step = 1" class="px-6 py-3 rounded-xl font-semibold text-text-dark hover:bg-card-border transition-colors flex items-center gap-2">
-                            <i class="fas fa-arrow-left text-sm"></i> Back
-                        </button>
+                    <div class="mt-8 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <button type="button" @click="step = 1" class="px-6 py-3 rounded-xl font-semibold text-text-dark hover:bg-card-border transition-colors flex items-center gap-2">
+                                <i class="fas fa-arrow-left text-sm"></i> Back
+                            </button>
+                            <a href="{{ route('candidate.dashboard') }}" class="text-xs text-text-dark/60 hover:text-text-main font-medium transition-colors px-3 py-2">
+                                Skip to Dashboard
+                            </a>
+                        </div>
                         <button type="button" @click="submitStep2" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2" :disabled="!agreed" :class="!agreed ? 'opacity-50 cursor-not-allowed' : ''">
                             Accept & Continue <i class="fas fa-arrow-right"></i>
                         </button>
@@ -1034,14 +1043,21 @@
             },
 
             init() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const reqStep = parseInt(urlParams.get('step'));
+
                 // Determine initial step based on profile status
                 const isProfileComplete = {{ $profile->is_profile_complete ? 'true' : 'false' }};
                 const isTermsAgreed = {{ $profile->is_terms_agreed ? 'true' : 'false' }};
                 const isAgreementSigned = {{ $profile->is_agreement_signed ? 'true' : 'false' }};
                 
-                if (isProfileComplete && !isTermsAgreed) this.step = 2;
-                if (isProfileComplete && isTermsAgreed && !isAgreementSigned) this.step = 3;
-                if (isProfileComplete && isTermsAgreed && isAgreementSigned) this.step = 4;
+                if (reqStep && reqStep >= 1 && reqStep <= 4) {
+                    this.step = reqStep;
+                } else {
+                    if (isProfileComplete && !isTermsAgreed) this.step = 2;
+                    if (isProfileComplete && isTermsAgreed && !isAgreementSigned) this.step = 3;
+                    if (isProfileComplete && isTermsAgreed && isAgreementSigned) this.step = 4;
+                }
 
                 this.$watch('step', value => {
                     if (value === 3 && this.sigType === 'draw') {
