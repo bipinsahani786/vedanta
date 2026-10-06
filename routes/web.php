@@ -161,19 +161,8 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
         $user = auth()->user();
         $profile = $user ? ($user->profile ?: $user->profile()->firstOrCreate([])) : null;
 
-        // Block entry to dashboard until agreement is signed
-        $hasSigned = $profile && (
-            $profile->is_agreement_signed ||
-            ! empty($profile->signature_data) ||
-            ! empty($profile->signature_date_time) ||
-            ! empty($profile->agreement_signed_at) ||
-            ! empty($profile->agreement_pdf_path) ||
-            $profile->is_manual_agreement
-        );
-
-        if (! $hasSigned) {
-            return redirect()->route('candidate.wizard')->with('warning', 'Please complete your registration and sign the agreement to access your dashboard.');
-        }
+        // Removed dashboard block to allow users to skip and access dashboard
+        // without signing the agreement immediately.
 
         // Auto-heal pending payment transaction if any exists in last 2 hours
         if ($user) {

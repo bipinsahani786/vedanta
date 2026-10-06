@@ -16,11 +16,10 @@ class RegistrationWizardController extends Controller
     {
         $this->phonePe = new PhonePeService();
     }
-
     public function show()
     {
         $user = auth()->user();
-        $profile = $user->profile;
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
         
         // Redirect to dashboard only if fee is paid AND agreement is signed
         if (($profile->initial_fee_paid || $profile->is_fee_paid) && $profile->is_agreement_signed) {

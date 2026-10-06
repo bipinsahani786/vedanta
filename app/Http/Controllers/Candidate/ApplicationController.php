@@ -71,10 +71,24 @@ class ApplicationController extends Controller
 
     public function apply(Request $request, JobPost $job)
     {
-        if ($redirect = $this->ensureRegistrationComplete()) return $redirect;
-
         $user = auth()->user();
         $profile = $user->profile;
+
+        // Ensure agreement is signed before allowing job application
+        $hasSigned = $profile && (
+            $profile->is_agreement_signed ||
+            ! empty($profile->signature_data) ||
+            ! empty($profile->signature_date_time) ||
+            ! empty($profile->agreement_signed_at) ||
+            ! empty($profile->agreement_pdf_path) ||
+            $profile->is_manual_agreement
+        );
+
+        if (! $hasSigned) {
+            return redirect()->route('candidate.wizard', ['step' => 2])->with('warning', 'Please complete your registration and sign the agreement (with live photo) before applying for jobs.');
+        }
+
+        if ($redirect = $this->ensureRegistrationComplete()) return $redirect;
 
         // Calculate score again for saving
         $score = 0;
