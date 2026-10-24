@@ -203,13 +203,13 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
 
         // Auto-heal candidate profile completion if admin filled core details or fee is paid
         if ($user && $profile) {
-            $hasCoreDetails = ! empty($profile->category_id) && ! empty($profile->subject_id);
+            $hasFullDetails = ! empty($profile->date_of_birth) && ! empty($profile->address) && ! empty($profile->highest_qualification_id) && ! empty($profile->category_id) && ! empty($profile->subject_id);
             $hasPayment = (bool) ($profile->initial_fee_paid || $profile->is_fee_paid || ($profile->paid_amount ?? 0) >= 500);
 
             $needsUpdate = false;
             $updates = [];
 
-            if (! $profile->is_profile_complete && ($hasCoreDetails || $hasPayment || ! empty($profile->registration_completed_at))) {
+            if (! $profile->is_profile_complete && (($hasFullDetails && ! empty($profile->resume_path)) || ! empty($profile->registration_completed_at))) {
                 $updates['is_profile_complete'] = true;
                 $needsUpdate = true;
             }

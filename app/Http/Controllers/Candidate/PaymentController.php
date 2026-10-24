@@ -23,6 +23,22 @@ class PaymentController extends Controller
         $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
         $isRenewal = $request->query('type') === 'renewal';
 
+        if (! $profile->is_profile_complete) {
+            return redirect()->route('candidate.wizard', ['step' => 1])
+                ->with('error', 'Please complete your profile details first before proceeding to payment.');
+        }
+
+        $hasSigned = $profile->is_agreement_signed
+            || ! empty($profile->signature_data)
+            || ! empty($profile->agreement_signed_at)
+            || ! empty($profile->agreement_pdf_path)
+            || $profile->is_manual_agreement;
+
+        if (! $hasSigned) {
+            return redirect()->route('candidate.wizard', ['step' => 2])
+                ->with('warning', 'Please review and digitally sign the placement agreement before proceeding to payment.');
+        }
+
         // Auto-heal any pending payment in the last 2 hours
         $pendingTxn = \App\Models\PaymentTransaction::where('candidate_id', $user->id)
             ->where('status', 'pending')
@@ -123,6 +139,22 @@ class PaymentController extends Controller
         $isUpgrade = $request->plan === 'upgrade';
         
         $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
+
+        if (! $profile->is_profile_complete) {
+            return redirect()->route('candidate.wizard', ['step' => 1])
+                ->with('error', 'Please complete your profile details first before payment.');
+        }
+
+        $hasSigned = $profile->is_agreement_signed
+            || ! empty($profile->signature_data)
+            || ! empty($profile->agreement_signed_at)
+            || ! empty($profile->agreement_pdf_path)
+            || $profile->is_manual_agreement;
+
+        if (! $hasSigned) {
+            return redirect()->route('candidate.wizard', ['step' => 2])
+                ->with('warning', 'Please review and digitally sign the placement agreement before payment.');
+        }
 
         // Check if existing plan is expired (Standard = 3 months, Premium = 6 months)
         $isPlanExpired = $profile->is_plan_expired;

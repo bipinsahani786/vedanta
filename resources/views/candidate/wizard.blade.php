@@ -1052,11 +1052,25 @@
                 const isAgreementSigned = {{ $profile->is_agreement_signed ? 'true' : 'false' }};
                 
                 if (reqStep && reqStep >= 1 && reqStep <= 4) {
-                    this.step = reqStep;
+                    if (reqStep >= 2 && !isProfileComplete) {
+                        this.step = 1;
+                    } else if (reqStep >= 3 && !isTermsAgreed) {
+                        this.step = 2;
+                    } else if (reqStep >= 4 && !isAgreementSigned) {
+                        this.step = 3;
+                    } else {
+                        this.step = reqStep;
+                    }
                 } else {
-                    if (isProfileComplete && !isTermsAgreed) this.step = 2;
-                    if (isProfileComplete && isTermsAgreed && !isAgreementSigned) this.step = 3;
-                    if (isProfileComplete && isTermsAgreed && isAgreementSigned) this.step = 4;
+                    if (!isProfileComplete) {
+                        this.step = 1;
+                    } else if (!isTermsAgreed) {
+                        this.step = 2;
+                    } else if (!isAgreementSigned) {
+                        this.step = 3;
+                    } else {
+                        this.step = 4;
+                    }
                 }
 
                 this.$watch('step', value => {
@@ -1136,7 +1150,7 @@
 
                 const hasExistingPhoto = {{ $profile->profile_photo_path ? 'true' : 'false' }};
                 const hasExistingSalarySlip = {{ $profile->salary_slip_path ? 'true' : 'false' }};
-                const hasExistingResume = {{ ($profile->resume_path || $profile->is_profile_complete || $profile->is_fee_paid || !empty($profile->category_id)) ? 'true' : 'false' }};
+                const hasExistingResume = {{ ($profile->resume_path) ? 'true' : 'false' }};
 
                 // Ensure current_school has a default value if left blank
                 if (!this.formData.current_school || !this.formData.current_school.trim()) {
