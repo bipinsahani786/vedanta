@@ -12,26 +12,28 @@
         $hasPayment = $user->paymentTransactions()->where('status', 'success')->exists();
     }
 
-    $step1Complete = (bool) ($profile && ($profile->is_profile_complete || $hasCoreProfile || !empty($profile->registration_completed_at)));
-    $step2Complete = (bool) ($profile && ($profile->is_agreement_signed || !empty($profile->signature_date_time) || !empty($profile->agreement_signed_at) || !empty($profile->registration_completed_at) || ($step1Complete && $hasPayment)));
+    $step1Complete = (bool) ($profile && ($profile->is_profile_complete || !empty($profile->registration_completed_at)));
+    $step2Complete = (bool) ($profile && ($profile->is_agreement_signed || !empty($profile->signature_date_time) || !empty($profile->agreement_signed_at) || !empty($profile->registration_completed_at)));
     $step3Complete = (bool) ($profile && ($hasPayment || !empty($profile->registration_completed_at)));
     
     $completedSteps = ($step1Complete ? 1 : 0) + ($step2Complete ? 1 : 0) + ($step3Complete ? 1 : 0);
-    $isRegistrationComplete = ($completedSteps === 3) || ($profile && (!empty($profile->registration_completed_at) || $profile->isRegistrationCompleted())) || ($profile && $step1Complete && $hasPayment);
+    $isRegistrationComplete = ($completedSteps === 3) || ($profile && (!empty($profile->registration_completed_at) || $profile->isRegistrationCompleted()));
     $progressPercent = (int) round(($completedSteps / 3) * 100);
 
     // Smart Action CTA & Step Label
     if (!$step1Complete) {
         $ctaLabel = 'Complete Profile (Step 1)';
         $pendingStepText = 'Your profile details and documents are pending.';
+        $wizardUrl = route('candidate.wizard', ['step' => 1]);
     } elseif (!$step2Complete) {
         $ctaLabel = 'Sign Agreement (Step 2)';
         $pendingStepText = 'Your placement agreement is pending signature.';
+        $wizardUrl = route('candidate.wizard', ['step' => 2]);
     } else {
         $ctaLabel = 'Pay Registration Fee (Step 3)';
         $pendingStepText = 'Your registration fee payment is pending to activate account.';
+        $wizardUrl = route('candidate.wizard', ['step' => 4]);
     }
-    $wizardUrl = route('candidate.wizard');
 @endphp
 
 @if(!$isRegistrationComplete)

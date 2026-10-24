@@ -20,11 +20,11 @@ class AgreementController extends Controller
         $profile = $user->profile;
 
         if (! $profile || ! $profile->is_profile_complete) {
-            return redirect()->route('candidate.profile.edit')->with('error', 'Please complete your profile first before signing the agreement.');
+            return redirect()->route('candidate.wizard', ['step' => 1])->with('error', 'Please complete your profile details first before signing the agreement.');
         }
 
         if (! $profile->is_agreement_signed) {
-            return redirect()->route('candidate.wizard')->with('info', 'Please complete your live camera photo and agreement signature.');
+            return redirect()->route('candidate.wizard', ['step' => 2])->with('info', 'Please complete your live camera photo and agreement signature.');
         }
 
         return view('candidate.agreement.show', compact('user', 'profile'));
@@ -44,13 +44,17 @@ class AgreementController extends Controller
 
     public function sign(Request $request)
     {
+        $user = auth()->user();
+        $profile = $user->profile;
+
+        if (! $profile || ! $profile->is_profile_complete) {
+            return redirect()->route('candidate.wizard', ['step' => 1])->with('error', 'Please complete your profile details first before signing the agreement.');
+        }
+
         $request->validate([
             'signature' => 'required|string',
             'terms_accepted' => 'required|accepted',
         ]);
-
-        $user = auth()->user();
-        $profile = $user->profile;
 
         $sigData = $request->signature;
         $sigType = 'draw';

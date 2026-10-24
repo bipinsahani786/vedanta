@@ -60,8 +60,8 @@ class RegistrationWizardController extends Controller
                 'english_fluency' => 'required|in:beginner,intermediate,fluent',
                 'residential_preference' => 'required|in:residential,day,both',
                 'availability_to_join' => 'required|string',
-                'resume' => ($profile && ($profile->resume_path || $profile->is_profile_complete || $profile->is_fee_paid)) ? 'nullable|file|mimes:pdf,doc,docx|max:5120' : 'nullable|file|mimes:pdf,doc,docx|max:5120',
-                'profile_photo' => ($profile && ($profile->profile_photo_path || $profile->is_profile_complete)) ? 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:5120' : 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:5120',
+                'resume' => ($profile && $profile->resume_path) ? 'nullable|file|mimes:pdf,doc,docx|max:5120' : 'required|file|mimes:pdf,doc,docx|max:5120',
+                'profile_photo' => ($profile && $profile->profile_photo_path) ? 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:5120' : 'required|file|image|mimes:jpeg,png,jpg,webp|max:5120',
                 'salary_slip' => 'nullable|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120',
                 'offer_letter' => 'nullable|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:5120',
             ], [
@@ -174,12 +174,18 @@ class RegistrationWizardController extends Controller
 
     public function saveStep2(Request $request)
     {
+        $user = auth()->user();
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
+
+        if (! $profile->is_profile_complete) {
+            return response()->json([
+                'message' => 'Please complete your profile details first before proceeding to agreement.'
+            ], 422);
+        }
+
         $request->validate([
             'agreed' => 'required|boolean|accepted',
         ]);
-
-        $user = auth()->user();
-        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
         $profile->update([
             'is_terms_agreed' => true,
@@ -190,6 +196,21 @@ class RegistrationWizardController extends Controller
 
     public function saveStep3(Request $request)
     {
+        $user = auth()->user();
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
+
+        if (! $profile->is_profile_complete) {
+            return response()->json([
+                'message' => 'Please complete your profile details first before signing the agreement.'
+            ], 422);
+        }
+
+        if (! $profile->is_terms_agreed) {
+            return response()->json([
+                'message' => 'Please accept the terms and conditions in Step 2 first.'
+            ], 422);
+        }
+
         $request->validate([
             'signature_type' => 'required|in:draw,upload,type',
             'signature_data' => 'required|string',
@@ -197,9 +218,6 @@ class RegistrationWizardController extends Controller
             'longitude' => 'nullable|numeric',
             'live_photo' => 'required|string', // Base64 expected
         ]);
-
-        $user = auth()->user();
-        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
         $signatureData = $request->signature_data;
 
@@ -253,12 +271,32 @@ class RegistrationWizardController extends Controller
 
     public function initiatePayment(Request $request)
     {
+        $user = auth()->user();
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
+
+        if (! $profile->is_profile_complete) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please complete your profile details first before payment.'
+            ], 422);
+        }
+
+        $hasSigned = $profile->is_agreement_signed
+            || ! empty($profile->signature_data)
+            || ! empty($profile->agreement_signed_at)
+            || ! empty($profile->agreement_pdf_path)
+            || $profile->is_manual_agreement;
+
+        if (! $hasSigned) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please complete and sign the placement agreement before proceeding to payment.'
+            ], 422);
+        }
+
         $request->validate([
             'plan_type' => 'required|in:standard,premium'
         ]);
-
-        $user = auth()->user();
-        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
         if ($profile->initial_fee_paid || $profile->is_fee_paid) {
             return response()->json(['success' => false, 'message' => 'You have already paid the registration fee.']);

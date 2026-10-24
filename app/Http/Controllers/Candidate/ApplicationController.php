@@ -12,9 +12,34 @@ class ApplicationController extends Controller
     private function ensureRegistrationComplete()
     {
         $profile = auth()->user()->profile;
-        if (!$profile || (!$profile->initial_fee_paid && !$profile->is_fee_paid)) {
-            return redirect()->route('candidate.dashboard')->with('error', 'Please complete your registration and fee payment to unlock job applications.');
+
+        // 1. Profile Complete Check
+        if (! $profile || ! $profile->is_profile_complete) {
+            return redirect()->route('candidate.wizard', ['step' => 1])
+                ->with('error', 'Please complete your profile details first before applying for jobs.');
         }
+
+        // 2. Agreement Signature Check
+        $hasSigned = $profile && (
+            $profile->is_agreement_signed ||
+            ! empty($profile->signature_data) ||
+            ! empty($profile->signature_date_time) ||
+            ! empty($profile->agreement_signed_at) ||
+            ! empty($profile->agreement_pdf_path) ||
+            $profile->is_manual_agreement
+        );
+
+        if (! $hasSigned) {
+            return redirect()->route('candidate.wizard', ['step' => 2])
+                ->with('warning', 'Please review and digitally sign the placement agreement before applying for jobs.');
+        }
+
+        // 3. Payment / Fee Check
+        if (! $profile->initial_fee_paid && ! $profile->is_fee_paid && ($profile->paid_amount ?? 0) < 500) {
+            return redirect()->route('candidate.wizard', ['step' => 4])
+                ->with('info', 'Please activate your registration plan to unlock and submit job applications.');
+        }
+
         return null;
     }
 
@@ -71,24 +96,10 @@ class ApplicationController extends Controller
 
     public function apply(Request $request, JobPost $job)
     {
+        if ($redirect = $this->ensureRegistrationComplete()) return $redirect;
+
         $user = auth()->user();
         $profile = $user->profile;
-
-        // Ensure agreement is signed before allowing job application
-        $hasSigned = $profile && (
-            $profile->is_agreement_signed ||
-            ! empty($profile->signature_data) ||
-            ! empty($profile->signature_date_time) ||
-            ! empty($profile->agreement_signed_at) ||
-            ! empty($profile->agreement_pdf_path) ||
-            $profile->is_manual_agreement
-        );
-
-        if (! $hasSigned) {
-            return redirect()->route('candidate.wizard', ['step' => 2])->with('warning', 'Please complete your registration and sign the agreement (with live photo) before applying for jobs.');
-        }
-
-        if ($redirect = $this->ensureRegistrationComplete()) return $redirect;
 
         // Calculate score again for saving
         $score = 0;
