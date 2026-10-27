@@ -77,7 +77,8 @@ class PaymentReceiptMail extends Mailable
                 $this->user->refresh();
             }
 
-            // 1. Check if this is a Service Charge transaction (SC_..., MANUAL_SC_..., or description matches)
+            // 1. Resolve Transaction & Invoice details if present
+            $transaction = PaymentTransaction::where('transaction_id', $this->transactionId)->first();
             $invoice = null;
 
             if (str_starts_with($this->transactionId, 'SC_')) {
@@ -88,8 +89,7 @@ class PaymentReceiptMail extends Mailable
                 $invoiceId = str_replace('MANUAL_SC_', '', $this->transactionId);
                 $invoice = $invoiceId ? ServiceChargeInvoice::with(['jobApplication.jobPost', 'candidate'])->find($invoiceId) : null;
             } elseif (str_contains($this->description, 'Service Charge')) {
-                $txn = PaymentTransaction::where('transaction_id', $this->transactionId)->first();
-                $invoiceId = $txn?->gateway_response['invoice_id'] ?? null;
+                $invoiceId = $transaction?->gateway_response['invoice_id'] ?? null;
                 if ($invoiceId) {
                     $invoice = ServiceChargeInvoice::with(['jobApplication.jobPost', 'candidate'])->find($invoiceId);
                 }
@@ -98,38 +98,29 @@ class PaymentReceiptMail extends Mailable
                 }
             }
 
-            if ($invoice) {
-                $pdf = Pdf::loadView('candidate.serviceCharge.invoice_pdf', [
-                    'invoice' => $invoice,
-                    'user' => $this->user,
-                ]);
-
-                return [
-                    Attachment::fromData(fn () => $pdf->output(), "Service_Charge_Invoice_{$invoice->id}.pdf")
-                        ->withMime('application/pdf'),
-                ];
-            }
-
-            // 2. Regular Payment Invoice (Registration, Plan Renewal, Plan Upgrade, etc.)
-            $transaction = PaymentTransaction::where('transaction_id', $this->transactionId)->first();
             if (! $transaction) {
                 $transaction = (object) [
                     'transaction_id' => $this->transactionId,
                     'amount' => $this->amount,
                     'created_at' => now(),
-                    'type' => 'payment',
+                    'type' => $invoice ? 'service_charge' : 'payment',
                     'formatted_description' => $this->description,
                     'status' => 'success',
                 ];
             }
 
-            // Load the NEW candidate payment invoice template
+            $effectiveDescription = $this->description 
+                ?: ($invoice?->description 
+                ?: ($transaction->formatted_description ?? 'Payment Receipt'));
+
+            // Load the NEW candidate payment invoice template (Consistent for ₹500, ₹1000, and all amounts)
             $pdf = Pdf::loadView('candidate.payment.invoice', [
                 'user' => $this->user,
                 'transaction' => $transaction,
                 'transactionId' => $this->transactionId,
                 'amount' => $this->amount,
-                'description' => $this->description,
+                'description' => $effectiveDescription,
+                'invoice' => $invoice,
             ]);
 
             return [
