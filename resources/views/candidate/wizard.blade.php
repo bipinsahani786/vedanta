@@ -130,7 +130,7 @@
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">
                                     Resume / CV 
-                                    <span class="text-text-dark/40 font-normal lowercase">({{ ($profile->resume_path || $profile->is_profile_complete) ? 'optional - existing file on record' : 'PDF, DOC, DOCX up to 5MB' }})</span>
+                                    <span class="text-text-dark/40 font-normal lowercase">({{ ($profile->resume_path || $profile->hasCompletedProfileDetails()) ? 'optional - existing file on record' : 'PDF, DOC, DOCX up to 5MB' }})</span>
                                 </label>
                                 <input type="file" accept=".pdf,.doc,.docx" @change="handleResumeUpload"
                                     class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent-blue file:text-white hover:file:bg-accent-blue-hover cursor-pointer">
@@ -1047,7 +1047,7 @@
                 const reqStep = parseInt(urlParams.get('step'));
 
                 // Determine initial step based on profile status
-                const isProfileComplete = {{ $profile->is_profile_complete ? 'true' : 'false' }};
+                const isProfileComplete = {{ $profile->hasCompletedProfileDetails() ? 'true' : 'false' }};
                 const isTermsAgreed = {{ $profile->is_terms_agreed ? 'true' : 'false' }};
                 const isAgreementSigned = {{ $profile->is_agreement_signed ? 'true' : 'false' }};
                 

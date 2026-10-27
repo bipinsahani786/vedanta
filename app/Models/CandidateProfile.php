@@ -162,15 +162,35 @@ class CandidateProfile extends Model
         $this->attributes['signature_date_time'] = $dt;
     }
 
+    public function hasCompletedProfileDetails(): bool
+    {
+        if (! $this->is_profile_complete) {
+            return false;
+        }
+
+        return ! empty($this->date_of_birth)
+            && ! empty($this->address)
+            && ! empty($this->highest_qualification_id)
+            && ! empty($this->category_id)
+            && ! empty($this->subject_id);
+    }
+
     public function getPendingReasonAttribute()
     {
         if ($this->isRegistrationCompleted()) {
             return 'Completed';
         }
-        if (! $this->is_profile_complete && (empty($this->category_id) || empty($this->subject_id))) {
+        if (! $this->hasCompletedProfileDetails()) {
             return 'Pending Profile Completion';
         }
-        if (! $this->is_agreement_signed && empty($this->signature_date_time) && empty($this->agreement_signed_at)) {
+        $hasAgreement = (bool) (
+            $this->is_agreement_signed ||
+            ! empty($this->signature_date_time) ||
+            ! empty($this->agreement_signed_at) ||
+            ! empty($this->agreement_pdf_path) ||
+            $this->is_manual_agreement
+        );
+        if (! $hasAgreement) {
             return 'Pending Agreement Upload';
         }
         if (! $this->has_paid_plan) {
@@ -185,10 +205,17 @@ class CandidateProfile extends Model
         if ($this->isRegistrationCompleted()) {
             return route('candidate.dashboard');
         }
-        if (! $this->is_profile_complete && (empty($this->category_id) || empty($this->subject_id))) {
-            return route('candidate.wizard');
+        if (! $this->hasCompletedProfileDetails()) {
+            return route('candidate.wizard', ['step' => 1]);
         }
-        if (! $this->is_agreement_signed && empty($this->signature_date_time) && empty($this->agreement_signed_at)) {
+        $hasAgreement = (bool) (
+            $this->is_agreement_signed ||
+            ! empty($this->signature_date_time) ||
+            ! empty($this->agreement_signed_at) ||
+            ! empty($this->agreement_pdf_path) ||
+            $this->is_manual_agreement
+        );
+        if (! $hasAgreement) {
             return route('candidate.wizard', ['step' => 2]);
         }
         if (! $this->has_paid_plan) {
@@ -259,20 +286,23 @@ class CandidateProfile extends Model
 
     public function isRegistrationCompleted(): bool
     {
-        // 1. If explicitly marked with registration_completed_at, they are registered
-        if (! empty($this->registration_completed_at)) {
-            return true;
-        }
+        $hasDetails = $this->hasCompletedProfileDetails();
 
-        // 2. Core profile details exist
-        $hasCoreProfile = (bool) ($this->is_profile_complete || (! empty($this->category_id) && ! empty($this->subject_id)));
+        $hasAgreement = (bool) (
+            $this->is_agreement_signed ||
+            ! empty($this->signature_date_time) ||
+            ! empty($this->agreement_signed_at) ||
+            ! empty($this->agreement_pdf_path) ||
+            $this->is_manual_agreement
+        );
 
-        // 3. Payment or active plan exists
         $hasPayment = (bool) ($this->initial_fee_paid || $this->is_fee_paid || ($this->paid_amount ?? 0) >= 500);
 
-        // 4. Agreement exists
-        $hasAgreement = (bool) ($this->is_agreement_signed || ! empty($this->signature_date_time) || ! empty($this->agreement_signed_at));
+        // If explicitly stamped with registration_completed_at, candidate must at least have profile details
+        if (! empty($this->registration_completed_at)) {
+            return $hasDetails;
+        }
 
-        return (bool) ($hasCoreProfile && ($hasAgreement || $hasPayment) && $hasPayment);
+        return (bool) ($hasDetails && $hasAgreement && $hasPayment);
     }
 }

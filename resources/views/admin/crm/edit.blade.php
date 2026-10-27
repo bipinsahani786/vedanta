@@ -332,7 +332,7 @@
             <h3 class="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2 mb-4">5. Onboarding & Profile Status</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/70 p-5 rounded-xl border border-gray-200">
                 <label class="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-200 shadow-xs cursor-pointer hover:border-blue-400 transition-all">
-                    <input type="checkbox" name="is_profile_complete" value="1" {{ old('is_profile_complete', $profile->is_profile_complete || (!empty($profile->category_id) && !empty($profile->subject_id))) ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1 h-4 w-4">
+                    <input type="checkbox" name="is_profile_complete" value="1" {{ old('is_profile_complete', $profile->hasCompletedProfileDetails()) ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1 h-4 w-4">
                     <div>
                         <div class="text-sm font-bold text-gray-800 flex items-center gap-1.5">
                             <span>Profile Completed</span>
@@ -342,7 +342,7 @@
                     </div>
                 </label>
                 <label class="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-200 shadow-xs cursor-pointer hover:border-blue-400 transition-all">
-                    <input type="checkbox" name="is_agreement_signed" value="1" {{ old('is_agreement_signed', $profile->is_agreement_signed || $profile->agreement_pdf_path || $profile->is_fee_paid) ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1 h-4 w-4">
+                    <input type="checkbox" name="is_agreement_signed" value="1" {{ old('is_agreement_signed', $profile->is_agreement_signed || !empty($profile->signature_date_time) || !empty($profile->agreement_signed_at) || !empty($profile->agreement_pdf_path) || $profile->is_manual_agreement) ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1 h-4 w-4">
                     <div>
                         <div class="text-sm font-bold text-gray-800 flex items-center gap-1.5">
                             <span>Agreement Verified / Signed</span>

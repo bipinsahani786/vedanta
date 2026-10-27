@@ -186,27 +186,37 @@
                     @endif
                 </td>
                 <td>
-                    @if($candidate->profile && $candidate->profile->is_fee_paid)
+                    @php
+                        $cp = $candidate->profile;
+                        $hasDetails = $cp && $cp->hasCompletedProfileDetails();
+                        $hasFee = $cp && $cp->is_fee_paid;
+                        $hasAgr = $cp && ($cp->is_agreement_signed || !empty($cp->signature_date_time) || !empty($cp->agreement_signed_at) || !empty($cp->agreement_pdf_path) || $cp->is_manual_agreement);
+                    @endphp
+                    @if($hasFee && $hasDetails)
                         <span class="bg-green-500/10 text-green-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-green-500/20 uppercase tracking-wider flex items-center gap-1 w-max">
                             <i class="fas fa-check-circle"></i> Active / Paid
                         </span>
-                    @elseif($candidate->profile && $candidate->profile->is_agreement_signed)
+                    @elseif($hasFee && !$hasDetails)
+                        <span class="bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-amber-500/20 uppercase tracking-wider flex items-center gap-1 w-max" title="Fee paid but profile details are incomplete">
+                            <i class="fas fa-exclamation-triangle"></i> Paid / Incomplete
+                        </span>
+                        <div class="mt-1 text-[10px] text-red-400 font-semibold max-w-[150px] leading-tight">
+                            Pending Profile Details
+                        </div>
+                    @elseif($hasAgr && $hasDetails)
                         <span class="bg-accent-blue/10 text-accent-blue px-2.5 py-1 rounded-lg text-[10px] font-bold border border-accent-blue/20 uppercase tracking-wider flex items-center gap-1 w-max">
                             <i class="fas fa-signature"></i> Signed
                         </span>
+                        <div class="mt-1 text-[10px] text-amber-400 font-semibold max-w-[150px] leading-tight">
+                            Pending Registration Fee
+                        </div>
                     @else
                         <span class="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-red-500/20 uppercase tracking-wider flex items-center gap-1 w-max">
                             <i class="fas fa-exclamation-circle"></i> Incomplete
                         </span>
-                        @if($candidate->profile)
-                            <div class="mt-1 text-[10px] text-red-400 font-semibold max-w-[150px] leading-tight">
-                                {{ $candidate->profile->pending_reason }}
-                            </div>
-                        @else
-                            <div class="mt-1 text-[10px] text-red-400 font-semibold max-w-[150px] leading-tight">
-                                Pending Profile Completion
-                            </div>
-                        @endif
+                        <div class="mt-1 text-[10px] text-red-400 font-semibold max-w-[150px] leading-tight">
+                            {{ $cp ? $cp->pending_reason : 'Pending Profile Completion' }}
+                        </div>
                     @endif
                     @if($candidate->profile)
                         @if($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_data || $candidate->profile->is_fee_paid)

@@ -307,14 +307,18 @@ class CrmController extends Controller
                 && $request->filled('payment_method')
                 && $request->filled('plan_type');
 
-            // Determine if profile should be marked complete (explicit flag, or core profile fields are filled by Admin)
-            $isComplete = $request->has('is_profile_complete')
-                ? $request->boolean('is_profile_complete')
-                : (! empty($request->category_id) && ! empty($request->subject_id));
+            // Determine if profile should be marked complete:
+            // Explicitly checked by Admin OR mandatory core fields are filled
+            $hasSubmittedFullDetails = ! empty($request->date_of_birth) 
+                && ! empty($request->address) 
+                && ! empty($request->highest_qualification_id);
+
+            $isComplete = $request->boolean('is_profile_complete') 
+                || ($hasSubmittedFullDetails && ! empty($request->category_id) && ! empty($request->subject_id));
 
             $updates['is_profile_complete'] = $isComplete;
 
-            // BUG FIX: Only stamp registration_completed_at when the fee is already paid OR is being
+            // BUG FIX: Only stamp registration_completed_at when profile details are complete AND fee is already paid OR is being
             // paid right now. Previously it was stamped on every profile save, bypassing the payment gate.
             $feeIsPaidOrBeingPaid = ($profile && $profile->is_fee_paid) || $isPayingNow;
             if ($isComplete && $feeIsPaidOrBeingPaid && (! $profile || empty($profile->registration_completed_at))) {
@@ -375,8 +379,10 @@ class CrmController extends Controller
                 $updates['total_allowed_applications'] = $request->plan_type === 'standard' ? 2 : 3;
                 $updates['plan_started_at']            = now();
                 $updates['payment_id']                 = $paymentId;
-                $updates['is_profile_complete']        = true;
-                $updates['registration_completed_at']  = now();
+                if ($isComplete || ($profile && $profile->hasCompletedProfileDetails())) {
+                    $updates['is_profile_complete']        = true;
+                    $updates['registration_completed_at']  = now();
+                }
 
                 PaymentTransaction::create([
                     'candidate_id'     => $user->id,

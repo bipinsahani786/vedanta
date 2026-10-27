@@ -209,7 +209,7 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             $needsUpdate = false;
             $updates = [];
 
-            if (! $profile->is_profile_complete && (($hasFullDetails && ! empty($profile->resume_path)) || ! empty($profile->registration_completed_at))) {
+            if (! $profile->is_profile_complete && $hasFullDetails) {
                 $updates['is_profile_complete'] = true;
                 $needsUpdate = true;
             }
@@ -226,7 +226,7 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             }
 
             // If fee is paid and core details exist, ensure registration_completed_at
-            if ($hasPayment && ($profile->is_profile_complete || ! empty($updates['is_profile_complete'])) && empty($profile->registration_completed_at)) {
+            if ($hasPayment && ($profile->hasCompletedProfileDetails() || ! empty($updates['is_profile_complete'])) && empty($profile->registration_completed_at)) {
                 $updates['registration_completed_at'] = now();
                 $needsUpdate = true;
             }

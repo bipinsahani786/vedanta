@@ -12,12 +12,12 @@
         $hasPayment = $user->paymentTransactions()->where('status', 'success')->exists();
     }
 
-    $step1Complete = (bool) ($profile && ($profile->is_profile_complete || !empty($profile->registration_completed_at)));
-    $step2Complete = (bool) ($profile && ($profile->is_agreement_signed || !empty($profile->signature_date_time) || !empty($profile->agreement_signed_at) || !empty($profile->registration_completed_at)));
-    $step3Complete = (bool) ($profile && ($hasPayment || !empty($profile->registration_completed_at)));
+    $step1Complete = (bool) ($profile && $profile->hasCompletedProfileDetails());
+    $step2Complete = (bool) ($profile && ($profile->is_agreement_signed || !empty($profile->signature_date_time) || !empty($profile->agreement_signed_at) || !empty($profile->agreement_pdf_path) || $profile->is_manual_agreement));
+    $step3Complete = (bool) ($profile && $hasPayment);
     
     $completedSteps = ($step1Complete ? 1 : 0) + ($step2Complete ? 1 : 0) + ($step3Complete ? 1 : 0);
-    $isRegistrationComplete = ($completedSteps === 3) || ($profile && (!empty($profile->registration_completed_at) || $profile->isRegistrationCompleted()));
+    $isRegistrationComplete = ($completedSteps === 3) || ($profile && $profile->isRegistrationCompleted());
     $progressPercent = (int) round(($completedSteps / 3) * 100);
 
     // Smart Action CTA & Step Label

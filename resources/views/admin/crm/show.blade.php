@@ -70,11 +70,37 @@
                         </div>
                     @endif
                     <div class="min-w-0">
-                        <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-center gap-2.5 flex-wrap">
                             <h3 class="text-xl font-extrabold text-gray-900 break-words">{{ $candidate->name }}</h3>
                             @if($candidate->profile && $candidate->profile->vpa_id)
                                 <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-mono font-bold border border-gray-200 shadow-sm flex items-center gap-1.5" title="Vedanta Candidate ID">
                                     <i class="fas fa-id-badge text-gray-400"></i> {{ $candidate->profile->vpa_id }}
+                                </span>
+                            @endif
+
+                            @php
+                                $showProfile = $candidate->profile;
+                                $isDetailsDone = $showProfile && $showProfile->hasCompletedProfileDetails();
+                                $isAgrDone = $showProfile && ($showProfile->is_agreement_signed || !empty($showProfile->signature_date_time) || !empty($showProfile->agreement_signed_at) || !empty($showProfile->agreement_pdf_path) || $showProfile->is_manual_agreement);
+                                $isFeeDone = $showProfile && $showProfile->has_paid_plan;
+                                $isRegFullyDone = $showProfile && $showProfile->isRegistrationCompleted();
+                            @endphp
+
+                            @if(!$isDetailsDone)
+                                <span class="bg-red-50 text-red-700 px-2.5 py-0.5 rounded-lg text-xs font-bold border border-red-200 shadow-sm flex items-center gap-1" title="Candidate profile details are incomplete (DOB/Address/Qualification pending)">
+                                    <i class="fas fa-exclamation-circle text-red-500"></i> Profile Incomplete
+                                </span>
+                            @elseif(!$isAgrDone)
+                                <span class="bg-amber-50 text-amber-800 px-2.5 py-0.5 rounded-lg text-xs font-bold border border-amber-200 shadow-sm flex items-center gap-1" title="Placement agreement signature is pending">
+                                    <i class="fas fa-file-contract text-amber-600"></i> Pending Agreement
+                                </span>
+                            @elseif(!$isFeeDone)
+                                <span class="bg-amber-50 text-amber-800 px-2.5 py-0.5 rounded-lg text-xs font-bold border border-amber-200 shadow-sm flex items-center gap-1" title="Registration fee payment is pending">
+                                    <i class="fas fa-credit-card text-amber-600"></i> Pending Fee
+                                </span>
+                            @else
+                                <span class="bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-lg text-xs font-bold border border-emerald-200 shadow-sm flex items-center gap-1" title="Registration Completed">
+                                    <i class="fas fa-check-circle text-emerald-600"></i> Registered & Active
                                 </span>
                             @endif
                         </div>
@@ -105,6 +131,78 @@
             </div>
 
             <div class="p-6">
+                {{-- Incomplete Profile / Registration Alert Banner --}}
+                @if(!$isRegFullyDone)
+                    <div class="mb-6 p-4 rounded-2xl border {{ !$isDetailsDone ? 'bg-red-50/80 border-red-200 shadow-sm' : 'bg-amber-50/80 border-amber-200 shadow-sm' }}">
+                        <div class="flex items-start justify-between gap-3 flex-wrap">
+                            <div class="flex items-start gap-3">
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 {{ !$isDetailsDone ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600' }}">
+                                    <i class="fas fa-exclamation-triangle text-base"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-sm font-extrabold {{ !$isDetailsDone ? 'text-red-900' : 'text-amber-900' }}">
+                                            Registration Status: {{ $showProfile ? $showProfile->pending_reason : 'Pending Profile Completion' }}
+                                        </h4>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded {{ !$isDetailsDone ? 'bg-red-200/60 text-red-800' : 'bg-amber-200/60 text-amber-800' }}">
+                                            Action Required
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-gray-600 mt-1 leading-relaxed">
+                                        @if(!$isDetailsDone)
+                                            Candidate has not completed essential profile details. 
+                                            @php
+                                                $missing = [];
+                                                if(!$showProfile || empty($showProfile->date_of_birth)) $missing[] = 'Date of Birth';
+                                                if(!$showProfile || empty($showProfile->address)) $missing[] = 'Address';
+                                                if(!$showProfile || empty($showProfile->highest_qualification_id)) $missing[] = 'Highest Qualification';
+                                                if(!$showProfile || empty($showProfile->resume_path)) $missing[] = 'Resume';
+                                            @endphp
+                                            @if(!empty($missing))
+                                                <span class="font-semibold text-red-700">Missing: {{ implode(', ', $missing) }}</span>.
+                                            @endif
+                                        @elseif(!$isAgrDone)
+                                            Candidate profile details are saved, but the placement agreement is pending digital signature or manual upload.
+                                        @else
+                                            Profile details and agreement are completed. Registration plan fee payment is pending.
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('admin.crm.edit', $candidate->id) }}" class="px-3.5 py-1.5 bg-white hover:bg-gray-50 text-gray-800 text-xs font-bold rounded-xl border border-gray-300 transition-colors shadow-xs inline-flex items-center gap-1.5">
+                                    <i class="fas fa-edit text-blue-600"></i> Edit Profile
+                                </a>
+                            </div>
+                        </div>
+
+                        {{-- 3-Step Onboarding Funnel Progress Tracker --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-4 pt-3.5 border-t {{ !$isDetailsDone ? 'border-red-100' : 'border-amber-100' }}">
+                            <div class="flex items-center gap-2 p-2 rounded-xl {{ $isDetailsDone ? 'bg-emerald-50 text-emerald-800 border border-emerald-100' : 'bg-red-100/60 text-red-800 border border-red-200' }}">
+                                <i class="fas {{ $isDetailsDone ? 'fa-check-circle text-emerald-600 text-sm' : 'fa-times-circle text-red-600 text-sm' }}"></i>
+                                <div class="text-xs">
+                                    <div class="font-bold">1. Profile Details</div>
+                                    <div class="text-[10px] {{ $isDetailsDone ? 'text-emerald-700' : 'text-red-700 font-medium' }}">{{ $isDetailsDone ? 'Complete' : 'Incomplete' }}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 rounded-xl {{ $isAgrDone ? 'bg-emerald-50 text-emerald-800 border border-emerald-100' : 'bg-amber-100/60 text-amber-800 border border-amber-200' }}">
+                                <i class="fas {{ $isAgrDone ? 'fa-check-circle text-emerald-600 text-sm' : 'fa-clock text-amber-600 text-sm' }}"></i>
+                                <div class="text-xs">
+                                    <div class="font-bold">2. Agreement</div>
+                                    <div class="text-[10px] {{ $isAgrDone ? 'text-emerald-700' : 'text-amber-700 font-medium' }}">{{ $isAgrDone ? 'Signed' : 'Pending' }}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 rounded-xl {{ $isFeeDone ? 'bg-emerald-50 text-emerald-800 border border-emerald-100' : 'bg-amber-100/60 text-amber-800 border border-amber-200' }}">
+                                <i class="fas {{ $isFeeDone ? 'fa-check-circle text-emerald-600 text-sm' : 'fa-clock text-amber-600 text-sm' }}"></i>
+                                <div class="text-xs">
+                                    <div class="font-bold">3. Plan Fee</div>
+                                    <div class="text-[10px] {{ $isFeeDone ? 'text-emerald-700' : 'text-amber-700 font-medium' }}">{{ $isFeeDone ? 'Active / Paid' : 'Pending' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 @if($candidate->profile)
                     <!-- Personal Info -->
                     <div class="mb-6">
@@ -243,18 +341,26 @@
                                 </form>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
-                                <div class="text-[10px] text-gray-400 uppercase font-bold mb-1">Status</div>
+                                <div class="text-[10px] text-gray-400 uppercase font-bold mb-1">Fee Payment</div>
                                 @if($candidate->profile->is_fee_paid)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1 text-[10px]"></i> Active</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1 text-[10px]"></i> Active / Paid</span>
                                 @else
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-yellow-100 text-yellow-800"><i class="fas fa-clock mr-1 text-[10px]"></i> Pending</span>
                                 @endif
                             </div>
                             <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                                <div class="text-[10px] text-gray-400 uppercase font-bold mb-1">Profile Details</div>
+                                @if($isDetailsDone)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1 text-[10px]"></i> Complete</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-800"><i class="fas fa-exclamation-circle mr-1 text-[10px]"></i> Incomplete</span>
+                                @endif
+                            </div>
+                            <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100 col-span-2 sm:col-span-1">
                                 <div class="text-[10px] text-gray-400 uppercase font-bold mb-1">Plan Details</div>
-                                <div class="text-sm font-bold text-gray-800">{{ $candidate->profile->plan_type ?? 'N/A' }}</div>
+                                <div class="text-sm font-bold text-gray-800">{{ $candidate->profile->plan_type ? ucfirst($candidate->profile->plan_type) : 'Standard' }} Plan</div>
                             </div>
                             <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100 col-span-2 flex justify-between items-center">
                                 <div>
