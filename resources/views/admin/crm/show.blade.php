@@ -299,7 +299,7 @@
                                 </a>
                             @endif
                              @if($candidate->profile->agreement_pdf_path || $candidate->profile->is_agreement_signed || $candidate->profile->signature_data)
-                                 <a href="{{ route('admin.crm.candidate.download-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-100 text-teal-700 rounded-lg text-xs font-bold transition-colors" title="Click to view/download signed agreement (auto-generates if missing)">
+                                 <a href="{{ Route::has('admin.crm.candidate.download-agreement') ? route('admin.crm.candidate.download-agreement', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/download-agreement') }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-100 text-teal-700 rounded-lg text-xs font-bold transition-colors" title="Click to view/download signed agreement (auto-generates if missing)">
                                      <i class="fas fa-file-signature"></i> Signed Agreement (PDF)
                                  </a>
                              @endif
@@ -324,7 +324,7 @@
                             @if($candidate->profile && ($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_date_time || $candidate->profile->signature_data))
                                 <div class="flex items-center gap-2 flex-wrap">
                                     @if($candidate->profile->has_uploaded_manual_backup && ! $candidate->profile->is_manual_agreement)
-                                        <form action="{{ route('admin.crm.candidate.restore-agreement', $candidate->id) }}" method="POST" class="inline">
+                                        <form action="{{ Route::has('admin.crm.candidate.restore-agreement') ? route('admin.crm.candidate.restore-agreement', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/restore-agreement') }}" method="POST" class="inline">
                                             @csrf
                                             <button type="submit" class="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-xs font-bold border border-amber-300 hover:bg-amber-100 transition-colors shadow-sm" title="Restore previously uploaded custom agreement" onclick="return confirm('Restore your previously uploaded custom agreement PDF as active for this candidate?')">
                                                 <i class="fas fa-undo-alt text-amber-600"></i> Restore Uploaded PDF
@@ -332,13 +332,13 @@
                                         </form>
                                     @endif
 
-                                    <a href="{{ route('admin.crm.candidate.preview-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200 hover:bg-blue-100 transition-colors" title="Live Preview Agreement PDF">
+                                    <a href="{{ Route::has('admin.crm.candidate.preview-agreement') ? route('admin.crm.candidate.preview-agreement', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/preview-agreement') }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200 hover:bg-blue-100 transition-colors" title="Live Preview Agreement PDF">
                                         <i class="fas fa-eye"></i> Live Preview
                                     </a>
-                                    <a href="{{ route('admin.crm.candidate.download-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200 hover:bg-green-100 transition-colors" title="Download Agreement">
+                                    <a href="{{ Route::has('admin.crm.candidate.download-agreement') ? route('admin.crm.candidate.download-agreement', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/download-agreement') }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200 hover:bg-green-100 transition-colors" title="Download Agreement">
                                         <i class="fas fa-download"></i> Download PDF
                                     </a>
-                                    <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-600 hover:text-indigo-600 rounded-full text-[11px] font-bold border border-gray-300 hover:bg-indigo-50 transition-colors" title="Force regenerate PDF from template" onclick="return confirm('Attention: Re-generate will switch the active agreement to the system auto-generated template. You can restore your custom uploaded PDF anytime with the \'Restore Uploaded PDF\' button. Proceed?')">
+                                    <a href="{{ Route::has('admin.crm.candidate.download-agreement') ? route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) : url('/admin/crm/candidate/'.$candidate->id.'/download-agreement?regenerate=1') }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-600 hover:text-indigo-600 rounded-full text-[11px] font-bold border border-gray-300 hover:bg-indigo-50 transition-colors" title="Force regenerate PDF from template" onclick="return confirm('Attention: Re-generate will switch the active agreement to the system auto-generated template. You can restore your custom uploaded PDF anytime with the \'Restore Uploaded PDF\' button. Proceed?')">
                                         <i class="fas fa-sync-alt"></i> Re-generate
                                     </a>
                                 </div>
@@ -347,20 +347,20 @@
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200">
                                         <i class="fas fa-clock"></i> Not Signed
                                     </span>
-                                    <form action="{{ route('admin.crm.candidate.send-agreement-link', $candidate->id) }}" method="POST">
+                                    <form action="{{ Route::has('admin.crm.candidate.send-agreement-link') ? route('admin.crm.candidate.send-agreement-link', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/send-agreement-link') }}" method="POST">
                                         @csrf
                                         <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full text-[11px] font-bold border border-blue-200 transition-colors" title="Send email link to candidate to sign agreement">
                                             <i class="fas fa-envelope"></i> Send Link
                                         </button>
                                     </form>
-                                    <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-full text-[11px] font-bold border border-indigo-200 transition-colors" title="Force generate Agreement PDF">
+                                    <a href="{{ Route::has('admin.crm.candidate.download-agreement') ? route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) : url('/admin/crm/candidate/'.$candidate->id.'/download-agreement?regenerate=1') }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-full text-[11px] font-bold border border-indigo-200 transition-colors" title="Force generate Agreement PDF">
                                         <i class="fas fa-file-pdf"></i> Generate PDF
                                     </a>
                                 </div>
                             @endif
                         </div>
 
-                        <form action="{{ route('admin.crm.candidate.upload-agreement', $candidate->id) }}" method="POST" enctype="multipart/form-data" class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
+                        <form action="{{ Route::has('admin.crm.candidate.upload-agreement') ? route('admin.crm.candidate.upload-agreement', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/upload-agreement') }}" method="POST" enctype="multipart/form-data" class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
                             @csrf
                             <div class="flex items-center justify-between mb-2">
                                 <label class="block text-xs font-bold text-gray-700">Manually Upload Agreement (PDF)</label>
