@@ -43,6 +43,13 @@
         <button type="button" onclick="openSendEmailModal()" class="px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 transition-colors flex items-center shadow-sm">
             <i class="fas fa-paper-plane mr-2"></i> Send Email
         </button>
+
+        <form action="{{ Route::has('admin.crm.candidate.send-agreement-link') ? route('admin.crm.candidate.send-agreement-link', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/send-agreement-link') }}" method="POST" class="inline">
+            @csrf
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors flex items-center shadow-sm" title="Email agreement link to candidate" onclick="return confirm('Send agreement link email to {{ addslashes($candidate->name) }}?')">
+                <i class="fas fa-envelope mr-2"></i> Send Agreement Link
+            </button>
+        </form>
         
         <a href="{{ route('admin.crm.candidate.magic-login', $candidate->id) }}" target="_blank" class="px-4 py-2 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-xl hover:bg-indigo-200 transition-colors flex items-center shadow-sm">
             <i class="fas fa-sign-in-alt mr-2"></i> Login as Candidate
@@ -437,6 +444,13 @@
                                             </button>
                                         </form>
                                     @endif
+
+                                    <form action="{{ Route::has('admin.crm.candidate.send-agreement-link') ? route('admin.crm.candidate.send-agreement-link', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/send-agreement-link') }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full text-[11px] font-bold border border-blue-200 transition-colors shadow-xs" title="Send agreement email link to candidate" onclick="return confirm('Send agreement link email to {{ addslashes($candidate->name) }}?')">
+                                            <i class="fas fa-envelope"></i> Send Link
+                                        </button>
+                                    </form>
 
                                     <a href="{{ Route::has('admin.crm.candidate.preview-agreement') ? route('admin.crm.candidate.preview-agreement', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/preview-agreement') }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200 hover:bg-blue-100 transition-colors" title="Live Preview Agreement PDF">
                                         <i class="fas fa-eye"></i> Live Preview

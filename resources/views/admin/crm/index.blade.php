@@ -219,15 +219,24 @@
                         </div>
                     @endif
                     @if($candidate->profile)
-                        @if($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_data || $candidate->profile->is_fee_paid)
-                            <a href="{{ route('admin.crm.candidate.download-agreement', $candidate->id) }}" target="_blank" class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500/10 text-teal-500 hover:bg-teal-500/20 rounded text-[10px] font-bold border border-teal-500/20 transition-colors w-max" title="Download Signed Agreement (Auto-generates if missing)">
-                                <i class="fas fa-file-download"></i> Agreement PDF
-                            </a>
-                        @else
-                            <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 rounded text-[10px] font-bold border border-indigo-500/20 transition-colors w-max" title="Generate Agreement PDF on-the-fly">
-                                <i class="fas fa-file-pdf"></i> Generate PDF
-                            </a>
-                        @endif
+                        <div class="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                            @if($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_data || $candidate->profile->is_fee_paid)
+                                <a href="{{ route('admin.crm.candidate.download-agreement', $candidate->id) }}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500/10 text-teal-500 hover:bg-teal-500/20 rounded text-[10px] font-bold border border-teal-500/20 transition-colors w-max" title="Download Signed Agreement (Auto-generates if missing)">
+                                    <i class="fas fa-file-download"></i> Agreement PDF
+                                </a>
+                            @else
+                                <a href="{{ route('admin.crm.candidate.download-agreement', ['id' => $candidate->id, 'regenerate' => 1]) }}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 rounded text-[10px] font-bold border border-indigo-500/20 transition-colors w-max" title="Generate Agreement PDF on-the-fly">
+                                    <i class="fas fa-file-pdf"></i> Generate PDF
+                                </a>
+                            @endif
+
+                            <form action="{{ Route::has('admin.crm.candidate.send-agreement-link') ? route('admin.crm.candidate.send-agreement-link', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/send-agreement-link') }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 text-accent-blue hover:bg-accent-blue hover:text-white rounded text-[10px] font-bold border border-accent-blue/20 transition-colors w-max" title="Send agreement email link to candidate" onclick="return confirm('Send agreement link email to {{ addslashes($candidate->name) }}?')">
+                                    <i class="fas fa-envelope"></i> Send Link
+                                </button>
+                            </form>
+                        </div>
                     @endif
                 </td>
                 <td>
@@ -271,6 +280,13 @@
                                 @csrf
                                 <button type="submit" onclick="return confirm('Send an email reminder to candidate about: {{ $candidate->profile->pending_reason }}?')" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white border border-indigo-100 hover:border-indigo-600 text-xs font-semibold transition-colors flex items-center gap-1" title="Send Reminder for: {{ $candidate->profile->pending_reason }}">
                                     <i class="fas fa-bell"></i>
+                                </button>
+                            </form>
+                        @else
+                            <form action="{{ Route::has('admin.crm.candidate.send-agreement-link') ? route('admin.crm.candidate.send-agreement-link', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/send-agreement-link') }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" onclick="return confirm('Send agreement email link to {{ addslashes($candidate->name) }}?')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-100 hover:border-blue-600 text-xs font-semibold transition-colors flex items-center gap-1" title="Send Agreement Email Link to {{ $candidate->name }}">
+                                    <i class="fas fa-envelope"></i>
                                 </button>
                             </form>
                         @endif

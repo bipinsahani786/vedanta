@@ -3,6 +3,29 @@
     <img src="{{ url('/images/logo.png') }}" alt="Vedanta Placement Agency" style="height: 60px; max-width: 100%;">
 </div>
 
+@php
+    $profile = $candidate->profile;
+    $isSigned = $profile && ($profile->is_agreement_signed || !empty($profile->agreement_pdf_path) || !empty($profile->signature_date_time));
+@endphp
+
+@if($isSigned)
+# Your Registration Agreement - Vedanta Placement Agency
+
+Dear **{{ $candidate->name }}**,
+
+Your registration agreement with **Vedanta Placement Agency** is signed and on record.
+
+<x-mail::panel>
+### Access Your Agreement
+You can review, verify, and download your signed registration agreement anytime by accessing your candidate portal below.
+</x-mail::panel>
+
+<div style="text-align: center; margin: 30px 0;">
+    <x-mail::button :url="$signUrl" color="primary">
+    View Signed Agreement
+    </x-mail::button>
+</div>
+@else
 # Action Required: Sign Your Registration Agreement
 
 Dear **{{ $candidate->name }}**,
@@ -21,6 +44,7 @@ Please log in to your account and review the agreement. Once signed, your profil
     Sign Agreement Now
     </x-mail::button>
 </div>
+@endif
 
 If you have any questions or need assistance, feel free to reply directly to this email.
 

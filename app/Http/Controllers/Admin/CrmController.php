@@ -774,8 +774,8 @@ class CrmController extends Controller
                 new AgreementLinkMail($candidate, $signUrl)
             );
 
-            return back()->with('success', 'Agreement signature link has been emailed to the candidate.');
-        } catch (Exception $e) {
+            return back()->with('success', 'Agreement link has been emailed to '.$candidate->name.' ('.$candidate->email.').');
+        } catch (\Throwable $e) {
             Log::error('Send Agreement Link Error: '.$e->getMessage());
 
             return back()->with('error', 'Failed to send email. Please check your email configuration.');

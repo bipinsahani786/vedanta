@@ -31,8 +31,15 @@ class AgreementLinkMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $profile = $this->candidate->profile;
+        $isSigned = $profile && ($profile->is_agreement_signed || !empty($profile->agreement_pdf_path) || !empty($profile->signature_date_time));
+
+        $subject = $isSigned
+            ? 'Your Registration Agreement - ' . config('app.name')
+            : 'Action Required: Sign Your Registration Agreement - ' . config('app.name');
+
         return new Envelope(
-            subject: 'Action Required: Sign Your Registration Agreement - ' . config('app.name'),
+            subject: $subject,
         );
     }
 
