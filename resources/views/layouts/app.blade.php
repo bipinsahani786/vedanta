@@ -601,8 +601,142 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-[#031238] border-t border-white/10 pt-14 pb-6 px-6 lg:px-[5%] text-white relative z-50">
+    <footer class="bg-[#031238] border-t border-white/10 pt-12 pb-6 px-6 lg:px-[5%] text-white relative z-50">
         <div class="max-w-7xl mx-auto">
+
+            <!-- Prominent Daily Job Alerts Signup Section -->
+            <div id="footer-job-alerts"
+                 class="bg-gradient-to-r from-[#07205c] via-[#0b2e80] to-[#061c52] border border-white/15 rounded-2xl p-6 sm:p-8 mb-12 shadow-[0_16px_40px_rgba(0,0,0,0.24)] relative overflow-hidden">
+                <div class="absolute -top-16 -right-16 w-56 h-56 bg-[#129aef]/15 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+                    <div class="lg:col-span-6">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ffb800]/15 border border-[#ffb800]/30 text-[#ffb800] text-[10px] font-extrabold uppercase tracking-wider mb-3">
+                            <i class="fas fa-bell"></i> Daily Job Alerts
+                        </span>
+                        <h3 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-1.5">
+                            Get Daily Job Updates
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed m-0">
+                            Subscribe to get verified school and teaching vacancies delivered straight to your email inbox.
+                        </p>
+                    </div>
+
+                    <div class="lg:col-span-6">
+                        <form id="footer-job-alert-form"
+                              action="{{ route('job-alerts.subscribe') }}#footer-job-alerts"
+                              method="POST"
+                              class="flex flex-col sm:flex-row gap-2.5">
+                            @csrf
+                            <label for="footer-job-alert-email" class="sr-only">Email address for daily job alerts</label>
+                            <div class="relative flex-1">
+                                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                                <input type="email"
+                                       id="footer-job-alert-email"
+                                       name="email"
+                                       value="{{ $errors->jobAlert->any() ? old('email') : '' }}"
+                                       required
+                                       autocomplete="email"
+                                       placeholder="Enter your email address"
+                                       class="w-full pl-10 pr-4 py-3 rounded-xl bg-white text-[#040e2d] placeholder-slate-400 text-sm font-medium border border-white/20 focus:outline-none focus:ring-2 focus:ring-[#129aef]">
+                            </div>
+                            <button type="submit"
+                                    id="footer-job-alert-submit"
+                                    class="px-6 py-3 rounded-xl bg-[#ffb800] hover:bg-[#e5a600] text-[#040e2d] font-extrabold text-sm transition-all shadow-lg shrink-0 inline-flex items-center justify-center gap-2 cursor-pointer">
+                                <i class="fas fa-paper-plane text-xs"></i>
+                                <span>Subscribe Free</span>
+                            </button>
+                        </form>
+
+                        {{-- Inline AJAX / Session Feedback --}}
+                        <div id="footer-job-alert-feedback"
+                             role="status"
+                             aria-live="polite"
+                             class="mt-2.5 text-xs font-semibold rounded-xl px-3.5 py-2 @if(session('job_alert_success')) bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 @elseif($errors->jobAlert->any()) bg-rose-500/20 border border-rose-400/40 text-rose-200 @else hidden @endif">
+                            @if(session('job_alert_success'))
+                                <i class="fas fa-check-circle mr-1.5"></i>{{ session('job_alert_success') }}
+                            @elseif($errors->jobAlert->any())
+                                <i class="fas fa-exclamation-circle mr-1.5"></i>{{ $errors->jobAlert->first('email') }}
+                            @endif
+                        </div>
+
+                        {{-- Free Note, Unsubscribe Assurance & Support Email --}}
+                        <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-slate-300/90">
+                            <span class="inline-flex items-center gap-1.5">
+                                <i class="fas fa-check-circle text-emerald-400 text-[10px]"></i>
+                                <span>100% Free Subscription</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <i class="fas fa-shield-alt text-[#129aef] text-[10px]"></i>
+                                <span>Unsubscribe anytime in 1 click</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <i class="fas fa-headset text-[#ffb800] text-[10px]"></i>
+                                <span>Support: <a href="mailto:info@vedantaplacementagency.in" class="text-white hover:text-[#129aef] underline">info@vedantaplacementagency.in</a></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                (function () {
+                    var form = document.getElementById('footer-job-alert-form');
+                    var emailInput = document.getElementById('footer-job-alert-email');
+                    var submitBtn = document.getElementById('footer-job-alert-submit');
+                    var feedback = document.getElementById('footer-job-alert-feedback');
+                    if (!form || !submitBtn || !feedback) return;
+
+                    form.addEventListener('submit', function (e) {
+                        if (!window.fetch || !window.FormData) return;
+                        e.preventDefault();
+
+                        var originalHtml = submitBtn.innerHTML;
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i> <span>Subscribing...</span>';
+                        feedback.className = 'hidden';
+
+                        fetch(@json(route('job-alerts.subscribe')), {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: new FormData(form)
+                        })
+                        .then(function (res) {
+                            return res.json().then(function (data) {
+                                return { ok: res.ok, status: res.status, data: data };
+                            });
+                        })
+                        .then(function (result) {
+                            if (result.ok && result.data && result.data.status === 'success') {
+                                feedback.className = 'mt-2.5 text-xs font-semibold rounded-xl px-3.5 py-2 bg-emerald-500/20 border border-emerald-400/40 text-emerald-200';
+                                feedback.innerHTML = '<i class="fas fa-check-circle mr-1.5"></i>';
+                                feedback.appendChild(document.createTextNode(result.data.message));
+                                if (result.data.state !== 'already_subscribed' && emailInput) {
+                                    emailInput.value = '';
+                                }
+                            } else {
+                                var errMsg = result.status === 419
+                                    ? 'Session expired. Please refresh the page and try again.'
+                                    : ((result.data && result.data.message) ? result.data.message : 'Unable to subscribe right now. Please try again.');
+                                feedback.className = 'mt-2.5 text-xs font-semibold rounded-xl px-3.5 py-2 bg-rose-500/20 border border-rose-400/40 text-rose-200';
+                                feedback.innerHTML = '<i class="fas fa-exclamation-circle mr-1.5"></i>';
+                                feedback.appendChild(document.createTextNode(errMsg));
+                            }
+                        })
+                        .catch(function () {
+                            feedback.className = 'mt-2.5 text-xs font-semibold rounded-xl px-3.5 py-2 bg-rose-500/20 border border-rose-400/40 text-rose-200';
+                            feedback.innerHTML = '<i class="fas fa-exclamation-circle mr-1.5"></i>Something went wrong. Please email info@vedantaplacementagency.in for assistance.';
+                        })
+                        .finally(function () {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalHtml;
+                        });
+                    });
+                })();
+            </script>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-8 pb-10">
 
                 <!-- 1. Brand Logo, Name & Short Intro -->

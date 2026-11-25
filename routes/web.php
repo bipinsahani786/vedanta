@@ -27,10 +27,11 @@ use App\Http\Controllers\Candidate\RegistrationWizardController;
 use App\Http\Controllers\Candidate\SavedJobController;
 use App\Http\Controllers\Candidate\ServiceChargeController;
 use App\Http\Controllers\CandidateAuthController;
-use App\Http\Controllers\Employer\ApplicantController;
+use App\Http\Controllers\Employer\ApplicantController;  
 use App\Http\Controllers\Employer\DashboardController;
 use App\Http\Controllers\EmployerAuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\JobAlertSubscriptionController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PhonePeWebhookController;
@@ -95,6 +96,16 @@ Route::get('/employer', function () {
 Route::get('/candidate', function () {
     return view('candidate');
 })->name('candidate');
+
+// Daily Job Alerts Subscription & Unsubscribe (Public)
+Route::post('/job-alerts/subscribe', [JobAlertSubscriptionController::class, 'subscribe'])
+    ->middleware('throttle:10,1')
+    ->name('job-alerts.subscribe');
+Route::get('/job-alerts/unsubscribe/{token}', [JobAlertSubscriptionController::class, 'unsubscribe'])
+    ->name('job-alerts.unsubscribe');
+Route::post('/job-alerts/resubscribe/{token}', [JobAlertSubscriptionController::class, 'resubscribe'])
+    ->middleware('throttle:10,1')
+    ->name('job-alerts.resubscribe');
 
 // Resume Builder (Public)
 Route::get('/resume-builder', [ResumeBuilderController::class, 'index'])->name('resume.builder');

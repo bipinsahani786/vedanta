@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
+        \App\Models\JobPost::observe(\App\Observers\JobPostObserver::class);
+
         \Illuminate\Support\Facades\View::composer(['layouts.app', 'partials.whatsapp-channel-card'], function ($view) {
             $activeAnnouncement = null;
             $whatsappChannelUrl = null;
