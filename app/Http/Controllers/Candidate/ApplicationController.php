@@ -13,13 +13,7 @@ class ApplicationController extends Controller
     {
         $profile = auth()->user()->profile;
 
-        // 1. Profile Complete Check
-        if (! $profile || ! $profile->is_profile_complete) {
-            return redirect()->route('candidate.wizard', ['step' => 1])
-                ->with('error', 'Please complete your profile details first before applying for jobs.');
-        }
-
-        // 2. Agreement Signature Check
+        // 1. Agreement Signature Check
         $hasSigned = $profile && (
             $profile->is_agreement_signed ||
             ! empty($profile->signature_data) ||
@@ -30,14 +24,21 @@ class ApplicationController extends Controller
         );
 
         if (! $hasSigned) {
-            return redirect()->route('candidate.wizard', ['step' => 2])
+            $step = ($profile && $profile->is_terms_agreed) ? 2 : 1;
+            return redirect()->route('candidate.wizard', ['step' => $step])
                 ->with('warning', 'Please review and digitally sign the placement agreement before applying for jobs.');
         }
 
-        // 3. Payment / Fee Check
+        // 2. Payment / Fee Check
         if (! $profile->initial_fee_paid && ! $profile->is_fee_paid && ($profile->paid_amount ?? 0) < 500) {
-            return redirect()->route('candidate.wizard', ['step' => 4])
+            return redirect()->route('candidate.wizard', ['step' => 3])
                 ->with('info', 'Please activate your registration plan to unlock and submit job applications.');
+        }
+
+        // 3. Profile Complete (100%) Check — always required before applying even after agreement & payment
+        if (! $profile || ! $profile->hasCompletedProfileDetails()) {
+            return redirect()->route('candidate.wizard', ['step' => 4])
+                ->with('error', 'Please complete your profile details 100% first before applying for jobs.');
         }
 
         return null;

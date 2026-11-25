@@ -282,7 +282,7 @@ class PaymentFulfillmentService
                             'paid_amount' => max(1000, $newTotalPaid),
                             'pending_amount' => 0,
                             'payment_id' => $txnId,
-                            'registration_completed_at' => $profile->registration_completed_at ?? now(),
+                            'registration_completed_at' => $profile->hasCompletedProfileDetails() ? ($profile->registration_completed_at ?? now()) : $profile->registration_completed_at,
                             'plan_started_at' => $profile->plan_started_at ?? now(),
                         ]);
 
@@ -299,7 +299,7 @@ class PaymentFulfillmentService
                             'paid_amount' => $newTotalPaid,
                             'pending_amount' => max(0, 500 - max(0, $newTotalPaid - 500)),
                             'payment_id' => $txnId,
-                            'registration_completed_at' => $profile->registration_completed_at ?? now(),
+                            'registration_completed_at' => $profile->hasCompletedProfileDetails() ? ($profile->registration_completed_at ?? now()) : $profile->registration_completed_at,
                             'plan_started_at' => $profile->plan_started_at ?? now(),
                         ]);
                     }

@@ -23,11 +23,6 @@ class PaymentController extends Controller
         $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
         $isRenewal = $request->query('type') === 'renewal';
 
-        if (! $profile->is_profile_complete) {
-            return redirect()->route('candidate.wizard', ['step' => 1])
-                ->with('error', 'Please complete your profile details first before proceeding to payment.');
-        }
-
         $hasSigned = $profile->is_agreement_signed
             || ! empty($profile->signature_data)
             || ! empty($profile->agreement_signed_at)
@@ -35,7 +30,8 @@ class PaymentController extends Controller
             || $profile->is_manual_agreement;
 
         if (! $hasSigned) {
-            return redirect()->route('candidate.wizard', ['step' => 2])
+            $step = $profile->is_terms_agreed ? 2 : 1;
+            return redirect()->route('candidate.wizard', ['step' => $step])
                 ->with('warning', 'Please review and digitally sign the placement agreement before proceeding to payment.');
         }
 
@@ -140,11 +136,6 @@ class PaymentController extends Controller
         
         $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
-        if (! $profile->is_profile_complete) {
-            return redirect()->route('candidate.wizard', ['step' => 1])
-                ->with('error', 'Please complete your profile details first before payment.');
-        }
-
         $hasSigned = $profile->is_agreement_signed
             || ! empty($profile->signature_data)
             || ! empty($profile->agreement_signed_at)
@@ -152,7 +143,8 @@ class PaymentController extends Controller
             || $profile->is_manual_agreement;
 
         if (! $hasSigned) {
-            return redirect()->route('candidate.wizard', ['step' => 2])
+            $step = $profile->is_terms_agreed ? 2 : 1;
+            return redirect()->route('candidate.wizard', ['step' => $step])
                 ->with('warning', 'Please review and digitally sign the placement agreement before payment.');
         }
 
@@ -287,6 +279,12 @@ class PaymentController extends Controller
 
         if (!$isSuccess) {
             return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or was cancelled. Please try again.');
+        }
+
+        $freshProfile = $fulfillment['user']?->fresh()?->profile ?? (auth()->user()?->fresh()?->profile);
+        if ($freshProfile && ! $freshProfile->hasCompletedProfileDetails()) {
+            return redirect()->route('candidate.wizard', ['step' => 4])
+                ->with('success', 'Payment processed successfully! Please complete your profile details (100%) to unlock job applications.');
         }
 
         return redirect()->route('candidate.dashboard')->with('success', 'Payment processed successfully. Your plan is now active!');

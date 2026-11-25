@@ -15,7 +15,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = auth()->user();
-        $profile = $user->profile;
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
         
         $categories = Category::where('is_active', true)->get();
         $subjects = Subject::where('is_active', true)->get();
@@ -29,7 +29,7 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = auth()->user();
-        $profile = $user->profile;
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
         $request->validate([
             'date_of_birth' => 'required|date',
@@ -107,6 +107,18 @@ class ProfileController extends Controller
             'availability_to_join' => $request->availability_to_join,
             'is_profile_complete' => true,
         ]);
+
+        $freshProfile = $profile->fresh();
+        $hasSigned = $freshProfile && (
+            $freshProfile->is_agreement_signed
+            || ! empty($freshProfile->signature_data)
+            || ! empty($freshProfile->agreement_signed_at)
+            || ! empty($freshProfile->agreement_pdf_path)
+            || $freshProfile->is_manual_agreement
+        );
+        if ($freshProfile && $hasSigned && $freshProfile->has_paid_plan && empty($freshProfile->registration_completed_at)) {
+            $freshProfile->update(['registration_completed_at' => now()]);
+        }
 
         return redirect()->route('candidate.profile.edit')->with('success', 'Profile updated successfully.');
     }

@@ -12,26 +12,26 @@
         $hasPayment = $user->paymentTransactions()->where('status', 'success')->exists();
     }
 
-    $step1Complete = (bool) ($profile && $profile->hasCompletedProfileDetails());
-    $step2Complete = (bool) ($profile && ($profile->is_agreement_signed || !empty($profile->signature_date_time) || !empty($profile->agreement_signed_at) || !empty($profile->agreement_pdf_path) || $profile->is_manual_agreement));
-    $step3Complete = (bool) ($profile && $hasPayment);
-    
-    $completedSteps = ($step1Complete ? 1 : 0) + ($step2Complete ? 1 : 0) + ($step3Complete ? 1 : 0);
+    $agreementSigned = (bool) ($profile && ($profile->is_agreement_signed || !empty($profile->signature_date_time) || !empty($profile->agreement_signed_at) || !empty($profile->agreement_pdf_path) || $profile->is_manual_agreement));
+    $paymentDone = (bool) ($profile && $hasPayment);
+    $profileDetailsDone = (bool) ($profile && $profile->hasCompletedProfileDetails());
+
+    $completedSteps = ($agreementSigned ? 1 : 0) + ($paymentDone ? 1 : 0) + ($profileDetailsDone ? 1 : 0);
     $isRegistrationComplete = ($completedSteps === 3) || ($profile && $profile->isRegistrationCompleted());
     $progressPercent = (int) round(($completedSteps / 3) * 100);
 
-    // Smart Action CTA & Step Label
-    if (!$step1Complete) {
-        $ctaLabel = 'Complete Profile (Step 1)';
-        $pendingStepText = 'Your profile details and documents are pending.';
-        $wizardUrl = route('candidate.wizard', ['step' => 1]);
-    } elseif (!$step2Complete) {
-        $ctaLabel = 'Sign Agreement (Step 2)';
-        $pendingStepText = 'Your placement agreement is pending signature.';
-        $wizardUrl = route('candidate.wizard', ['step' => 2]);
+    // Smart Action CTA & Step Label (New Flow: 1. Agreement -> 2. Payment -> 3. Complete Profile)
+    if (!$agreementSigned) {
+        $ctaLabel = 'Sign Agreement (Step 1)';
+        $pendingStepText = 'Please review and digitally sign the placement agreement to get started.';
+        $wizardUrl = route('candidate.wizard', ['step' => ($profile && $profile->is_terms_agreed) ? 2 : 1]);
+    } elseif (!$paymentDone) {
+        $ctaLabel = 'Pay Registration Fee (Step 2)';
+        $pendingStepText = 'Your placement agreement is signed! Activate your registration plan next.';
+        $wizardUrl = route('candidate.wizard', ['step' => 3]);
     } else {
-        $ctaLabel = 'Pay Registration Fee (Step 3)';
-        $pendingStepText = 'Your registration fee payment is pending to activate account.';
+        $ctaLabel = 'Complete Profile (Required to Apply)';
+        $pendingStepText = 'Your agreement and payment are done! Complete your profile 100% to unlock job applications.';
         $wizardUrl = route('candidate.wizard', ['step' => 4]);
     }
 @endphp
@@ -139,48 +139,48 @@
             {{-- 3-Step Checklist Breakdown --}}
             <div class="mt-4 space-y-2.5 text-left">
                 
-                {{-- Step 1: Profile & Qualifications --}}
-                <div style="{{ $step1Complete ? 'background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35);' : 'background: rgba(245, 158, 11, 0.12); border: 1.5px solid rgba(245, 158, 11, 0.5);' }}"
+                {{-- Step 1: Placement Agreement --}}
+                <div style="{{ $agreementSigned ? 'background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35);' : 'background: rgba(245, 158, 11, 0.12); border: 1.5px solid rgba(245, 158, 11, 0.5);' }}"
                      class="flex items-center justify-between p-3 rounded-xl transition-all">
                     <div class="flex items-center gap-3 min-w-0">
-                        <div style="{{ $step1Complete ? 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff;' : 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #020617;' }}"
+                        <div style="{{ $agreementSigned ? 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff;' : 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #020617;' }}"
                              class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-black shadow-sm">
-                            <i class="fas {{ $step1Complete ? 'fa-check' : 'fa-user' }}"></i>
+                            <i class="fas {{ $agreementSigned ? 'fa-check' : 'fa-file-signature' }}"></i>
                         </div>
                         <div class="min-w-0">
-                            <h4 class="text-xs sm:text-sm font-bold text-white truncate">1. Profile & Qualifications</h4>
-                            <p class="text-[11px] {{ $step1Complete ? 'text-emerald-300/80' : 'text-amber-200/90' }}">Personal details, subject & resume upload</p>
+                            <h4 class="text-xs sm:text-sm font-bold text-white truncate">1. Placement Agreement</h4>
+                            <p class="text-[11px] {{ $agreementSigned ? 'text-emerald-300/80' : 'text-amber-200/90' }}">Terms acceptance &amp; digital candidate signature</p>
                         </div>
                     </div>
-                    <span class="shrink-0 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1 {{ $step1Complete ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35' : 'bg-amber-500/25 text-amber-300 border border-amber-500/50 animate-pulse' }}">
-                        @if($step1Complete)
-                            <i class="fas fa-check text-[9px]"></i>
-                            <span>Completed</span>
-                        @else
-                            <i class="fas fa-clock text-[9px]"></i>
-                            <span>Pending</span>
-                        @endif
-                    </span>
-                </div>
-
-                {{-- Step 2: Placement Agreement --}}
-                <div style="{{ $step2Complete ? 'background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35);' : ($step1Complete ? 'background: rgba(245, 158, 11, 0.14); border: 1.5px solid rgba(245, 158, 11, 0.6); box-shadow: 0 0 18px rgba(245, 158, 11, 0.12);' : 'background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);') }}"
-                     class="flex items-center justify-between p-3 rounded-xl transition-all">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div style="{{ $step2Complete ? 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff;' : ($step1Complete ? 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #020617;' : 'background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.4);') }}"
-                             class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-black shadow-sm">
-                            <i class="fas {{ $step2Complete ? 'fa-check' : 'fa-file-signature' }}"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h4 class="text-xs sm:text-sm font-bold {{ $step2Complete || $step1Complete ? 'text-white' : 'text-slate-400' }} truncate">2. Placement Agreement</h4>
-                            <p class="text-[11px] {{ $step2Complete ? 'text-emerald-300/80' : ($step1Complete ? 'text-amber-200/90' : 'text-slate-500') }}">Terms acceptance & digital candidate signature</p>
-                        </div>
-                    </div>
-                    <span class="shrink-0 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1 {{ $step2Complete ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35' : ($step1Complete ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 animate-pulse' : 'bg-white/5 text-slate-500 border border-white/10') }}">
-                        @if($step2Complete)
+                    <span class="shrink-0 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1 {{ $agreementSigned ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35' : 'bg-amber-500/25 text-amber-300 border border-amber-500/50 animate-pulse' }}">
+                        @if($agreementSigned)
                             <i class="fas fa-check text-[9px]"></i>
                             <span>Signed</span>
-                        @elseif($step1Complete)
+                        @else
+                            <i class="fas fa-clock text-[9px]"></i>
+                            <span>Pending</span>
+                        @endif
+                    </span>
+                </div>
+
+                {{-- Step 2: Account Activation Fee --}}
+                <div style="{{ $paymentDone ? 'background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35);' : ($agreementSigned ? 'background: rgba(245, 158, 11, 0.14); border: 1.5px solid rgba(245, 158, 11, 0.6); box-shadow: 0 0 18px rgba(245, 158, 11, 0.12);' : 'background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);') }}"
+                     class="flex items-center justify-between p-3 rounded-xl transition-all">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div style="{{ $paymentDone ? 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff;' : ($agreementSigned ? 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #020617;' : 'background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.4);') }}"
+                             class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-black shadow-sm">
+                            <i class="fas {{ $paymentDone ? 'fa-check' : 'fa-credit-card' }}"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="text-xs sm:text-sm font-bold {{ $paymentDone || $agreementSigned ? 'text-white' : 'text-slate-400' }} truncate">2. Account Activation Fee</h4>
+                            <p class="text-[11px] {{ $paymentDone ? 'text-emerald-300/80' : ($agreementSigned ? 'text-amber-200/90' : 'text-slate-500') }}">One-time registration fee to activate plan</p>
+                        </div>
+                    </div>
+                    <span class="shrink-0 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1 {{ $paymentDone ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35' : ($agreementSigned ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 animate-pulse' : 'bg-white/5 text-slate-500 border border-white/10') }}">
+                        @if($paymentDone)
+                            <i class="fas fa-check text-[9px]"></i>
+                            <span>Activated</span>
+                        @elseif($agreementSigned)
                             <i class="fas fa-clock text-[9px]"></i>
                             <span>Pending</span>
                         @else
@@ -189,30 +189,29 @@
                     </span>
                 </div>
 
-                {{-- Step 3: Account Activation Fee --}}
-                <div style="{{ $step3Complete ? 'background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35);' : ($step2Complete ? 'background: rgba(245, 158, 11, 0.14); border: 1.5px solid rgba(245, 158, 11, 0.6); box-shadow: 0 0 18px rgba(245, 158, 11, 0.12);' : 'background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);') }}"
+                {{-- Step 3: Profile & Qualifications (Always open anytime) --}}
+                <div style="{{ $profileDetailsDone ? 'background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35);' : 'background: rgba(245, 158, 11, 0.12); border: 1.5px solid rgba(245, 158, 11, 0.5);' }}"
                      class="flex items-center justify-between p-3 rounded-xl transition-all">
                     <div class="flex items-center gap-3 min-w-0">
-                        <div style="{{ $step3Complete ? 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff;' : ($step2Complete ? 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #020617;' : 'background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.4);') }}"
+                        <div style="{{ $profileDetailsDone ? 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff;' : 'background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); color: #ffffff;' }}"
                              class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-black shadow-sm">
-                            <i class="fas {{ $step3Complete ? 'fa-check' : 'fa-credit-card' }}"></i>
+                            <i class="fas {{ $profileDetailsDone ? 'fa-check' : 'fa-user' }}"></i>
                         </div>
                         <div class="min-w-0">
-                            <h4 class="text-xs sm:text-sm font-bold {{ $step3Complete || $step2Complete ? 'text-white' : 'text-slate-400' }} truncate">3. Account Activation Fee</h4>
-                            <p class="text-[11px] {{ $step3Complete ? 'text-emerald-300/80' : ($step2Complete ? 'text-amber-200/90' : 'text-slate-500') }}">One-time registration fee to verify profile</p>
+                            <h4 class="text-xs sm:text-sm font-bold text-white truncate">3. Profile &amp; Qualifications</h4>
+                            <p class="text-[11px] {{ $profileDetailsDone ? 'text-emerald-300/80' : 'text-amber-200/90' }}">Personal details, subject &amp; resume (required 100% to apply)</p>
                         </div>
                     </div>
-                    <span class="shrink-0 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1 {{ $step3Complete ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35' : ($step2Complete ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 animate-pulse' : 'bg-white/5 text-slate-500 border border-white/10') }}">
-                        @if($step3Complete)
+                    @if($profileDetailsDone)
+                        <span class="shrink-0 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/35">
                             <i class="fas fa-check text-[9px]"></i>
-                            <span>Activated</span>
-                        @elseif($step2Complete)
-                            <i class="fas fa-clock text-[9px]"></i>
-                            <span>Pending</span>
-                        @else
-                            <span>Locked</span>
-                        @endif
-                    </span>
+                            <span>Completed</span>
+                        </span>
+                    @else
+                        <a href="{{ route('candidate.wizard', ['step' => 4]) }}" class="shrink-0 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1 bg-sky-500/25 hover:bg-sky-500/40 text-sky-200 border border-sky-400/50 transition-colors">
+                            <span>Fill Now</span>
+                        </a>
+                    @endif
                 </div>
 
             </div>

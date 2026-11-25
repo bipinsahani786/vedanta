@@ -18,14 +18,14 @@
         <!-- Header -->
         <div class="text-center mb-10 reveal">
             <h1 class="text-3xl md:text-4xl font-bold text-text-main mb-3">Complete Your Registration</h1>
-            <p class="text-text-dark/60 text-sm md:text-base max-w-xl mx-auto">Follow these simple steps to complete your profile and activate your candidate account.</p>
+            <p class="text-text-dark/60 text-sm md:text-base max-w-xl mx-auto">Sign your agreement and activate your plan first, or complete your profile details anytime.</p>
         </div>
 
         <!-- Progress Bar -->
         <div class="mb-10 reveal reveal-delay-1">
             <div class="flex justify-between mb-2">
                 <template x-for="(s, index) in steps" :key="index">
-                    <div class="text-center w-1/3 relative z-10">
+                    <div class="text-center w-1/4 relative z-10">
                         <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-300"
                             :class="[
                                 step > index + 1 ? 'bg-green-500 border-green-500 text-white' : '',
@@ -42,7 +42,7 @@
                 </template>
             </div>
             <!-- Connecting Line -->
-            <div class="relative w-full h-1 bg-card-border rounded-full -mt-[3.25rem] z-0 mx-auto" style="width: 66%;">
+            <div class="relative w-full h-1 bg-card-border rounded-full -mt-[3.25rem] z-0 mx-auto" style="width: 75%;">
                 <div class="absolute top-0 left-0 h-full bg-accent-blue rounded-full transition-all duration-500 ease-out"
                     :style="'width: ' + ((step - 1) / (steps.length - 1) * 100) + '%'"></div>
             </div>
@@ -56,6 +56,31 @@
                 <div class="w-10 h-10 border-4 border-accent-blue border-t-transparent rounded-full animate-spin"></div>
                 <p class="mt-4 text-sm font-semibold text-text-main animate-pulse" x-text="loadingMessage"></p>
             </div>
+
+            @if(session('success'))
+                <div class="bg-emerald-500/15 border-l-4 border-emerald-500 p-4 mx-8 mt-8 rounded-r-xl flex items-center gap-3 text-emerald-300 text-sm font-semibold">
+                    <i class="fas fa-check-circle shrink-0"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+            @if(session('info'))
+                <div class="bg-sky-500/15 border-l-4 border-sky-500 p-4 mx-8 mt-8 rounded-r-xl flex items-center gap-3 text-sky-200 text-sm font-semibold">
+                    <i class="fas fa-info-circle shrink-0"></i>
+                    <span>{{ session('info') }}</span>
+                </div>
+            @endif
+            @if(session('warning'))
+                <div class="bg-amber-500/15 border-l-4 border-amber-500 p-4 mx-8 mt-8 rounded-r-xl flex items-center gap-3 text-amber-200 text-sm font-semibold">
+                    <i class="fas fa-exclamation-triangle shrink-0"></i>
+                    <span>{{ session('warning') }}</span>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="bg-red-500/15 border-l-4 border-red-500 p-4 mx-8 mt-8 rounded-r-xl flex items-center gap-3 text-red-300 text-sm font-semibold">
+                    <i class="fas fa-exclamation-circle shrink-0"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
 
             <!-- Error Message Summary -->
             <div x-show="error || Object.keys(fieldErrors).length > 0" class="bg-red-500/10 border-l-4 border-red-500 p-4 mb-4 mx-8 mt-8 rounded-r-xl" x-transition>
@@ -77,11 +102,16 @@
             </div>
 
             <div class="p-8 md:p-10">
-                <!-- STEP 1: Profile Details -->
-                <div x-show="step === 1" x-transition.opacity.duration.500ms>
-                    <h2 class="text-2xl font-bold text-text-main mb-6 flex items-center gap-3">
-                        <i class="fas fa-user-edit text-accent-blue"></i> Profile Details
-                    </h2>
+                <!-- STEP 4: Profile Details -->
+                <div x-show="step === 4" x-transition.opacity.duration.500ms style="display: none;">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+                        <h2 class="text-2xl font-bold text-text-main flex items-center gap-3">
+                            <i class="fas fa-user-edit text-accent-blue"></i> Profile Details
+                        </h2>
+                        <span class="text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
+                            Complete 100% to apply for jobs
+                        </span>
+                    </div>
                     
                     <form id="step1Form" @submit.prevent="submitStep1" novalidate>
                         @csrf
@@ -332,20 +362,20 @@
                             </div>
                         </div>
 
-                        <div class="mt-8 flex justify-between items-center">
+                        <div class="mt-8 flex flex-wrap justify-between items-center gap-3">
                             <a href="{{ route('candidate.dashboard') }}" class="text-text-dark hover:text-text-main font-semibold transition-all px-4 py-2.5 rounded-xl border border-card-border/60 hover:border-card-border hover:bg-secondary-bg/80 flex items-center gap-2 text-sm">
-                                <span>Skip for now</span>
+                                <span>Skip to Dashboard</span>
                                 <i class="fas fa-chevron-right text-xs opacity-60"></i>
                             </a>
-                            <button type="submit" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2">
-                                Next Step <i class="fas fa-arrow-right"></i>
+                            <button type="submit" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2 cursor-pointer">
+                                Save Profile <i class="fas fa-check"></i>
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- STEP 2: Agreement -->
-                <div x-show="step === 2" x-transition.opacity.duration.500ms style="display: none;">
+                <!-- STEP 1: Agreement -->
+                <div x-show="step === 1" x-transition.opacity.duration.500ms>
                     <h2 class="text-2xl font-bold text-text-main mb-6 flex items-center gap-3">
                         <i class="fas fa-file-contract text-accent-blue"></i> Agreement
                     </h2>
@@ -358,32 +388,33 @@
                     </div>
 
                     <div class="mb-6 flex items-center gap-3 bg-accent-blue/5 p-4 rounded-xl border border-accent-blue/20 cursor-pointer" @click="agreed = !agreed">
-                        <div class="w-6 h-6 rounded-md border-2 border-accent-blue flex items-center justify-center transition-colors"
+                        <div class="w-6 h-6 rounded-md border-2 border-accent-blue flex items-center justify-center transition-colors shrink-0"
                             :class="agreed ? 'bg-accent-blue text-white' : 'bg-transparent text-transparent'">
                             <i class="fas fa-check text-xs"></i>
                         </div>
                         <span class="text-sm font-semibold text-text-main select-none">I have read and agree to the Terms & Conditions of Vedanta Placement Agency.</span>
                     </div>
 
-                    <!-- Signature Options moved to step 3 -->
+                    <!-- Signature Options moved to step 2 -->
 
-                    <div class="mt-8 flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <button type="button" @click="step = 1" class="px-6 py-3 rounded-xl font-semibold text-text-dark hover:bg-card-border transition-colors flex items-center gap-2">
-                                <i class="fas fa-arrow-left text-sm"></i> Back
+                    <div class="mt-8 flex flex-wrap justify-between items-center gap-3">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button type="button" @click="step = 4; window.scrollTo({top: 0, behavior: 'smooth'});" class="text-text-dark hover:text-text-main font-semibold transition-all px-4 py-2.5 rounded-xl border border-card-border/60 hover:border-card-border hover:bg-secondary-bg/80 flex items-center gap-2 text-xs sm:text-sm cursor-pointer">
+                                <i class="fas fa-user-edit text-xs text-accent-blue"></i>
+                                <span>Complete Profile First</span>
                             </button>
                             <a href="{{ route('candidate.dashboard') }}" class="text-xs text-text-dark/60 hover:text-text-main font-medium transition-colors px-3 py-2">
                                 Skip to Dashboard
                             </a>
                         </div>
-                        <button type="button" @click="submitStep2" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2" :disabled="!agreed" :class="!agreed ? 'opacity-50 cursor-not-allowed' : ''">
+                        <button type="button" @click="submitStep2" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2 cursor-pointer" :disabled="!agreed" :class="!agreed ? 'opacity-50 cursor-not-allowed' : ''">
                             Accept & Continue <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- STEP 3: Identity Verification -->
-                <div x-show="step === 3" x-transition.opacity.duration.500ms style="display: none;" x-init="$watch('step', value => { if(value === 3 && !latitude) getLocation(); })">
+                <!-- STEP 2: Identity Verification -->
+                <div x-show="step === 2" x-transition.opacity.duration.500ms style="display: none;" x-init="$watch('step', value => { if(value === 2 && !latitude) getLocation(); })">
                     <h2 class="text-2xl font-bold text-text-main mb-6 flex items-center gap-3">
                         <i class="fas fa-user-check text-accent-blue"></i> Identity Verification
                     </h2>
@@ -476,18 +507,23 @@
                         </div>
                     </div>
 
-                    <div class="mt-8 flex justify-between">
-                        <button type="button" @click="step = 2" class="px-6 py-3 rounded-xl font-semibold text-text-dark hover:bg-card-border transition-colors flex items-center gap-2">
-                            <i class="fas fa-arrow-left text-sm"></i> Back
-                        </button>
-                        <button type="button" @click="submitStep3" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2">
+                    <div class="mt-8 flex flex-wrap justify-between items-center gap-3">
+                        <div class="flex items-center gap-3">
+                            <button type="button" @click="step = 1" class="px-6 py-3 rounded-xl font-semibold text-text-dark hover:bg-card-border transition-colors flex items-center gap-2 cursor-pointer">
+                                <i class="fas fa-arrow-left text-sm"></i> Back
+                            </button>
+                            <a href="{{ route('candidate.dashboard') }}" class="text-xs text-text-dark/60 hover:text-text-main font-medium transition-colors px-3 py-2">
+                                Skip to Dashboard
+                            </a>
+                        </div>
+                        <button type="button" @click="submitStep3" class="bg-accent-blue text-white px-8 py-3 rounded-xl font-semibold shadow-glow-blue hover:bg-accent-blue-hover transition-all hover:-translate-y-0.5 flex items-center gap-2 cursor-pointer">
                             Verify Identity <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- STEP 4: Plan & Payment (High-Converting 3-Step Flow) -->
-                <div x-show="step === 4" x-transition.opacity.duration.500ms style="display: none;" class="max-w-xl mx-auto">
+                <!-- STEP 3: Plan & Payment (High-Converting 3-Step Flow) -->
+                <div x-show="step === 3" x-transition.opacity.duration.500ms style="display: none;" class="max-w-xl mx-auto">
                     
                     <!-- ===================================================== -->
                     <!-- SCREEN 1: UPSELL / RECOMMENDED FOR YOU (flowStep === 1) -->
@@ -624,11 +660,19 @@
                             <span>Your information is safe and secure with us</span>
                         </div>
 
-                        <!-- Back Button to Verification -->
-                        <div class="mt-6 pt-4 border-t border-card-border flex justify-start">
-                            <button type="button" @click="step = 3" class="px-5 py-2.5 rounded-xl font-semibold text-text-dark/60 hover:text-text-main hover:bg-card-border/30 transition-colors flex items-center gap-2 text-xs cursor-pointer">
+                        <!-- Back Button to Verification / Skip to Profile -->
+                        <div class="mt-6 pt-4 border-t border-card-border flex flex-wrap items-center justify-between gap-3">
+                            <button type="button" @click="step = 2" class="px-5 py-2.5 rounded-xl font-semibold text-text-dark/60 hover:text-text-main hover:bg-card-border/30 transition-colors flex items-center gap-2 text-xs cursor-pointer">
                                 <i class="fas fa-arrow-left text-xs"></i> Back to Verification
                             </button>
+                            <div class="flex items-center gap-3">
+                                <button type="button" @click="step = 4; window.scrollTo({top: 0, behavior: 'smooth'});" class="text-xs font-semibold text-accent-blue hover:underline cursor-pointer">
+                                    Fill Profile Later / Step 4
+                                </button>
+                                <a href="{{ route('candidate.dashboard') }}" class="text-xs font-semibold text-text-dark/60 hover:text-text-main transition-colors">
+                                    Skip to Dashboard
+                                </a>
+                            </div>
                         </div>
                     </div>
 
@@ -935,7 +979,7 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('registrationWizard', () => ({
             step: 1,
-            steps: ['Profile', 'Agreement', 'Verification', 'Payment'],
+            steps: ['Agreement', 'Verification', 'Payment', 'Profile'],
             loading: false,
             loadingMessage: '',
             error: '',
@@ -984,7 +1028,7 @@
             offerLetterFile: null,
             
             // Signature & Identity Data
-            agreed: false,
+            agreed: {{ $profile->is_terms_agreed ? 'true' : 'false' }},
             sigType: 'draw',
             signaturePad: null,
             typedSignature: '',
@@ -1046,41 +1090,52 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const reqStep = parseInt(urlParams.get('step'));
 
-                // Determine initial step based on profile status
+                // Determine initial step based on profile status (Order: Agreement -> Verification -> Payment -> Profile)
                 const isProfileComplete = {{ $profile->hasCompletedProfileDetails() ? 'true' : 'false' }};
                 const isTermsAgreed = {{ $profile->is_terms_agreed ? 'true' : 'false' }};
-                const isAgreementSigned = {{ $profile->is_agreement_signed ? 'true' : 'false' }};
-                
+                const isAgreementSigned = {{ ($profile->is_agreement_signed || !empty($profile->signature_data) || $profile->is_manual_agreement) ? 'true' : 'false' }};
+                const isFeePaid = {{ ($profile->initial_fee_paid || $profile->is_fee_paid || ($profile->paid_amount ?? 0) >= 500) ? 'true' : 'false' }};
+
                 if (reqStep && reqStep >= 1 && reqStep <= 4) {
-                    if (reqStep >= 2 && !isProfileComplete) {
+                    if (reqStep === 4) {
+                        // Profile can be completed anytime even before agreement or payment
+                        this.step = 4;
+                    } else if (reqStep === 3 && !isAgreementSigned) {
+                        this.step = isTermsAgreed ? 2 : 1;
+                    } else if (reqStep === 2 && !isTermsAgreed) {
                         this.step = 1;
-                    } else if (reqStep >= 3 && !isTermsAgreed) {
-                        this.step = 2;
-                    } else if (reqStep >= 4 && !isAgreementSigned) {
-                        this.step = 3;
                     } else {
                         this.step = reqStep;
                     }
                 } else {
-                    if (!isProfileComplete) {
+                    if (!isTermsAgreed) {
                         this.step = 1;
-                    } else if (!isTermsAgreed) {
-                        this.step = 2;
                     } else if (!isAgreementSigned) {
+                        this.step = 2;
+                    } else if (!isFeePaid) {
                         this.step = 3;
                     } else {
                         this.step = 4;
                     }
                 }
 
+                if (this.step === 2) {
+                    if (this.sigType === 'draw') {
+                        setTimeout(() => this.initSignaturePad(), 300);
+                    }
+                    if (!this.latitude) {
+                        this.getLocation();
+                    }
+                }
+
                 this.$watch('step', value => {
-                    if (value === 3 && this.sigType === 'draw') {
+                    if (value === 2 && this.sigType === 'draw') {
                         setTimeout(() => this.initSignaturePad(), 300);
                     }
                 });
 
                 this.$watch('sigType', value => {
-                    if (value === 'draw' && this.step === 3) {
+                    if (value === 'draw' && this.step === 2) {
                         setTimeout(() => this.initSignaturePad(), 300);
                     }
                 });
@@ -1268,8 +1323,8 @@
                     }
                     
                     if (response.ok && (data.success || !data.errors)) {
-                        this.step = 2;
-                        window.scrollTo({top: 0, behavior: 'smooth'});
+                        window.location.href = data.redirect_url || '{{ route("candidate.dashboard") }}';
+                        return;
                     } else if (response.status === 422 || data.errors) {
                         this.fieldErrors = data.errors || {};
                         this.error = 'Please fix the errors below.';
@@ -1399,7 +1454,8 @@
                     const result = await response.json();
                     
                     if (response.ok) {
-                        this.step = 3;
+                        this.step = 2;
+                        window.scrollTo({top: 0, behavior: 'smooth'});
                     } else {
                         this.error = result.message || 'An error occurred while saving the agreement.';
                     }
@@ -1476,11 +1532,16 @@
                     const result = await response.json();
                     
                     if (response.ok) {
-                        const isFeePaid = {{ ($profile->initial_fee_paid || $profile->is_fee_paid) ? 'true' : 'false' }};
-                        if (isFeePaid) {
+                        const isFeePaid = {{ ($profile->initial_fee_paid || $profile->is_fee_paid || ($profile->paid_amount ?? 0) >= 500) ? 'true' : 'false' }};
+                        const isProfileComplete = {{ $profile->hasCompletedProfileDetails() ? 'true' : 'false' }};
+                        if (isFeePaid && isProfileComplete) {
                             window.location.href = '{{ route("candidate.dashboard") }}';
-                        } else {
+                        } else if (isFeePaid) {
                             this.step = 4;
+                            window.scrollTo({top: 0, behavior: 'smooth'});
+                        } else {
+                            this.step = 3;
+                            window.scrollTo({top: 0, behavior: 'smooth'});
                         }
                     } else {
                         this.error = result.message || 'An error occurred while verifying identity.';

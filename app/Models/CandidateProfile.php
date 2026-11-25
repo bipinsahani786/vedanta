@@ -180,9 +180,6 @@ class CandidateProfile extends Model
         if ($this->isRegistrationCompleted()) {
             return 'Completed';
         }
-        if (! $this->hasCompletedProfileDetails()) {
-            return 'Pending Profile Completion';
-        }
         $hasAgreement = (bool) (
             $this->is_agreement_signed ||
             ! empty($this->signature_date_time) ||
@@ -196,6 +193,9 @@ class CandidateProfile extends Model
         if (! $this->has_paid_plan) {
             return 'Pending Registration Fee';
         }
+        if (! $this->hasCompletedProfileDetails()) {
+            return 'Pending Profile Completion';
+        }
 
         return 'Completed';
     }
@@ -205,9 +205,6 @@ class CandidateProfile extends Model
         if ($this->isRegistrationCompleted()) {
             return route('candidate.dashboard');
         }
-        if (! $this->hasCompletedProfileDetails()) {
-            return route('candidate.wizard', ['step' => 1]);
-        }
         $hasAgreement = (bool) (
             $this->is_agreement_signed ||
             ! empty($this->signature_date_time) ||
@@ -216,9 +213,12 @@ class CandidateProfile extends Model
             $this->is_manual_agreement
         );
         if (! $hasAgreement) {
-            return route('candidate.wizard', ['step' => 2]);
+            return route('candidate.wizard', ['step' => $this->is_terms_agreed ? 2 : 1]);
         }
         if (! $this->has_paid_plan) {
+            return route('candidate.wizard', ['step' => 3]);
+        }
+        if (! $this->hasCompletedProfileDetails()) {
             return route('candidate.wizard', ['step' => 4]);
         }
 

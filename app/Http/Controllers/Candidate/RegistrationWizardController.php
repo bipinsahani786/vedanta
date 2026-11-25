@@ -20,9 +20,17 @@ class RegistrationWizardController extends Controller
     {
         $user = auth()->user();
         $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
-        
-        // Redirect to dashboard only if fee is paid AND agreement is signed
-        if (($profile->initial_fee_paid || $profile->is_fee_paid) && $profile->is_agreement_signed) {
+
+        $hasSigned = $profile->is_agreement_signed
+            || ! empty($profile->signature_data)
+            || ! empty($profile->agreement_signed_at)
+            || ! empty($profile->agreement_pdf_path)
+            || $profile->is_manual_agreement;
+
+        $hasPaid = (bool) ($profile->initial_fee_paid || $profile->is_fee_paid || ($profile->paid_amount ?? 0) >= 500);
+
+        // Redirect to dashboard only if agreement is signed, fee is paid, AND profile details are complete
+        if ($hasPaid && $hasSigned && $profile->hasCompletedProfileDetails()) {
             return redirect()->route('candidate.dashboard');
         }
 
@@ -162,7 +170,25 @@ class RegistrationWizardController extends Controller
                 }
             }
 
-            return response()->json(['success' => true]);
+            $freshProfile = $profile->fresh();
+            $hasSigned = (bool) ($freshProfile && (
+                $freshProfile->is_agreement_signed
+                || ! empty($freshProfile->signature_data)
+                || ! empty($freshProfile->agreement_signed_at)
+                || ! empty($freshProfile->agreement_pdf_path)
+                || $freshProfile->is_manual_agreement
+            ));
+            $hasPaid = (bool) ($freshProfile && $freshProfile->has_paid_plan);
+
+            if ($freshProfile && $hasSigned && $hasPaid && empty($freshProfile->registration_completed_at)) {
+                $freshProfile->update(['registration_completed_at' => now()]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'is_registration_complete' => ($hasSigned && $hasPaid),
+                'redirect_url' => route('candidate.dashboard'),
+            ]);
 
         } catch (\Exception $e) {
             \Log::error('Wizard Step 1 Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
@@ -176,12 +202,6 @@ class RegistrationWizardController extends Controller
     {
         $user = auth()->user();
         $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
-
-        if (! $profile->is_profile_complete) {
-            return response()->json([
-                'message' => 'Please complete your profile details first before proceeding to agreement.'
-            ], 422);
-        }
 
         $request->validate([
             'agreed' => 'required|boolean|accepted',
@@ -199,15 +219,9 @@ class RegistrationWizardController extends Controller
         $user = auth()->user();
         $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
 
-        if (! $profile->is_profile_complete) {
-            return response()->json([
-                'message' => 'Please complete your profile details first before signing the agreement.'
-            ], 422);
-        }
-
         if (! $profile->is_terms_agreed) {
             return response()->json([
-                'message' => 'Please accept the terms and conditions in Step 2 first.'
+                'message' => 'Please accept the terms and conditions first.'
             ], 422);
         }
 
@@ -273,13 +287,6 @@ class RegistrationWizardController extends Controller
     {
         $user = auth()->user();
         $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
-
-        if (! $profile->is_profile_complete) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please complete your profile details first before payment.'
-            ], 422);
-        }
 
         $hasSigned = $profile->is_agreement_signed
             || ! empty($profile->signature_data)
@@ -419,6 +426,12 @@ class RegistrationWizardController extends Controller
 
         if (!$isSuccess) {
             return redirect()->route('candidate.dashboard')->with('error', 'Payment failed or was cancelled. Please try again.');
+        }
+
+        $freshProfile = $fulfillment['user']?->fresh()?->profile ?? (auth()->user()?->fresh()?->profile);
+        if ($freshProfile && ! $freshProfile->hasCompletedProfileDetails()) {
+            return redirect()->route('candidate.wizard', ['step' => 4])
+                ->with('success', 'Payment successful! Please complete your profile details (100%) to apply for jobs.');
         }
 
         return redirect()->route('candidate.dashboard')->with('success', 'Payment successful! Registration complete.');
