@@ -252,6 +252,93 @@
         </marquee>
     </div>
 
+    @if(isset($activeAnnouncement) && $activeAnnouncement)
+        @php
+            $noticeKey = 'vpa_notice_closed_' . $activeAnnouncement->id . '_' . ($activeAnnouncement->updated_at?->timestamp ?? 0);
+            $bannerStyles = [
+                'info' => [
+                    'wrap' => 'bg-gradient-to-r from-[#062356] via-[#0b3578] to-[#062356] border-blue-400/30 text-white',
+                    'badge' => 'bg-[#129aef] text-white',
+                    'btn' => 'bg-white text-[#040e2d] hover:bg-blue-50',
+                    'icon' => 'fa-bullhorn text-[#ffb800]',
+                ],
+                'warning' => [
+                    'wrap' => 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 border-amber-300 text-slate-950',
+                    'badge' => 'bg-[#040e2d] text-[#ffb800]',
+                    'btn' => 'bg-[#040e2d] text-white hover:bg-slate-800',
+                    'icon' => 'fa-exclamation-circle text-[#040e2d]',
+                ],
+                'success' => [
+                    'wrap' => 'bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-800 border-emerald-400/30 text-white',
+                    'badge' => 'bg-emerald-400 text-slate-950',
+                    'btn' => 'bg-white text-emerald-900 hover:bg-emerald-50',
+                    'icon' => 'fa-check-circle text-emerald-300',
+                ],
+                'urgent' => [
+                    'wrap' => 'bg-gradient-to-r from-rose-800 via-rose-700 to-rose-800 border-rose-400/30 text-white',
+                    'badge' => 'bg-white text-rose-800',
+                    'btn' => 'bg-[#ffb800] text-[#040e2d] hover:bg-yellow-300',
+                    'icon' => 'fa-bell text-[#ffb800]',
+                ],
+            ];
+            $bannerTheme = $bannerStyles[$activeAnnouncement->style ?? 'info'] ?? $bannerStyles['info'];
+        @endphp
+        <div id="site-announcement-banner"
+             role="region"
+             aria-label="Announcement"
+             class="relative z-[104] w-full border-b px-4 sm:px-6 lg:px-[5%] py-2.5 shadow-sm {{ $bannerTheme['wrap'] }}">
+            <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap min-w-0 flex-1">
+                    <i class="fas {{ $bannerTheme['icon'] }} text-sm shrink-0"></i>
+                    @if($activeAnnouncement->title)
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider shrink-0 {{ $bannerTheme['badge'] }}">
+                            {{ $activeAnnouncement->title }}
+                        </span>
+                    @endif
+                    <p class="text-xs sm:text-sm font-medium leading-snug m-0">
+                        {{ $activeAnnouncement->message }}
+                    </p>
+                    @if($activeAnnouncement->hasSafeLink())
+                        <a href="{{ trim($activeAnnouncement->link_url) }}"
+                           class="px-3 py-1 rounded-lg text-[11px] font-extrabold transition-colors shrink-0 inline-flex items-center gap-1 shadow-sm {{ $bannerTheme['btn'] }}">
+                            <span>{{ $activeAnnouncement->link_text ?: 'Learn More' }}</span>
+                            <i class="fas fa-arrow-right text-[9px]"></i>
+                        </a>
+                    @endif
+                </div>
+
+                <button type="button"
+                        id="close-site-announcement-btn"
+                        aria-label="Close announcement"
+                        title="Close"
+                        class="w-7 h-7 rounded-lg bg-black/15 hover:bg-black/30 flex items-center justify-center text-xs transition-colors shrink-0 cursor-pointer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <script>
+            (function () {
+                var banner = document.getElementById('site-announcement-banner');
+                var closeBtn = document.getElementById('close-site-announcement-btn');
+                var storageKey = @json($noticeKey);
+                if (!banner) return;
+                try {
+                    if (localStorage.getItem(storageKey) === '1') {
+                        banner.style.display = 'none';
+                    }
+                } catch (e) {}
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function () {
+                        banner.style.display = 'none';
+                        try {
+                            localStorage.setItem(storageKey, '1');
+                        } catch (e) {}
+                    });
+                }
+            })();
+        </script>
+    @endif
+
     <!-- Top Contact Bar -->
     <div
         class="bg-gradient-to-r from-[#040e2d] via-[#129aef] to-[#040e2d] text-white text-xs py-2 px-6 lg:px-[5%] hidden md:flex justify-between items-center border-b border-white/10 shadow-sm">

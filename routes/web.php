@@ -487,6 +487,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('services', ServiceController::class)->except(['create', 'show', 'edit']);
     Route::resource('testimonials', TestimonialController::class)->except(['create', 'show', 'edit']);
     Route::resource('clients', ClientLogoController::class)->except(['create', 'show', 'edit'])->parameters(['clients' => 'clientLogo']);
+    Route::resource('announcements', App\Http\Controllers\Admin\AnnouncementController::class)->except(['create', 'show', 'edit']);
+    Route::patch('announcements/{announcement}/toggle', [App\Http\Controllers\Admin\AnnouncementController::class, 'toggle'])->name('announcements.toggle');
 
     // Refer & Earn Admin Management
     Route::get('/referrals/dashboard', [App\Http\Controllers\Admin\ReferralController::class, 'dashboard'])->name('referrals.dashboard');
