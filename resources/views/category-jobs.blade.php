@@ -121,6 +121,10 @@
                 <p class="text-gray-500 max-w-md mx-auto">Check back soon! We regularly update our job listings with new opportunities.</p>
             </div>
             @endif
+
+            <div class="max-w-4xl mx-auto text-left">
+                @include('partials.whatsapp-channel-card', ['variant' => 'banner'])
+            </div>
         </div>
     </section>
 

@@ -838,6 +838,8 @@
 
             </div>
 
+            @include('partials.whatsapp-channel-card', ['variant' => 'footer'])
+
             <!-- Bottom Legal & Copyright Bar -->
             <div class="border-t border-white/10 pt-5 flex flex-col lg:flex-row justify-between items-center gap-3 text-[11px] text-slate-400">
                 <p class="m-0">Copyright &copy; {{ date('Y') }} Vedanta Placement Agency<sup>&reg;</sup>. All rights reserved.</p>
@@ -854,6 +856,10 @@
             </div>
         </div>
     </footer>
+
+    @if(!request()->routeIs('login*', 'password.*', 'verification.*', 'candidate.*', 'employer.*', 'admin.*'))
+        @include('partials.whatsapp-channel-card', ['variant' => 'floating'])
+    @endif
 
     <!-- FABs -->
     <div class="fixed right-6 bottom-6 flex flex-col gap-3 z-[999]">

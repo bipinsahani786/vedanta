@@ -512,6 +512,8 @@
                 <i class="fas fa-arrow-right transition-transform group-hover:translate-x-1"></i>
             </a>
         </div>
+
+        @include('partials.whatsapp-channel-card', ['variant' => 'banner-dark'])
     </section>
 
     <!-- Refer & Earn Showcase Section -->

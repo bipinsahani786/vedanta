@@ -380,6 +380,8 @@
                     </a>
                 </div>
 
+                @include('partials.whatsapp-channel-card', ['variant' => 'banner'])
+
             </div>
 
             <!-- RIGHT SIDEBAR (Image 2 & 3) -->

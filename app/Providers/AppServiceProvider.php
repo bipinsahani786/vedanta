@@ -23,19 +23,25 @@ class AppServiceProvider extends ServiceProvider
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
-        \Illuminate\Support\Facades\View::composer('layouts.app', function ($view) {
+        \Illuminate\Support\Facades\View::composer(['layouts.app', 'partials.whatsapp-channel-card'], function ($view) {
             $activeAnnouncement = null;
+            $whatsappChannelUrl = null;
             try {
                 if (\Illuminate\Support\Facades\Schema::hasTable('announcements')) {
                     $activeAnnouncement = \App\Models\Announcement::active()
                         ->latest('updated_at')
                         ->first();
                 }
+                $whatsappChannelUrl = \App\Models\SiteSetting::getActiveWhatsAppChannelUrl();
             } catch (\Throwable $e) {
                 $activeAnnouncement = null;
+                $whatsappChannelUrl = null;
             }
 
-            $view->with('activeAnnouncement', $activeAnnouncement);
+            $view->with([
+                'activeAnnouncement' => $activeAnnouncement,
+                'whatsappChannelUrl' => $whatsappChannelUrl,
+            ]);
         });
     }
 }

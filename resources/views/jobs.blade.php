@@ -433,6 +433,8 @@
         <div class="mt-12">
             {{ $jobs->links() }}
         </div>
+
+        @include('partials.whatsapp-channel-card', ['variant' => 'banner'])
     </div>
 </div>
 
