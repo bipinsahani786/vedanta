@@ -134,6 +134,13 @@ class JobAlertSubscriptionController extends Controller
         $previous = url()->previous() ?: route('home');
         $base = strtok($previous, '#') ?: route('home');
 
+        $appHost = parse_url(url('/'), PHP_URL_HOST);
+        $prevHost = parse_url($base, PHP_URL_HOST);
+
+        if ($prevHost && $appHost && strcasecmp($prevHost, $appHost) !== 0) {
+            return route('home') . '#footer-job-alerts';
+        }
+
         return $base . '#footer-job-alerts';
     }
 }

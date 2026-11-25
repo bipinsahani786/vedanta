@@ -53,6 +53,7 @@ class SendNewJobAlertToSubscribersJob
                 return;
             }
 
+            @ignore_user_abort(true);
             @set_time_limit(180);
 
             $sentCount = 0;
@@ -62,6 +63,11 @@ class SendNewJobAlertToSubscribersJob
                 ->chunkById(50, function ($subscribers) use ($job, &$sentCount) {
                     foreach ($subscribers as $subscriber) {
                         try {
+                            if (empty($subscriber->unsubscribe_token)) {
+                                $subscriber->update([
+                                    'unsubscribe_token' => JobAlertSubscriber::generateUniqueToken(),
+                                ]);
+                            }
                             Mail::to($subscriber->email)->send(new NewJobAlertMail($job, $subscriber));
                             $sentCount++;
                         } catch (\Throwable $e) {

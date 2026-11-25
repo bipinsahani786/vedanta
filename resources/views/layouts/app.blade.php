@@ -704,9 +704,13 @@
                             body: new FormData(form)
                         })
                         .then(function (res) {
-                            return res.json().then(function (data) {
-                                return { ok: res.ok, status: res.status, data: data };
-                            });
+                            var ct = res.headers.get('content-type') || '';
+                            if (ct.indexOf('application/json') !== -1) {
+                                return res.json().then(function (data) {
+                                    return { ok: res.ok, status: res.status, data: data };
+                                });
+                            }
+                            return { ok: false, status: res.status, data: null };
                         })
                         .then(function (result) {
                             if (result.ok && result.data && result.data.status === 'success') {
@@ -717,9 +721,14 @@
                                     emailInput.value = '';
                                 }
                             } else {
-                                var errMsg = result.status === 419
-                                    ? 'Session expired. Please refresh the page and try again.'
-                                    : ((result.data && result.data.message) ? result.data.message : 'Unable to subscribe right now. Please try again.');
+                                var errMsg;
+                                if (result.status === 419) {
+                                    errMsg = 'Session expired. Please refresh the page and try again.';
+                                } else if (result.status === 429) {
+                                    errMsg = 'Too many attempts. Please wait a minute and try again.';
+                                } else {
+                                    errMsg = (result.data && result.data.message) ? result.data.message : 'Unable to subscribe right now. Please try again.';
+                                }
                                 feedback.className = 'mt-2.5 text-xs font-semibold rounded-xl px-3.5 py-2 bg-rose-500/20 border border-rose-400/40 text-rose-200';
                                 feedback.innerHTML = '<i class="fas fa-exclamation-circle mr-1.5"></i>';
                                 feedback.appendChild(document.createTextNode(errMsg));
