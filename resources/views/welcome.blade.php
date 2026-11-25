@@ -278,28 +278,64 @@
         </div>
     </section>
 
-<!-- Our Clients -->
+<!-- Our Clients / Featured Schools Hiring Now -->
+    @php
+        $showHiringClients = ($totalJobs ?? 0) > 0 && isset($featuredSchools) && $featuredSchools->isNotEmpty();
+    @endphp
     <section class="bg-white py-14 overflow-hidden border-b border-slate-100">
-        <div class="text-left mb-6 px-6 lg:px-[5%] reveal">
-            <h2 class="text-3xl font-bold text-slate-800 text-center mb-10">Our Clients</h2>
+        <div class="text-center mb-8 px-6 lg:px-[5%] reveal">
+            @if($showHiringClients)
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-extrabold uppercase tracking-wider mb-3">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Featured Schools Hiring Now
+                </span>
+            @endif
+            <h2 class="text-3xl font-bold text-slate-800">Our Clients</h2>
+            @if($showHiringClients)
+                <p class="text-xs sm:text-sm text-slate-500 mt-1.5">Click any partner school card below to view active openings.</p>
+            @endif
         </div>
         <div class="swiper marquee-swiper reveal">
-            <div class="swiper-wrapper items-center">
-                @forelse($clients as $client)
-                <div class="swiper-slide w-auto">
-                    <div class="bg-white border border-slate-200 px-6 py-3 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[180px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group overflow-hidden">
-                        <img src="{{ Storage::url($client->logo_path) }}" alt="{{ $client->name }}" class="max-h-12 max-w-full object-contain transition-all duration-300">
+            <div class="swiper-wrapper items-center py-2">
+                @if($showHiringClients)
+                    @foreach($featuredSchools as $school)
+                    <div class="swiper-slide w-auto">
+                        <a href="{{ $school->jobs_url }}"
+                           class="bg-white border border-slate-200 px-5 py-3.5 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] flex flex-col justify-between min-w-[220px] max-w-[250px] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#129aef]/60 hover:shadow-[0_10px_28px_rgba(18,154,239,0.18)] cursor-pointer group overflow-hidden no-underline">
+                            <div class="h-14 w-full flex items-center justify-center mb-2.5">
+                                <img src="{{ Storage::url($school->logo_path) }}"
+                                     alt="{{ $school->name }}"
+                                     draggable="false"
+                                     class="max-h-12 max-w-[165px] object-contain transition-transform duration-300 group-hover:scale-105"
+                                     onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                                <span class="hidden text-[#129aef] text-2xl"><i class="fas fa-school"></i></span>
+                            </div>
+                            <div class="border-t border-slate-100 pt-2.5 flex items-center justify-between gap-2 w-full">
+                                <span class="text-xs font-extrabold text-[#040e2d] group-hover:text-[#129aef] transition-colors truncate" title="{{ $school->name }}">
+                                    {{ $school->name }}
+                                </span>
+                                <span class="text-[11px] font-bold text-[#129aef] group-hover:text-[#040e2d] whitespace-nowrap inline-flex items-center gap-1 shrink-0">
+                                    <span>View Jobs</span>
+                                    <i class="fas fa-arrow-right text-[9px] transition-transform group-hover:translate-x-0.5"></i>
+                                </span>
+                            </div>
+                        </a>
                     </div>
-                </div>
-                @empty
-                <div class="w-full text-center text-slate-500 py-4 italic">
-                    Our trusted clients will appear here.
-                </div>
-                @endforelse
+                    @endforeach
+                @else
+                    @forelse($clients as $client)
+                    <div class="swiper-slide w-auto">
+                        <div class="bg-white border border-slate-200 px-6 py-3 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex items-center justify-center min-w-[180px] h-20 transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/60 hover:border-accent-blue/50 hover:shadow-[0_8px_32px_rgba(18,154,239,0.2)] cursor-grab active:cursor-grabbing group overflow-hidden">
+                            <img src="{{ Storage::url($client->logo_path) }}" alt="{{ $client->name }}" class="max-h-12 max-w-full object-contain transition-all duration-300">
+                        </div>
+                    </div>
+                    @empty
+                    <div class="w-full text-center text-slate-500 py-4 italic">
+                        Our trusted clients will appear here.
+                    </div>
+                    @endforelse
+                @endif
             </div>
-
-            </div>
-        </div>
         </div>
     </section>
 

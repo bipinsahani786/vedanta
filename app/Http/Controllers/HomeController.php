@@ -32,7 +32,44 @@ class HomeController extends Controller
         $totalApplications = \App\Models\JobApplication::count();
         $totalEmployers = \App\Models\User::where('role', 'employer')->count();
 
-        return view('welcome', compact('recentJobs', 'categories', 'services', 'testimonials', 'clients', 'totalJobs', 'totalApplications', 'totalEmployers'));
+        $featuredSchools = collect();
+        if ($totalJobs > 0 && $clients->isNotEmpty()) {
+            $activeJobsForMatching = JobPost::where('status', 'approved')
+                ->select(['id', 'school_name', 'title', 'description'])
+                ->get();
+
+            $featuredSchools = $clients
+                ->filter(fn ($client) => ! empty(trim((string) $client->name)) && ! empty($client->logo_path))
+                ->map(function ($client) use ($activeJobsForMatching) {
+                    $schoolName = trim((string) $client->name);
+                    $matchedCount = $activeJobsForMatching->filter(function ($job) use ($schoolName) {
+                        $jobSchool = trim((string) ($job->school_name ?? ''));
+                        $isPublicSchoolName = $jobSchool !== '' && ! in_array(strtolower($jobSchool), [
+                            'trusted education partner',
+                            'reputed school',
+                            'school name confidential',
+                        ], true);
+
+                        if ($isPublicSchoolName && stripos($jobSchool, $schoolName) !== false) {
+                            return true;
+                        }
+
+                        return stripos((string) ($job->title ?? ''), $schoolName) !== false
+                            || stripos(strip_tags((string) ($job->description ?? '')), $schoolName) !== false;
+                    })->count();
+
+                    return (object) [
+                        'name' => $schoolName,
+                        'logo_path' => $client->logo_path,
+                        'matched_jobs_count' => $matchedCount,
+                        'jobs_url' => $matchedCount > 0 ? route('jobs', ['q' => $schoolName]) : route('jobs'),
+                    ];
+                })
+                ->sortByDesc('matched_jobs_count')
+                ->values();
+        }
+
+        return view('welcome', compact('recentJobs', 'categories', 'services', 'testimonials', 'clients', 'featuredSchools', 'totalJobs', 'totalApplications', 'totalEmployers'));
     }
     public function categoryJobs($id)
     {
