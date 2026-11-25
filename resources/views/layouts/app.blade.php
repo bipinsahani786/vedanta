@@ -514,114 +514,257 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-primary-bg pt-12 pb-5 px-6 lg:px-[5%] text-text-main relative z-50">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
-            <div>
-                <a href="#" class="flex items-center no-underline mb-5">
-                    <img src="/images/logo.png" alt="Vedanta Placement Agency®"
-                        class="h-20 md:h-24 w-auto object-contain">
-                </a>
-                <p class="text-xs text-text-main opacity-50 leading-relaxed mb-5">
-                    Connecting educators and schools across India since 2020. With hundreds of teacher placements, we
-                    make hiring and job searching simple, fast and reliable.
-                </p>
-                <h5 class="font-semibold mb-2 text-sm">Download App</h5>
-                <div class="flex gap-2">
-                    <div
-                        class="bg-gray-800/80 border border-gray-600/50 rounded-lg px-2.5 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-gray-700 transition-colors">
-                        <i class="fab fa-google-play text-base"></i>
-                        <div class="text-left">
-                            <p class="text-[7px] uppercase m-0 leading-none text-gray-400">Coming soon to</p>
-                            <p class="font-semibold text-xs m-0 leading-tight">Google Play</p>
+    <footer class="bg-[#031238] border-t border-white/10 pt-14 pb-6 px-6 lg:px-[5%] text-white relative z-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-8 pb-10">
+
+                <!-- 1. Brand Logo, Name & Short Intro -->
+                <div class="sm:col-span-2 lg:col-span-3">
+                    <a href="{{ route('home') }}" class="inline-flex items-center gap-3 no-underline mb-4 group">
+                        <img src="/images/logo.png" alt="Vedanta Placement Agency®"
+                            class="h-14 w-auto object-contain">
+                        <div>
+                            <div class="text-base font-extrabold text-white leading-tight group-hover:text-[#129aef] transition-colors">
+                                Vedanta Placement Agency<sup>&reg;</sup>
+                            </div>
+                            <div class="text-[11px] font-semibold text-[#ffb800] tracking-wide">
+                                Education Recruitment Experts
+                            </div>
                         </div>
-                    </div>
-                    <div
-                        class="bg-gray-800/80 border border-gray-600/50 rounded-lg px-2.5 py-1 flex items-center gap-1.5 cursor-pointer hover:bg-gray-700 transition-colors">
-                        <i class="fab fa-apple text-xl"></i>
-                        <div class="text-left">
-                            <p class="text-[7px] uppercase m-0 leading-none text-gray-400">Coming soon to the</p>
-                            <p class="font-semibold text-xs m-0 leading-tight">App Store</p>
-                        </div>
+                    </a>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-5 max-w-sm">
+                        Connecting passionate educators and institutional staff with trusted schools across India since 2020—making hiring and job searching simple, transparent, and reliable.
+                    </p>
+                    <div class="flex items-center gap-2.5">
+                        <a href="https://www.instagram.com/vedantaplacementagency?igsh=MWUwczFoYzQ2eGUydQ=="
+                            target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+                            class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:bg-[#129aef] hover:text-white hover:border-[#129aef] flex items-center justify-center text-sm transition-all">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.facebook.com/share/1Dmruc9Esx/"
+                            target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+                            class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:bg-[#129aef] hover:text-white hover:border-[#129aef] flex items-center justify-center text-sm transition-all">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://youtube.com/@vedantaplacementagency?si=UZ0VPukRGknF4EhQ"
+                            target="_blank" rel="noopener noreferrer" aria-label="YouTube"
+                            class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:bg-[#129aef] hover:text-white hover:border-[#129aef] flex items-center justify-center text-sm transition-all">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="https://wa.me/917070938975"
+                            target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
+                            class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:bg-[#25D366] hover:text-white hover:border-[#25D366] flex items-center justify-center text-sm transition-all">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/company/vedanta-placement-agency-india/"
+                            target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
+                            class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:bg-[#129aef] hover:text-white hover:border-[#129aef] flex items-center justify-center text-sm transition-all">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
                     </div>
                 </div>
-            </div>
 
-            <div>
-                <h4 class="text-sm font-bold mb-5 tracking-wider uppercase">Quick Links</h4>
-                <div class="grid grid-cols-2 gap-y-2.5 text-xs text-gray-400">
-                    <a href="{{ route('home') }}" class="hover:text-accent-blue transition-colors">Home</a>
-                    <a href="{{ route('about') }}" class="hover:text-accent-blue transition-colors">About us</a>
-                    @auth
-                        @if(auth()->user()->role === 'admin')
-                            <a href="{{ route('admin.jobs.create') }}" class="hover:text-accent-blue transition-colors">Post your Job</a>
-                        @else
-                            <a href="{{ route('employer.jobs.create') }}" class="hover:text-accent-blue transition-colors">Post your Job</a>
-                        @endif
-                    @else
-                        <a href="{{ route('employer.jobs.create') }}" class="hover:text-accent-blue transition-colors">Post your Job</a>
-                    @endauth
-                    <a href="{{ route('contact') }}" class="hover:text-accent-blue transition-colors">Contact us</a>
-                    <a href="{{ route('terms') }}" class="hover:text-accent-blue transition-colors">Terms &
-                        Conditions</a>
-                    {{-- <a href="{{ route('refund') }}" class="hover:text-accent-blue transition-colors">Refund,
-                        Cancellation & Payment Policy</a> --}}
-                    {{-- <a href="{{ route('pricing')}}" class="hover:text-accent-blue transition-colors"> Pricing & Service
-                        Charges Policy</a> --}}
-                    <a href="{{ route('cookie') }}" class="hover:text-accent-blue transition-colors">Cookie Policy</a>
-                    <a href="{{ route('disclaimer') }}" class="hover:text-accent-blue transition-colors">Disclaimer</a>
-                    <a href="{{ route('services') }}" class="hover:text-accent-blue transition-colors">Services</a>
-                    <a href="{{ route('privacy') }}" class="hover:text-accent-blue transition-colors">Privacy Policy</a>
-                    <a href="{{ route('jobs') }}" class="hover:text-accent-blue transition-colors">Jobs</a>
-                    <a href="{{ route('media') }}" class="hover:text-accent-blue transition-colors">Media</a>
-                    <a href="{{ route('employer') }}" class="hover:text-accent-blue transition-colors">Employer</a>
-                    <a href="{{ route('candidate') }}" class="hover:text-accent-blue transition-colors">Candidate</a>
+                <!-- 2. Job Seekers Quick Links -->
+                <div class="lg:col-span-2">
+                    <h4 class="text-xs font-extrabold mb-4 tracking-wider uppercase text-[#ffb800]">Job Seekers</h4>
+                    <ul class="space-y-2.5 text-xs text-slate-300 list-none p-0 m-0">
+                        <li>
+                            <a href="{{ route('jobs') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Browse Jobs
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('home') }}#job-categories" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Job Categories
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('resume.builder') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Resume Builder
+                                <span class="bg-[#ffb800] text-[#040e2d] text-[9px] px-1.5 py-0.5 rounded font-extrabold uppercase">Free</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('pricing') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Plan &amp; Pricing
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('hiring') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Hiring Process
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-            </div>
 
-            <div>
-                <h4 class="text-sm font-bold mb-5 tracking-wider uppercase">Social</h4>
-                <ul class="space-y-2.5 text-xs text-gray-400">
-                    <li><a href="https://www.instagram.com/vedantaplacementagency?igsh=MWUwczFoYzQ2eGUydQ=="
-                            target="'blank"
-                            class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
-                                class="fab fa-instagram text-sm w-4 text-center"></i> Instagram</a></li>
-                    <li><a href="https://www.facebook.com/share/1Dmruc9Esx/" target="blank"
-                            class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
-                                class="fab fa-facebook text-sm w-4 text-center"></i> Facebook</a></li>
-                    <li><a href="https://youtube.com/@vedantaplacementagency?si=UZ0VPukRGknF4EhQ" target="blank"
-                            class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
-                                class="fab fa-youtube text-sm w-4 text-center"></i> Youtube</a></li>
-                    <li><a href="https://wa.me/917070938975" target="_blank"
-                            class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
-                                class="fab fa-whatsapp text-sm w-4 text-center"></i> Whatsapp</a></li>
-                    <li><a href="https://www.linkedin.com/company/vedanta-placement-agency-india/" target='blank'
-                            class="flex items-center gap-2.5 hover:text-accent-blue transition-colors"><i
-                                class="fab fa-linkedin text-sm w-4 text-center"></i> Linkedin</a></li>
-                </ul>
-            </div>
+                <!-- 3. Employers / Schools Links -->
+                <div class="lg:col-span-2">
+                    <h4 class="text-xs font-extrabold mb-4 tracking-wider uppercase text-[#ffb800]">Employers / Schools</h4>
+                    <ul class="space-y-2.5 text-xs text-slate-300 list-none p-0 m-0">
+                        <li>
+                            @auth
+                                @if(auth()->user()->role === 'admin')
+                                    <a href="{{ route('admin.jobs.create') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                        <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Post a Job
+                                    </a>
+                                @else
+                                    <a href="{{ route('employer.jobs.create') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                        <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Post a Job
+                                    </a>
+                                @endif
+                            @else
+                                <a href="{{ route('post-job') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                    <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Post a Job
+                                </a>
+                            @endauth
+                        </li>
+                        <li>
+                            @auth
+                                @if(auth()->user()->role === 'employer')
+                                    <a href="{{ route('employer.dashboard') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                        <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> School Dashboard
+                                    </a>
+                                @elseif(auth()->user()->role === 'admin')
+                                    <a href="{{ route('admin.dashboard') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                        <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Admin Dashboard
+                                    </a>
+                                @else
+                                    <a href="{{ route('login', ['role' => 'employer']) }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                        <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> School Login / Dashboard
+                                    </a>
+                                @endif
+                            @else
+                                <a href="{{ route('login', ['role' => 'employer']) }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                    <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> School Login / Dashboard
+                                </a>
+                            @endauth
+                        </li>
+                        <li>
+                            @auth
+                                @if(auth()->user()->role === 'employer')
+                                    <a href="{{ route('employer.applicants.index') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                        <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Candidate Search
+                                    </a>
+                                @elseif(auth()->user()->role === 'admin')
+                                    <a href="{{ route('admin.crm.index') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                        <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Candidate Search
+                                    </a>
+                                @else
+                                    <a href="{{ route('login', ['role' => 'employer']) }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                        <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Candidate Search
+                                    </a>
+                                @endif
+                            @else
+                                <a href="{{ route('login', ['role' => 'employer']) }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                    <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Candidate Search
+                                </a>
+                            @endauth
+                        </li>
+                        <li>
+                            <a href="{{ route('services') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Hiring Solutions
+                            </a>
+                        </li>
+                    </ul>
+                </div>
 
-            <div>
-                <h4 class="text-sm font-bold mb-5 tracking-wider uppercase">Get In Touch</h4>
-                <div class="text-xs text-gray-400 space-y-4">
-                    <p class="leading-relaxed flex gap-2"><i class="fas fa-map-marker-alt text-accent-b lue mt-0.5"></i>
-                        Career Point Building, 2nd floor,<br>Patna, 800001, Bihar</p>
-                    <div class="flex gap-2">
-                        <i class="fas fa-envelope text-accent-blue mt-0.5"></i>
+                <!-- 4. Company Links -->
+                <div class="lg:col-span-2">
+                    <h4 class="text-xs font-extrabold mb-4 tracking-wider uppercase text-[#ffb800]">Company</h4>
+                    <ul class="space-y-2.5 text-xs text-slate-300 list-none p-0 m-0">
+                        <li>
+                            <a href="{{ route('about') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> About Us
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('contact') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Contact Us
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('media') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Media
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('employer') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Employer Terms
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('candidate') }}" class="hover:text-[#129aef] transition-colors inline-flex items-center gap-1.5">
+                                <i class="fas fa-chevron-right text-[9px] text-[#129aef]"></i> Candidate Terms
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 5. Support Details -->
+                <div class="lg:col-span-3">
+                    <h4 class="text-xs font-extrabold mb-4 tracking-wider uppercase text-[#ffb800]">Support</h4>
+                    <div class="space-y-3 text-xs text-slate-300">
                         <a href="mailto:info@vedantaplacementagency.in"
-                            class="hover:text-accent-blue transition-colors">info@vedantaplacementagency.in</a>
-                    </div>
-                    <div class="flex gap-2">
-                        <i class="fas fa-phone-alt text-accent-blue mt-0.5"></i>
-                        <a href="tel:+917070938975" class="hover:text-accent-blue transition-colors">+91-7070938975</a>
+                            class="flex items-start gap-2.5 hover:text-[#129aef] transition-colors break-all">
+                            <span class="w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-[#129aef] flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="fas fa-envelope text-[11px]"></i>
+                            </span>
+                            <div>
+                                <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Support Email</div>
+                                <div class="font-medium text-white">info@vedantaplacementagency.in</div>
+                            </div>
+                        </a>
+
+                        <a href="tel:+917070938975"
+                            class="flex items-start gap-2.5 hover:text-[#129aef] transition-colors">
+                            <span class="w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-[#129aef] flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="fas fa-phone-alt text-[11px]"></i>
+                            </span>
+                            <div>
+                                <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Helpline</div>
+                                <div class="font-medium text-white">+91-7070938975</div>
+                            </div>
+                        </a>
+
+                        <a href="https://wa.me/917070938975" target="_blank" rel="noopener noreferrer"
+                            class="flex items-start gap-2.5 hover:text-[#25D366] transition-colors">
+                            <span class="w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-[#25D366] flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="fab fa-whatsapp text-xs"></i>
+                            </span>
+                            <div>
+                                <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">WhatsApp Support</div>
+                                <div class="font-medium text-white">+91-7070938975</div>
+                            </div>
+                        </a>
+
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-[#ffb800] flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="fas fa-map-marker-alt text-[11px]"></i>
+                            </span>
+                            <div>
+                                <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Office</div>
+                                <div class="text-slate-300 leading-relaxed">Career Point Building, 2nd floor, Patna, 800001, Bihar</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div
-            class="border-t border-gray-600/30 pt-4 flex flex-col md:flex-row justify-between items-center text-[11px] text-gray-500">
-            <p class="mb-1 md:mb-0">Copyright © 2026</p>
-            <a href="https://startupwebsupport.com" class="text-accent-blue hover:text-accent-blue">Designed By: Startup Web Support</a>
+            </div>
+
+            <!-- Bottom Legal & Copyright Bar -->
+            <div class="border-t border-white/10 pt-5 flex flex-col lg:flex-row justify-between items-center gap-3 text-[11px] text-slate-400">
+                <p class="m-0">Copyright &copy; {{ date('Y') }} Vedanta Placement Agency<sup>&reg;</sup>. All rights reserved.</p>
+                <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
+                    <a href="{{ route('terms') }}" class="hover:text-white transition-colors">Terms &amp; Conditions</a>
+                    <a href="{{ route('privacy') }}" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="{{ route('refund') }}" class="hover:text-white transition-colors">Refund Policy</a>
+                    <a href="{{ route('cookie') }}" class="hover:text-white transition-colors">Cookie Policy</a>
+                    <a href="{{ route('disclaimer') }}" class="hover:text-white transition-colors">Disclaimer</a>
+                </div>
+                <a href="https://startupwebsupport.com" target="_blank" rel="noopener noreferrer" class="text-[#129aef] hover:text-white transition-colors">
+                    Designed By: Startup Web Support
+                </a>
+            </div>
         </div>
     </footer>
 

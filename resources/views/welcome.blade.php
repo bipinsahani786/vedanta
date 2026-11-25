@@ -217,7 +217,7 @@
     </section>
 
 <!-- Categories Section -->
-    <section class="py-16 px-6 lg:px-[5%] relative bg-slate-50">
+    <section id="job-categories" class="scroll-mt-28 py-16 px-6 lg:px-[5%] relative bg-slate-50">
         
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 relative z-10">
             @foreach($categories as $category)
