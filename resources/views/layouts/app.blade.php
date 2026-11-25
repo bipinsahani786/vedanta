@@ -283,34 +283,36 @@
                 class="logo-img h-9 md:h-11 w-auto object-contain transition-all duration-300">
         </a>
         <nav class="hidden lg:flex items-center">
-            <ul class="flex gap-3.5 xl:gap-5 2xl:gap-6 mr-3 xl:mr-5 list-none items-center">
+            <ul class="flex gap-2.5 xl:gap-4 2xl:gap-5 mr-2.5 xl:mr-4 list-none items-center">
                 <li><a href="{{ route('home') }}"
-                        class="{{ request()->routeIs('home') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('home') ? 'after:w-0' : '' }}">Home</a>
+                        class="{{ request()->routeIs('home') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} whitespace-nowrap font-bold text-[12.5px] xl:text-[13.5px] 2xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('home') ? 'after:w-0' : '' }}">Home</a>
                 </li>
                 <li><a href="{{ route('about') }}"
-                        class="{{ request()->routeIs('about') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('about') ? 'after:w-0' : '' }}">About
+                        class="{{ request()->routeIs('about') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} whitespace-nowrap font-bold text-[12.5px] xl:text-[13.5px] 2xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('about') ? 'after:w-0' : '' }}">About
                         us</a></li>
                 <li><a href="{{ route('services') }}"
-                        class="{{ request()->routeIs('services') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('services') ? 'after:w-0' : '' }}">Our
+                        class="{{ request()->routeIs('services') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} whitespace-nowrap font-bold text-[12.5px] xl:text-[13.5px] 2xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('services') ? 'after:w-0' : '' }}">Our
                         Services</a></li>
                 <li><a href="{{ route('jobs') }}"
-                        class="{{ request()->routeIs('jobs') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('jobs') ? 'after:w-0' : '' }}">Jobs</a>
+                        class="{{ request()->routeIs('jobs') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} whitespace-nowrap font-bold text-[12.5px] xl:text-[13.5px] 2xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('jobs') ? 'after:w-0' : '' }}">Jobs</a>
                 </li>
                 <li><a href="{{ route('resume.builder') }}"
-                        class="{{ request()->routeIs('resume.builder') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('resume.builder') ? 'after:w-0' : '' }}">Resume
+                        class="{{ request()->routeIs('resume.builder') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} whitespace-nowrap font-bold text-[12.5px] xl:text-[13.5px] 2xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('resume.builder') ? 'after:w-0' : '' }}">Resume
                         Builder <span
                             class="bg-accent-yellow text-white text-[9px] px-1.5 py-0.5 rounded uppercase font-extrabold ml-1 relative -top-1">Free</span></a>
                 </li>
                 <li><a href="{{ route('hiring') }}"
-                        class="{{ request()->routeIs('hiring') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('hiring') ? 'after:w-0' : '' }}">Hiring
+                        class="{{ request()->routeIs('hiring') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} whitespace-nowrap font-bold text-[12.5px] xl:text-[13.5px] 2xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('hiring') ? 'after:w-0' : '' }}">Hiring
                         Process</a></li>
+                <li><a href="{{ route('pricing') }}"
+                        class="{{ request()->routeIs('pricing') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} whitespace-nowrap font-bold text-[12.5px] xl:text-[13.5px] 2xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('pricing') ? 'after:w-0' : '' }}">Plan &amp; Pricing</a></li>
                 <li><a href="{{ route('contact') }}"
-                        class="{{ request()->routeIs('contact') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} font-bold text-[14px] xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact
+                        class="{{ request()->routeIs('contact') ? 'active-link after:w-full' : 'nav-link hover:after:w-full' }} whitespace-nowrap font-bold text-[12.5px] xl:text-[13.5px] 2xl:text-[15px] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:bg-accent-blue after:transition-all {{ !request()->routeIs('contact') ? 'after:w-0' : '' }}">Contact
                         Us</a></li>
             </ul>
 
             <!-- Navbar Search Bar (Working Search with Live Dropdown) -->
-            <div class="relative mr-3 xl:mr-5"
+            <div class="relative mr-2.5 xl:mr-4"
                  x-data="{
                      query: '{{ request('q') }}',
                      showDropdown: false,
@@ -335,7 +337,7 @@
                  }"
                  @click.away="showDropdown = false">
                 <form action="{{ route('jobs') }}" method="GET" class="relative flex items-center m-0">
-                    <div class="nav-search-bar flex items-center border rounded-xl px-3 py-1.5 xl:py-2 transition-all duration-300 w-48 xl:w-60 2xl:w-68 shadow-sm focus-within:ring-2 focus-within:ring-[#129aef]/40">
+                    <div class="nav-search-bar flex items-center border rounded-xl px-2.5 xl:px-3 py-1.5 xl:py-2 transition-all duration-300 w-36 xl:w-48 2xl:w-60 shadow-sm focus-within:ring-2 focus-within:ring-[#129aef]/40">
                         <input type="text"
                                name="q"
                                x-model="query"
@@ -474,6 +476,9 @@
                 <li><a href="{{ route('hiring') }}"
                         class="{{ request()->routeIs('hiring') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Hiring
                         Process</a></li>
+                <li><a href="{{ route('pricing') }}"
+                        class="{{ request()->routeIs('pricing') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Plan &amp;
+                        Pricing</a></li>
                 <li><a href="{{ route('contact') }}"
                         class="{{ request()->routeIs('contact') ? 'text-accent-blue' : 'text-text-main hover:text-accent-blue' }} transition-colors">Contact
                         us</a></li>
