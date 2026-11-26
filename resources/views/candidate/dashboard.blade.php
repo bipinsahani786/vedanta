@@ -43,9 +43,161 @@
 
     $usedApplications = (int) ($profile->used_applications ?? 0);
     $totalAllowedApplications = (int) ($profile->total_allowed_applications ?? ($profile && $profile->plan_type === 'premium' ? 3 : 2));
+    $placedCount = (int) ($placedCount ?? 0);
+
+    $isProfileDetailsDone = (bool) ($profile && $profile->hasCompletedProfileDetails());
+    $isRegistrationComplete = (bool) (($profile && $profile->isRegistrationCompleted()) || ($isAgreementSigned && $hasPaidPlan && $isProfileDetailsDone));
+    $isVerified = (bool) ($profile && $profile->is_verified);
+    $verificationRequested = (bool) ($verificationRequested ?? false);
+    $verificationRequestedAt = $verificationRequestedAt ?? null;
+    $hasResume = (bool) ($profile && !empty($profile->resume_path));
+    $hasPhoto = (bool) ($profile && !empty($profile->profile_photo_path));
+
+    // Missing profile fields checklist (matches ProfileController & Wizard fields)
+    $personalMissing = [];
+    if (!$profile || empty($profile->date_of_birth)) { $personalMissing[] = 'Date of Birth'; }
+    if (!$profile || empty($profile->gender)) { $personalMissing[] = 'Gender'; }
+    if (!$profile || empty($profile->address)) { $personalMissing[] = 'Full Address'; }
+
+    $academicMissing = [];
+    if (!$profile || empty($profile->category_id)) { $academicMissing[] = 'Job Category'; }
+    if (!$profile || empty($profile->subject_id)) { $academicMissing[] = 'Subject'; }
+    if (!$profile || empty($profile->highest_qualification_id)) { $academicMissing[] = 'Highest Qualification'; }
+
+    $preferencesMissing = [];
+    if (!$profile || empty($profile->preferred_state_id)) { $preferencesMissing[] = 'Preferred State'; }
+    if (!$profile || empty($profile->preferred_city_id)) { $preferencesMissing[] = 'Preferred City'; }
+    if (!$profile || $profile->experience_years === null) { $preferencesMissing[] = 'Experience (Years)'; }
+    if (!$profile || empty($profile->current_salary)) { $preferencesMissing[] = 'Current Salary'; }
+    if (!$profile || empty($profile->expected_salary)) { $preferencesMissing[] = 'Expected Salary'; }
+    if (!$profile || empty($profile->english_fluency)) { $preferencesMissing[] = 'English Fluency'; }
+    if (!$profile || empty($profile->residential_preference)) { $preferencesMissing[] = 'School Type Preference'; }
+    if (!$profile || empty($profile->availability_to_join)) { $preferencesMissing[] = 'Availability to Join'; }
+
+    $documentMissing = [];
+    if (!$hasPhoto) { $documentMissing[] = 'Profile Photo'; }
+    if (!$hasResume) { $documentMissing[] = 'Resume / CV'; }
+
+    $missingRequiredFields = array_merge($personalMissing, $academicMissing, $preferencesMissing);
+    $allMissingFields = array_merge($missingRequiredFields, $documentMissing);
+
+    $profileChecklistGroups = [
+        [
+            'label' => 'Personal Info & Address',
+            'done' => empty($personalMissing),
+            'missing' => $personalMissing,
+            'url' => route('candidate.profile.edit'),
+        ],
+        [
+            'label' => 'Category, Subject & Qualification',
+            'done' => empty($academicMissing),
+            'missing' => $academicMissing,
+            'url' => route('candidate.profile.edit'),
+        ],
+        [
+            'label' => 'Location & Career Preferences',
+            'done' => empty($preferencesMissing),
+            'missing' => $preferencesMissing,
+            'url' => route('candidate.profile.edit'),
+        ],
+        [
+            'label' => 'Profile Photo & Resume / CV',
+            'done' => empty($documentMissing),
+            'missing' => $documentMissing,
+            'url' => route('candidate.profile.edit') . '#resume-section',
+        ],
+    ];
+
+    // Relevant next step prompt based on candidate state
+    $nextStepBadge = 'Ready';
+    $nextStepTitle = 'Your Profile is Ready to Apply';
+    $nextStepDescription = 'Browse verified school vacancies and apply directly.';
+    $nextStepCtaLabel = 'Browse Jobs';
+    $nextStepUrl = route('jobs');
+    $nextStepTone = 'emerald';
+
+    if (!$isProfileDetailsDone && $isAgreementSigned && $hasPaidPlan) {
+        $nextStepBadge = 'Action Required';
+        $nextStepTitle = 'Complete Profile to Apply';
+        $nextStepDescription = 'Your agreement & plan are active, but required profile details are incomplete. Complete Profile to Apply for jobs.';
+        $nextStepCtaLabel = 'Complete Profile to Apply';
+        $nextStepUrl = route('candidate.wizard', ['step' => 4]);
+        $nextStepTone = 'amber';
+    } elseif (!$isProfileDetailsDone) {
+        $nextStepBadge = !$isAgreementSigned ? 'Next Step: Agreement or Profile' : 'Next Step: Plan or Profile';
+        $nextStepTitle = 'Complete Profile to Apply';
+        if (!$isAgreementSigned) {
+            $nextStepDescription = 'Sign your placement agreement next (Step 1), or fill your missing profile fields now. Agreement, plan, and 100% profile completion are required to apply.';
+            $nextStepCtaLabel = 'Sign Agreement (Step 1)';
+            $nextStepUrl = route('candidate.wizard', ['step' => ($profile && $profile->is_terms_agreed) ? 2 : 1]);
+        } else {
+            $nextStepDescription = 'Agreement signed! Activate your plan next (Step 2) and finish missing profile details to apply for jobs.';
+            $nextStepCtaLabel = 'Activate Plan (Step 2)';
+            $nextStepUrl = route('candidate.wizard', ['step' => 3]);
+        }
+        $nextStepTone = 'amber';
+    } elseif (!$isAgreementSigned) {
+        $nextStepBadge = 'Next Step: Agreement';
+        $nextStepTitle = 'Sign Placement Agreement to Unlock Plan';
+        $nextStepDescription = 'Your profile details are saved! Sign the placement agreement next so you can activate a plan and apply.';
+        $nextStepCtaLabel = 'Sign Agreement';
+        $nextStepUrl = route('candidate.wizard', ['step' => ($profile && $profile->is_terms_agreed) ? 2 : 1]);
+        $nextStepTone = 'sky';
+    } elseif (!$hasPaidPlan) {
+        $nextStepBadge = 'Next Step: Activate Plan';
+        $nextStepTitle = 'Activate Your Plan to Apply';
+        $nextStepDescription = 'Profile & agreement are complete! Choose a membership plan to unlock school details and apply.';
+        $nextStepCtaLabel = 'Payment / Plan';
+        $nextStepUrl = route('candidate.wizard', ['step' => 3]);
+        $nextStepTone = 'sky';
+    } elseif ($isPlanExpired) {
+        $nextStepBadge = 'Plan Expired';
+        $nextStepTitle = 'Renew Your Plan to Keep Applying';
+        $nextStepDescription = 'Your membership plan has expired. Renew now to apply for new vacancies and receive interview calls.';
+        $nextStepCtaLabel = 'Renew Now';
+        $nextStepUrl = route('candidate.payment.show', ['type' => 'renewal']);
+        $nextStepTone = 'rose';
+    }
+
+    $showNextStepCard = !$isRegistrationComplete || !$isProfileDetailsDone || !empty($missingRequiredFields) || $isPlanExpired || !$hasResume || !$hasPhoto;
+
+    $remainingApplications = $placedCount > 0 ? 0 : max(0, $totalAllowedApplications - $usedApplications);
+    $canApplyNow = $isRegistrationComplete && $isPlanActive && ($usedApplications < $totalAllowedApplications) && ($placedCount === 0);
+
+    $appStatusBadges = [
+        'applied' => ['label' => 'Applied', 'class' => 'bg-sky-500/15 text-sky-300 border-sky-500/30'],
+        'shortlisted' => ['label' => 'Shortlisted', 'class' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'],
+        'interviewed' => ['label' => 'Interview Scheduled', 'class' => 'bg-amber-500/15 text-amber-300 border-amber-500/30'],
+        'hold' => ['label' => 'On Hold', 'class' => 'bg-amber-500/15 text-amber-300 border-amber-500/30'],
+        'hired' => ['label' => 'Placed', 'class' => 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'],
+        'rejected' => ['label' => 'Not Selected', 'class' => 'bg-rose-500/15 text-rose-300 border-rose-500/30'],
+    ];
 @endphp
 
-<div class="space-y-6 pb-8">
+<div class="space-y-5 pb-8">
+
+    {{-- Flash Alerts --}}
+    @php
+        $flashAlertStyles = [
+            'success' => ['wrap' => 'bg-emerald-500/15 border-emerald-500/35 text-emerald-200', 'icon' => 'fa-check-circle text-emerald-400', 'close' => 'text-emerald-300/70'],
+            'error'   => ['wrap' => 'bg-rose-500/15 border-rose-500/35 text-rose-200', 'icon' => 'fa-exclamation-circle text-rose-400', 'close' => 'text-rose-300/70'],
+            'warning' => ['wrap' => 'bg-amber-500/15 border-amber-500/35 text-amber-200', 'icon' => 'fa-exclamation-triangle text-amber-400', 'close' => 'text-amber-300/70'],
+            'info'    => ['wrap' => 'bg-sky-500/15 border-sky-500/35 text-sky-200', 'icon' => 'fa-info-circle text-sky-400', 'close' => 'text-sky-300/70'],
+        ];
+    @endphp
+    @foreach($flashAlertStyles as $flashKey => $flashStyle)
+        @if(session($flashKey))
+            <div class="rounded-2xl border px-4 py-3 flex items-center justify-between gap-3 text-xs sm:text-sm shadow-sm {{ $flashStyle['wrap'] }}">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <i class="fas {{ $flashStyle['icon'] }} shrink-0"></i>
+                    <span class="font-semibold">{{ session($flashKey) }}</span>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" class="{{ $flashStyle['close'] }} hover:text-white p-1 shrink-0" aria-label="Dismiss">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+        @endif
+    @endforeach
 
     {{-- Top Welcome & Profile Strength Banner --}}
     <div class="bg-gradient-to-r from-[#031544] via-[#092b7a] to-[#1e0e47] border border-blue-400/25 rounded-3xl p-6 sm:p-7 text-white shadow-[0_10px_35px_rgba(3,27,78,0.45)] relative overflow-hidden">
@@ -179,31 +331,314 @@
 
                 {{-- Checklist Items --}}
                 <div class="space-y-1.5 text-xs text-left">
-                    <div class="flex items-center gap-2 {{ ($profile->is_profile_complete || (!empty($profile->category_id) && !empty($profile->subject_id))) ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
-                        <i class="fas {{ ($profile->is_profile_complete || (!empty($profile->category_id) && !empty($profile->subject_id))) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
-                        <span>Complete your profile</span>
+                    <div class="flex items-center gap-2 {{ empty($personalMissing) ? 'text-emerald-300 font-semibold' : 'text-amber-200/80' }}">
+                        <i class="fas {{ empty($personalMissing) ? 'fa-check-circle text-emerald-400' : 'fa-exclamation-circle text-amber-400 text-[10px]' }}"></i>
+                        <span>Personal details &amp; address</span>
                     </div>
-                    <div class="flex items-center gap-2 {{ ($profile->experience_years > 0 || !empty($profile->current_school)) ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
-                        <i class="fas {{ ($profile->experience_years > 0 || !empty($profile->current_school)) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
-                        <span>Add experience details</span>
+                    <div class="flex items-center gap-2 {{ empty($academicMissing) ? 'text-emerald-300 font-semibold' : 'text-amber-200/80' }}">
+                        <i class="fas {{ empty($academicMissing) ? 'fa-check-circle text-emerald-400' : 'fa-exclamation-circle text-amber-400 text-[10px]' }}"></i>
+                        <span>Category, subject &amp; qualification</span>
                     </div>
-                    <div class="flex items-center gap-2 {{ !empty($profile->resume_path) ? 'text-emerald-300 font-semibold' : ($profile->is_profile_complete ? 'text-emerald-300/90 font-medium' : 'text-white/45') }}">
-                        <i class="fas {{ !empty($profile->resume_path) ? 'fa-check-circle text-emerald-400' : ($profile->is_profile_complete ? 'fa-check text-[10px] text-emerald-400' : 'fa-circle text-[7px] text-white/30') }}"></i>
-                        <span>{{ !empty($profile->resume_path) ? 'Resume on record' : ($profile->is_profile_complete ? 'Profile documents verified' : 'Upload documents') }}</span>
+                    <div class="flex items-center gap-2 {{ $hasResume ? 'text-emerald-300 font-semibold' : ($isProfileDetailsDone ? 'text-sky-200/80' : 'text-amber-200/80') }}">
+                        <i class="fas {{ $hasResume ? 'fa-check-circle text-emerald-400' : ($isProfileDetailsDone ? 'fa-file-upload text-sky-400 text-[10px]' : 'fa-circle text-[7px] text-white/30') }}"></i>
+                        <span>{{ $hasResume ? 'Resume on record' : 'Upload Resume / CV' }}</span>
                     </div>
-                    <div class="flex items-center gap-2 {{ ($profile->is_verified || $profile->is_fee_paid || $profile->is_profile_complete) ? 'text-emerald-300 font-semibold' : 'text-white/45' }}">
-                        <i class="fas {{ ($profile->is_verified || $profile->is_fee_paid || $profile->is_profile_complete) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
-                        <span>Profile is visible to schools</span>
+                    <div class="flex items-center gap-2 {{ ($isVerified || $isRegistrationComplete) ? 'text-emerald-300 font-semibold' : 'text-white/55' }}">
+                        <i class="fas {{ ($isVerified || $isRegistrationComplete) ? 'fa-check-circle text-emerald-400' : 'fa-circle text-[7px] text-white/30' }}"></i>
+                        <span>{{ $isVerified ? 'Verified candidate profile' : 'Ready to apply & be shortlisted' }}</span>
                     </div>
 
                     <div class="pt-1.5">
                         <a href="{{ route('candidate.profile.edit') }}" 
                            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-bold text-white transition-all shadow hover:shadow-md hover:scale-[1.02] active:scale-[0.98]">
-                            <span>Improve Profile</span>
+                            <span>{{ $isProfileDetailsDone ? 'Update Profile' : 'Complete Profile' }}</span>
                             <i class="fas fa-arrow-right text-[10px]"></i>
                         </a>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Relevant Next Step & Missing Profile Fields Checklist Banner --}}
+    @if($showNextStepCard)
+        @php
+            $bannerBorder = $nextStepTone === 'rose'
+                ? 'border-rose-500/40'
+                : ($nextStepTone === 'amber' ? 'border-amber-500/40' : ($nextStepTone === 'sky' ? 'border-sky-500/35' : 'border-emerald-500/30'));
+        @endphp
+        <div class="bg-gradient-to-br from-[#0a1e4a]/95 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border {{ $bannerBorder }} p-4 sm:p-5 shadow-[0_6px_25px_rgba(0,0,0,0.28)] space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="space-y-1.5 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider {{ $nextStepTone === 'rose' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/35' : ($nextStepTone === 'amber' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/35' : ($nextStepTone === 'sky' ? 'bg-sky-500/20 text-sky-300 border border-sky-500/35' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35')) }}">
+                            {{ $nextStepBadge }}
+                        </span>
+                        @if(!empty($missingRequiredFields))
+                            <span class="text-[11px] font-bold text-amber-300">
+                                {{ count($missingRequiredFields) }} required {{ count($missingRequiredFields) === 1 ? 'field' : 'fields' }} missing
+                            </span>
+                        @elseif(!$isProfileDetailsDone)
+                            <span class="text-[11px] font-bold text-amber-300">
+                                Save profile details to unlock applications
+                            </span>
+                        @elseif(!empty($documentMissing))
+                            <span class="text-[11px] font-semibold text-sky-300">
+                                Optional boost: {{ implode(', ', $documentMissing) }} not uploaded
+                            </span>
+                        @endif
+                    </div>
+
+                    <h2 class="text-base sm:text-lg font-black text-white tracking-tight">
+                        {{ $nextStepTitle }}
+                    </h2>
+                    <p class="text-xs text-slate-300 leading-relaxed max-w-3xl">
+                        {{ $nextStepDescription }}
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                    @if(!$isProfileDetailsDone || !$isRegistrationComplete || $isPlanExpired)
+                        <a href="{{ $nextStepUrl }}"
+                           class="px-4 py-2.5 rounded-xl bg-gradient-to-r {{ $nextStepTone === 'rose' ? 'from-rose-500 to-amber-500 text-white' : ($nextStepTone === 'amber' ? 'from-amber-400 to-amber-500 text-slate-950' : 'from-sky-400 to-blue-600 text-white') }} font-black text-xs shadow-md hover:brightness-105 hover:-translate-y-0.5 transition-all inline-flex items-center gap-1.5 whitespace-nowrap">
+                            <span>{{ $nextStepCtaLabel }}</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    @endif
+
+                    @if(!$isProfileDetailsDone || !empty($allMissingFields))
+                        <a href="{{ route('candidate.profile.edit') }}"
+                           class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white font-bold text-xs inline-flex items-center gap-1.5 transition-colors whitespace-nowrap">
+                            <i class="fas fa-user-edit text-[11px] text-sky-300"></i>
+                            <span>{{ $isProfileDetailsDone ? 'Update Profile / Docs' : 'Fill Profile Fields' }}</span>
+                        </a>
+                    @endif
+
+                    @if(!$isProfileDetailsDone && !$isRegistrationComplete)
+                        <button type="button"
+                                @click="$dispatch('open-incomplete-modal')"
+                                class="px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white font-semibold text-xs transition-colors">
+                            Steps Guide
+                        </button>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Missing Profile Fields Checklist --}}
+            @if(!$isProfileDetailsDone || !empty($allMissingFields))
+                <div class="pt-3 border-t border-white/[0.08] space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5">
+                        @foreach($profileChecklistGroups as $group)
+                            <a href="{{ $group['url'] }}"
+                               class="rounded-xl p-3 border transition-all flex items-start gap-2.5 {{ $group['done'] ? 'bg-emerald-500/[0.07] border-emerald-500/25 hover:border-emerald-400/40' : 'bg-white/[0.03] border-amber-500/25 hover:border-amber-400/50 hover:bg-white/[0.06]' }}">
+                                <span class="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[10px] {{ $group['done'] ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300' }}">
+                                    <i class="fas {{ $group['done'] ? 'fa-check' : 'fa-exclamation' }}"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold text-white leading-tight">{{ $group['label'] }}</div>
+                                    @if($group['done'])
+                                        <div class="text-[11px] text-emerald-300 font-medium mt-0.5">Completed</div>
+                                    @else
+                                        <div class="text-[11px] text-amber-200/90 mt-0.5 leading-snug">
+                                            Missing: {{ implode(', ', array_slice($group['missing'], 0, 3)) }}{{ count($group['missing']) > 3 ? ' +' . (count($group['missing']) - 3) . ' more' : '' }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+
+                    @if(!empty($missingRequiredFields))
+                        <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+                            <span class="text-slate-400 font-bold uppercase tracking-wider text-[10px] mr-1">Missing Fields:</span>
+                            @foreach($missingRequiredFields as $fieldLabel)
+                                <span class="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-200 font-semibold">
+                                    {{ $fieldLabel }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @endif
+        </div>
+    @endif
+
+    {{-- Candidate Application & Verification Status Summary Cards --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{-- Card A: Application Status Summary --}}
+        <div class="bg-gradient-to-b from-[#0a1e4a]/95 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.25)] flex flex-col justify-between gap-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/25 text-sky-300 flex items-center justify-center text-base shrink-0">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Application Status</span>
+                        <h3 class="text-base font-black text-white tracking-tight truncate">
+                            @if($canApplyNow)
+                                Ready to Apply
+                            @elseif($placedCount > 0)
+                                Placed Successfully
+                            @elseif(!$isProfileDetailsDone)
+                                Complete Profile to Apply
+                            @elseif(!$isAgreementSigned)
+                                Agreement Pending
+                            @elseif(!$hasPaidPlan || $isPlanExpired)
+                                Plan Activation Required
+                            @else
+                                Application Quota Used
+                            @endif
+                        </h3>
+                    </div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider shrink-0 {{ $canApplyNow ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : ($placedCount > 0 ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/40' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30') }}">
+                    {{ $canApplyNow ? $remainingApplications . ' Left' : ($placedCount > 0 ? 'Placed' : 'Action Needed') }}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2 text-center">
+                <div class="rounded-xl bg-white/[0.04] border border-white/[0.06] py-2 px-1">
+                    <div class="text-base sm:text-lg font-black text-white">{{ $applicationsCount }}</div>
+                    <div class="text-[10px] text-slate-400 font-semibold">Applied</div>
+                </div>
+                <div class="rounded-xl bg-white/[0.04] border border-white/[0.06] py-2 px-1">
+                    <div class="text-base sm:text-lg font-black text-emerald-300">{{ $shortlistedCount }}</div>
+                    <div class="text-[10px] text-slate-400 font-semibold">Shortlisted</div>
+                </div>
+                <div class="rounded-xl bg-white/[0.04] border border-white/[0.06] py-2 px-1">
+                    <div class="text-base sm:text-lg font-black text-amber-300">{{ $interviewsCount }}</div>
+                    <div class="text-[10px] text-slate-400 font-semibold">Interviews</div>
+                </div>
+                <div class="rounded-xl bg-white/[0.04] border border-white/[0.06] py-2 px-1">
+                    <div class="text-base sm:text-lg font-black text-sky-300">{{ $placedCount }}</div>
+                    <div class="text-[10px] text-slate-400 font-semibold">Placed</div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/[0.08] text-xs">
+                @if(!empty($latestApplication))
+                    @php
+                        $latestAppMeta = $appStatusBadges[$latestApplication->status ?? 'applied'] ?? $appStatusBadges['applied'];
+                    @endphp
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="text-slate-400 shrink-0">Latest:</span>
+                        <span class="font-semibold text-white truncate max-w-[170px]">{{ $latestApplication->jobPost?->title ?? 'Job Application' }}</span>
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border shrink-0 {{ $latestAppMeta['class'] }}">{{ $latestAppMeta['label'] }}</span>
+                    </div>
+                @else
+                    <span class="text-slate-400">
+                        @if($hasPaidPlan)
+                            Quota: <strong class="text-white">{{ $usedApplications }}/{{ $totalAllowedApplications }}</strong> applications used
+                        @else
+                            No applications submitted yet
+                        @endif
+                    </span>
+                @endif
+
+                <div class="flex items-center gap-3 shrink-0 ml-auto">
+                    @if(!$isProfileDetailsDone)
+                        <a href="{{ route('candidate.profile.edit') }}" class="font-bold text-amber-300 hover:text-amber-200 inline-flex items-center gap-1 transition-colors">
+                            <span>Complete Profile to Apply</span>
+                            <i class="fas fa-arrow-right text-[9px]"></i>
+                        </a>
+                    @else
+                        <a href="{{ route('candidate.applications.index') }}" class="font-bold text-accent-blue hover:text-white inline-flex items-center gap-1 transition-colors">
+                            <span>Applications</span>
+                            <i class="fas fa-arrow-right text-[9px]"></i>
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- Card B: Verification Status Summary --}}
+        <div class="bg-gradient-to-b from-[#0a1e4a]/95 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border {{ $isVerified ? 'border-emerald-500/35' : ($verificationRequested ? 'border-sky-500/35' : 'border-white/[0.08]') }} p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.25)] flex flex-col justify-between gap-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl {{ $isVerified ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' : ($verificationRequested ? 'bg-sky-500/15 border-sky-500/30 text-sky-300' : 'bg-amber-500/15 border-amber-500/30 text-amber-300') }} border flex items-center justify-center text-base shrink-0">
+                        <i class="fas {{ $isVerified ? 'fa-shield-alt' : ($verificationRequested ? 'fa-hourglass-half' : 'fa-user-check') }}"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Verification Status</span>
+                        <h3 class="text-base font-black text-white tracking-tight truncate">
+                            @if($isVerified)
+                                Verified Candidate
+                            @elseif($verificationRequested)
+                                Verification Under Review
+                            @elseif(!$isProfileDetailsDone)
+                                Profile Incomplete
+                            @else
+                                Ready for Verification
+                            @endif
+                        </h3>
+                    </div>
+                </div>
+                @if($isVerified)
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                        Verified
+                    </span>
+                @elseif($verificationRequested)
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-sky-500/15 text-sky-300 border border-sky-500/30 shrink-0">
+                        Requested
+                    </span>
+                @else
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
+                        Unverified
+                    </span>
+                @endif
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                <div class="rounded-xl bg-white/[0.04] border border-white/[0.06] px-2.5 py-2 flex items-center gap-1.5">
+                    <i class="fas {{ $isProfileDetailsDone ? 'fa-check-circle text-emerald-400' : 'fa-clock text-amber-400' }} text-[10px]"></i>
+                    <span class="font-semibold text-slate-200 truncate">Profile</span>
+                </div>
+                <div class="rounded-xl bg-white/[0.04] border border-white/[0.06] px-2.5 py-2 flex items-center gap-1.5">
+                    <i class="fas {{ $isAgreementSigned ? 'fa-check-circle text-emerald-400' : 'fa-clock text-amber-400' }} text-[10px]"></i>
+                    <span class="font-semibold text-slate-200 truncate">Agreement</span>
+                </div>
+                <div class="rounded-xl bg-white/[0.04] border border-white/[0.06] px-2.5 py-2 flex items-center gap-1.5">
+                    <i class="fas {{ $hasPaidPlan ? 'fa-check-circle text-emerald-400' : 'fa-clock text-amber-400' }} text-[10px]"></i>
+                    <span class="font-semibold text-slate-200 truncate">Plan / Fee</span>
+                </div>
+                <div class="rounded-xl bg-white/[0.04] border border-white/[0.06] px-2.5 py-2 flex items-center gap-1.5">
+                    <i class="fas {{ $isVerified ? 'fa-check-circle text-emerald-400' : ($verificationRequested ? 'fa-hourglass-half text-sky-400' : 'fa-minus-circle text-slate-500') }} text-[10px]"></i>
+                    <span class="font-semibold text-slate-200 truncate">Badge</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/[0.08] text-xs">
+                @if($isVerified)
+                    <span class="text-emerald-300 font-medium">Your profile carries the Verified Badge for schools.</span>
+                    <a href="{{ route('candidate.profile.edit') }}" class="font-bold text-accent-blue hover:text-white inline-flex items-center gap-1 shrink-0">
+                        <span>View Profile</span>
+                        <i class="fas fa-arrow-right text-[9px]"></i>
+                    </a>
+                @elseif($verificationRequested)
+                    <span class="text-sky-200 font-medium">
+                        Submitted {{ $verificationRequestedAt ? $verificationRequestedAt->diffForHumans() : 'recently' }} — team review pending.
+                    </span>
+                    <a href="{{ route('candidate.profile.edit') }}" class="font-bold text-accent-blue hover:text-white inline-flex items-center gap-1 shrink-0">
+                        <span>Update Profile</span>
+                        <i class="fas fa-arrow-right text-[9px]"></i>
+                    </a>
+                @elseif(!$isProfileDetailsDone)
+                    <span class="text-slate-300">Complete your profile details first to request verification.</span>
+                    <a href="{{ route('candidate.profile.edit') }}" class="font-bold text-amber-300 hover:text-amber-200 inline-flex items-center gap-1 shrink-0">
+                        <span>Complete Profile</span>
+                        <i class="fas fa-arrow-right text-[9px]"></i>
+                    </a>
+                @else
+                    <span class="text-slate-300">Profile complete — boost visibility with verification.</span>
+                    <form action="{{ route('candidate.verification.request') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit"
+                                class="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs transition-all shadow cursor-pointer inline-flex items-center gap-1.5">
+                            <i class="fas fa-paper-plane text-[10px]"></i>
+                            <span>Request Verification</span>
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>
@@ -319,7 +754,241 @@
         {{-- ==================== LEFT COLUMN ==================== --}}
         <div class="lg:col-span-8 space-y-5">
 
-            {{-- 1. Notifications & Updates List --}}
+            {{-- 1. Quick Actions (Core Candidate Shortcuts) --}}
+            <div>
+                <h3 class="text-base font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fas fa-bolt text-accent-yellow text-sm"></i>
+                    <span>Quick Actions</span>
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                    {{-- 1. Complete / Update Profile --}}
+                    <a href="{{ route('candidate.profile.edit') }}"
+                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border {{ !$isProfileDetailsDone ? 'border-amber-500/35' : 'border-white/[0.08]' }} p-4 hover:border-sky-400/50 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(18,154,239,0.2)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/25 text-sky-400 flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-md text-[9px] font-bold {{ !empty($missingRequiredFields) ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' }}">
+                                {{ !empty($missingRequiredFields) ? count($missingRequiredFields) . ' Left' : 'Done' }}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">{{ $isProfileDetailsDone ? 'Update Profile' : 'Complete Profile' }}</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Personal &amp; teaching info</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-sky-400 mt-2.5 group-hover:translate-x-1 transition-transform">
+                                <span>{{ $isProfileDetailsDone ? 'Edit Details' : 'Fill Now' }}</span>
+                                <i class="fas fa-arrow-right text-[9px]"></i>
+                            </span>
+                        </div>
+                    </a>
+
+                    {{-- 2. View / Update Resume --}}
+                    <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-purple-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(168,85,247,0.2)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/25 text-purple-400 flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-md text-[9px] font-bold {{ $hasResume ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30' }}">
+                                {{ $hasResume ? 'On File' : 'Missing' }}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">View / Update Resume</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">
+                                {{ $hasResume ? 'Open or replace CV file' : 'Upload CV or build ATS resume' }}
+                            </p>
+                            <div class="mt-2.5 flex flex-wrap items-center gap-2 text-[11px] font-bold">
+                                @if($hasResume)
+                                    <a href="{{ route('candidate.resume.view') }}" target="_blank" class="text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1">
+                                        <span>View</span>
+                                        <i class="fas fa-external-link-alt text-[9px]"></i>
+                                    </a>
+                                    <span class="text-slate-600">&bull;</span>
+                                    <a href="{{ route('candidate.profile.edit') }}#resume-section" class="text-purple-400 hover:text-purple-300">
+                                        Update
+                                    </a>
+                                @else
+                                    <a href="{{ route('candidate.profile.edit') }}#resume-section" class="text-purple-400 hover:text-purple-300">
+                                        Upload
+                                    </a>
+                                    <span class="text-slate-600">&bull;</span>
+                                    <a href="{{ route('resume.builder') }}" class="text-sky-400 hover:text-sky-300">
+                                        Builder
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- 3. Browse Jobs --}}
+                    <a href="{{ route('jobs') }}"
+                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-accent-blue/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(18,154,239,0.2)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-accent-blue/15 border border-accent-blue/25 text-accent-blue flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Browse Jobs</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Explore school vacancies</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-accent-blue mt-2.5 group-hover:translate-x-1 transition-transform">
+                                <span>Search Jobs</span>
+                                <i class="fas fa-arrow-right text-[9px]"></i>
+                            </span>
+                        </div>
+                    </a>
+
+                    {{-- 4. Applications --}}
+                    <a href="{{ route('candidate.applications.index') }}"
+                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-emerald-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(52,211,153,0.2)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                                <i class="fas fa-paper-plane"></i>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                {{ $applicationsCount }}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Applications</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Track applied &amp; interviews</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-2.5 group-hover:translate-x-1 transition-transform">
+                                <span>View Tracker</span>
+                                <i class="fas fa-arrow-right text-[9px]"></i>
+                            </span>
+                        </div>
+                    </a>
+
+                    {{-- 5. Agreement --}}
+                    <a href="{{ route('candidate.agreement.show') }}"
+                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-indigo-400/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(99,102,241,0.2)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                                <i class="fas fa-file-contract"></i>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-md text-[9px] font-bold {{ $isAgreementSigned ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30' }}">
+                                {{ $isAgreementSigned ? 'Signed' : 'Pending' }}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Agreement</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">{{ $isAgreementSigned ? 'View or download PDF' : 'Accept & digitally sign' }}</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-300 mt-2.5 group-hover:translate-x-1 transition-transform">
+                                <span>{{ $isAgreementSigned ? 'View Agreement' : 'Sign Now' }}</span>
+                                <i class="fas fa-arrow-right text-[9px]"></i>
+                            </span>
+                        </div>
+                    </a>
+
+                    {{-- 6. Payment / Plan --}}
+                    <a href="{{ route('candidate.payment.show') }}"
+                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-amber-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(245,158,11,0.2)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/25 text-amber-400 flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-md text-[9px] font-bold {{ $isPlanActive ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : ($isPlanExpired ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30') }}">
+                                {{ $isPlanActive ? 'Active' : ($isPlanExpired ? 'Expired' : 'Inactive') }}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Payment / Plan</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Invoices, upgrade &amp; renew</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-400 mt-2.5 group-hover:translate-x-1 transition-transform">
+                                <span>{{ $isPlanExpired ? 'Renew Plan' : 'Manage Plan' }}</span>
+                                <i class="fas fa-arrow-right text-[9px]"></i>
+                            </span>
+                        </div>
+                    </a>
+
+                    {{-- 7. Request Verification --}}
+                    @if($isVerified)
+                        <a href="{{ route('candidate.profile.edit') }}"
+                           class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-emerald-500/30 p-4 hover:border-emerald-400/50 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+                            <div class="flex items-start justify-between gap-2 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 flex items-center justify-center text-base">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                    Verified
+                                </span>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white">Request Verification</h4>
+                                <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Profile is already verified</p>
+                                <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-2.5">
+                                    <span>Verified Badge</span>
+                                    <i class="fas fa-check-circle text-[10px]"></i>
+                                </span>
+                            </div>
+                        </a>
+                    @elseif($verificationRequested)
+                        <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-sky-500/30 p-4 flex flex-col justify-between">
+                            <div class="flex items-start justify-between gap-2 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/25 text-sky-400 flex items-center justify-center text-base">
+                                    <i class="fas fa-hourglass-half"></i>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                                    Requested
+                                </span>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white">Request Verification</h4>
+                                <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Team review in progress</p>
+                                <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-sky-300 mt-2.5">
+                                    <span>Under Review</span>
+                                </span>
+                            </div>
+                        </div>
+                    @else
+                        <form action="{{ route('candidate.verification.request') }}" method="POST" class="flex">
+                            @csrf
+                            <button type="submit"
+                                    class="w-full text-left bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-cyan-400/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(34,211,238,0.18)] transition-all duration-300 flex flex-col justify-between group cursor-pointer">
+                                <div class="flex items-start justify-between gap-2 mb-3 w-full">
+                                    <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/25 text-cyan-300 flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded-md text-[9px] font-bold {{ $isProfileDetailsDone ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30' }}">
+                                        {{ $isProfileDetailsDone ? 'Ready' : 'Profile 1st' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-white">Request Verification</h4>
+                                    <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Get verified badge for schools</p>
+                                    <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-cyan-300 mt-2.5 group-hover:translate-x-1 transition-transform">
+                                        <span>{{ $isProfileDetailsDone ? 'Submit Request' : 'Complete Profile First' }}</span>
+                                        <i class="fas fa-arrow-right text-[9px]"></i>
+                                    </span>
+                                </div>
+                            </button>
+                        </form>
+                    @endif
+
+                    {{-- 8. Saved Jobs --}}
+                    <a href="{{ route('candidate.savedJobs.index') }}"
+                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-pink-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(236,72,153,0.18)] transition-all duration-300 flex flex-col justify-between group">
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-pink-500/15 border border-pink-500/25 text-pink-400 flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                                <i class="fas fa-bookmark"></i>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-pink-500/15 text-pink-300 border border-pink-500/30">
+                                {{ $savedJobsCount ?? 0 }}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Saved Jobs</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Your bookmarked vacancies</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-pink-400 mt-2.5 group-hover:translate-x-1 transition-transform">
+                                <span>View Saved</span>
+                                <i class="fas fa-arrow-right text-[9px]"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            {{-- 2. Notifications & Updates List --}}
             <div class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -395,86 +1064,6 @@
                             </div>
                         </div>
                     @endforelse
-                </div>
-            </div>
-
-            {{-- 3. Quick Actions (4 Interactive Cards Grid) --}}
-            <div>
-                <h3 class="text-base font-bold text-white mb-3 flex items-center gap-2">
-                    <i class="fas fa-bolt text-accent-yellow text-sm"></i>
-                    <span>Quick Actions</span>
-                </h3>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                    {{-- 1. Resume Builder --}}
-                    <a href="{{ route('resume.builder') }}" 
-                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-purple-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(168,85,247,0.2)] transition-all duration-300 flex flex-col justify-between group">
-                        <div class="w-11 h-11 rounded-2xl bg-purple-500/15 border border-purple-500/25 text-purple-400 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
-                            <i class="fas fa-file-invoice"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-white">Resume Builder</h4>
-                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Create ATS friendly resume</p>
-                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-400 mt-3 group-hover:translate-x-1 transition-transform">
-                                <span>Build Resume</span>
-                                <i class="fas fa-arrow-right text-[9px]"></i>
-                            </span>
-                        </div>
-                    </a>
-
-                    {{-- 2. Find Jobs --}}
-                    <a href="{{ route('jobs') }}" 
-                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-accent-blue/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(18,154,239,0.2)] transition-all duration-300 flex flex-col justify-between group">
-                        <div class="w-11 h-11 rounded-2xl bg-accent-blue/15 border border-accent-blue/25 text-accent-blue flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-white">Find Jobs</h4>
-                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Explore matching opportunities</p>
-                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-accent-blue mt-3 group-hover:translate-x-1 transition-transform">
-                                <span>Search Jobs</span>
-                                <i class="fas fa-arrow-right text-[9px]"></i>
-                            </span>
-                        </div>
-                    </a>
-
-                    {{-- 3. Saved Jobs --}}
-                    <a href="{{ route('candidate.savedJobs.index') }}" 
-                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-emerald-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(52,211,153,0.2)] transition-all duration-300 flex flex-col justify-between group">
-                        <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
-                            <i class="fas fa-bookmark"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center justify-between">
-                                <h4 class="text-xs font-bold text-white">Saved Jobs</h4>
-                                @if(!empty($savedJobsCount) && $savedJobsCount > 0)
-                                    <span class="px-1.5 py-0.2 rounded-md text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                        {{ $savedJobsCount }}
-                                    </span>
-                                @endif
-                            </div>
-                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">View your bookmarked jobs</p>
-                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-3 group-hover:translate-x-1 transition-transform">
-                                <span>View Saved ({{ $savedJobsCount ?? 0 }})</span>
-                                <i class="fas fa-arrow-right text-[9px]"></i>
-                            </span>
-                        </div>
-                    </a>
-
-                    {{-- 4. Job Alerts --}}
-                    <a href="{{ route('candidate.aditionalFeature.show') }}" 
-                       class="bg-gradient-to-b from-[#0a1e4a]/90 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 hover:border-amber-500/40 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(245,158,11,0.2)] transition-all duration-300 flex flex-col justify-between group">
-                        <div class="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/25 text-amber-400 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition-transform">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-white">Job Alerts</h4>
-                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Get notified about new jobs</p>
-                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-400 mt-3 group-hover:translate-x-1 transition-transform">
-                                <span>Manage Alerts</span>
-                                <i class="fas fa-arrow-right text-[9px]"></i>
-                            </span>
-                        </div>
-                    </a>
                 </div>
             </div>
 

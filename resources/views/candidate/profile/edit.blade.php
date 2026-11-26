@@ -32,6 +32,20 @@
         </div>
     @endif
 
+    @if(session('info'))
+        <div class="mb-6 bg-sky-500/10 border border-sky-500/30 p-4 rounded-xl flex items-center gap-3 reveal">
+            <i class="fas fa-info-circle text-sky-400"></i>
+            <span class="text-sm text-sky-300 font-medium">{{ session('info') }}</span>
+        </div>
+    @endif
+
+    @if(session('warning'))
+        <div class="mb-6 bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl flex items-center gap-3 reveal">
+            <i class="fas fa-exclamation-triangle text-amber-400"></i>
+            <span class="text-sm text-amber-300 font-medium">{{ session('warning') }}</span>
+        </div>
+    @endif
+
     @if($errors->any())
         <div class="mb-6 bg-red-500/10 border border-red-500/30 p-4 rounded-xl reveal">
             <div class="flex items-start gap-3">
@@ -253,14 +267,19 @@
                         </div>
                     </div>
 
-                    <div>
+                    <div id="resume-section">
                         <label class="block text-xs font-semibold text-text-main/70 mb-2 uppercase tracking-wider">Upload Resume <span class="text-text-dark/40 text-[10px] normal-case">({{ $profile->resume_path ? 'Uploaded' : 'Optional / Recommended' }})</span></label>
                         <div class="relative">
                             <input type="file" name="resume" accept=".pdf,.doc,.docx"
                                 class="w-full bg-secondary-bg border border-card-border rounded-xl px-4 py-2.5 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-accent-blue/10 file:text-accent-blue hover:file:bg-accent-blue/20">
                         </div>
                         @if($profile->resume_path)
-                            <p class="text-[11px] text-green-400 mt-1.5 flex items-center gap-1"><i class="fas fa-check-circle"></i> Resume uploaded. Select new file to replace.</p>
+                            <div class="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                                <span class="text-green-400 flex items-center gap-1"><i class="fas fa-check-circle"></i> Resume uploaded. Select new file to replace.</span>
+                                <a href="{{ route('candidate.resume.view') }}" target="_blank" class="inline-flex items-center gap-1 text-accent-blue hover:underline font-semibold">
+                                    <i class="fas fa-external-link-alt text-[10px]"></i> View Current Resume
+                                </a>
+                            </div>
                         @endif
                     </div>
 

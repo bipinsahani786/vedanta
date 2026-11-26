@@ -207,10 +207,49 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
 
         // Dynamic metrics
         $applicationsCount = $user ? $user->applications()->count() : 0;
+        $pendingAppsCount = $user ? $user->applications()->where('status', 'applied')->count() : 0;
         $shortlistedCount = $user ? $user->applications()->where('status', 'shortlisted')->count() : 0;
         $interviewsCount = $user ? $user->applications()->where(function ($q) {
             $q->where('status', 'interviewed')->orWhereNotNull('interview_date');
         })->count() : 0;
+        $placedCount = $user ? $user->applications()->where('status', 'hired')->count() : 0;
+        $holdCount = $user ? $user->applications()->where('status', 'hold')->count() : 0;
+        $rejectedCount = $user ? $user->applications()->where('status', 'rejected')->count() : 0;
+        $latestApplication = $user ? $user->applications()->with('jobPost')->latest()->first() : null;
+
+        // Verification request status (from existing notifications table, no schema changes needed)
+        $latestVerificationReq = null;
+        if ($user && $profile && ! $profile->is_verified) {
+            $cid = (int) $user->id;
+            $lastVerifiedNotifAt = \Illuminate\Support\Facades\DB::table('notifications')
+                ->where('type', 'App\Notifications\ProfileVerified')
+                ->where('notifiable_type', 'App\Models\User')
+                ->where('notifiable_id', $cid)
+                ->max('created_at');
+
+            $verificationNotifs = \Illuminate\Support\Facades\DB::table('notifications')
+                ->whereIn('type', ['App\Notifications\VerificationRequested', 'App\Notifications\VerificationRequestSubmitted'])
+                ->where(function ($q) use ($cid) {
+                    $q->where('data', 'like', '%"candidate_id":' . $cid . ',%')
+                      ->orWhere('data', 'like', '%"candidate_id":' . $cid . '}%')
+                      ->orWhere('data', 'like', '%"candidate_id": ' . $cid . ',%')
+                      ->orWhere('data', 'like', '%"candidate_id": ' . $cid . '}%');
+                })
+                ->orderByDesc('created_at')
+                ->get(['id', 'data', 'created_at']);
+
+            foreach ($verificationNotifs as $vn) {
+                $decoded = json_decode($vn->data, true);
+                if (is_array($decoded) && (int) ($decoded['candidate_id'] ?? 0) === $cid) {
+                    if (! $lastVerifiedNotifAt || $vn->created_at > $lastVerifiedNotifAt) {
+                        $latestVerificationReq = $vn;
+                    }
+                    break;
+                }
+            }
+        }
+        $verificationRequested = (bool) $latestVerificationReq;
+        $verificationRequestedAt = $latestVerificationReq ? \Carbon\Carbon::parse($latestVerificationReq->created_at) : null;
 
         // Auto-heal candidate profile completion if admin filled core details or fee is paid
         if ($user && $profile) {
@@ -245,6 +284,7 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             if ($needsUpdate) {
                 $profile->update($updates);
                 $profile->refresh();
+                $user->setRelation('profile', $profile);
             }
         }
 
@@ -335,8 +375,15 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
         return view('candidate.dashboard', compact(
             'profile',
             'applicationsCount',
+            'pendingAppsCount',
             'shortlistedCount',
             'interviewsCount',
+            'placedCount',
+            'holdCount',
+            'rejectedCount',
+            'latestApplication',
+            'verificationRequested',
+            'verificationRequestedAt',
             'profileViews',
             'wallet',
             'pointRate',
@@ -350,6 +397,10 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             'savedJobsCount'
         ));
     })->name('dashboard');
+
+    // Resume View & Verification Request Routes
+    Route::get('/resume/view', [ProfileController::class, 'viewResume'])->name('resume.view');
+    Route::post('/verification/request', [ProfileController::class, 'requestVerification'])->name('verification.request');
 
     // Saved Jobs Routes
     Route::post('/jobs/{job}/toggle-save', [SavedJobController::class, 'toggle'])->name('jobs.toggleSave');

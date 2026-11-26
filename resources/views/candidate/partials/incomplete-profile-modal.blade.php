@@ -1,7 +1,7 @@
 {{-- Candidate Incomplete Registration / Profile Popup Modal --}}
 @php
     $user = auth()->user();
-    $profile = $user ? ($user->profile ?: null) : null;
+    $profile = $profile ?? ($user ? ($user->profile ?: null) : null);
     $hasCoreProfile = (bool) ($profile && (!empty($profile->category_id) && !empty($profile->subject_id)));
     $hasActivePlan = (bool) ($profile && ($profile->is_plan_active || $profile->has_paid_plan));
     if (!$hasActivePlan && $user) {
@@ -16,11 +16,20 @@
     $paymentDone = (bool) ($profile && $hasPayment);
     $profileDetailsDone = (bool) ($profile && $profile->hasCompletedProfileDetails());
 
+    $modalMissingFields = [];
+    if (!$profile || empty($profile->date_of_birth)) { $modalMissingFields[] = 'Date of Birth'; }
+    if (!$profile || empty($profile->gender)) { $modalMissingFields[] = 'Gender'; }
+    if (!$profile || empty($profile->address)) { $modalMissingFields[] = 'Address'; }
+    if (!$profile || empty($profile->category_id) || empty($profile->subject_id)) { $modalMissingFields[] = 'Category & Subject'; }
+    if (!$profile || empty($profile->highest_qualification_id)) { $modalMissingFields[] = 'Qualification'; }
+    if (!$profile || empty($profile->preferred_state_id) || empty($profile->preferred_city_id)) { $modalMissingFields[] = 'Location'; }
+    if (!$profile || empty($profile->resume_path)) { $modalMissingFields[] = 'Resume'; }
+
     $completedSteps = ($agreementSigned ? 1 : 0) + ($paymentDone ? 1 : 0) + ($profileDetailsDone ? 1 : 0);
     $isRegistrationComplete = ($completedSteps === 3) || ($profile && $profile->isRegistrationCompleted());
     $progressPercent = (int) round(($completedSteps / 3) * 100);
 
-    // Smart Action CTA & Step Label (New Flow: 1. Agreement -> 2. Payment -> 3. Complete Profile)
+    // Smart Action CTA & Step Label (Flow: 1. Agreement -> 2. Payment -> 3. Complete Profile)
     if (!$agreementSigned) {
         $ctaLabel = 'Sign Agreement (Step 1)';
         $pendingStepText = 'Please review and digitally sign the placement agreement to get started.';
@@ -30,17 +39,30 @@
         $pendingStepText = 'Your placement agreement is signed! Activate your registration plan next.';
         $wizardUrl = route('candidate.wizard', ['step' => 3]);
     } else {
-        $ctaLabel = 'Complete Profile (Required to Apply)';
+        $ctaLabel = 'Complete Profile to Apply';
         $pendingStepText = 'Your agreement and payment are done! Complete your profile 100% to unlock job applications.';
         $wizardUrl = route('candidate.wizard', ['step' => 4]);
     }
 @endphp
 
-@if(!$isRegistrationComplete)
+@if(!$isRegistrationComplete && !$profileDetailsDone)
 <div x-data="{
-        showModal: true,
+        showModal: false,
+        storageKey: 'vpa_incomplete_popup_dismissed_{{ $user->id ?? 0 }}',
+        init() {
+            try {
+                if (!sessionStorage.getItem(this.storageKey)) {
+                    this.showModal = true;
+                }
+            } catch (e) {
+                this.showModal = true;
+            }
+        },
         close() {
             this.showModal = false;
+            try {
+                sessionStorage.setItem(this.storageKey, '1');
+            } catch (e) {}
         }
     }"
     x-show="showModal"
@@ -199,7 +221,13 @@
                         </div>
                         <div class="min-w-0">
                             <h4 class="text-xs sm:text-sm font-bold text-white truncate">3. Profile &amp; Qualifications</h4>
-                            <p class="text-[11px] {{ $profileDetailsDone ? 'text-emerald-300/80' : 'text-amber-200/90' }}">Personal details, subject &amp; resume (required 100% to apply)</p>
+                            <p class="text-[11px] {{ $profileDetailsDone ? 'text-emerald-300/80' : 'text-amber-200/90' }}">
+                                @if(!empty($modalMissingFields) && !$profileDetailsDone)
+                                    Missing: {{ implode(', ', array_slice($modalMissingFields, 0, 4)) }}{{ count($modalMissingFields) > 4 ? ' +' . (count($modalMissingFields) - 4) . ' more' : '' }}
+                                @else
+                                    Personal details, subject &amp; resume (required 100% to apply)
+                                @endif
+                            </p>
                         </div>
                     </div>
                     @if($profileDetailsDone)

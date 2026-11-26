@@ -142,4 +142,120 @@ class ProfileController extends Controller
 
         return back()->with('password_success', 'Password updated successfully!');
     }
+
+    /**
+     * Stream or download the candidate's uploaded resume from public storage.
+     */
+    public function viewResume()
+    {
+        $user = auth()->user();
+        $profile = $user->profile;
+
+        if (! $profile || empty($profile->resume_path) || ! \Illuminate\Support\Facades\Storage::disk('public')->exists($profile->resume_path)) {
+            return redirect()->to(route('candidate.profile.edit') . '#resume-section')
+                ->with('info', 'No uploaded resume found. Please upload your resume below or use the Resume Builder.');
+        }
+
+        $cleanName = preg_replace('/[^A-Za-z0-9_]/', '_', $user->name ?? 'Candidate');
+        $ext = strtolower(pathinfo($profile->resume_path, PATHINFO_EXTENSION) ?: 'pdf');
+        $mimeMap = [
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ];
+        $mimeType = $mimeMap[$ext] ?? 'application/octet-stream';
+
+        return \Illuminate\Support\Facades\Storage::disk('public')->response(
+            $profile->resume_path,
+            'Resume_' . $cleanName . '.' . $ext,
+            ['Content-Type' => $mimeType],
+            'inline'
+        );
+    }
+
+    /**
+     * Submit a profile verification request notification to admins.
+     */
+    public function requestVerification(Request $request)
+    {
+        $user = auth()->user();
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
+
+        if ($profile->is_verified) {
+            return redirect()->route('candidate.dashboard')
+                ->with('info', 'Your profile is already verified.');
+        }
+
+        if (! $profile->hasCompletedProfileDetails()) {
+            return redirect()->route('candidate.profile.edit')
+                ->with('warning', 'Please complete your profile details first before requesting verification.');
+        }
+
+        $cid = (int) $user->id;
+        $lastVerifiedNotifAt = \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('type', 'App\Notifications\ProfileVerified')
+            ->where('notifiable_type', 'App\Models\User')
+            ->where('notifiable_id', $cid)
+            ->max('created_at');
+
+        $existingRequests = \Illuminate\Support\Facades\DB::table('notifications')
+            ->whereIn('type', ['App\Notifications\VerificationRequested', 'App\Notifications\VerificationRequestSubmitted'])
+            ->where(function ($q) use ($cid) {
+                $q->where('data', 'like', '%"candidate_id":' . $cid . ',%')
+                  ->orWhere('data', 'like', '%"candidate_id":' . $cid . '}%')
+                  ->orWhere('data', 'like', '%"candidate_id": ' . $cid . ',%')
+                  ->orWhere('data', 'like', '%"candidate_id": ' . $cid . '}%');
+            })
+            ->orderByDesc('created_at')
+            ->get(['id', 'data', 'created_at']);
+
+        foreach ($existingRequests as $reqRow) {
+            $decoded = json_decode($reqRow->data, true);
+            if (is_array($decoded) && (int) ($decoded['candidate_id'] ?? 0) === $cid) {
+                if (! $lastVerifiedNotifAt || $reqRow->created_at > $lastVerifiedNotifAt) {
+                    return redirect()->route('candidate.dashboard')
+                        ->with('info', 'Your verification request is already under review by our team.');
+                }
+                break;
+            }
+        }
+
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        $vpaId = $profile->vpa_id ? " ({$profile->vpa_id})" : '';
+        $payload = json_encode([
+            'title' => 'Candidate Verification Request',
+            'message' => "{$user->name}{$vpaId} has requested profile verification.",
+            'candidate_id' => $cid,
+            'vpa_id' => $profile->vpa_id,
+        ]);
+
+        foreach ($admins as $admin) {
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'id' => \Illuminate\Support\Str::uuid()->toString(),
+                'type' => 'App\Notifications\VerificationRequested',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => $admin->id,
+                'data' => $payload,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        \Illuminate\Support\Facades\DB::table('notifications')->insert([
+            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'type' => 'App\Notifications\VerificationRequestSubmitted',
+            'notifiable_type' => 'App\Models\User',
+            'notifiable_id' => $cid,
+            'data' => json_encode([
+                'title' => 'Verification Request Submitted',
+                'message' => 'Your profile verification request has been received. Our team will review your profile shortly.',
+                'candidate_id' => $cid,
+            ]),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('candidate.dashboard')
+            ->with('success', 'Verification request submitted successfully! Our team will review your profile shortly.');
+    }
 }
