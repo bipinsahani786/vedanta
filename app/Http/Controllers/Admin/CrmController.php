@@ -167,7 +167,7 @@ class CrmController extends Controller
 
                     'is_terms_agreed'     => true,
                     'is_agreement_signed' => $request->has('is_agreement_signed') ? $request->boolean('is_agreement_signed') : true,
-                    'signature_date_time' => now(),
+                    'signature_date_time' => ($request->has('is_agreement_signed') ? $request->boolean('is_agreement_signed') : true) ? now() : null,
                 ]);
 
                 // 3. Create Payment Transaction ONLY when actual money was collected (amount > 0).
@@ -767,7 +767,11 @@ class CrmController extends Controller
     {
         $candidate = User::where('role', 'candidate')->findOrFail($id);
 
-        $signUrl = route('candidate.agreement.show');
+        if (! $candidate->email) {
+            return back()->with('error', 'Candidate does not have a valid email address.');
+        }
+
+        $signUrl = route('candidate.agreement.show', ['sign' => 1]);
 
         try {
             Mail::to($candidate->email)->send(

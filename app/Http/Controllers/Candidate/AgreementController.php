@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 class AgreementController extends Controller
 {
-    public function show()
+    public function show(Request $request)
     {
         $user = auth()->user();
         $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
@@ -24,7 +24,9 @@ class AgreementController extends Controller
             return redirect()->route('candidate.wizard', ['step' => $step])->with('info', 'Please complete your live camera photo and agreement signature.');
         }
 
-        return view('candidate.agreement.show', compact('user', 'profile'));
+        $forceSignForm = $request->boolean('sign');
+
+        return view('candidate.agreement.show', compact('user', 'profile', 'forceSignForm'));
     }
 
     public function preview(Request $request)

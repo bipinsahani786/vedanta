@@ -66,7 +66,7 @@
         </div>
 
         {{-- Signature Section --}}
-        @if($profile->is_agreement_signed)
+        @if($profile->is_agreement_signed && !($forceSignForm ?? false))
             <div class="p-6 md:p-8 bg-green-500/5">
                 <div class="flex items-start gap-4">
                     <div class="w-12 h-12 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xl flex-shrink-0">
