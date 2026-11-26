@@ -21,7 +21,13 @@
         <form action="{{ route('admin.jobs.update', $job->id) }}" method="POST" enctype="multipart/form-data" class="p-8">
             @csrf
             @method('PUT')
-            
+
+            @include('admin.jobs.partials.school-selector', [
+                'schools' => $schools,
+                'selectedSchoolId' => $selectedSchoolId ?? old('school_user_id'),
+                'isEdit' => true,
+            ])
+
             <!-- School / Institution Banner Image Upload -->
             <div class="mb-8">
                 <label class="block text-xs font-bold text-text-dark/80 uppercase tracking-wider mb-2 flex items-center gap-2">
@@ -30,6 +36,7 @@
                 
                 <div id="school-image-upload-box" class="relative group border-2 border-dashed border-card-border hover:border-accent-blue/60 rounded-2xl bg-secondary-bg/30 p-6 transition-all duration-200 text-center cursor-pointer">
                     <input type="file" name="school_image" id="school_image" accept="image/png,image/jpeg,image/jpg,image/webp" class="hidden">
+                    <input type="hidden" name="retained_image" id="retained_image" value="{{ old('retained_image', $job->school_image) }}">
                     <input type="hidden" name="remove_school_image" id="remove_school_image" value="0">
                     
                     <!-- Empty State -->
@@ -76,28 +83,28 @@
                 <!-- School Name -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">School/Institution Name</label>
-                    <input type="text" name="school_name" value="{{ old('school_name', $job->school_name) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Delhi Public School">
+                    <input type="text" name="school_name" id="school_name" value="{{ old('school_name', $job->school_name) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Delhi Public School">
                     @error('school_name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Contact Person -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Contact Person</label>
-                    <input type="text" name="contact_person" value="{{ old('contact_person', $job->contact_person) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Mr. Sharma">
+                    <input type="text" name="contact_person" id="contact_person" value="{{ old('contact_person', $job->contact_person) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. Mr. Sharma">
                     @error('contact_person') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Email -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Email Address</label>
-                    <input type="email" name="email" value="{{ old('email', $job->email) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. hr@school.com">
+                    <input type="email" name="email" id="email" value="{{ old('email', $job->email) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. hr@school.com">
                     @error('email') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Phone -->
                 <div>
                     <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wide mb-2">Phone Number</label>
-                    <input type="text" name="phone" value="{{ old('phone', $job->phone) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 9876543210">
+                    <input type="text" name="phone" id="phone" value="{{ old('phone', $job->phone) }}" class="w-full bg-secondary-bg border border-card-border text-text-main rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all" placeholder="e.g. 9876543210">
                     @error('phone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -265,6 +272,8 @@
     </div>
 </div>
 
+@include('admin.jobs.partials.quick-add-school-modal')
+
 @push('scripts')
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <style>
@@ -402,6 +411,8 @@
             btnRemove.addEventListener('click', function(e) {
                 e.stopPropagation();
                 fileInput.value = '';
+                const retainedInput = document.getElementById('retained_image');
+                if (retainedInput) retainedInput.value = '';
                 previewImg.src = '';
                 previewState.classList.add('hidden');
                 emptyState.classList.remove('hidden');

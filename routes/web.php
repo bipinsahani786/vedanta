@@ -584,6 +584,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Dedicated Schools CRM
     Route::get('/schools', [SchoolCrmController::class, 'index'])->name('schools.index');
     Route::get('/schools/create', [SchoolCrmController::class, 'create'])->name('schools.create');
+    Route::post('/schools/quick-store', [SchoolCrmController::class, 'quickStore'])->name('schools.quick-store');
     Route::post('/schools', [SchoolCrmController::class, 'store'])->name('schools.store');
     Route::get('/schools/{id}', [SchoolCrmController::class, 'show'])->name('schools.show');
     Route::get('/schools/{id}/edit', [SchoolCrmController::class, 'edit'])->name('schools.edit');

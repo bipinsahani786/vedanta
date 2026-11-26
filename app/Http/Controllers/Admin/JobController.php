@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\EmployerProfile;
 use App\Models\JobPost;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -227,12 +228,16 @@ class JobController extends Controller
             ? \App\Models\City::where('state_id', $selectedStateId)->where('is_active', true)->get() 
             : collect();
 
-        return view('admin.jobs.create', compact('categories', 'subjects', 'qualifications', 'states', 'cities'));
+        $schools = $this->getSavedSchools();
+        $selectedSchoolId = old('school_user_id', $request->query('school_user_id'));
+
+        return view('admin.jobs.create', compact('categories', 'subjects', 'qualifications', 'states', 'cities', 'schools', 'selectedSchoolId'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'school_user_id' => 'nullable|integer|exists:users,id',
             'title' => 'required|string|max:255',
             'school_name' => 'nullable|string|max:255',
             'school_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
@@ -255,12 +260,18 @@ class JobController extends Controller
             'retained_image' => 'nullable|string|max:255',
         ]);
 
+        unset($validated['school_user_id'], $validated['retained_image']);
+
         if ($request->hasFile('school_image')) {
             $validated['school_image'] = $request->file('school_image')->store('schools', 'public');
-        } elseif ($request->filled('retained_image')) {
+        } elseif ($request->input('remove_school_image') !== '1' && $request->filled('retained_image')) {
             $validated['school_image'] = $request->input('retained_image');
         }
-        unset($validated['retained_image']);
+
+        $linkedSchool = $this->applySelectedSchoolData($request, $validated);
+        if (!isset($validated['user_id'])) {
+            $validated['user_id'] = auth()->id();
+        }
 
         // Auto-generate formatted salary_range for backwards-compatibility
         $rate = $request->input('salary_rate', 'per month');
@@ -277,8 +288,6 @@ class JobController extends Controller
         } elseif ($mode === 'exact_amount' && $min > 0) {
             $validated['salary_range'] = '₹' . number_format($min) . ' ' . $rate;
         }
-
-        $validated['user_id'] = auth()->id();
 
         $job = JobPost::create($validated);
 
@@ -321,6 +330,7 @@ class JobController extends Controller
         $action = $request->input('action', 'save');
         if ($action === 'save_and_add_another' || $request->has('add_another')) {
             $queryParams = [
+                'school_user_id' => $linkedSchool?->id,
                 'school_name' => $job->school_name,
                 'contact_person' => $job->contact_person,
                 'email' => $job->email,
@@ -333,7 +343,7 @@ class JobController extends Controller
                 $queryParams['retained_image'] = $job->school_image;
             }
 
-            return redirect()->route('admin.jobs.create', $queryParams)
+            return redirect()->route('admin.jobs.create', array_filter($queryParams, fn ($v) => $v !== null && $v !== ''))
                 ->with('success', 'Job "' . $job->title . '" posted successfully! You can now add another job for ' . ($job->school_name ?: 'this institution') . '.')
                 ->with('retained_school', $job->school_name ?: 'Same Institution');
         }
@@ -349,12 +359,16 @@ class JobController extends Controller
         $states = \App\Models\State::where('is_active', true)->get();
         $cities = \App\Models\City::where('state_id', $job->state_id)->where('is_active', true)->get();
 
-        return view('admin.jobs.edit', compact('job', 'categories', 'subjects', 'qualifications', 'states', 'cities'));
+        $schools = $this->getSavedSchools();
+        $selectedSchoolId = old('school_user_id', ($job->user && $job->user->role === 'employer') ? $job->user_id : null);
+
+        return view('admin.jobs.edit', compact('job', 'categories', 'subjects', 'qualifications', 'states', 'cities', 'schools', 'selectedSchoolId'));
     }
 
     public function update(Request $request, JobPost $job)
     {
         $validated = $request->validate([
+            'school_user_id' => 'nullable|integer|exists:users,id',
             'title' => 'required|string|max:255',
             'school_name' => 'nullable|string|max:255',
             'school_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
@@ -373,13 +387,20 @@ class JobController extends Controller
             'salary_max' => 'nullable|numeric|min:0',
             'salary_rate' => 'nullable|string|max:50',
             'description' => 'nullable|string',
+            'retained_image' => 'nullable|string|max:255',
         ]);
+
+        unset($validated['school_user_id'], $validated['retained_image']);
 
         if ($request->hasFile('school_image')) {
             $validated['school_image'] = $request->file('school_image')->store('schools', 'public');
         } elseif ($request->input('remove_school_image') === '1') {
             $validated['school_image'] = null;
+        } elseif ($request->filled('retained_image')) {
+            $validated['school_image'] = $request->input('retained_image');
         }
+
+        $this->applySelectedSchoolData($request, $validated, $job);
 
         // Auto-generate formatted salary_range for backwards-compatibility
         $rate = $request->input('salary_rate', 'per month');
@@ -572,5 +593,106 @@ class JobController extends Controller
         }
 
         return back()->with('success', "Notification sent successfully to {$sentCount} candidate(s).");
+    }
+
+    private function getSavedSchools(): array
+    {
+        return User::where('role', 'employer')
+            ->with('employerProfile')
+            ->get()
+            ->sortBy(fn (User $u) => strtolower((string) ($u->employerProfile?->school_name ?: $u->name)))
+            ->values()
+            ->map(fn (User $u) => SchoolCrmController::formatSchoolPayload($u))
+            ->all();
+    }
+
+    private function applySelectedSchoolData(Request $request, array &$validated, ?JobPost $existingJob = null): ?User
+    {
+        $schoolUserId = $request->input('school_user_id');
+        if ($schoolUserId) {
+            $schoolUser = User::where('role', 'employer')->with('employerProfile')->find($schoolUserId);
+            if ($schoolUser) {
+                $profile = $schoolUser->employerProfile;
+                $validated['user_id'] = $schoolUser->id;
+
+                if (empty($validated['school_name'])) {
+                    $validated['school_name'] = $profile?->school_name ?: $schoolUser->name;
+                }
+                if (empty($validated['contact_person'])) {
+                    $validated['contact_person'] = $profile?->contact_person ?: $schoolUser->name;
+                }
+                if (empty($validated['email'])) {
+                    $validated['email'] = $schoolUser->email;
+                }
+                if (empty($validated['phone'])) {
+                    $validated['phone'] = $schoolUser->phone;
+                }
+                if (empty($validated['school_image']) && $request->input('remove_school_image') !== '1' && !empty($profile?->logo_path)) {
+                    $validated['school_image'] = $profile->logo_path;
+                }
+
+                // Persist any newly supplied fields back to EmployerProfile for reuse on future job posts
+                if ($profile) {
+                    $profileUpdates = [];
+                    if (empty($profile->school_name) && !empty($validated['school_name'])) {
+                        $profileUpdates['school_name'] = $validated['school_name'];
+                    }
+                    if (empty($profile->contact_person) && !empty($validated['contact_person'])) {
+                        $profileUpdates['contact_person'] = $validated['contact_person'];
+                    }
+                    if (empty($profile->logo_path) && !empty($validated['school_image'])) {
+                        $profileUpdates['logo_path'] = $validated['school_image'];
+                    }
+                    if (!empty($profileUpdates)) {
+                        $profile->update($profileUpdates);
+                    }
+                } else {
+                    EmployerProfile::create([
+                        'user_id' => $schoolUser->id,
+                        'school_name' => $validated['school_name'] ?: $schoolUser->name,
+                        'contact_person' => $validated['contact_person'] ?: $schoolUser->name,
+                        'logo_path' => $validated['school_image'] ?? null,
+                    ]);
+                }
+
+                return $schoolUser;
+            }
+        }
+
+        // Optional inline "save entered school details for future job posts" when no saved school was selected
+        if (
+            $request->boolean('save_as_new_school')
+            && !empty($validated['school_name'])
+            && !empty($validated['email'])
+        ) {
+            $emailLower = strtolower(trim((string) $validated['email']));
+            $existingByEmail = User::where('email', $emailLower)->with('employerProfile')->first();
+            if ($existingByEmail && $existingByEmail->role === 'employer') {
+                $validated['user_id'] = $existingByEmail->id;
+
+                return $existingByEmail;
+            }
+
+            if (!$existingByEmail) {
+                $phoneVal = !empty($validated['phone']) ? trim((string) $validated['phone']) : null;
+                $phoneTaken = $phoneVal !== null && User::where('phone', $phoneVal)->exists();
+                if (!$phoneTaken) {
+                    $created = SchoolCrmController::createSchoolAccount([
+                        'school_name' => $validated['school_name'],
+                        'contact_person' => $validated['contact_person'] ?: $validated['school_name'],
+                        'email' => $emailLower,
+                        'phone' => $phoneVal ?: ('0000' . random_int(100000, 999999)),
+                        'address' => '',
+                        'logo_path' => $validated['school_image'] ?? null,
+                        'is_active' => true,
+                    ]);
+                    $validated['user_id'] = $created['user']->id;
+
+                    return $created['user'];
+                }
+            }
+        }
+
+        return $existingJob?->user;
     }
 }
