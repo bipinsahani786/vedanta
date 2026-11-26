@@ -326,6 +326,10 @@ class CandidateProfile extends Model
                 ->orWhere(function ($pq) {
                     $pq->whereNotNull('agreement_pdf_path')
                         ->where('agreement_pdf_path', '!=', '');
+                })
+                ->orWhere(function ($mq) {
+                    $mq->whereNotNull('manual_agreement_path')
+                        ->where('manual_agreement_path', '!=', '');
                 });
         });
     }

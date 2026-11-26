@@ -12,6 +12,38 @@
 
 @section('content')
 
+@if(!empty($lastBulkBatch))
+<div id="crmBatchStatusBanner" class="mb-5 bg-card-bg border border-accent-blue/40 rounded-2xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-accent-blue/15 text-accent-blue flex items-center justify-center">
+            <i class="fas {{ ($lastBulkBatch['status'] ?? '') === 'completed' ? 'fa-check-circle text-emerald-500' : 'fa-layer-group' }}"></i>
+        </div>
+        <div class="text-xs">
+            <div class="font-bold text-text-main flex items-center gap-2 flex-wrap">
+                <span>Background Bulk Notification Queue</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold {{ ($lastBulkBatch['status'] ?? '') === 'completed' ? 'bg-emerald-500/15 text-emerald-500' : 'bg-blue-500/15 text-accent-blue' }}">
+                    {{ ucfirst($lastBulkBatch['status'] ?? 'queued') }}
+                </span>
+            </div>
+            <p class="text-text-dark/70 mt-0.5">
+                Target: <strong>{{ number_format((int) ($lastBulkBatch['total'] ?? 0)) }}</strong> candidate(s) ·
+                Batches: <strong>{{ (int) ($lastBulkBatch['chunks_done'] ?? 0) }}/{{ (int) ($lastBulkBatch['total_chunks'] ?? 0) }}</strong> ·
+                Sent: <strong class="text-emerald-500">{{ (int) ($lastBulkBatch['sent'] ?? 0) }}</strong>
+                @if(($lastBulkBatch['skipped'] ?? 0) > 0)
+                    · Skipped: <strong>{{ (int) $lastBulkBatch['skipped'] }}</strong>
+                @endif
+                @if(($lastBulkBatch['failed'] ?? 0) > 0)
+                    · Failed: <strong class="text-red-500">{{ (int) $lastBulkBatch['failed'] }}</strong>
+                @endif
+            </p>
+        </div>
+    </div>
+    <a href="{{ request()->fullUrl() }}" class="px-3 py-1.5 rounded-lg bg-secondary-bg border border-card-border text-xs font-bold text-text-main hover:border-accent-blue transition-colors">
+        <i class="fas fa-sync-alt mr-1"></i> Refresh Queue Progress
+    </a>
+</div>
+@endif
+
 {{-- Analytics Cards --}}
 <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
     <a href="{{ request()->fullUrlWithQuery(['status' => null, 'page' => null]) }}" class="bg-card-bg border {{ request('status') === null ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-blue-500 transition-all">
@@ -111,19 +143,64 @@
             <button type="button" onclick="document.getElementById('advanced-filters').classList.toggle('hidden')" class="text-sm font-semibold text-accent-blue flex items-center gap-2 hover:text-accent-blue-hover transition-colors cursor-pointer">
                 <i class="fas fa-filter"></i> Advanced Filters
             </button>
+            @if($candidates->total() > 0)
+                <button type="button" id="selectAllMatchingTopBtn" onclick="selectAllMatchingCandidates()"
+                        class="px-3 py-1.5 rounded-xl bg-accent-blue/10 hover:bg-accent-blue text-accent-blue hover:text-white border border-accent-blue/30 text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5">
+                    <i class="fas fa-check-double"></i>
+                    <span>Select All Matching ({{ number_format($candidates->total()) }})</span>
+                </button>
+            @endif
         </div>
     </div>
 
     <form action="{{ route('admin.crm.index') }}" method="GET" class="space-y-4">
-        <div class="flex items-center relative">
-            <i class="fas fa-search absolute left-3 text-text-dark/40 text-sm"></i>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, phone, candidate ID..." 
-                   class="w-full pl-9 pr-4 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
-            @if(request()->anyFilled(['status', 'search', 'subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability', 'plan_amount']))
-                <a href="{{ route('admin.crm.index') }}" class="absolute right-3 text-text-dark/40 hover:text-red-400 transition-colors text-sm font-bold flex items-center gap-1">
-                    <i class="fas fa-times"></i> Clear Filters
-                </a>
-            @endif
+        @php
+            $currentStatus = strtolower((string) request('status', ''));
+            $statusAliasMap = [
+                'incomplete_profile' => 'pending_profile',
+                'unsigned_agreement' => 'pending_agreement',
+                'unpaid_payment' => 'pending_fee',
+            ];
+            $normalizedStatus = $statusAliasMap[$currentStatus] ?? $currentStatus;
+        @endphp
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <div class="md:col-span-7 flex items-center relative">
+                <i class="fas fa-search absolute left-3 text-text-dark/40 text-sm"></i>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, phone, candidate ID..." 
+                       class="w-full pl-9 pr-28 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
+                @if(request()->anyFilled(['status', 'search', 'subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability', 'plan_amount']))
+                    <a href="{{ route('admin.crm.index') }}" class="absolute right-3 text-text-dark/40 hover:text-red-400 transition-colors text-xs font-bold flex items-center gap-1">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </a>
+                @endif
+            </div>
+
+            <div class="md:col-span-4">
+                <select name="status" onchange="this.form.submit()" class="w-full bg-secondary-bg border border-card-border rounded-xl px-3 py-2.5 text-sm text-text-main font-medium focus:border-accent-blue focus:outline-none">
+                    <option value="">All Candidate Statuses</option>
+                    <option value="pending_profile" {{ $normalizedStatus === 'pending_profile' ? 'selected' : '' }}>Incomplete Profile Details</option>
+                    <option value="pending_agreement" {{ $normalizedStatus === 'pending_agreement' ? 'selected' : '' }}>Unsigned Agreement</option>
+                    <option value="pending_fee" {{ $normalizedStatus === 'pending_fee' ? 'selected' : '' }}>Unpaid Payment / Fee</option>
+                    <option value="pending_dues" {{ $normalizedStatus === 'pending_dues' ? 'selected' : '' }}>Pending Service Charge Dues</option>
+                    <option value="pending" {{ $normalizedStatus === 'pending' ? 'selected' : '' }}>Onboarding Pending (Any Missing Step)</option>
+                    <option value="completed" {{ $normalizedStatus === 'completed' ? 'selected' : '' }}>Onboarding Complete</option>
+                    <option value="active_paid" {{ $normalizedStatus === 'active_paid' ? 'selected' : '' }}>Active / Paid Plan</option>
+                    <option value="signed" {{ $normalizedStatus === 'signed' ? 'selected' : '' }}>Signed Agreement Only (Unpaid Fee)</option>
+                    <option value="incomplete" {{ $normalizedStatus === 'incomplete' ? 'selected' : '' }}>Incomplete (Not Signed or Paid)</option>
+                    <option value="verified" {{ $normalizedStatus === 'verified' ? 'selected' : '' }}>Verified Profiles</option>
+                    <option value="unverified" {{ $normalizedStatus === 'unverified' ? 'selected' : '' }}>Unverified Profiles</option>
+                    <option value="has_resume" {{ $normalizedStatus === 'has_resume' ? 'selected' : '' }}>With Resume Uploaded</option>
+                    <option value="missing_resume" {{ $normalizedStatus === 'missing_resume' ? 'selected' : '' }}>No Resume Uploaded</option>
+                    <option value="active_account" {{ $normalizedStatus === 'active_account' ? 'selected' : '' }}>Active Accounts</option>
+                    <option value="inactive_account" {{ $normalizedStatus === 'inactive_account' ? 'selected' : '' }}>Inactive / Deactivated Accounts</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-1">
+                <button type="submit" class="w-full h-full bg-accent-blue text-white rounded-xl px-3 py-2.5 text-sm font-bold shadow hover:bg-accent-blue-hover transition-colors cursor-pointer">
+                    Go
+                </button>
+            </div>
         </div>
 
         <div id="advanced-filters" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 {{ request()->anyFilled(['subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability', 'plan_amount']) ? '' : 'hidden' }}">
@@ -182,6 +259,20 @@
     </form>
 </div>
 
+{{-- Cross-Page Select All Matching Banner --}}
+<div id="selectAllMatchingBanner" class="hidden bg-accent-blue/10 border-x border-b border-accent-blue/30 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+    <div id="selectAllMatchingBannerText" class="font-semibold text-text-main"></div>
+    <div class="flex items-center gap-3">
+        <button type="button" id="selectAllMatchingActionBtn" onclick="selectAllMatchingCandidates()"
+                class="hidden font-bold text-accent-blue hover:underline cursor-pointer">
+            Select all {{ number_format($candidates->total()) }} matching candidates (across all pages)
+        </button>
+        <button type="button" onclick="deselectAllCandidates()" class="font-semibold text-text-dark/70 hover:text-red-400 cursor-pointer">
+            Clear selection
+        </button>
+    </div>
+</div>
+
 {{-- Candidate View Details Cards Grid --}}
 <div x-show="viewMode === 'cards'" x-cloak class="bg-card-bg rounded-b-2xl border border-card-border p-5 shadow-xl">
     @if($candidates->count() > 0)
@@ -198,6 +289,9 @@
                     <div>
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex items-center gap-3 min-w-0">
+                                <input type="checkbox" value="{{ $candidate->id }}" data-candidate-id="{{ $candidate->id }}"
+                                       class="candidate-checkbox rounded border-card-border text-accent-blue focus:ring-accent-blue cursor-pointer shrink-0"
+                                       onchange="onCandidateCheckboxChange(this)">
                                 <button type="button"
                                         onclick='openAdminPhotoModal(@json($candidate->name), @json($cp?->vpa_id ?? ""), @json($cardPhotoUrl), @json($cardUploadUrl), "Profile Photo")'
                                         class="relative group shrink-0 rounded-full focus:outline-none cursor-pointer"
@@ -318,9 +412,9 @@
             @forelse($candidates as $candidate)
             <tr class="group">
                 <td class="text-center">
-                    @if(!$candidate->profile || $candidate->profile->pending_reason !== 'Completed')
-                        <input type="checkbox" name="candidate_ids[]" value="{{ $candidate->id }}" class="candidate-checkbox rounded border-card-border text-accent-blue focus:ring-accent-blue cursor-pointer" onchange="updateBulkActionState()">
-                    @endif
+                    <input type="checkbox" value="{{ $candidate->id }}" data-candidate-id="{{ $candidate->id }}"
+                           class="candidate-checkbox rounded border-card-border text-accent-blue focus:ring-accent-blue cursor-pointer"
+                           onchange="onCandidateCheckboxChange(this)">
                 </td>
                 <td>
                     @php
@@ -598,14 +692,14 @@
 <!-- Floating Bulk Action Bar -->
 <div id="bulkActionBar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden bg-card-bg border border-accent-blue/50 rounded-2xl shadow-2xl p-4 flex items-center gap-4 backdrop-blur-xl animate-bounce-short">
     <div class="flex items-center gap-2 text-sm font-bold text-text-main">
-        <span class="w-7 h-7 rounded-full bg-accent-blue text-white flex items-center justify-center text-xs" id="selectedCount">0</span>
-        <span>Candidates Selected</span>
+        <span class="px-2.5 h-7 rounded-full bg-accent-blue text-white flex items-center justify-center text-xs" id="selectedCount">0</span>
+        <span id="selectedCountLabel">Candidates Selected</span>
     </div>
     <div class="h-6 w-px bg-card-border"></div>
-    <button type="button" onclick="openBulkNotificationModal()" class="px-4 py-2 bg-accent-blue hover:bg-accent-blue-hover text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-md">
+    <button type="button" onclick="openBulkNotificationModal()" class="px-4 py-2 bg-accent-blue hover:bg-accent-blue-hover text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer">
         <i class="fas fa-paper-plane"></i> Send Bulk Notification / Email
     </button>
-    <button type="button" onclick="deselectAllCandidates()" class="text-xs text-text-dark/50 hover:text-red-400 font-semibold px-2">
+    <button type="button" onclick="deselectAllCandidates()" class="text-xs text-text-dark/50 hover:text-red-400 font-semibold px-2 cursor-pointer">
         Cancel
     </button>
 </div>
@@ -620,11 +714,23 @@
         <h3 class="text-lg font-bold text-text-main mb-1 flex items-center gap-2">
             <i class="fas fa-bullhorn text-accent-blue"></i> Send Bulk Notification
         </h3>
-        <p class="text-xs text-text-dark/60 mb-4">Send email notifications to <span id="modalSelectedCount" class="font-bold text-accent-blue">0</span> selected candidate(s).</p>
+        <p class="text-xs text-text-dark/60 mb-1">
+            Queue email notifications for <span id="modalSelectedCount" class="font-bold text-accent-blue">0</span> selected candidate(s).
+        </p>
+        <p class="text-[11px] text-emerald-500 font-medium mb-4">
+            <i class="fas fa-layer-group mr-1"></i> Processed asynchronously in background queue batches of 50 (supports 2,000+ records cleanly).
+        </p>
         
         <form action="{{ route('admin.crm.candidate.bulk-remind') }}" method="POST" id="bulkNotificationForm">
             @csrf
-            <!-- Hidden input containers for selected candidate IDs -->
+            <input type="hidden" name="select_all_matching" id="bulkSelectAllMatchingInput" value="0">
+            <input type="hidden" name="excluded_ids_csv" id="bulkExcludedCsvInput" value="">
+            @foreach(['status', 'search', 'subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability', 'salary', 'plan_amount'] as $filterKey)
+                @if(request()->filled($filterKey))
+                    <input type="hidden" name="{{ $filterKey }}" value="{{ request($filterKey) }}">
+                @endif
+            @endforeach
+            <!-- Hidden input containers for selected candidate IDs (manual selection mode) -->
             <div id="bulkCandidateInputs"></div>
 
             <div class="space-y-4">
@@ -655,7 +761,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-text-dark/70 mb-1">Email Message <span class="text-red-500">*</span></label>
-                        <textarea name="custom_message" rows="4" placeholder="Type your custom notification message here..." class="w-full bg-secondary-bg border border-card-border rounded-xl p-3 text-xs text-text-main focus:outline-none focus:border-accent-blue"></textarea>
+                        <textarea name="custom_message" rows="4" placeholder="Type your custom notification message here... (Optional placeholders: {name}, {email}, {phone})" class="w-full bg-secondary-bg border border-card-border rounded-xl p-3 text-xs text-text-main focus:outline-none focus:border-accent-blue"></textarea>
                     </div>
                 </div>
 
@@ -663,8 +769,8 @@
                     <button type="button" onclick="closeBulkNotificationModal()" class="px-4 py-2 bg-secondary-bg text-text-dark/70 text-xs font-bold rounded-xl hover:bg-card-border transition-colors">
                         Cancel
                     </button>
-                    <button type="submit" class="px-5 py-2 bg-accent-blue text-white text-xs font-bold rounded-xl hover:bg-accent-blue-hover shadow-md flex items-center gap-2 transition-all">
-                        <i class="fas fa-paper-plane"></i> Send Now
+                    <button type="submit" class="px-5 py-2 bg-accent-blue text-white text-xs font-bold rounded-xl hover:bg-accent-blue-hover shadow-md flex items-center gap-2 transition-all cursor-pointer">
+                        <i class="fas fa-paper-plane"></i> Queue Notifications
                     </button>
                 </div>
             </div>
@@ -690,35 +796,112 @@
         document.getElementById('ratingModal').classList.remove('hidden');
     }
 
+    const totalMatchingCandidates = {{ (int) $candidates->total() }};
+    const visiblePageCount = {{ (int) $candidates->count() }};
+    let selectAllMatchingMode = false;
+    let excludedCandidateIds = new Set();
+
+    function getUniquePageIds() {
+        const ids = new Set();
+        document.querySelectorAll('.candidate-checkbox').forEach(cb => ids.add(String(cb.value)));
+        return ids;
+    }
+
+    function getSelectedPageIds() {
+        const ids = new Set();
+        document.querySelectorAll('.candidate-checkbox:checked').forEach(cb => ids.add(String(cb.value)));
+        return ids;
+    }
+
+    function syncCandidateCheckboxes(candidateId, checked) {
+        document.querySelectorAll(`.candidate-checkbox[data-candidate-id="${candidateId}"]`).forEach(cb => {
+            cb.checked = checked;
+        });
+    }
+
+    function onCandidateCheckboxChange(cb) {
+        const id = String(cb.value);
+        syncCandidateCheckboxes(id, cb.checked);
+
+        if (selectAllMatchingMode) {
+            if (cb.checked) {
+                excludedCandidateIds.delete(id);
+            } else {
+                excludedCandidateIds.add(id);
+            }
+        }
+        updateBulkActionState();
+    }
+
     function toggleSelectAllCandidates(master) {
-        const checkboxes = document.querySelectorAll('.candidate-checkbox');
-        checkboxes.forEach(cb => cb.checked = master.checked);
+        if (!master.checked) {
+            deselectAllCandidates();
+            return;
+        }
+        selectAllMatchingMode = false;
+        excludedCandidateIds.clear();
+        document.querySelectorAll('.candidate-checkbox').forEach(cb => cb.checked = true);
+        updateBulkActionState();
+    }
+
+    function selectAllMatchingCandidates() {
+        if (totalMatchingCandidates <= 0) return;
+        selectAllMatchingMode = true;
+        excludedCandidateIds.clear();
+        document.querySelectorAll('.candidate-checkbox').forEach(cb => cb.checked = true);
         updateBulkActionState();
     }
 
     function deselectAllCandidates() {
+        selectAllMatchingMode = false;
+        excludedCandidateIds.clear();
         const master = document.getElementById('selectAllCandidates');
         if (master) master.checked = false;
-        const checkboxes = document.querySelectorAll('.candidate-checkbox');
-        checkboxes.forEach(cb => cb.checked = false);
+        document.querySelectorAll('.candidate-checkbox').forEach(cb => cb.checked = false);
         updateBulkActionState();
     }
 
     function updateBulkActionState() {
-        const checked = document.querySelectorAll('.candidate-checkbox:checked');
-        const count = checked.length;
+        const allPageIds = getUniquePageIds();
+        const selectedPageIds = getSelectedPageIds();
+        const effectiveCount = selectAllMatchingMode
+            ? Math.max(0, totalMatchingCandidates - excludedCandidateIds.size)
+            : selectedPageIds.size;
+
         const bar = document.getElementById('bulkActionBar');
         const countSpan = document.getElementById('selectedCount');
+        const countLabel = document.getElementById('selectedCountLabel');
         const master = document.getElementById('selectAllCandidates');
-        const allCheckboxes = document.querySelectorAll('.candidate-checkbox');
+        const banner = document.getElementById('selectAllMatchingBanner');
+        const bannerText = document.getElementById('selectAllMatchingBannerText');
+        const bannerBtn = document.getElementById('selectAllMatchingActionBtn');
 
-        if (countSpan) countSpan.textContent = count;
-
-        if (master && allCheckboxes.length > 0) {
-            master.checked = (count === allCheckboxes.length);
+        if (countSpan) countSpan.textContent = effectiveCount.toLocaleString();
+        if (countLabel) {
+            countLabel.textContent = selectAllMatchingMode
+                ? 'Matching Candidates Selected (All Pages)'
+                : 'Candidates Selected';
         }
 
-        if (count > 0) {
+        if (master && allPageIds.size > 0) {
+            master.checked = (selectedPageIds.size === allPageIds.size);
+        }
+
+        if (banner && bannerText && bannerBtn) {
+            if (selectAllMatchingMode) {
+                banner.classList.remove('hidden');
+                bannerText.innerHTML = `<i class="fas fa-check-double text-accent-blue mr-1.5"></i> All <strong>${effectiveCount.toLocaleString()}</strong> matching candidate(s) across all pages are selected.`;
+                bannerBtn.classList.add('hidden');
+            } else if (allPageIds.size > 0 && selectedPageIds.size === allPageIds.size && totalMatchingCandidates > visiblePageCount) {
+                banner.classList.remove('hidden');
+                bannerText.innerHTML = `All <strong>${selectedPageIds.size}</strong> candidate(s) on this page are selected.`;
+                bannerBtn.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        if (effectiveCount > 0) {
             bar.classList.remove('hidden');
         } else {
             bar.classList.add('hidden');
@@ -726,20 +909,34 @@
     }
 
     function openBulkNotificationModal() {
-        const checked = document.querySelectorAll('.candidate-checkbox:checked');
-        if (checked.length === 0) return;
+        const selectedPageIds = getSelectedPageIds();
+        const effectiveCount = selectAllMatchingMode
+            ? Math.max(0, totalMatchingCandidates - excludedCandidateIds.size)
+            : selectedPageIds.size;
+
+        if (effectiveCount === 0) return;
 
         const inputsContainer = document.getElementById('bulkCandidateInputs');
+        const allMatchingInput = document.getElementById('bulkSelectAllMatchingInput');
+        const excludedCsvInput = document.getElementById('bulkExcludedCsvInput');
         inputsContainer.innerHTML = '';
-        checked.forEach(cb => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'candidate_ids[]';
-            input.value = cb.value;
-            inputsContainer.appendChild(input);
-        });
 
-        document.getElementById('modalSelectedCount').textContent = checked.length;
+        if (selectAllMatchingMode) {
+            allMatchingInput.value = '1';
+            excludedCsvInput.value = Array.from(excludedCandidateIds).join(',');
+        } else {
+            allMatchingInput.value = '0';
+            excludedCsvInput.value = '';
+            selectedPageIds.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'candidate_ids[]';
+                input.value = id;
+                inputsContainer.appendChild(input);
+            });
+        }
+
+        document.getElementById('modalSelectedCount').textContent = effectiveCount.toLocaleString();
         document.getElementById('bulkNotificationModal').classList.remove('hidden');
     }
 

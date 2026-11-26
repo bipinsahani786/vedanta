@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Candidate\AgreementController;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendCandidateBulkNotificationChunkJob;
 use App\Mail\AgreementLinkMail;
 use App\Mail\CandidateReminderMail;
 use App\Mail\DynamicTemplateMail;
@@ -34,6 +35,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -428,27 +430,14 @@ class CrmController extends Controller
         }
     }
 
-    public function index(Request $request)
+    /**
+     * Build the filtered candidate query so list views and "Select All Matching" bulk actions stay identical.
+     */
+    protected function buildFilteredCandidatesQuery(Request $request, bool $applyStatusFilter = true)
     {
-        $query = User::where('role', 'candidate')
-            ->with([
-                'profile.category',
-                'profile.subject',
-                'profile.specialization',
-                'profile.highestQualification',
-                'profile.preferredState',
-                'profile.preferredCity',
-                'referredBy',
-                'latestFollowUp',
-                'applications.jobPost',
-                'applications' => function ($q) {
-                    $q->where('status', 'hired');
-                },
-            ])
-            ->withCount('openFollowUps');
+        $query = User::where('role', 'candidate');
 
-        // Search text (Name, Email, Phone, Candidate ID / VPA ID)
-        if ($search = trim($request->input('search', ''))) {
+        if ($search = trim((string) $request->input('search', ''))) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
@@ -464,7 +453,6 @@ class CrmController extends Controller
             });
         }
 
-        // Advanced Filters
         if ($subjectId = $request->input('subject_id')) {
             $query->whereHas('profile', function ($q) use ($subjectId) {
                 $q->where('subject_id', $subjectId);
@@ -526,10 +514,45 @@ class CrmController extends Controller
             });
         }
 
-        // Base query for stats (before status filter)
-        $baseQuery = clone $query;
+        if ($applyStatusFilter && ($status = $request->input('status'))) {
+            $this->applyCandidateStatusFilter($query, (string) $status);
+        }
 
-        // Analytics based on base query
+        return $query;
+    }
+
+    protected function applyCandidateStatusFilter($query, string $status): void
+    {
+        match (strtolower(trim($status))) {
+            'completed' => $query->whereHas('profile', fn ($q) => $q->registrationCompleted()),
+            'pending' => $query->whereDoesntHave('profile', fn ($q) => $q->registrationCompleted()),
+            'pending_agreement', 'unsigned_agreement' => $query->whereDoesntHave('profile', fn ($q) => $q->withSignedAgreement()),
+            'pending_fee', 'unpaid_payment' => $query->whereDoesntHave('profile', fn ($q) => $q->withPaidPlan()),
+            'pending_profile', 'incomplete_profile' => $query->whereDoesntHave('profile', fn ($q) => $q->withCompletedDetails()),
+            'active_paid' => $query->whereHas('profile', fn ($q) => $q->where('is_fee_paid', true)),
+            'signed' => $query->whereHas('profile', fn ($q) => $q->where('is_fee_paid', false)->where('is_agreement_signed', true)),
+            'pending_dues' => $query->whereHas('profile', fn ($q) => $q->where('pending_amount', '>', 0)),
+            'incomplete' => $query->whereDoesntHave('profile', function ($pq) {
+                $pq->where('is_fee_paid', true)
+                    ->orWhere(function ($q2) {
+                        $q2->where('is_fee_paid', false)->where('is_agreement_signed', true);
+                    });
+            }),
+            'verified' => $query->whereHas('profile', fn ($q) => $q->where('is_verified', true)),
+            'unverified' => $query->whereDoesntHave('profile', fn ($q) => $q->where('is_verified', true)),
+            'has_resume' => $query->whereHas('profile', fn ($q) => $q->whereNotNull('resume_path')->where('resume_path', '!=', '')),
+            'missing_resume' => $query->whereDoesntHave('profile', fn ($q) => $q->whereNotNull('resume_path')->where('resume_path', '!=', '')),
+            'active_account' => $query->where('users.is_active', true),
+            'inactive_account' => $query->where('users.is_active', false),
+            default => null,
+        };
+    }
+
+    public function index(Request $request)
+    {
+        $baseQuery = $this->buildFilteredCandidatesQuery($request, false);
+
+        // Analytics based on base query (before status filter)
         $onboardingSummary = CandidateProfile::onboardingSummary($baseQuery);
         $stats = [
             'total' => $onboardingSummary['total'],
@@ -550,39 +573,22 @@ class CrmController extends Controller
         ];
         $stats['incomplete'] = $stats['total'] - $stats['active_paid'] - $stats['signed'];
 
-        // Status Filter
-        if ($status = $request->input('status')) {
-            if ($status === 'completed') {
-                $query->whereHas('profile', fn ($q) => $q->registrationCompleted());
-            } elseif ($status === 'pending') {
-                $query->whereDoesntHave('profile', fn ($q) => $q->registrationCompleted());
-            } elseif ($status === 'pending_agreement') {
-                $query->whereDoesntHave('profile', fn ($q) => $q->withSignedAgreement());
-            } elseif ($status === 'pending_fee') {
-                $query->whereDoesntHave('profile', fn ($q) => $q->withPaidPlan());
-            } elseif ($status === 'pending_profile') {
-                $query->whereDoesntHave('profile', fn ($q) => $q->withCompletedDetails());
-            } elseif ($status === 'active_paid') {
-                $query->whereHas('profile', function ($q) {
-                    $q->where('is_fee_paid', true);
-                });
-            } elseif ($status === 'signed') {
-                $query->whereHas('profile', function ($q) {
-                    $q->where('is_fee_paid', false)->where('is_agreement_signed', true);
-                });
-            } elseif ($status === 'pending_dues') {
-                $query->whereHas('profile', function ($q) {
-                    $q->where('pending_amount', '>', 0);
-                });
-            } elseif ($status === 'incomplete') {
-                $query->whereDoesntHave('profile', function ($pq) {
-                    $pq->where('is_fee_paid', true)
-                        ->orWhere(function ($q2) {
-                            $q2->where('is_fee_paid', false)->where('is_agreement_signed', true);
-                        });
-                });
-            }
-        }
+        $query = $this->buildFilteredCandidatesQuery($request, true)
+            ->with([
+                'profile.category',
+                'profile.subject',
+                'profile.specialization',
+                'profile.highestQualification',
+                'profile.preferredState',
+                'profile.preferredCity',
+                'referredBy',
+                'latestFollowUp',
+                'applications.jobPost',
+                'applications' => function ($q) {
+                    $q->where('status', 'hired');
+                },
+            ])
+            ->withCount('openFollowUps');
 
         // Sorting
         $sortField = $request->input('sort_by', 'created_at');
@@ -602,8 +608,11 @@ class CrmController extends Controller
         $qualifications = Qualification::all();
         $states = State::all();
         $cities = City::all();
+        $lastBulkBatch = session('crm_last_bulk_batch_id')
+            ? Cache::get('crm_bulk_batch:' . session('crm_last_bulk_batch_id'))
+            : null;
 
-        return view('admin.crm.index', compact('candidates', 'stats', 'sortField', 'sortDirection', 'subjects', 'qualifications', 'states', 'cities'));
+        return view('admin.crm.index', compact('candidates', 'stats', 'sortField', 'sortDirection', 'subjects', 'qualifications', 'states', 'cities', 'lastBulkBatch'));
     }
 
     public function show($id)
@@ -1355,34 +1364,87 @@ class CrmController extends Controller
     public function sendBulkOnboardingReminder(Request $request)
     {
         $request->validate([
-            'candidate_ids' => 'required|array|min:1',
-            'candidate_ids.*' => 'exists:users,id',
+            'select_all_matching' => 'nullable|boolean',
+            'candidate_ids' => 'nullable|array',
+            'candidate_ids.*' => 'integer|exists:users,id',
+            'excluded_ids' => 'nullable|array',
+            'excluded_ids.*' => 'integer',
+            'excluded_ids_csv' => 'nullable|string',
             'notification_type' => 'required|in:status_reminder,custom_email',
             'custom_subject' => 'nullable|required_if:notification_type,custom_email|string|max:255',
             'custom_message' => 'nullable|required_if:notification_type,custom_email|string',
         ]);
 
-        $candidates = User::whereIn('id', $request->candidate_ids)->get();
-        $sentCount = 0;
+        $selectAllMatching = $request->boolean('select_all_matching');
+        $manualIds = array_values(array_unique(array_map('intval', (array) $request->input('candidate_ids', []))));
 
-        foreach ($candidates as $user) {
-            if ($request->notification_type === 'custom_email') {
-                Mail::raw($request->custom_message, function ($message) use ($user, $request) {
-                    $message->to($user->email)
-                        ->subject($request->custom_subject);
-                });
-                $sentCount++;
-            } else {
-                $profile = $user->profile;
-                $reason = $profile ? $profile->pending_reason : 'Pending Profile Completion';
-                $actionUrl = $profile ? $profile->pending_action_url : route('candidate.wizard');
-
-                Mail::to($user->email)->send(new CandidateReminderMail($user, $reason, $actionUrl));
-                $sentCount++;
-            }
+        if (!$selectAllMatching && empty($manualIds)) {
+            return back()->with('error', 'Please select at least one candidate or click Select All Matching Candidates.');
         }
 
-        return back()->with('success', "Bulk notifications successfully sent to {$sentCount} candidate(s).");
+        if ($selectAllMatching) {
+            $targetQuery = $this->buildFilteredCandidatesQuery($request, true);
+
+            $excludedIds = array_map('intval', (array) $request->input('excluded_ids', []));
+            if ($request->filled('excluded_ids_csv')) {
+                $csvIds = array_filter(array_map('intval', explode(',', (string) $request->input('excluded_ids_csv'))));
+                $excludedIds = array_merge($excludedIds, $csvIds);
+            }
+            $excludedIds = array_values(array_unique(array_filter($excludedIds)));
+
+            if (!empty($excludedIds)) {
+                $targetQuery->whereNotIn('users.id', $excludedIds);
+            }
+        } else {
+            $targetQuery = User::where('role', 'candidate')->whereIn('id', $manualIds);
+        }
+
+        $targetQuery->whereNotNull('email')->where('email', '!=', '');
+
+        $totalMatched = (clone $targetQuery)->count();
+        if ($totalMatched === 0) {
+            return back()->with('warning', 'No matching candidates with a valid email address were found for the current selection.');
+        }
+
+        $chunkSize = 50;
+        $totalChunks = (int) ceil($totalMatched / $chunkSize);
+        $batchKey = (string) Str::uuid();
+
+        Cache::put("crm_bulk_batch:{$batchKey}", [
+            'batch_key' => $batchKey,
+            'status' => 'queued',
+            'notification_type' => $request->notification_type,
+            'total' => $totalMatched,
+            'total_chunks' => $totalChunks,
+            'chunks_done' => 0,
+            'processed' => 0,
+            'sent' => 0,
+            'skipped' => 0,
+            'failed' => 0,
+            'queued_at' => now('Asia/Kolkata')->format('d M Y, h:i A') . ' IST',
+        ], now()->addHours(12));
+
+        $dispatchedChunks = 0;
+        (clone $targetQuery)
+            ->select('users.id')
+            ->orderBy('users.id')
+            ->chunkById($chunkSize, function ($rows) use ($request, $batchKey, &$dispatchedChunks) {
+                $ids = $rows->pluck('id')->all();
+                if (!empty($ids)) {
+                    SendCandidateBulkNotificationChunkJob::dispatch(
+                        $ids,
+                        (string) $request->notification_type,
+                        $request->custom_subject,
+                        $request->custom_message,
+                        $batchKey
+                    );
+                    $dispatchedChunks++;
+                }
+            }, 'users.id', 'id');
+
+        return back()
+            ->with('crm_last_bulk_batch_id', $batchKey)
+            ->with('success', "Queued notifications for {$totalMatched} matching candidate(s) across {$dispatchedChunks} background job batch(es). Emails are being processed asynchronously in the background.");
     }
 
     public function manualPaymentFulfill(Request $request, $id)
