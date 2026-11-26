@@ -223,6 +223,74 @@
     </div>
 </div>
 
+{{-- Registration & Onboarding Status Grid --}}
+<div class="mb-8">
+    <h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
+        <i class="fas fa-user-check text-[#00a8e8]"></i> Registration & Onboarding Status
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Onboarding Complete -->
+        <a href="{{ route('admin.crm.index', ['status' => 'completed']) }}" class="block p-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Onboarding Complete</p>
+            <h4 class="text-3xl font-bold text-emerald-600 mb-3">{{ number_format($onboardingCompleteCount) }}</h4>
+            <div class="mt-4 flex items-center justify-between text-xs">
+                <span class="text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-md">Profile + Agreement + Paid</span>
+                <span class="text-gray-400 font-semibold">View List &rarr;</span>
+            </div>
+        </a>
+
+        <!-- Onboarding Pending -->
+        <a href="{{ route('admin.crm.index', ['status' => 'pending']) }}" class="block p-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Onboarding Pending</p>
+            <h4 class="text-3xl font-bold text-rose-500 mb-3">{{ number_format($onboardingPendingCount) }}</h4>
+            <div class="mt-4 flex items-center justify-between text-xs">
+                <span class="text-rose-600 font-medium bg-rose-50 px-2 py-0.5 rounded-md">Incomplete Onboarding</span>
+                <span class="text-gray-400 font-semibold">View List &rarr;</span>
+            </div>
+        </a>
+
+        <!-- Pending Agreement -->
+        <a href="{{ route('admin.crm.index', ['status' => 'pending_agreement']) }}" class="block p-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pending Agreement</p>
+            <h4 class="text-3xl font-bold text-indigo-600 mb-3">{{ number_format($pendingAgreementCount) }}</h4>
+            <div class="mt-4 flex items-center justify-between text-xs">
+                <span class="text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded-md">Agreement Not Signed</span>
+                <span class="text-gray-400 font-semibold">View List &rarr;</span>
+            </div>
+        </a>
+
+        <!-- Pending Registration Fee -->
+        <a href="{{ route('admin.crm.index', ['status' => 'pending_fee']) }}" class="block p-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pending Fee / Plan</p>
+            <h4 class="text-3xl font-bold text-amber-500 mb-3">{{ number_format($pendingFeeCount) }}</h4>
+            <div class="mt-4 flex items-center justify-between text-xs">
+                <span class="text-amber-600 font-medium bg-amber-50 px-2 py-0.5 rounded-md">Payment Pending</span>
+                <span class="text-gray-400 font-semibold">View List &rarr;</span>
+            </div>
+        </a>
+
+        <!-- Pending Profile Details -->
+        <a href="{{ route('admin.crm.index', ['status' => 'pending_profile']) }}" class="block p-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pending Profile Details</p>
+            <h4 class="text-3xl font-bold text-orange-500 mb-3">{{ number_format($pendingProfileCount) }}</h4>
+            <div class="mt-4 flex items-center justify-between text-xs">
+                <span class="text-orange-600 font-medium bg-orange-50 px-2 py-0.5 rounded-md">Details Incomplete</span>
+                <span class="text-gray-400 font-semibold">View List &rarr;</span>
+            </div>
+        </a>
+
+        <!-- Registration Transactions -->
+        <a href="{{ route('admin.transactions.index', ['type' => 'registration_fee', 'status' => 'success']) }}" class="block p-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Paid Reg. Transactions</p>
+            <h4 class="text-3xl font-bold text-[#00a8e8] mb-3">{{ number_format($regSuccessTxnsCount) }}</h4>
+            <div class="mt-4 flex items-center justify-between text-xs">
+                <span class="text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-md">{{ number_format($regPendingTxnsCount) }} Pending Txns</span>
+                <span class="text-gray-400 font-semibold">Transactions &rarr;</span>
+            </div>
+        </a>
+    </div>
+</div>
+
 {{-- Application Analytics Grid --}}
 <div class="mb-8">
     <h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
@@ -351,7 +419,7 @@
             </h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <a href="{{ route('admin.transactions.index') }}" class="block p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+                <a href="{{ route('admin.transactions.index', ['status' => 'success']) }}" class="block p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Total Collected</p>
                     <h4 class="text-2xl font-bold text-gray-900 mb-3">₹{{ number_format($totalCollections) }}</h4>
                     <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
@@ -359,7 +427,7 @@
                     </div>
                 </a>
                 
-                <a href="{{ route('admin.crm.index') }}" class="block p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+                <a href="{{ route('admin.crm.index', ['status' => 'pending_dues']) }}" class="block p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pending Collections</p>
                     <h4 class="text-2xl font-bold text-rose-500 mb-3">₹{{ number_format($pendingCollections) }}</h4>
                     <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">

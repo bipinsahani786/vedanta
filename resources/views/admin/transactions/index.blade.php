@@ -5,6 +5,32 @@
 
 @section('content')
 
+{{-- Transaction Summary Cards --}}
+@if(isset($stats))
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <a href="{{ request()->fullUrlWithQuery(['status' => null, 'page' => null]) }}" class="bg-card-bg border {{ !request('status') ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-blue-500 transition-all">
+        <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Total Transactions</p>
+        <h4 class="text-2xl font-extrabold text-blue-500 relative z-10">{{ $stats['total'] }}</h4>
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'success', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'success' ? 'border-green-500 shadow-md ring-1 ring-green-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-green-500 transition-all">
+        <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Success</p>
+        <h4 class="text-2xl font-extrabold text-green-500 relative z-10">{{ $stats['success'] }}</h4>
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'pending', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'pending' ? 'border-amber-500 shadow-md ring-1 ring-amber-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-amber-500 transition-all">
+        <div class="absolute inset-0 bg-amber-500/5 group-hover:bg-amber-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Pending</p>
+        <h4 class="text-2xl font-extrabold text-amber-500 relative z-10">{{ $stats['pending'] }}</h4>
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'failed', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'failed' ? 'border-red-500 shadow-md ring-1 ring-red-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-red-500 transition-all">
+        <div class="absolute inset-0 bg-red-500/5 group-hover:bg-red-500/10 transition-colors"></div>
+        <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Failed</p>
+        <h4 class="text-2xl font-extrabold text-red-500 relative z-10">{{ $stats['failed'] }}</h4>
+    </a>
+</div>
+@endif
+
 <div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-4">
     <form action="{{ route('admin.transactions.index') }}" method="GET" class="flex flex-col md:flex-row gap-4">
         <div class="flex-1 relative">
@@ -60,8 +86,15 @@
                     @endif
                 </td>
                 <td>
-                    <div class="font-semibold text-text-main group-hover:text-accent-blue transition-colors">{{ $txn->candidate->name ?? 'Unknown' }}</div>
-                    <div class="text-xs text-text-dark/50">{{ $txn->candidate->email ?? '' }}</div>
+                    @if($txn->candidate)
+                        <a href="{{ route('admin.crm.show', $txn->candidate->id) }}" class="font-semibold text-text-main hover:text-accent-blue transition-colors inline-flex items-center gap-1">
+                            <span>{{ $txn->candidate->name }}</span>
+                            <i class="fas fa-external-link-alt text-[9px] opacity-60"></i>
+                        </a>
+                        <div class="text-xs text-text-dark/50">{{ $txn->candidate->email ?? '' }}</div>
+                    @else
+                        <div class="font-semibold text-text-main">Unknown</div>
+                    @endif
                 </td>
                 <td>
                     @if($txn->type === 'registration_fee')

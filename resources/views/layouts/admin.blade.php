@@ -390,11 +390,18 @@
                             <!-- Notification List -->
                             <div class="max-h-80 overflow-y-auto divide-y divide-gray-50">
                                 @forelse($adminNotifications as $notif)
+                                    @php
+                                        $notifTargetUrl = \App\Http\Controllers\Admin\NotificationController::resolveTargetUrl($notif->data, $notif->type ?? null);
+                                    @endphp
                                     <a href="{{ route('admin.notifications.mark-read', $notif->id) }}"
                                         class="flex items-start gap-3 px-4 py-3 hover:bg-blue-50/50 transition-colors group">
                                         <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
                                             @if(str_contains($notif->type, 'LeadFollowUp'))
                                                 <i class="fas fa-user-clock"></i>
+                                            @elseif(str_contains($notif->type, 'VerificationRequested'))
+                                                <i class="fas fa-user-check text-cyan-600"></i>
+                                            @elseif(str_contains($notif->type, 'PaymentReceived'))
+                                                <i class="fas fa-rupee-sign text-emerald-600"></i>
                                             @elseif(str_contains($notif->type, 'LateFee'))
                                                 <i class="fas fa-exclamation-triangle text-orange-500"></i>
                                             @elseif(str_contains($notif->type, 'ProfileVerified'))
@@ -406,7 +413,12 @@
                                         <div class="flex-1 min-w-0">
                                             <p class="text-xs font-bold text-gray-800 leading-snug">{{ $notif->data->title ?? 'Notification' }}</p>
                                             <p class="text-xs text-gray-500 mt-0.5 leading-snug">{{ $notif->data->message ?? '' }}</p>
-                                            <p class="text-[10px] text-gray-400 mt-1 font-medium">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</p>
+                                            <div class="flex items-center justify-between gap-2 mt-1">
+                                                <p class="text-[10px] text-gray-400 font-medium">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</p>
+                                                @if($notifTargetUrl)
+                                                    <span class="text-[10px] font-bold text-accent-blue group-hover:underline">Open Record &rarr;</span>
+                                                @endif
+                                            </div>
                                         </div>
                                         <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
                                     </a>

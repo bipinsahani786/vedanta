@@ -66,9 +66,22 @@
                 </div>
                 <h3 class="text-lg font-bold text-text-main mb-2">Verified Candidate Badge</h3>
                 <p class="text-sm text-text-dark/50 mb-6 flex-1">Boost your visibility. Verified profiles are 3x more likely to be shortlisted by top schools.</p>
-                <a href="{{ route('candidate.profile.edit') }}" class="mt-auto px-4 py-2.5 bg-secondary-bg text-text-main text-sm font-semibold rounded-xl hover:bg-card-border/50 transition-colors text-center border border-card-border">
-                    Request Verification
-                </a>
+                @if(auth()->user()->profile && auth()->user()->profile->is_verified)
+                    <a href="{{ route('candidate.profile.edit') }}" class="mt-auto px-4 py-2.5 bg-blue-500/10 text-blue-400 text-sm font-semibold rounded-xl hover:bg-blue-500/20 transition-colors text-center border border-blue-400/30">
+                        Verified Profile
+                    </a>
+                @elseif(auth()->user()->profile && auth()->user()->profile->hasCompletedProfileDetails())
+                    <form action="{{ route('candidate.verification.request') }}" method="POST" class="mt-auto">
+                        @csrf
+                        <button type="submit" class="w-full px-4 py-2.5 bg-secondary-bg text-text-main text-sm font-semibold rounded-xl hover:bg-card-border/50 transition-colors text-center border border-card-border cursor-pointer">
+                            Request Verification
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('candidate.profile.edit') }}" class="mt-auto px-4 py-2.5 bg-secondary-bg text-text-main text-sm font-semibold rounded-xl hover:bg-card-border/50 transition-colors text-center border border-card-border">
+                        Complete Profile for Verification
+                    </a>
+                @endif
             </div>
 
         </div>

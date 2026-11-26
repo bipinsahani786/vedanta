@@ -305,4 +305,72 @@ class CandidateProfile extends Model
 
         return (bool) ($hasDetails && $hasAgreement && $hasPayment);
     }
+
+    public function scopeWithCompletedDetails($query)
+    {
+        return $query->where('is_profile_complete', true)
+            ->whereNotNull('date_of_birth')
+            ->whereNotNull('address')
+            ->where('address', '!=', '')
+            ->whereNotNull('highest_qualification_id')
+            ->whereNotNull('category_id')
+            ->whereNotNull('subject_id');
+    }
+
+    public function scopeWithSignedAgreement($query)
+    {
+        return $query->where(function ($aq) {
+            $aq->where('is_agreement_signed', true)
+                ->orWhereNotNull('signature_date_time')
+                ->orWhereNotNull('agreement_signed_at')
+                ->orWhere(function ($pq) {
+                    $pq->whereNotNull('agreement_pdf_path')
+                        ->where('agreement_pdf_path', '!=', '');
+                });
+        });
+    }
+
+    public function scopeWithPaidPlan($query)
+    {
+        return $query->where(function ($fq) {
+            $fq->where('initial_fee_paid', true)
+                ->orWhere('is_fee_paid', true)
+                ->orWhere('paid_amount', '>=', 500);
+        });
+    }
+
+    public function scopeRegistrationCompleted($query)
+    {
+        return $query->withCompletedDetails()
+            ->where(function ($q) {
+                $q->whereNotNull('registration_completed_at')
+                    ->orWhere(function ($sub) {
+                        $sub->withSignedAgreement()->withPaidPlan();
+                    });
+            });
+    }
+
+    /**
+     * Summarize registration & onboarding statuses across a base candidate user query.
+     *
+     * @return array{total: int, completed: int, pending: int, pending_agreement: int, pending_fee: int, pending_profile: int}
+     */
+    public static function onboardingSummary($userQuery = null): array
+    {
+        $base = $userQuery
+            ? (clone $userQuery)
+            : User::where('role', 'candidate');
+
+        $total = (clone $base)->count();
+        $completed = (clone $base)->whereHas('profile', fn ($q) => $q->registrationCompleted())->count();
+
+        return [
+            'total' => $total,
+            'completed' => $completed,
+            'pending' => max(0, $total - $completed),
+            'pending_agreement' => (clone $base)->whereDoesntHave('profile', fn ($q) => $q->withSignedAgreement())->count(),
+            'pending_fee' => (clone $base)->whereDoesntHave('profile', fn ($q) => $q->withPaidPlan())->count(),
+            'pending_profile' => (clone $base)->whereDoesntHave('profile', fn ($q) => $q->withCompletedDetails())->count(),
+        ];
+    }
 }

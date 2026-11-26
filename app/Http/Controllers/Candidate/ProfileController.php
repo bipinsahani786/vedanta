@@ -227,6 +227,7 @@ class ProfileController extends Controller
             'message' => "{$user->name}{$vpaId} has requested profile verification.",
             'candidate_id' => $cid,
             'vpa_id' => $profile->vpa_id,
+            'action_url' => route('admin.crm.show', $cid),
         ]);
 
         foreach ($admins as $admin) {

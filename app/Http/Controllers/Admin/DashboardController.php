@@ -39,6 +39,14 @@ class DashboardController extends Controller
 
         // Statistics
         $totalCandidates = User::where('role', 'candidate')->count();
+        $onboardingSummary = CandidateProfile::onboardingSummary();
+        $onboardingCompleteCount = $onboardingSummary['completed'];
+        $onboardingPendingCount = $onboardingSummary['pending'];
+        $pendingAgreementCount = $onboardingSummary['pending_agreement'];
+        $pendingFeeCount = $onboardingSummary['pending_fee'];
+        $pendingProfileCount = $onboardingSummary['pending_profile'];
+        $regSuccessTxnsCount = PaymentTransaction::where('type', 'registration_fee')->where('status', 'success')->count();
+        $regPendingTxnsCount = PaymentTransaction::where('type', 'registration_fee')->where('status', 'pending')->count();
         $totalSchools = User::where('role', 'employer')->count();
         $jobSummary = JobPost::statusSummary();
         $totalJobs = $jobSummary['total'];
@@ -134,6 +142,13 @@ class DashboardController extends Controller
             'totalLateFees',
             'totalCollections',
             'totalCandidates',
+            'onboardingCompleteCount',
+            'onboardingPendingCount',
+            'pendingAgreementCount',
+            'pendingFeeCount',
+            'pendingProfileCount',
+            'regSuccessTxnsCount',
+            'regPendingTxnsCount',
             'totalSchools',
             'totalJobs',
             'activeJobs',

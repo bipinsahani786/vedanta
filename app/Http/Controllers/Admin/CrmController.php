@@ -512,8 +512,14 @@ class CrmController extends Controller
         $baseQuery = clone $query;
 
         // Analytics based on base query
+        $onboardingSummary = CandidateProfile::onboardingSummary($baseQuery);
         $stats = [
-            'total' => (clone $baseQuery)->count(),
+            'total' => $onboardingSummary['total'],
+            'onboarding_complete' => $onboardingSummary['completed'],
+            'onboarding_pending' => $onboardingSummary['pending'],
+            'pending_agreement' => $onboardingSummary['pending_agreement'],
+            'pending_fee' => $onboardingSummary['pending_fee'],
+            'pending_profile' => $onboardingSummary['pending_profile'],
             'active_paid' => (clone $baseQuery)->whereHas('profile', function ($q) {
                 $q->where('is_fee_paid', true);
             })->count(),
@@ -528,7 +534,17 @@ class CrmController extends Controller
 
         // Status Filter
         if ($status = $request->input('status')) {
-            if ($status === 'active_paid') {
+            if ($status === 'completed') {
+                $query->whereHas('profile', fn ($q) => $q->registrationCompleted());
+            } elseif ($status === 'pending') {
+                $query->whereDoesntHave('profile', fn ($q) => $q->registrationCompleted());
+            } elseif ($status === 'pending_agreement') {
+                $query->whereDoesntHave('profile', fn ($q) => $q->withSignedAgreement());
+            } elseif ($status === 'pending_fee') {
+                $query->whereDoesntHave('profile', fn ($q) => $q->withPaidPlan());
+            } elseif ($status === 'pending_profile') {
+                $query->whereDoesntHave('profile', fn ($q) => $q->withCompletedDetails());
+            } elseif ($status === 'active_paid') {
                 $query->whereHas('profile', function ($q) {
                     $q->where('is_fee_paid', true);
                 });

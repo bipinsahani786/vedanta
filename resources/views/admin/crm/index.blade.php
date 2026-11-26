@@ -41,11 +41,56 @@
     </a>
 </div>
 
+{{-- Registration / Onboarding Status Filters --}}
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'completed', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'completed' ? 'border-emerald-500 shadow-md ring-1 ring-emerald-500' : 'border-card-border' }} rounded-xl px-4 py-3 shadow-sm flex items-center justify-between hover:border-emerald-500 transition-all">
+        <div>
+            <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider">Onboarding Complete</p>
+            <h5 class="text-lg font-extrabold text-emerald-500">{{ $stats['onboarding_complete'] ?? 0 }}</h5>
+        </div>
+        <i class="fas fa-check-double text-emerald-500/60"></i>
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'pending', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'pending' ? 'border-rose-500 shadow-md ring-1 ring-rose-500' : 'border-card-border' }} rounded-xl px-4 py-3 shadow-sm flex items-center justify-between hover:border-rose-500 transition-all">
+        <div>
+            <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider">Onboarding Pending</p>
+            <h5 class="text-lg font-extrabold text-rose-500">{{ $stats['onboarding_pending'] ?? 0 }}</h5>
+        </div>
+        <i class="fas fa-hourglass-half text-rose-500/60"></i>
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'pending_agreement', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'pending_agreement' ? 'border-indigo-500 shadow-md ring-1 ring-indigo-500' : 'border-card-border' }} rounded-xl px-4 py-3 shadow-sm flex items-center justify-between hover:border-indigo-500 transition-all">
+        <div>
+            <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider">Pending Agreement</p>
+            <h5 class="text-lg font-extrabold text-indigo-500">{{ $stats['pending_agreement'] ?? 0 }}</h5>
+        </div>
+        <i class="fas fa-file-signature text-indigo-500/60"></i>
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'pending_fee', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'pending_fee' ? 'border-amber-500 shadow-md ring-1 ring-amber-500' : 'border-card-border' }} rounded-xl px-4 py-3 shadow-sm flex items-center justify-between hover:border-amber-500 transition-all">
+        <div>
+            <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider">Pending Fee</p>
+            <h5 class="text-lg font-extrabold text-amber-500">{{ $stats['pending_fee'] ?? 0 }}</h5>
+        </div>
+        <i class="fas fa-rupee-sign text-amber-500/60"></i>
+    </a>
+    <a href="{{ request()->fullUrlWithQuery(['status' => 'pending_profile', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'pending_profile' ? 'border-orange-500 shadow-md ring-1 ring-orange-500' : 'border-card-border' }} rounded-xl px-4 py-3 shadow-sm flex items-center justify-between hover:border-orange-500 transition-all">
+        <div>
+            <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider">Pending Profile</p>
+            <h5 class="text-lg font-extrabold text-orange-500">{{ $stats['pending_profile'] ?? 0 }}</h5>
+        </div>
+        <i class="fas fa-user-edit text-orange-500/60"></i>
+    </a>
+</div>
+
 {{-- Filter/Search Bar --}}
 <div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-4">
-    <div class="flex justify-between items-center mb-4">
-        <div class="text-sm text-text-dark/50 font-medium">
-            Showing {{ $candidates->firstItem() ?? 0 }} to {{ $candidates->lastItem() ?? 0 }} of {{ $candidates->total() }} entries
+    <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+        <div class="text-sm text-text-dark/50 font-medium flex flex-wrap items-center gap-2">
+            <span>Showing {{ $candidates->firstItem() ?? 0 }} to {{ $candidates->lastItem() ?? 0 }} of {{ $candidates->total() }} entries</span>
+            @if(request('status'))
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-accent-blue/10 text-accent-blue border border-accent-blue/20 inline-flex items-center gap-1.5">
+                    <span>Filter: {{ str_replace('_', ' ', ucfirst(request('status'))) }}</span>
+                    <a href="{{ route('admin.crm.index') }}" class="hover:text-red-500" title="Clear status filter"><i class="fas fa-times"></i></a>
+                </span>
+            @endif
         </div>
         <button type="button" onclick="document.getElementById('advanced-filters').classList.toggle('hidden')" class="text-sm font-semibold text-accent-blue flex items-center gap-2 hover:text-accent-blue-hover transition-colors">
             <i class="fas fa-filter"></i> Advanced Filters
@@ -57,7 +102,7 @@
             <i class="fas fa-search absolute left-3 text-text-dark/40 text-sm"></i>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, phone, candidate ID..." 
                    class="w-full pl-9 pr-4 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue transition-all">
-            @if(request()->anyFilled(['search', 'subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability', 'plan_amount']))
+            @if(request()->anyFilled(['status', 'search', 'subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability', 'plan_amount']))
                 <a href="{{ route('admin.crm.index') }}" class="absolute right-3 text-text-dark/40 hover:text-red-400 transition-colors text-sm font-bold flex items-center gap-1">
                     <i class="fas fa-times"></i> Clear Filters
                 </a>
@@ -189,35 +234,44 @@
                     @php
                         $cp = $candidate->profile;
                         $hasDetails = $cp && $cp->hasCompletedProfileDetails();
-                        $hasFee = $cp && $cp->is_fee_paid;
+                        $hasFee = $cp && $cp->has_paid_plan;
                         $hasAgr = $cp && ($cp->is_agreement_signed || !empty($cp->signature_date_time) || !empty($cp->agreement_signed_at) || !empty($cp->agreement_pdf_path) || $cp->is_manual_agreement);
+                        $isOnboardingDone = $cp && $cp->isRegistrationCompleted();
                     @endphp
-                    @if($hasFee && $hasDetails)
+                    @if($isOnboardingDone)
                         <span class="bg-green-500/10 text-green-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-green-500/20 uppercase tracking-wider flex items-center gap-1 w-max">
                             <i class="fas fa-check-circle"></i> Active / Paid
                         </span>
+                        <div class="mt-1 text-[10px] text-emerald-500 font-bold">
+                            Onboarding Complete
+                        </div>
                     @elseif($hasFee && !$hasDetails)
                         <span class="bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-amber-500/20 uppercase tracking-wider flex items-center gap-1 w-max" title="Fee paid but profile details are incomplete">
                             <i class="fas fa-exclamation-triangle"></i> Paid / Incomplete
                         </span>
-                        <div class="mt-1 text-[10px] text-red-400 font-semibold max-w-[150px] leading-tight">
-                            Pending Profile Details
+                        <div class="mt-1 text-[10px] text-red-400 font-semibold max-w-[165px] leading-tight">
+                            Onboarding Pending · Profile Details
                         </div>
                     @elseif($hasAgr && $hasDetails)
                         <span class="bg-accent-blue/10 text-accent-blue px-2.5 py-1 rounded-lg text-[10px] font-bold border border-accent-blue/20 uppercase tracking-wider flex items-center gap-1 w-max">
                             <i class="fas fa-signature"></i> Signed
                         </span>
-                        <div class="mt-1 text-[10px] text-amber-400 font-semibold max-w-[150px] leading-tight">
-                            Pending Registration Fee
+                        <div class="mt-1 text-[10px] text-amber-400 font-semibold max-w-[165px] leading-tight">
+                            Onboarding Pending · Registration Fee
                         </div>
                     @else
                         <span class="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-red-500/20 uppercase tracking-wider flex items-center gap-1 w-max">
                             <i class="fas fa-exclamation-circle"></i> Incomplete
                         </span>
-                        <div class="mt-1 text-[10px] text-red-400 font-semibold max-w-[150px] leading-tight">
-                            {{ $cp ? $cp->pending_reason : 'Pending Profile Completion' }}
+                        <div class="mt-1 text-[10px] text-red-400 font-semibold max-w-[165px] leading-tight">
+                            Onboarding Pending · {{ $cp ? $cp->pending_reason : 'Pending Profile Completion' }}
                         </div>
                     @endif
+                    <div class="mt-1 flex items-center gap-1.5 flex-wrap text-[9px] font-bold">
+                        <span class="px-1.5 py-0.5 rounded {{ $hasAgr ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-400' }}">Agr {{ $hasAgr ? '✓' : '✗' }}</span>
+                        <span class="px-1.5 py-0.5 rounded {{ $hasFee ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-400' }}">Fee {{ $hasFee ? '✓' : '✗' }}</span>
+                        <span class="px-1.5 py-0.5 rounded {{ $hasDetails ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-400' }}">Profile {{ $hasDetails ? '✓' : '✗' }}</span>
+                    </div>
                     @if($candidate->profile)
                         <div class="mt-1.5 flex items-center gap-1.5 flex-wrap">
                             @if($candidate->profile->is_agreement_signed || $candidate->profile->agreement_pdf_path || $candidate->profile->signature_data || $candidate->profile->is_fee_paid)
