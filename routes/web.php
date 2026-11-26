@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BulkEmailController;
+use App\Http\Controllers\Admin\CandidateAccessRequestController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\ClientLogoController;
@@ -499,6 +500,13 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
     Route::get('/agreement/template', [EmployerAgreementController::class, 'downloadTemplate'])->name('agreement.template');
     Route::post('/agreement/upload', [EmployerAgreementController::class, 'upload'])->name('agreement.upload');
     Route::get('/agreement/uploaded', [EmployerAgreementController::class, 'downloadUploaded'])->name('agreement.uploaded');
+
+    // Search Candidates / Teachers Discovery & Access Requests
+    Route::get('/search-candidates', [App\Http\Controllers\Employer\CandidateSearchController::class, 'index'])->name('talent.index');
+    Route::get('/search-candidates/{candidate}/photo', [App\Http\Controllers\Employer\CandidateSearchController::class, 'photo'])->name('talent.photo');
+    Route::get('/search-candidates/{candidate}/cv', [App\Http\Controllers\Employer\CandidateSearchController::class, 'cv'])->name('talent.cv');
+    Route::get('/search-candidates/{candidate}', [App\Http\Controllers\Employer\CandidateSearchController::class, 'preview'])->name('talent.preview');
+    Route::post('/search-candidates/{candidate}/request-access', [App\Http\Controllers\Employer\CandidateSearchController::class, 'requestAccess'])->name('talent.request-access');
 });
 
 // Global Impersonation Leave Route
@@ -560,6 +568,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/candidate/{id}/send-email', [CrmController::class, 'sendCandidateEmail'])->name('crm.candidate.send-email');
     Route::post('/crm/candidate/{id}/password-reset-link', [CrmController::class, 'sendPasswordResetLink'])->name('crm.candidate.password-reset-link');
     Route::post('/crm/candidate/{id}/temporary-password', [CrmController::class, 'issueTemporaryPassword'])->name('crm.candidate.temporary-password');
+    Route::post('/crm/candidate/{id}/school-discovery', [CrmController::class, 'updateSchoolDiscovery'])->name('crm.candidate.school-discovery');
+    Route::post('/crm/candidates/bulk-school-discovery', [CrmController::class, 'bulkUpdateSchoolDiscovery'])->name('crm.candidate.bulk-school-discovery');
+
+    // School Candidate Profile Access Requests & Audit Log
+    Route::get('/access-requests', [CandidateAccessRequestController::class, 'index'])->name('access-requests.index');
+    Route::get('/access-requests/{id}', [CandidateAccessRequestController::class, 'show'])->name('access-requests.show');
+    Route::post('/access-requests/{id}/review', [CandidateAccessRequestController::class, 'review'])->name('access-requests.review');
 
     // Applications & Transactions
     Route::get('/applications', [App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');

@@ -30,10 +30,11 @@
                       (str_contains($notif->type, 'CandidateFollowUpReminder') ? 'bg-amber-100 text-amber-600' :
                       (str_contains($notif->type, 'StandaloneAgreementSigned') ? 'bg-emerald-100 text-emerald-700' :
                       (str_contains($notif->type, 'EmployerAgreementUploaded') ? 'bg-indigo-100 text-indigo-700' :
+                      (str_contains($notif->type, 'SchoolProfileAccessRequested') ? 'bg-amber-100 text-amber-700' :
                       (str_contains($notif->type, 'VerificationRequested') ? 'bg-cyan-100 text-cyan-600' :
                       (str_contains($notif->type, 'PaymentReceived') ? 'bg-emerald-100 text-emerald-600' :
                       (str_contains($notif->type, 'LateFee') ? 'bg-orange-100 text-orange-600' :
-                      (str_contains($notif->type, 'ProfileVerified') ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'))))))) }}">
+                      (str_contains($notif->type, 'ProfileVerified') ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600')))))))) }}">
                     @if(str_contains($notif->type, 'LeadFollowUp'))
                         <i class="fas fa-user-clock"></i>
                     @elseif(str_contains($notif->type, 'CandidateFollowUpReminder'))
@@ -42,6 +43,8 @@
                         <i class="fas fa-file-signature"></i>
                     @elseif(str_contains($notif->type, 'EmployerAgreementUploaded'))
                         <i class="fas fa-file-signature"></i>
+                    @elseif(str_contains($notif->type, 'SchoolProfileAccessRequested'))
+                        <i class="fas fa-user-shield"></i>
                     @elseif(str_contains($notif->type, 'VerificationRequested'))
                         <i class="fas fa-user-check"></i>
                     @elseif(str_contains($notif->type, 'PaymentReceived'))

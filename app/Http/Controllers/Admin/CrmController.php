@@ -15,6 +15,7 @@ use App\Mail\ProfileApprovedMail;
 use App\Mail\RegistrationSuccessMail;
 use App\Mail\ServiceChargeInvoiceMail;
 use App\Mail\TemporaryPasswordMail;
+use App\Models\CandidateAccessRequest;
 use App\Models\CandidateProfile;
 use App\Models\CandidateRating;
 use App\Models\Category;
@@ -41,6 +42,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
@@ -544,6 +546,15 @@ class CrmController extends Controller
             'missing_resume' => $query->whereDoesntHave('profile', fn ($q) => $q->whereNotNull('resume_path')->where('resume_path', '!=', '')),
             'active_account' => $query->where('users.is_active', true),
             'inactive_account' => $query->where('users.is_active', false),
+            'school_visible' => Schema::hasColumn('candidate_profiles', 'school_discovery_visible')
+                ? $query->whereHas('profile', fn ($q) => $q->where('school_discovery_visible', true))
+                : null,
+            'school_hidden' => Schema::hasColumn('candidate_profiles', 'school_discovery_visible')
+                ? $query->whereDoesntHave('profile', fn ($q) => $q->where('school_discovery_visible', true))
+                : null,
+            'best_profile' => Schema::hasColumn('candidate_profiles', 'is_best_profile')
+                ? $query->whereHas('profile', fn ($q) => $q->where('is_best_profile', true))
+                : null,
             default => null,
         };
     }
@@ -554,6 +565,7 @@ class CrmController extends Controller
 
         // Analytics based on base query (before status filter)
         $onboardingSummary = CandidateProfile::onboardingSummary($baseQuery);
+        $hasSchoolCols = Schema::hasColumn('candidate_profiles', 'school_discovery_visible');
         $stats = [
             'total' => $onboardingSummary['total'],
             'onboarding_complete' => $onboardingSummary['completed'],
@@ -570,6 +582,12 @@ class CrmController extends Controller
             'pending_dues' => (clone $baseQuery)->whereHas('profile', function ($q) {
                 $q->where('pending_amount', '>', 0);
             })->count(),
+            'school_visible' => $hasSchoolCols
+                ? (clone $baseQuery)->whereHas('profile', fn ($q) => $q->where('school_discovery_visible', true))->count()
+                : 0,
+            'best_profile' => $hasSchoolCols
+                ? (clone $baseQuery)->whereHas('profile', fn ($q) => $q->where('is_best_profile', true))->count()
+                : 0,
         ];
         $stats['incomplete'] = $stats['total'] - $stats['active_paid'] - $stats['signed'];
 
@@ -758,8 +776,14 @@ class CrmController extends Controller
 
         $history = $history->sortByDesc('date')->values();
         $emailTemplates = EmailTemplate::orderBy('name', 'asc')->get();
+        $accessRequests = Schema::hasTable('candidate_access_requests')
+            ? CandidateAccessRequest::where('candidate_user_id', $id)
+                ->with(['school.employerProfile', 'reviewer', 'logs.actor'])
+                ->latest('updated_at')
+                ->get()
+            : collect();
 
-        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'payments', 'rating', 'history', 'availableJobs', 'emailTemplates'));
+        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'payments', 'rating', 'history', 'availableJobs', 'emailTemplates', 'accessRequests'));
     }
 
     public function uploadAgreement(Request $request, $id)
@@ -1361,6 +1385,35 @@ class CrmController extends Controller
         return back()->with('success', 'Reminder email sent successfully for: '.$reason);
     }
 
+    protected function resolveBulkCandidateQuery(Request $request)
+    {
+        $selectAllMatching = $request->boolean('select_all_matching');
+        $manualIds = array_values(array_unique(array_map('intval', (array) $request->input('candidate_ids', []))));
+
+        if (! $selectAllMatching && empty($manualIds)) {
+            return null;
+        }
+
+        if ($selectAllMatching) {
+            $targetQuery = $this->buildFilteredCandidatesQuery($request, true);
+
+            $excludedIds = array_map('intval', (array) $request->input('excluded_ids', []));
+            if ($request->filled('excluded_ids_csv')) {
+                $csvIds = array_filter(array_map('intval', explode(',', (string) $request->input('excluded_ids_csv'))));
+                $excludedIds = array_merge($excludedIds, $csvIds);
+            }
+            $excludedIds = array_values(array_unique(array_filter($excludedIds)));
+
+            if (! empty($excludedIds)) {
+                $targetQuery->whereNotIn('users.id', $excludedIds);
+            }
+
+            return $targetQuery;
+        }
+
+        return User::where('role', 'candidate')->whereIn('id', $manualIds);
+    }
+
     public function sendBulkOnboardingReminder(Request $request)
     {
         $request->validate([
@@ -1375,28 +1428,10 @@ class CrmController extends Controller
             'custom_message' => 'nullable|required_if:notification_type,custom_email|string',
         ]);
 
-        $selectAllMatching = $request->boolean('select_all_matching');
-        $manualIds = array_values(array_unique(array_map('intval', (array) $request->input('candidate_ids', []))));
+        $targetQuery = $this->resolveBulkCandidateQuery($request);
 
-        if (!$selectAllMatching && empty($manualIds)) {
+        if (! $targetQuery) {
             return back()->with('error', 'Please select at least one candidate or click Select All Matching Candidates.');
-        }
-
-        if ($selectAllMatching) {
-            $targetQuery = $this->buildFilteredCandidatesQuery($request, true);
-
-            $excludedIds = array_map('intval', (array) $request->input('excluded_ids', []));
-            if ($request->filled('excluded_ids_csv')) {
-                $csvIds = array_filter(array_map('intval', explode(',', (string) $request->input('excluded_ids_csv'))));
-                $excludedIds = array_merge($excludedIds, $csvIds);
-            }
-            $excludedIds = array_values(array_unique(array_filter($excludedIds)));
-
-            if (!empty($excludedIds)) {
-                $targetQuery->whereNotIn('users.id', $excludedIds);
-            }
-        } else {
-            $targetQuery = User::where('role', 'candidate')->whereIn('id', $manualIds);
         }
 
         $targetQuery->whereNotNull('email')->where('email', '!=', '');
@@ -1724,5 +1759,100 @@ class CrmController extends Controller
         }
 
         return "Vpa@{$digits}{$letters}";
+    }
+
+    public function updateSchoolDiscovery(Request $request, $id)
+    {
+        if (! Schema::hasColumn('candidate_profiles', 'school_discovery_visible')) {
+            return back()->with('error', 'School discovery columns are not migrated yet.');
+        }
+
+        $validated = $request->validate([
+            'school_discovery_visible' => 'nullable|boolean',
+            'is_best_profile' => 'nullable|boolean',
+            'school_display_mode' => 'required|in:vpa_id,masked_name,full_name',
+        ]);
+
+        $candidate = User::where('role', 'candidate')->with('profile')->findOrFail($id);
+        $profile = $candidate->profile ?: $candidate->profile()->create([]);
+
+        $visible = $request->boolean('school_discovery_visible');
+        $best = $request->boolean('is_best_profile');
+
+        $profile->update([
+            'school_discovery_visible' => $visible,
+            'is_best_profile' => $best,
+            'school_display_mode' => $validated['school_display_mode'],
+        ]);
+
+        $state = $visible ? 'visible in School Search' : 'hidden from School Search';
+
+        return back()->with('success', "School discovery updated: {$candidate->name} is now {$state}.");
+    }
+
+    public function bulkUpdateSchoolDiscovery(Request $request)
+    {
+        if (! Schema::hasColumn('candidate_profiles', 'school_discovery_visible')) {
+            return back()->with('error', 'School discovery columns are not migrated yet.');
+        }
+
+        $validated = $request->validate([
+            'select_all_matching' => 'nullable|boolean',
+            'candidate_ids' => 'nullable|array',
+            'candidate_ids.*' => 'integer|exists:users,id',
+            'excluded_ids' => 'nullable|array',
+            'excluded_ids.*' => 'integer',
+            'excluded_ids_csv' => 'nullable|string',
+            'discovery_action' => 'required|in:show,hide,mark_best,unmark_best',
+            'school_display_mode' => 'nullable|in:vpa_id,masked_name,full_name',
+        ]);
+
+        $targetQuery = $this->resolveBulkCandidateQuery($request);
+        if (! $targetQuery) {
+            return back()->with('error', 'Please select at least one candidate or click Select All Matching Candidates.');
+        }
+
+        $action = $validated['discovery_action'];
+        $displayMode = $validated['school_display_mode'] ?? null;
+        $updatedCount = 0;
+
+        (clone $targetQuery)
+            ->select('users.id')
+            ->orderBy('users.id')
+            ->chunkById(200, function ($rows) use ($action, $displayMode, &$updatedCount): void {
+                $userIds = $rows->pluck('id')->all();
+                if (empty($userIds)) {
+                    return;
+                }
+
+                // Ensure profiles exist for selected candidates before bulk update
+                $existingUserIds = CandidateProfile::whereIn('user_id', $userIds)->pluck('user_id')->all();
+                foreach (array_diff($userIds, $existingUserIds) as $missingUserId) {
+                    CandidateProfile::create(['user_id' => $missingUserId]);
+                }
+
+                $updates = match ($action) {
+                    'show' => ['school_discovery_visible' => true],
+                    'hide' => ['school_discovery_visible' => false],
+                    'mark_best' => ['school_discovery_visible' => true, 'is_best_profile' => true],
+                    'unmark_best' => ['is_best_profile' => false],
+                };
+
+                if ($displayMode) {
+                    $updates['school_display_mode'] = $displayMode;
+                }
+
+                CandidateProfile::whereIn('user_id', $userIds)->update($updates);
+                $updatedCount += count($userIds);
+            }, 'users.id', 'id');
+
+        $label = match ($action) {
+            'show' => 'marked visible in School Discovery',
+            'hide' => 'hidden from School Discovery',
+            'mark_best' => 'marked Visible + Best Profile for Schools',
+            'unmark_best' => 'removed from Best Profiles',
+        };
+
+        return back()->with('success', "{$updatedCount} candidate(s) {$label}.");
     }
 }

@@ -120,6 +120,95 @@
         </a>
     </div>
 
+    {{-- Search Candidates / Search Teachers Discovery Section --}}
+    @if(!empty($discoveryReady))
+        <div class="mb-8 bg-card-bg rounded-2xl border border-accent-yellow/35 p-6 shadow-xl reveal space-y-5">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <span class="w-9 h-9 rounded-xl bg-accent-yellow/15 text-accent-yellow flex items-center justify-center text-base">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </span>
+                        <h2 class="text-lg font-bold text-text-main">Search Candidates / Search Teachers</h2>
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-accent-yellow/15 text-accent-yellow border border-accent-yellow/30">
+                            {{ $discoveryStats['eligible'] ?? 0 }} Eligible Profiles
+                        </span>
+                    </div>
+                    <p class="text-xs text-text-dark/60 mt-1.5">
+                        Browse Admin-approved teacher profiles by Category (TGT / PGT / PRT) &amp; Subject, inspect blurred previews, and request field-level unlock for Photo, Full Profile, CV, or Contact details.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    <a href="{{ route('employer.talent.index', ['curated' => 'verified']) }}"
+                       class="px-3.5 py-2 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-blue-400 text-xs font-bold inline-flex items-center gap-1.5">
+                        <i class="fas fa-check-circle"></i> Verified Profiles ({{ $discoveryStats['verified'] ?? 0 }})
+                    </a>
+                    <a href="{{ route('employer.talent.index', ['curated' => 'best']) }}"
+                       class="px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 text-xs font-bold inline-flex items-center gap-1.5">
+                        <i class="fas fa-award"></i> Best Profiles ({{ $discoveryStats['best'] ?? 0 }})
+                    </a>
+                    <a href="{{ route('employer.talent.index', ['tab' => 'requests']) }}"
+                       class="px-3.5 py-2 rounded-xl bg-secondary-bg hover:bg-card-border/50 border border-card-border text-text-main text-xs font-bold inline-flex items-center gap-1.5">
+                        <i class="fas fa-unlock-alt text-accent-yellow"></i> My Requests
+                        <span class="text-amber-400">({{ $discoveryStats['pending_requests'] ?? 0 }} Pending</span>
+                        <span class="text-emerald-400">/ {{ $discoveryStats['approved_requests'] ?? 0 }} Unlocked)</span>
+                    </a>
+                </div>
+            </div>
+
+            <form action="{{ route('employer.talent.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div class="md:col-span-5">
+                    <input type="text" name="keyword" placeholder="Search subject, B.Ed, CTET, VPA ID, city..."
+                           class="w-full px-4 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:border-accent-yellow focus:outline-none">
+                </div>
+                <div class="md:col-span-3">
+                    <select name="category_id" class="w-full px-3 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:border-accent-yellow focus:outline-none">
+                        <option value="">All Categories (TGT / PGT / PRT)</option>
+                        @foreach($quickCategories ?? [] as $cat)
+                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <select name="subject_id" class="w-full px-3 py-2.5 bg-secondary-bg border border-card-border rounded-xl text-sm text-text-main focus:border-accent-yellow focus:outline-none">
+                        <option value="">All Subjects</option>
+                        @foreach($quickSubjects ?? [] as $sub)
+                            <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit" class="w-full h-full px-4 py-2.5 bg-accent-yellow text-[#031b4e] rounded-xl text-xs font-extrabold hover:brightness-110 transition-all cursor-pointer">
+                        <i class="fas fa-search mr-1"></i> Find Teachers
+                    </button>
+                </div>
+            </form>
+
+            @if(isset($recentAccessRequests) && $recentAccessRequests->count() > 0)
+                <div class="pt-3 border-t border-card-border/60 flex flex-wrap items-center gap-2 text-xs">
+                    <span class="text-text-dark/50 font-semibold mr-1">Recent Access Requests:</span>
+                    @foreach($recentAccessRequests as $rar)
+                        @php
+                            $rarClass = match ($rar->status) {
+                                'approved' => 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+                                'partially_approved' => 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+                                'declined' => 'bg-rose-500/15 text-rose-400 border-rose-500/30',
+                                default => 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+                            };
+                        @endphp
+                        <a href="{{ route('employer.talent.index', ['tab' => 'requests']) }}"
+                           class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border {{ $rarClass }} text-[11px] font-bold hover:opacity-90">
+                            <span>{{ $rar->candidate?->profile?->vpa_id ?? ('#' . $rar->candidate_user_id) }}</span>
+                            <span>({{ $rar->candidate?->profile?->subject?->name ?? 'Teacher' }})</span>
+                            <span>· {{ $rar->statusLabel() }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div id="tour-emp-jobs" class="lg:col-span-2 space-y-8">
             @if($recentJobs->count() > 0)

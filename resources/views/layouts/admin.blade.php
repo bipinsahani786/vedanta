@@ -209,6 +209,18 @@
                     class="sidebar-link {{ request()->routeIs('admin.schools.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-school w-5 text-center"></i> Schools CRM
                 </a>
+                <a href="{{ route('admin.access-requests.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.access-requests.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-user-shield w-5 text-center"></i> Access Requests
+                    @php
+                        $pendingAccessReqCount = \Illuminate\Support\Facades\Schema::hasTable('candidate_access_requests')
+                            ? \App\Models\CandidateAccessRequest::where('status', 'pending')->count()
+                            : 0;
+                    @endphp
+                    @if($pendingAccessReqCount > 0)
+                        <span class="ml-auto bg-amber-400 text-[#031b4e] text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $pendingAccessReqCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('admin.standalone-agreements.index') }}"
                     class="sidebar-link {{ request()->routeIs('admin.standalone-agreements.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-paper-plane w-5 text-center"></i> Send Agreement

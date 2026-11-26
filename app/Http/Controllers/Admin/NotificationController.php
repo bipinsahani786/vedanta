@@ -55,6 +55,10 @@ class NotificationController extends Controller
      */
     public static function resolveTargetUrl(?object $data, ?string $type = null): ?string
     {
+        if ($type && str_contains($type, 'SchoolProfileAccessRequested') && $data && ! empty($data->action_url)) {
+            return $data->action_url;
+        }
+
         if ($type && str_contains($type, 'CandidateFollowUpReminder') && $data && ! empty($data->candidate_id)) {
             return route('admin.crm.show', (int) $data->candidate_id) . '#follow-ups-section';
         }

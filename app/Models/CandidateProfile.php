@@ -88,11 +88,44 @@ class CandidateProfile extends Model
         'is_profile_complete' => 'boolean',
         'is_agreement_signed' => 'boolean',
         'is_fee_paid' => 'boolean',
+        'is_verified' => 'boolean',
+        'school_discovery_visible' => 'boolean',
+        'is_best_profile' => 'boolean',
         'registration_completed_at' => 'datetime',
         'signature_date_time' => 'datetime',
         'plan_started_at' => 'datetime',
         'agreement_signed_at' => 'datetime',
     ];
+
+    /**
+     * Resolve the public identifier/name shown to schools on discovery cards.
+     */
+    public function resolveSchoolDisplayName(bool $canViewFullProfile = false, ?string $rawName = null): string
+    {
+        $name = trim((string) ($rawName ?: $this->user?->name ?: 'Candidate'));
+        $vpa = $this->vpa_id ?: ('VPA-CAN-' . str_pad((string) ($this->user_id ?: $this->id), 4, '0', STR_PAD_LEFT));
+        $mode = $this->school_display_mode ?: 'vpa_id';
+
+        if ($canViewFullProfile || $mode === 'full_name') {
+            return $name;
+        }
+
+        if ($mode === 'masked_name') {
+            $parts = preg_split('/\s+/', $name) ?: [];
+            $maskedParts = array_map(function ($word) {
+                $len = mb_strlen($word);
+                if ($len <= 1) {
+                    return $word . '*';
+                }
+
+                return mb_substr($word, 0, 1) . str_repeat('*', min(3, $len - 1));
+            }, $parts);
+
+            return trim(implode(' ', $maskedParts)) . " ({$vpa})";
+        }
+
+        return $vpa;
+    }
 
     public function user()
     {

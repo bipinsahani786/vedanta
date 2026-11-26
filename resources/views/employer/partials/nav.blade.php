@@ -14,6 +14,9 @@
             <a href="{{ route('employer.applicants.index') }}" class="relative px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2 {{ request()->routeIs('employer.applicants.index') ? 'nav-active-link text-accent-yellow after:absolute after:bottom-0 after:left-2 after:right-2 after:h-[2px] after:bg-accent-yellow after:rounded-full font-bold' : 'text-text-dark/50 hover:text-text-main' }}">
                 <i class="fas fa-users text-xs"></i> Candidates
             </a>
+            <a href="{{ route('employer.talent.index') }}" class="relative px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2 {{ request()->routeIs('employer.talent.*') ? 'nav-active-link text-accent-yellow after:absolute after:bottom-0 after:left-2 after:right-2 after:h-[2px] after:bg-accent-yellow after:rounded-full font-bold' : 'text-text-dark/50 hover:text-text-main' }}">
+                <i class="fas fa-search text-xs"></i> Search Teachers
+            </a>
             <a href="{{ route('employer.profile.edit') }}" class="relative px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2 {{ request()->routeIs('employer.profile.edit') ? 'nav-active-link text-accent-yellow after:absolute after:bottom-0 after:left-2 after:right-2 after:h-[2px] after:bg-accent-yellow after:rounded-full font-bold' : 'text-text-dark/50 hover:text-text-main' }}">
                 <i class="fas fa-cog text-xs"></i> Settings
             </a>

@@ -193,6 +193,11 @@
                     <option value="missing_resume" {{ $normalizedStatus === 'missing_resume' ? 'selected' : '' }}>No Resume Uploaded</option>
                     <option value="active_account" {{ $normalizedStatus === 'active_account' ? 'selected' : '' }}>Active Accounts</option>
                     <option value="inactive_account" {{ $normalizedStatus === 'inactive_account' ? 'selected' : '' }}>Inactive / Deactivated Accounts</option>
+                    <optgroup label="School Discovery Visibility">
+                        <option value="school_visible" {{ $normalizedStatus === 'school_visible' ? 'selected' : '' }}>School Discovery: Visible ({{ $stats['school_visible'] ?? 0 }})</option>
+                        <option value="school_hidden" {{ $normalizedStatus === 'school_hidden' ? 'selected' : '' }}>School Discovery: Hidden</option>
+                        <option value="best_profile" {{ $normalizedStatus === 'best_profile' ? 'selected' : '' }}>Best Profiles for Schools ({{ $stats['best_profile'] ?? 0 }})</option>
+                    </optgroup>
                 </select>
             </div>
 
@@ -315,6 +320,14 @@
                                         @endif
                                     </div>
                                     <div class="text-[11px] font-mono text-text-dark/60">{{ $cp?->vpa_id ?? 'No VPA ID' }}</div>
+                                    @if($cp?->school_discovery_visible)
+                                        <div class="mt-1 flex items-center gap-1 flex-wrap">
+                                            <span class="px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 text-[9px] font-bold">School Visible</span>
+                                            @if($cp?->is_best_profile)
+                                                <span class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[9px] font-bold">Best</span>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 {{ $isDone ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30' }}">
@@ -470,6 +483,12 @@
                                         <span class="px-1.5 py-0.5 rounded bg-secondary-bg text-text-dark/60 border border-card-border font-medium">
                                             {{ $candidate->profile->preferredCity?->name ?? 'N/A' }}, {{ $candidate->profile->preferredState?->name ?? '' }}
                                         </span>
+                                    @endif
+                                    @if($candidate->profile->school_discovery_visible)
+                                        <span class="px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 font-bold">School Visible</span>
+                                    @endif
+                                    @if($candidate->profile->is_best_profile)
+                                        <span class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold">Best Profile</span>
                                     @endif
                                 </div>
                             @endif
@@ -690,7 +709,7 @@
 </div>
 
 <!-- Floating Bulk Action Bar -->
-<div id="bulkActionBar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden bg-card-bg border border-accent-blue/50 rounded-2xl shadow-2xl p-4 flex items-center gap-4 backdrop-blur-xl animate-bounce-short">
+<div id="bulkActionBar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden bg-card-bg border border-accent-blue/50 rounded-2xl shadow-2xl p-4 flex items-center gap-3 flex-wrap backdrop-blur-xl animate-bounce-short">
     <div class="flex items-center gap-2 text-sm font-bold text-text-main">
         <span class="px-2.5 h-7 rounded-full bg-accent-blue text-white flex items-center justify-center text-xs" id="selectedCount">0</span>
         <span id="selectedCountLabel">Candidates Selected</span>
@@ -699,6 +718,11 @@
     <button type="button" onclick="openBulkNotificationModal()" class="px-4 py-2 bg-accent-blue hover:bg-accent-blue-hover text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer">
         <i class="fas fa-paper-plane"></i> Send Bulk Notification / Email
     </button>
+    @if(\Illuminate\Support\Facades\Schema::hasColumn('candidate_profiles', 'school_discovery_visible'))
+        <button type="button" onclick="openBulkSchoolDiscoveryModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer">
+            <i class="fas fa-school"></i> School Visibility
+        </button>
+    @endif
     <button type="button" onclick="deselectAllCandidates()" class="text-xs text-text-dark/50 hover:text-red-400 font-semibold px-2 cursor-pointer">
         Cancel
     </button>
@@ -773,6 +797,63 @@
                         <i class="fas fa-paper-plane"></i> Queue Notifications
                     </button>
                 </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bulk School Discovery Modal -->
+<div id="bulkSchoolDiscoveryModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-card-bg border border-card-border rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+        <button type="button" onclick="closeBulkSchoolDiscoveryModal()" class="absolute top-4 right-4 text-text-dark/50 hover:text-text-main cursor-pointer">
+            <i class="fas fa-times text-lg"></i>
+        </button>
+
+        <h3 class="text-lg font-bold text-text-main mb-1 flex items-center gap-2">
+            <i class="fas fa-school text-indigo-500"></i> Bulk School Discovery Visibility
+        </h3>
+        <p class="text-xs text-text-dark/60 mb-4">
+            Update School Search visibility for <span id="discoveryModalSelectedCount" class="font-bold text-indigo-500">0</span> selected candidate(s).
+        </p>
+
+        <form action="{{ route('admin.crm.candidate.bulk-school-discovery') }}" method="POST" id="bulkSchoolDiscoveryForm" class="space-y-4">
+            @csrf
+            <input type="hidden" name="select_all_matching" id="bulkDiscoverySelectAllMatching" value="0">
+            <input type="hidden" name="excluded_ids_csv" id="bulkDiscoveryExcludedCsv" value="">
+            @foreach(['status', 'search', 'subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability', 'salary', 'plan_amount'] as $filterKey)
+                @if(request()->filled($filterKey))
+                    <input type="hidden" name="{{ $filterKey }}" value="{{ request($filterKey) }}">
+                @endif
+            @endforeach
+            <div id="bulkDiscoveryCandidateInputs"></div>
+
+            <div>
+                <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wider mb-1.5">Action</label>
+                <select name="discovery_action" required class="w-full bg-secondary-bg border border-card-border rounded-xl px-3 py-2.5 text-sm text-text-main">
+                    <option value="show">Make Visible in School Search</option>
+                    <option value="mark_best">Make Visible + Mark as Best Profile</option>
+                    <option value="hide">Hide from School Search</option>
+                    <option value="unmark_best">Remove Best Profile Flag</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wider mb-1.5">Identifier Mode (Optional Override)</label>
+                <select name="school_display_mode" class="w-full bg-secondary-bg border border-card-border rounded-xl px-3 py-2.5 text-sm text-text-main">
+                    <option value="">Keep Existing Mode</option>
+                    <option value="vpa_id">VPA ID Only (Most Private)</option>
+                    <option value="masked_name">Masked Name + VPA ID</option>
+                    <option value="full_name">Full Name</option>
+                </select>
+            </div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeBulkSchoolDiscoveryModal()" class="px-4 py-2 bg-secondary-bg text-text-dark/70 text-xs font-bold rounded-xl cursor-pointer">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-sm">
+                    Apply Visibility
+                </button>
             </div>
         </form>
     </div>
@@ -908,17 +989,17 @@
         }
     }
 
-    function openBulkNotificationModal() {
+    function syncBulkSelectionInputs(containerId, allMatchingId, excludedCsvId, countDisplayId) {
         const selectedPageIds = getSelectedPageIds();
         const effectiveCount = selectAllMatchingMode
             ? Math.max(0, totalMatchingCandidates - excludedCandidateIds.size)
             : selectedPageIds.size;
 
-        if (effectiveCount === 0) return;
+        if (effectiveCount === 0) return false;
 
-        const inputsContainer = document.getElementById('bulkCandidateInputs');
-        const allMatchingInput = document.getElementById('bulkSelectAllMatchingInput');
-        const excludedCsvInput = document.getElementById('bulkExcludedCsvInput');
+        const inputsContainer = document.getElementById(containerId);
+        const allMatchingInput = document.getElementById(allMatchingId);
+        const excludedCsvInput = document.getElementById(excludedCsvId);
         inputsContainer.innerHTML = '';
 
         if (selectAllMatchingMode) {
@@ -936,12 +1017,30 @@
             });
         }
 
-        document.getElementById('modalSelectedCount').textContent = effectiveCount.toLocaleString();
+        document.getElementById(countDisplayId).textContent = effectiveCount.toLocaleString();
+        return true;
+    }
+
+    function openBulkNotificationModal() {
+        if (!syncBulkSelectionInputs('bulkCandidateInputs', 'bulkSelectAllMatchingInput', 'bulkExcludedCsvInput', 'modalSelectedCount')) {
+            return;
+        }
         document.getElementById('bulkNotificationModal').classList.remove('hidden');
     }
 
     function closeBulkNotificationModal() {
         document.getElementById('bulkNotificationModal').classList.add('hidden');
+    }
+
+    function openBulkSchoolDiscoveryModal() {
+        if (!syncBulkSelectionInputs('bulkDiscoveryCandidateInputs', 'bulkDiscoverySelectAllMatching', 'bulkDiscoveryExcludedCsv', 'discoveryModalSelectedCount')) {
+            return;
+        }
+        document.getElementById('bulkSchoolDiscoveryModal').classList.remove('hidden');
+    }
+
+    function closeBulkSchoolDiscoveryModal() {
+        document.getElementById('bulkSchoolDiscoveryModal').classList.add('hidden');
     }
 
     function toggleNotificationFields(type) {

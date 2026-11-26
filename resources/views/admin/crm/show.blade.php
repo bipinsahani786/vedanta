@@ -373,6 +373,65 @@
                             </div>
                         @endif
                     </div>
+
+                    {{-- School Discovery & Visibility Controls --}}
+                    @if($candidate->profile && \Illuminate\Support\Facades\Schema::hasColumn('candidate_profiles', 'school_discovery_visible'))
+                        <div class="mt-3 p-3.5 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
+                                    <i class="fas fa-school mr-1"></i> School Discovery Visibility
+                                </span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $candidate->profile->school_discovery_visible ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700' }}">
+                                    {{ $candidate->profile->school_discovery_visible ? 'Visible to Schools' : 'Hidden from Schools' }}
+                                </span>
+                            </div>
+
+                            <form action="{{ route('admin.crm.candidate.school-discovery', $candidate->id) }}" method="POST" class="space-y-2.5 text-xs">
+                                @csrf
+                                <div class="flex flex-wrap items-center gap-4">
+                                    <label class="inline-flex items-center gap-1.5 font-semibold text-gray-800 cursor-pointer">
+                                        <input type="checkbox" name="school_discovery_visible" value="1"
+                                               {{ $candidate->profile->school_discovery_visible ? 'checked' : '' }}
+                                               class="rounded text-indigo-600">
+                                        <span>Allow in School Search</span>
+                                    </label>
+                                    <label class="inline-flex items-center gap-1.5 font-semibold text-amber-800 cursor-pointer">
+                                        <input type="checkbox" name="is_best_profile" value="1"
+                                               {{ $candidate->profile->is_best_profile ? 'checked' : '' }}
+                                               class="rounded text-amber-600">
+                                        <span>Mark as Best Profile</span>
+                                    </label>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <select name="school_display_mode" class="flex-1 min-w-[160px] rounded-lg border border-indigo-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-gray-700 outline-none">
+                                        <option value="vpa_id" {{ ($candidate->profile->school_display_mode ?? 'vpa_id') === 'vpa_id' ? 'selected' : '' }}>Show Identifier: VPA ID Only</option>
+                                        <option value="masked_name" {{ ($candidate->profile->school_display_mode ?? '') === 'masked_name' ? 'selected' : '' }}>Show Identifier: Masked Name + ID</option>
+                                        <option value="full_name" {{ ($candidate->profile->school_display_mode ?? '') === 'full_name' ? 'selected' : '' }}>Show Identifier: Full Name</option>
+                                    </select>
+                                    <button type="submit" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold cursor-pointer">
+                                        Save Visibility
+                                    </button>
+                                </div>
+                            </form>
+
+                            @if(isset($accessRequests) && $accessRequests->count() > 0)
+                                <div class="pt-2 border-t border-indigo-100 space-y-1">
+                                    <span class="text-[10px] font-bold uppercase text-indigo-700 block">School Unlock Requests ({{ $accessRequests->count() }})</span>
+                                    @foreach($accessRequests->take(3) as $ar)
+                                        <div class="flex items-center justify-between gap-2 text-[11px]">
+                                            <a href="{{ route('admin.access-requests.show', $ar->id) }}" class="font-semibold text-blue-700 hover:underline truncate">
+                                                {{ $ar->school?->employerProfile?->school_name ?: ($ar->school?->name ?? 'School') }}
+                                            </a>
+                                            <a href="{{ route('admin.access-requests.show', $ar->id) }}" class="px-1.5 py-0.5 rounded bg-white border border-indigo-200 text-[10px] font-bold text-gray-700 shrink-0">
+                                                {{ $ar->statusLabel() }}
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
 
                 @if($candidate->profile)
