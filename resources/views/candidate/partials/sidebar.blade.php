@@ -245,6 +245,24 @@
         @endif
     </div>
 
+    {{-- Help & Platform Tour Trigger --}}
+    <div {!! !$isDrawer ? 'id="tour-cand-help"' : '' !!} class="pt-2 border-t border-white/10">
+        <a href="{{ route('candidate.dashboard', ['tour' => 1]) }}"
+           @if(request()->routeIs('candidate.dashboard'))
+               @click.prevent="$dispatch('start-platform-tour'); mobileSidebarOpen = false"
+           @endif
+           title="Platform Tour / Help"
+           class="w-full flex items-center rounded-xl text-xs font-semibold text-sky-300 hover:text-white hover:bg-sky-500/15 border border-sky-400/20 transition-all group"
+           :class="(!{{ $isDrawer ? 'true' : '!sidebarCollapsed' }}) ? 'justify-center p-2.5' : 'justify-between px-3 py-2'">
+            <div class="flex items-center gap-2 min-w-0" :class="(!{{ $isDrawer ? 'true' : '!sidebarCollapsed' }}) ? 'justify-center' : ''">
+                <i class="fas fa-compass text-xs text-sky-400 group-hover:rotate-45 transition-transform"></i>
+                <span class="truncate" @if(!$isDrawer) x-show="!sidebarCollapsed" @endif>Platform Tour</span>
+            </div>
+            <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-sky-500/20 text-sky-200 border border-sky-400/30 shrink-0"
+                  @if(!$isDrawer) x-show="!sidebarCollapsed" @endif>Help</span>
+        </a>
+    </div>
+
     {{-- Logout Action --}}
     <div class="pt-2 border-t border-white/10">
         <form action="{{ route('logout') }}" method="POST">

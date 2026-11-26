@@ -14,6 +14,11 @@
                     <p class="text-sm text-text-dark/50 mt-0.5">Explore premium tools and manage your candidate notifications.</p>
                 </div>
             </div>
+            <a href="{{ route('candidate.dashboard', ['tour' => 1]) }}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-300 hover:text-white text-xs font-bold transition-all shadow-sm shrink-0">
+                <i class="fas fa-compass text-sm"></i>
+                <span>Start Platform Tour</span>
+            </a>
         </div>
 
         {{-- Features Grid --}}

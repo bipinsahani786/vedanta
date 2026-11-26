@@ -49,7 +49,11 @@
 <div x-data="{
         showModal: false,
         storageKey: 'vpa_incomplete_popup_dismissed_{{ $user->id ?? 0 }}',
+        suppressForWalkthrough: {{ ($shouldStartWalkthrough ?? false) ? 'true' : 'false' }},
         init() {
+            if (this.suppressForWalkthrough) {
+                return;
+            }
             try {
                 if (!sessionStorage.getItem(this.storageKey)) {
                     this.showModal = true;

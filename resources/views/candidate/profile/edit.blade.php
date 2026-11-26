@@ -4,25 +4,32 @@
 <div class="space-y-6">
 
     {{-- Page Header --}}
-    <div class="flex items-center gap-4 mb-8 reveal">
-        @if($profile->profile_photo_path)
-            <img src="{{ asset('storage/' . $profile->profile_photo_path) }}" alt="Profile Photo" class="w-16 h-16 rounded-full object-cover border-2 border-accent-blue shadow-lg">
-        @else
-            <div class="w-16 h-16 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center text-3xl shadow-inner">
-                <i class="fas fa-user"></i>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 reveal">
+        <div class="flex items-center gap-4">
+            @if($profile->profile_photo_path)
+                <img src="{{ asset('storage/' . $profile->profile_photo_path) }}" alt="Profile Photo" class="w-16 h-16 rounded-full object-cover border-2 border-accent-blue shadow-lg">
+            @else
+                <div class="w-16 h-16 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center text-3xl shadow-inner">
+                    <i class="fas fa-user"></i>
+                </div>
+            @endif
+            <div>
+                <h1 class="text-2xl font-bold text-text-main flex items-center gap-2">
+                    My Profile
+                    @if($profile->is_verified)
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/20 border border-blue-400/50 text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-full" title="Verified Profile">
+                            <i class="fas fa-check-circle"></i> Verified
+                        </span>
+                    @endif
+                </h1>
+                <p class="text-sm text-text-dark/50 mt-0.5">Manage your personal and professional details.</p>
             </div>
-        @endif
-        <div>
-            <h1 class="text-2xl font-bold text-text-main flex items-center gap-2">
-                My Profile
-                @if($profile->is_verified)
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/20 border border-blue-400/50 text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-full" title="Verified Profile">
-                        <i class="fas fa-check-circle"></i> Verified
-                    </span>
-                @endif
-            </h1>
-            <p class="text-sm text-text-dark/50 mt-0.5">Manage your personal and professional details.</p>
         </div>
+        <a href="{{ route('candidate.dashboard', ['tour' => 1]) }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-300 hover:text-white text-xs font-bold transition-all shadow-sm shrink-0 w-fit">
+            <i class="fas fa-compass text-sm"></i>
+            <span>Restart Platform Tour</span>
+        </a>
     </div>
 
     @if(session('success'))

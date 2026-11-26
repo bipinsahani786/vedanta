@@ -211,7 +211,7 @@
     @endif
 
     {{-- Top Welcome & Profile Strength Banner --}}
-    <div class="bg-gradient-to-r from-[#031544] via-[#092b7a] to-[#1e0e47] border border-blue-400/25 rounded-3xl p-6 sm:p-7 text-white shadow-[0_10px_35px_rgba(3,27,78,0.45)] relative overflow-hidden">
+    <div id="tour-cand-hero" class="bg-gradient-to-r from-[#031544] via-[#092b7a] to-[#1e0e47] border border-blue-400/25 rounded-3xl p-6 sm:p-7 text-white shadow-[0_10px_35px_rgba(3,27,78,0.45)] relative overflow-hidden">
         {{-- Decorative ambient glow backlights --}}
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-sky-400/15 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-24 left-1/3 w-80 h-80 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
@@ -328,6 +328,14 @@
                                 <span>Plan <strong class="text-amber-300 ml-0.5">Activate Now</strong></span>
                             </a>
                         @endif
+
+                        {{-- Help / Platform Tour Trigger --}}
+                        <button type="button"
+                                @click="$dispatch('start-platform-tour')"
+                                class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-sky-200 hover:text-white text-[11px] font-semibold backdrop-blur-sm shadow-sm transition-all cursor-pointer">
+                            <i class="fas fa-compass text-xs text-sky-300"></i>
+                            <span>Platform Tour</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -395,7 +403,7 @@
                 ? 'border-rose-500/40'
                 : ($nextStepTone === 'amber' ? 'border-amber-500/40' : ($nextStepTone === 'sky' ? 'border-sky-500/35' : 'border-emerald-500/30'));
         @endphp
-        <div class="bg-gradient-to-br from-[#0a1e4a]/95 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border {{ $bannerBorder }} p-4 sm:p-5 shadow-[0_6px_25px_rgba(0,0,0,0.28)] space-y-4">
+        <div id="tour-cand-nextstep" class="bg-gradient-to-br from-[#0a1e4a]/95 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border {{ $bannerBorder }} p-4 sm:p-5 shadow-[0_6px_25px_rgba(0,0,0,0.28)] space-y-4">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div class="space-y-1.5 min-w-0">
                     <div class="flex flex-wrap items-center gap-2">
@@ -492,7 +500,7 @@
     @endif
 
     {{-- Candidate Application & Verification Status Summary Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div id="tour-cand-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {{-- Card A: Application Status Summary --}}
         <div class="bg-gradient-to-b from-[#0a1e4a]/95 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.25)] flex flex-col justify-between gap-4">
             <div class="flex items-start justify-between gap-3">
@@ -783,7 +791,7 @@
         <div class="lg:col-span-8 space-y-5">
 
             {{-- 1. Quick Actions (Core Candidate Shortcuts) --}}
-            <div>
+            <div id="tour-cand-quick-actions">
                 <h3 class="text-base font-bold text-white mb-3 flex items-center gap-2">
                     <i class="fas fa-bolt text-accent-yellow text-sm"></i>
                     <span>Quick Actions</span>
@@ -1096,7 +1104,7 @@
             </div>
 
             {{-- 4. Recommended Jobs for You --}}
-            <div class="space-y-3.5">
+            <div id="tour-cand-recommended" class="space-y-3.5">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-base font-bold text-white">Recommended Jobs for You</h3>
@@ -1205,7 +1213,7 @@
         <div class="lg:col-span-4 space-y-5">
 
             {{-- 1. Prominent Membership / Plan Status Card --}}
-            <div class="bg-gradient-to-b from-[#0a1e4a]/95 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border {{ $isPlanExpired ? 'border-rose-500/40' : ($isPlanActive ? 'border-emerald-500/35' : 'border-amber-500/35') }} p-5 shadow-[0_6px_25px_rgba(0,0,0,0.28)] space-y-4">
+            <div id="tour-cand-plan" class="bg-gradient-to-b from-[#0a1e4a]/95 to-[#07173e]/95 backdrop-blur-xl rounded-2xl border {{ $isPlanExpired ? 'border-rose-500/40' : ($isPlanActive ? 'border-emerald-500/35' : 'border-amber-500/35') }} p-5 shadow-[0_6px_25px_rgba(0,0,0,0.28)] space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-white/[0.08]">
                     <div>
                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Membership / Plan Status</span>
@@ -1611,6 +1619,8 @@
             </div>
         </div>
     </div>
+
+    @include('partials.platform-walkthrough', ['portal' => 'candidate'])
 
 </div>
 @endsection

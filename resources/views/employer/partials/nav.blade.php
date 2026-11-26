@@ -17,6 +17,14 @@
             <a href="{{ route('employer.profile.edit') }}" class="relative px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2 {{ request()->routeIs('employer.profile.edit') ? 'nav-active-link text-accent-yellow after:absolute after:bottom-0 after:left-2 after:right-2 after:h-[2px] after:bg-accent-yellow after:rounded-full font-bold' : 'text-text-dark/50 hover:text-text-main' }}">
                 <i class="fas fa-cog text-xs"></i> Settings
             </a>
+            <a id="tour-emp-nav"
+               href="{{ route('employer.dashboard', ['tour' => 1]) }}"
+               @if(request()->routeIs('employer.dashboard'))
+                   @click.prevent="$dispatch('start-platform-tour')"
+               @endif
+               class="relative px-4 py-3.5 whitespace-nowrap transition-all flex items-center gap-2 text-sky-300/80 hover:text-sky-200 font-semibold">
+                <i class="fas fa-compass text-xs"></i> Help Tour
+            </a>
             <form action="{{ route('logout') }}" method="POST" class="ml-auto">
                 @csrf
                 <button type="submit" class="px-4 py-3.5 text-red-400/70 hover:text-red-400 whitespace-nowrap transition-colors flex items-center gap-1.5 text-sm">

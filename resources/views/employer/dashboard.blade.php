@@ -7,7 +7,7 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     {{-- Welcome Header --}}
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 reveal">
+    <div id="tour-emp-header" class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 reveal">
         <div class="flex items-center gap-4">
             <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent-yellow to-accent-yellow/60 text-[#031b4e] flex items-center justify-center text-xl font-bold shadow-lg">
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
@@ -23,7 +23,7 @@
     </div>
 
     {{-- Stats Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 reveal">
+    <div id="tour-emp-stats" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 reveal">
         <a href="{{ route('employer.jobs.index') }}" class="block bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group hover:border-accent-yellow/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
             <div class="absolute -right-6 -top-6 w-24 h-24 bg-accent-yellow/10 rounded-full blur-xl group-hover:bg-accent-yellow/20 transition-all duration-500"></div>
             <div class="flex items-center justify-between mb-4 relative z-10">
@@ -82,7 +82,7 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2 space-y-8">
+        <div id="tour-emp-jobs" class="lg:col-span-2 space-y-8">
             @if($recentJobs->count() > 0)
                 <div class="bg-card-bg rounded-2xl border border-card-border overflow-hidden shadow-xl reveal">
                     <div class="px-6 py-4 border-b border-card-border flex justify-between items-center bg-black/20">
@@ -193,4 +193,6 @@
         </div>
     </div>
 </div>
+
+@include('partials.platform-walkthrough', ['portal' => 'employer'])
 @endsection

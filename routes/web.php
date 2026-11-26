@@ -372,6 +372,11 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
         $savedJobIds = $user ? SavedJob::where('user_id', $user->id)->pluck('job_post_id')->toArray() : [];
         $savedJobsCount = count($savedJobIds);
 
+        // First-login Walkthrough state
+        $walkthroughKey = $user ? "platform_walkthrough_done:candidate:{$user->id}" : null;
+        $forceWalkthrough = request()->boolean('tour');
+        $shouldStartWalkthrough = $forceWalkthrough || ($walkthroughKey ? ! \Illuminate\Support\Facades\Cache::get($walkthroughKey, false) : false);
+
         return view('candidate.dashboard', compact(
             'profile',
             'applicationsCount',
@@ -394,7 +399,9 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
             'notifications',
             'leaderboard',
             'savedJobIds',
-            'savedJobsCount'
+            'savedJobsCount',
+            'shouldStartWalkthrough',
+            'forceWalkthrough'
         ));
     })->name('dashboard');
 
@@ -441,6 +448,21 @@ Route::middleware(['auth', 'verified', 'candidate'])->prefix('candidate')->name(
     // Service Charge callback moved outside auth middleware group (see top of file)
     Route::view('/additional-feature', 'candidate.aditionalFeature.show')->name('aditionalFeature.show');
 });
+
+// Walkthrough completion endpoint for authenticated users
+Route::middleware(['auth'])->post('/walkthrough/complete', function (Request $request) {
+    $user = auth()->user();
+    $portal = $request->input('portal');
+    if (! in_array($portal, ['candidate', 'employer'], true)) {
+        $portal = $user && $user->role === 'employer' ? 'employer' : 'candidate';
+    }
+
+    if ($user) {
+        \Illuminate\Support\Facades\Cache::forever("platform_walkthrough_done:{$portal}:{$user->id}", true);
+    }
+
+    return response()->json(['success' => true]);
+})->name('walkthrough.complete');
 
 // Employer Auth Routes
 Route::get('/employer/register', [EmployerAuthController::class, 'showRegistrationForm'])->name('employer.register');

@@ -4,9 +4,16 @@
 @include('employer.partials.nav')
 
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8">
-        <h1 class="text-2xl font-bold text-text-main">Settings & Profile</h1>
-        <p class="text-sm text-text-dark/50 mt-0.5">Manage your account details, change password, and update your institution profile.</p>
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-text-main">Settings & Profile</h1>
+            <p class="text-sm text-text-dark/50 mt-0.5">Manage your account details, change password, and update your institution profile.</p>
+        </div>
+        <a href="{{ route('employer.dashboard', ['tour' => 1]) }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-300 hover:text-white text-xs font-bold transition-all shadow-sm shrink-0 w-fit">
+            <i class="fas fa-compass text-sm"></i>
+            <span>Restart Platform Tour</span>
+        </a>
     </div>
 
     @if(session('success'))
