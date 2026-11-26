@@ -510,6 +510,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/candidates', [CrmController::class, 'index'])->name('crm.index');
     Route::get('/candidates/{id}', [CrmController::class, 'show'])->name('crm.show');
     Route::post('/crm/candidate/{id}/follow-up', [CrmController::class, 'storeFollowUp'])->name('crm.followup.store');
+    Route::put('/crm/follow-up/{followUpId}/status', [CrmController::class, 'updateFollowUpStatus'])->name('crm.followup.status');
     Route::post('/crm/candidate/{id}/invoice', [CrmController::class, 'storeInvoice'])->name('crm.invoice.store');
     Route::post('/crm/candidate/{id}/assign-job', [CrmController::class, 'assignJob'])->name('crm.application.assign');
     Route::put('/crm/invoice/{id}', [CrmController::class, 'updateInvoiceStatus'])->name('crm.invoice.update');

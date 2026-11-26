@@ -129,6 +129,21 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(SavedJob::class, 'user_id')->latest();
     }
 
+    public function crmFollowUps()
+    {
+        return $this->hasMany(CrmFollowUp::class, 'candidate_id')->latest();
+    }
+
+    public function latestFollowUp()
+    {
+        return $this->hasOne(CrmFollowUp::class, 'candidate_id')->latestOfMany();
+    }
+
+    public function openFollowUps()
+    {
+        return $this->hasMany(CrmFollowUp::class, 'candidate_id')->where('status', 'open');
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

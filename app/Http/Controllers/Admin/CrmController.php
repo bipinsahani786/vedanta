@@ -433,11 +433,13 @@ class CrmController extends Controller
                 'profile.preferredState',
                 'profile.preferredCity',
                 'referredBy',
+                'latestFollowUp',
                 'applications.jobPost',
                 'applications' => function ($q) {
                     $q->where('status', 'hired');
                 },
-            ]);
+            ])
+            ->withCount('openFollowUps');
 
         // Search text (Name, Email, Phone, Candidate ID / VPA ID)
         if ($search = trim($request->input('search', ''))) {
@@ -613,7 +615,11 @@ class CrmController extends Controller
             ])
             ->findOrFail($id);
 
-        $followUps = CrmFollowUp::where('candidate_id', $id)->with('admin')->orderBy('created_at', 'desc')->get();
+        $followUps = CrmFollowUp::where('candidate_id', $id)
+            ->with('admin')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get();
         $invoices = ServiceChargeInvoice::where('candidate_id', $id)->with('jobApplication.jobPost')->orderBy('created_at', 'desc')->get();
         $rating = CandidateRating::where('candidate_id', $id)->first();
         $payments = PaymentTransaction::where('candidate_id', $id)->where('status', 'success')->get();
@@ -688,13 +694,22 @@ class CrmController extends Controller
 
         // 4. Follow-ups
         foreach ($followUps as $fu) {
+            $descParts = ['Notes: '.$fu->notes];
+            if (! empty($fu->next_action)) {
+                $descParts[] = 'Next Action: '.$fu->next_action;
+            }
+            if ($fu->scheduled_date_time) {
+                $descParts[] = 'Scheduled: '.$fu->scheduled_date_time->copy()->timezone('Asia/Kolkata')->format('M d, Y h:i A').' IST';
+            }
+            $descParts[] = 'Status: '.ucfirst($fu->status);
+
             $history->push([
                 'date' => $fu->created_at,
                 'type' => 'follow_up',
-                'title' => 'Follow-up Added',
-                'description' => 'Notes: '.$fu->notes,
+                'title' => 'Follow-up Logged'.(! empty($fu->next_action) ? ' ('.$fu->next_action.')' : ''),
+                'description' => implode(' · ', $descParts),
                 'icon' => 'fas fa-phone-alt',
-                'color' => 'bg-yellow-500',
+                'color' => $fu->status === 'closed' ? 'bg-green-500' : 'bg-yellow-500',
             ]);
         }
 
@@ -895,19 +910,69 @@ class CrmController extends Controller
     {
         $request->validate([
             'notes' => 'required|string',
+            'next_action' => 'nullable|string|max:255',
+            'follow_up_at' => 'nullable|date',
             'follow_up_date' => 'nullable|date',
+            'tz_offset' => 'nullable|integer|min:-840|max:840',
             'status' => 'required|in:open,closed',
         ]);
 
-        CrmFollowUp::create([
+        User::where('role', 'candidate')->findOrFail($id);
+
+        $scheduledAt = null;
+        $scheduledDate = null;
+        if ($request->filled('follow_up_at')) {
+            if ($request->filled('tz_offset')) {
+                $eastMinutes = -(int) $request->input('tz_offset');
+                $sign = $eastMinutes < 0 ? '-' : '+';
+                $absMinutes = abs($eastMinutes);
+                $clientTz = sprintf('%s%02d:%02d', $sign, intdiv($absMinutes, 60), $absMinutes % 60);
+                $localTime = Carbon::parse($request->input('follow_up_at'), $clientTz);
+                $scheduledDate = $localTime->toDateString();
+                $scheduledAt = $localTime->copy()->setTimezone(config('app.timezone'));
+            } else {
+                $scheduledAt = Carbon::parse($request->input('follow_up_at'));
+                $scheduledDate = $scheduledAt->toDateString();
+            }
+        } elseif ($request->filled('follow_up_date')) {
+            $scheduledDate = Carbon::parse($request->input('follow_up_date'))->toDateString();
+            $scheduledAt = Carbon::parse($scheduledDate)->setTime(9, 0);
+        }
+
+        $payload = [
             'candidate_id' => $id,
-            'notes' => $request->notes,
-            'follow_up_date' => $request->follow_up_date,
-            'status' => $request->status,
+            'notes' => $request->input('notes'),
+            'follow_up_date' => $scheduledDate,
+            'status' => $request->input('status'),
             'created_by' => auth()->id(),
+        ];
+
+        if (CrmFollowUp::hasExtendedColumns()) {
+            $payload['next_action'] = $request->filled('next_action') ? trim($request->input('next_action')) : null;
+            $payload['follow_up_at'] = $scheduledAt;
+        }
+
+        $followUp = CrmFollowUp::create($payload);
+
+        if ($followUp->status === 'open' && $followUp->scheduled_date_time && $followUp->scheduled_date_time->lte(now())) {
+            CrmFollowUp::dispatchDueReminders();
+        }
+
+        return back()->with('success', 'Follow-up recorded successfully.');
+    }
+
+    public function updateFollowUpStatus(Request $request, $followUpId)
+    {
+        $request->validate([
+            'status' => 'required|in:open,closed',
         ]);
 
-        return back()->with('success', 'Follow-up added successfully.');
+        $followUp = CrmFollowUp::findOrFail($followUpId);
+        $followUp->update([
+            'status' => $request->input('status'),
+        ]);
+
+        return back()->with('success', 'Follow-up status updated.');
     }
 
     public function storeInvoice(Request $request, $id)

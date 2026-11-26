@@ -264,6 +264,47 @@
                             <div class="text-xs font-medium text-gray-800">{{ $candidate->referredBy?->name ?? 'Direct Signup' }}</div>
                         </div>
                     </div>
+
+                    @php
+                        $latestFu = $followUps->first();
+                        $openFuCount = $followUps->where('status', 'open')->count();
+                    @endphp
+                    <div class="mt-3 p-3 rounded-xl border {{ $latestFu && $latestFu->is_due ? 'bg-amber-50 border-amber-200' : 'bg-blue-50/40 border-blue-100' }}">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider {{ $latestFu && $latestFu->is_due ? 'text-amber-700' : 'text-blue-700' }}">
+                                <i class="fas fa-headset mr-1"></i> Latest Follow-up Status
+                            </span>
+                            @if($latestFu)
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded {{ $latestFu->status === 'closed' ? 'bg-emerald-100 text-emerald-700' : ($latestFu->is_due ? 'bg-amber-200 text-amber-900' : 'bg-blue-100 text-blue-700') }}">
+                                    {{ $latestFu->status === 'closed' ? 'Closed' : ($latestFu->is_due ? 'Due Now' : 'Open') }}
+                                    @if($openFuCount > 1) · {{ $openFuCount }} Open @endif
+                                </span>
+                            @else
+                                <span class="text-[10px] font-semibold text-gray-400">No Follow-ups Yet</span>
+                            @endif
+                        </div>
+                        @if($latestFu)
+                            @if(!empty($latestFu->next_action))
+                                <div class="text-xs font-bold text-gray-800">Next Action: {{ $latestFu->next_action }}</div>
+                            @endif
+                            <div class="text-[11px] text-gray-600 mt-0.5 truncate">{{ $latestFu->notes }}</div>
+                            <div class="flex items-center justify-between gap-2 mt-1.5 text-[10px]">
+                                <span class="text-gray-500">
+                                    @if($latestFu->scheduled_date_time)
+                                        Scheduled: <strong>{{ $latestFu->follow_up_at ? $latestFu->follow_up_at->copy()->timezone('Asia/Kolkata')->format('M d, Y h:i A') . ' IST' : $latestFu->follow_up_date->format('M d, Y') }}</strong>
+                                    @else
+                                        Logged {{ $latestFu->created_at->format('M d, Y') }}
+                                    @endif
+                                </span>
+                                <a href="#follow-ups-section" class="font-bold text-blue-600 hover:underline">Manage &darr;</a>
+                            </div>
+                        @else
+                            <div class="flex items-center justify-between text-xs text-gray-500 mt-1">
+                                <span>No call notes or next steps logged yet.</span>
+                                <a href="#follow-ups-section" class="font-bold text-blue-600 hover:underline">+ Log Follow-up</a>
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 @if($candidate->profile)
@@ -1001,50 +1042,124 @@
         </div>
 
         <!-- Follow-ups -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div id="follow-ups-section" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 border-b border-gray-200">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Follow-ups & Notes</h3>
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-calendar-check text-blue-600"></i> Follow-ups &amp; Conversation Notes
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Record call discussion, schedule date &amp; time, and track next action with automatic admin reminders.</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $followUps->where('status', 'open')->isNotEmpty() ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-600' }}">
+                        {{ $followUps->where('status', 'open')->count() }} Open / {{ $followUps->count() }} Total
+                    </span>
+                </div>
                 
                 <!-- Add Follow-up Form -->
-                <form action="{{ route('admin.crm.followup.store', $candidate->id) }}" method="POST" class="mb-6 bg-gray-50 p-4 rounded border border-gray-200">
+                <form action="{{ route('admin.crm.followup.store', $candidate->id) }}" method="POST" class="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-4">
                     @csrf
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes / Call Summary</label>
-                        <textarea name="notes" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" required placeholder="What was discussed?"></textarea>
+                    <input type="hidden" name="tz_offset" id="follow_up_tz_offset" value="-330">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Conversation Notes / Call Summary <span class="text-red-500">*</span></label>
+                        <textarea name="notes" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" required placeholder="What was discussed with the candidate?">{{ old('notes') }}</textarea>
                     </div>
-                    <div class="flex gap-4">
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Next Follow-up Date</label>
-                            <input type="date" name="follow_up_date" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Next Process / Action</label>
+                            <input type="text"
+                                   id="follow_up_next_action"
+                                   name="next_action"
+                                   list="crmNextActionSuggestions"
+                                   value="{{ old('next_action') }}"
+                                   placeholder="e.g. Agreement Call, Payment Link, Interview"
+                                   class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
+                            <datalist id="crmNextActionSuggestions">
+                                <option value="Follow-up Call">
+                                <option value="Agreement Signature Follow-up">
+                                <option value="Registration Payment Follow-up">
+                                <option value="Collect Pending Profile / CV">
+                                <option value="Schedule School Interview">
+                                <option value="Share Matching Vacancy">
+                                <option value="Profile Verification Review">
+                            </datalist>
                         </div>
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Follow-up Date &amp; Time</label>
+                            <input type="datetime-local"
+                                   name="follow_up_at"
+                                   value="{{ old('follow_up_at') }}"
+                                   class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Status</label>
                             <select name="status" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="open">Open (Needs Action)</option>
-                                <option value="closed">Closed (Resolved)</option>
+                                <option value="open" {{ old('status', 'open') === 'open' ? 'selected' : '' }}>Open / Scheduled (Send Reminder)</option>
+                                <option value="closed" {{ old('status') === 'closed' ? 'selected' : '' }}>Closed / Completed</option>
                             </select>
                         </div>
                     </div>
-                    <div class="mt-4 text-right">
-                        <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm">
-                            Add Follow-up
+
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            @foreach(['Follow-up Call', 'Agreement Follow-up', 'Payment Follow-up', 'Schedule Interview', 'Verify Profile'] as $quickAct)
+                                <button type="button"
+                                        onclick="document.getElementById('follow_up_next_action').value = @js($quickAct)"
+                                        class="px-2.5 py-1 rounded-md bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 text-[11px] font-semibold text-gray-600 hover:text-blue-700 transition-colors cursor-pointer">
+                                    + {{ $quickAct }}
+                                </button>
+                            @endforeach
+                        </div>
+                        <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                            Save Follow-up
                         </button>
                     </div>
                 </form>
 
                 <!-- Follow-up History -->
                 <div class="space-y-4">
-                    <h4 class="font-bold text-sm text-gray-600 uppercase tracking-wider mb-2">History</h4>
+                    <h4 class="font-bold text-sm text-gray-600 uppercase tracking-wider mb-2">Follow-up History</h4>
                     @forelse($followUps as $fu)
-                        <div class="border-l-4 {{ $fu->status === 'open' ? 'border-yellow-400' : 'border-green-400' }} pl-4 py-2">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-xs font-bold text-gray-500">{{ $fu->admin->name }} &bull; {{ $fu->created_at->format('M d, Y h:i A') }}</span>
-                                <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded {{ $fu->status === 'open' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">{{ $fu->status }}</span>
+                        <div class="border-l-4 {{ $fu->status === 'closed' ? 'border-green-400 bg-green-50/30' : ($fu->is_due ? 'border-red-500 bg-red-50/40' : 'border-yellow-400 bg-yellow-50/20') }} pl-4 pr-3 py-3 rounded-r-xl border border-l-4 border-gray-100">
+                            <div class="flex flex-wrap justify-between items-start gap-2 mb-1.5">
+                                <span class="text-xs font-bold text-gray-500">{{ $fu->admin->name ?? 'Admin' }} &bull; {{ $fu->created_at->format('M d, Y h:i A') }}</span>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    @if($fu->status === 'open' && $fu->is_due)
+                                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-red-100 text-red-700">Due / Overdue</span>
+                                    @endif
+                                    @if($fu->reminder_sent_at)
+                                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-700" title="Admin notified on {{ $fu->reminder_sent_at->format('M d, Y h:i A') }}">
+                                            <i class="fas fa-bell mr-0.5"></i> Reminder Sent
+                                        </span>
+                                    @elseif($fu->status === 'open' && $fu->scheduled_date_time)
+                                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                                            <i class="fas fa-clock mr-0.5"></i> Reminder Scheduled
+                                        </span>
+                                    @endif
+                                    <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded {{ $fu->status === 'open' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">{{ ucfirst($fu->status) }}</span>
+                                    <form action="{{ route('admin.crm.followup.status', $fu->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="status" value="{{ $fu->status === 'open' ? 'closed' : 'open' }}">
+                                        <button type="submit" class="text-[11px] font-bold px-2 py-0.5 rounded border {{ $fu->status === 'open' ? 'bg-white text-emerald-700 border-emerald-300 hover:bg-emerald-50' : 'bg-white text-amber-700 border-amber-300 hover:bg-amber-50' }} transition-colors cursor-pointer">
+                                            {{ $fu->status === 'open' ? 'Mark Closed' : 'Reopen' }}
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                            <p class="text-sm text-gray-800">{{ $fu->notes }}</p>
-                            @if($fu->follow_up_date)
-                                <div class="mt-2 text-xs text-indigo-600 font-medium">
-                                    <i class="fas fa-calendar-alt mr-1"></i> Next Follow-up: {{ \Carbon\Carbon::parse($fu->follow_up_date)->format('M d, Y') }}
+                            @if(!empty($fu->next_action))
+                                <div class="mb-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-bold">
+                                    <i class="fas fa-forward text-[10px]"></i> Next Action: {{ $fu->next_action }}
+                                </div>
+                            @endif
+                            <p class="text-sm text-gray-800 leading-relaxed">{{ $fu->notes }}</p>
+                            @if($fu->scheduled_date_time)
+                                <div class="mt-2 text-xs {{ $fu->is_due ? 'text-red-600 font-bold' : 'text-indigo-600 font-medium' }}">
+                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                    Scheduled Follow-up: {{ $fu->follow_up_at ? $fu->follow_up_at->copy()->timezone('Asia/Kolkata')->format('M d, Y h:i A') . ' IST' : $fu->follow_up_date->format('M d, Y') }}
                                 </div>
                             @endif
                         </div>
@@ -1216,6 +1331,16 @@
         </div>
     </div>
 @include('admin.crm.partials.photo-modal')
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tzInput = document.getElementById('follow_up_tz_offset');
+        if (tzInput) {
+            tzInput.value = new Date().getTimezoneOffset();
+        }
+    });
+</script>
+@endpush
 @endsection
 
 @push('scripts')

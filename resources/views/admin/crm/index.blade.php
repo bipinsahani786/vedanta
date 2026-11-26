@@ -240,6 +240,15 @@
                             <div><span class="text-[10px] text-text-dark/40 block uppercase font-bold">Qualification</span><span class="font-medium text-text-main">{{ $cp?->highestQualification?->name ?? 'N/A' }}</span></div>
                             <div><span class="text-[10px] text-text-dark/40 block uppercase font-bold">Exp / Plan</span><span class="font-medium text-text-main">{{ $cp?->experience_years ?? 0 }} yrs · {{ $cp?->plan_type ? ucfirst($cp->plan_type) : 'Unpaid' }}</span></div>
                         </div>
+                        @if($candidate->latestFollowUp)
+                            @php $cardFu = $candidate->latestFollowUp; @endphp
+                            <div class="mt-2.5 px-2.5 py-1.5 rounded-lg text-[11px] flex items-center justify-between gap-2 {{ $cardFu->status === 'closed' ? 'bg-emerald-500/10 text-emerald-400' : ($cardFu->is_due ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/10 text-amber-400') }}">
+                                <span class="font-bold truncate"><i class="fas fa-headset mr-1"></i>{{ $cardFu->next_action ?: ucfirst($cardFu->status) }}</span>
+                                @if($cardFu->scheduled_date_time)
+                                    <span class="text-[10px] shrink-0">{{ $cardFu->follow_up_at ? $cardFu->follow_up_at->copy()->timezone('Asia/Kolkata')->format('M d, h:i A') : $cardFu->follow_up_date->format('M d') }}</span>
+                                @endif
+                            </div>
+                        @endif
                     </div>
 
                     <div class="pt-3 border-t border-card-border/70 flex items-center justify-between gap-2 flex-wrap">
@@ -367,6 +376,16 @@
                                         <span class="px-1.5 py-0.5 rounded bg-secondary-bg text-text-dark/60 border border-card-border font-medium">
                                             {{ $candidate->profile->preferredCity?->name ?? 'N/A' }}, {{ $candidate->profile->preferredState?->name ?? '' }}
                                         </span>
+                                    @endif
+                                </div>
+                            @endif
+                            @if($candidate->latestFollowUp)
+                                @php $lfu = $candidate->latestFollowUp; @endphp
+                                <div class="mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold {{ $lfu->status === 'closed' ? 'bg-emerald-500/10 text-emerald-400' : ($lfu->is_due ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400') }}">
+                                    <i class="fas fa-headset"></i>
+                                    <span>{{ $lfu->next_action ?: ($lfu->status === 'closed' ? 'Follow-up Closed' : 'Follow-up Open') }}</span>
+                                    @if($lfu->scheduled_date_time)
+                                        <span>· {{ $lfu->follow_up_at ? $lfu->follow_up_at->copy()->timezone('Asia/Kolkata')->format('M d, h:i A') : $lfu->follow_up_date->format('M d') }}</span>
                                     @endif
                                 </div>
                             @endif

@@ -337,6 +337,10 @@
                 <div class="flex items-center gap-3 sm:gap-5">
                     {{-- Notifications Dropdown --}}
                     @php
+                        \Illuminate\Support\Facades\Cache::remember('crm_followup_reminder_tick', 60, function () {
+                            \App\Models\CrmFollowUp::dispatchDueReminders();
+                            return true;
+                        });
                         $adminIds = \App\Models\User::where('role', 'admin')->pluck('id');
                         $adminNotifications = \Illuminate\Support\Facades\DB::table('notifications')
                             ->where('notifiable_type', 'App\Models\User')
@@ -400,6 +404,8 @@
                                                 <i class="fas fa-user-clock"></i>
                                             @elseif(str_contains($notif->type, 'VerificationRequested'))
                                                 <i class="fas fa-user-check text-cyan-600"></i>
+                                            @elseif(str_contains($notif->type, 'CandidateFollowUpReminder'))
+                                                <i class="fas fa-calendar-check text-amber-600"></i>
                                             @elseif(str_contains($notif->type, 'PaymentReceived'))
                                                 <i class="fas fa-rupee-sign text-emerald-600"></i>
                                             @elseif(str_contains($notif->type, 'LateFee'))
