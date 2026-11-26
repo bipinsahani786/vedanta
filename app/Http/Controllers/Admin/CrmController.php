@@ -26,6 +26,9 @@ use App\Models\JobApplication;
 use App\Models\JobPost;
 use App\Models\PaymentTransaction;
 use App\Models\Qualification;
+use App\Models\SchoolSharingCategory;
+use App\Models\SchoolSharingFile;
+use App\Models\SchoolSharingFileCandidate;
 use App\Models\ServiceChargeInvoice;
 use App\Models\State;
 use App\Models\Subject;
@@ -629,8 +632,11 @@ class CrmController extends Controller
         $lastBulkBatch = session('crm_last_bulk_batch_id')
             ? Cache::get('crm_bulk_batch:' . session('crm_last_bulk_batch_id'))
             : null;
+        $sharingFiles = Schema::hasTable('school_sharing_files')
+            ? SchoolSharingFile::with(['school.employerProfile', 'categories'])->orderByDesc('id')->get()
+            : collect();
 
-        return view('admin.crm.index', compact('candidates', 'stats', 'sortField', 'sortDirection', 'subjects', 'qualifications', 'states', 'cities', 'lastBulkBatch'));
+        return view('admin.crm.index', compact('candidates', 'stats', 'sortField', 'sortDirection', 'subjects', 'qualifications', 'states', 'cities', 'lastBulkBatch', 'sharingFiles'));
     }
 
     public function show($id)
@@ -782,8 +788,17 @@ class CrmController extends Controller
                 ->latest('updated_at')
                 ->get()
             : collect();
+        $sharingFiles = Schema::hasTable('school_sharing_files')
+            ? SchoolSharingFile::with(['school.employerProfile', 'categories'])->orderByDesc('id')->get()
+            : collect();
+        $candidateSharingEntries = Schema::hasTable('school_sharing_file_candidates')
+            ? SchoolSharingFileCandidate::where('candidate_user_id', $id)
+                ->with(['sharingFile.school.employerProfile', 'category'])
+                ->latest('id')
+                ->get()
+            : collect();
 
-        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'payments', 'rating', 'history', 'availableJobs', 'emailTemplates', 'accessRequests'));
+        return view('admin.crm.show', compact('candidate', 'followUps', 'invoices', 'payments', 'rating', 'history', 'availableJobs', 'emailTemplates', 'accessRequests', 'sharingFiles', 'candidateSharingEntries'));
     }
 
     public function uploadAgreement(Request $request, $id)
@@ -1854,5 +1869,91 @@ class CrmController extends Controller
         };
 
         return back()->with('success', "{$updatedCount} candidate(s) {$label}.");
+    }
+
+    public function addToSharingFile(Request $request)
+    {
+        if (! Schema::hasTable('school_sharing_files')) {
+            return back()->with('error', 'School sharing file tables are not migrated yet.');
+        }
+
+        $validated = $request->validate([
+            'sharing_file_id' => 'required|integer|exists:school_sharing_files,id',
+            'category_id' => 'nullable|integer',
+            'new_category_name' => 'nullable|string|max:120',
+            'select_all_matching' => 'nullable|boolean',
+            'candidate_ids' => 'nullable|array',
+            'candidate_ids.*' => 'integer|exists:users,id',
+            'excluded_ids' => 'nullable|array',
+            'excluded_ids.*' => 'integer',
+            'excluded_ids_csv' => 'nullable|string',
+            'admin_note' => 'nullable|string|max:500',
+        ]);
+
+        $targetQuery = $this->resolveBulkCandidateQuery($request);
+        if (! $targetQuery) {
+            return back()->with('error', 'Please select at least one candidate to add.');
+        }
+
+        $sharingFile = SchoolSharingFile::findOrFail($validated['sharing_file_id']);
+        $newCatName = trim((string) ($validated['new_category_name'] ?? ''));
+        $category = null;
+
+        if ($newCatName !== '') {
+            $category = SchoolSharingCategory::where('sharing_file_id', $sharingFile->id)
+                ->whereRaw('LOWER(name) = ?', [strtolower($newCatName)])
+                ->first();
+
+            if (! $category) {
+                $nextOrder = ((int) SchoolSharingCategory::where('sharing_file_id', $sharingFile->id)->max('sort_order')) + 1;
+                $category = SchoolSharingCategory::create([
+                    'sharing_file_id' => $sharingFile->id,
+                    'name' => $newCatName,
+                    'sort_order' => $nextOrder,
+                ]);
+            }
+        } elseif (! empty($validated['category_id'])) {
+            $category = SchoolSharingCategory::where('sharing_file_id', $sharingFile->id)
+                ->findOrFail($validated['category_id']);
+        } else {
+            return back()->with('error', 'Please select an existing category or enter a new category name (e.g. TGT Hindi).');
+        }
+
+        $added = 0;
+        $skipped = 0;
+        $note = ! empty($validated['admin_note']) ? trim($validated['admin_note']) : null;
+        $actorId = auth()->id();
+
+        (clone $targetQuery)
+            ->select('users.id')
+            ->orderBy('users.id')
+            ->chunkById(200, function ($rows) use ($sharingFile, $category, $actorId, $note, &$added, &$skipped): void {
+                foreach ($rows as $row) {
+                    $record = SchoolSharingFileCandidate::firstOrCreate(
+                        [
+                            'category_id' => $category->id,
+                            'candidate_user_id' => $row->id,
+                        ],
+                        [
+                            'sharing_file_id' => $sharingFile->id,
+                            'added_by' => $actorId,
+                            'admin_note' => $note,
+                        ]
+                    );
+
+                    if ($record->wasRecentlyCreated) {
+                        $added++;
+                    } else {
+                        $skipped++;
+                    }
+                }
+            }, 'users.id', 'id');
+
+        $msg = "Added {$added} candidate(s) to \"{$sharingFile->title}\" -> \"{$category->name}\".";
+        if ($skipped > 0) {
+            $msg .= " ({$skipped} already in this category.)";
+        }
+
+        return back()->with('success', $msg);
     }
 }

@@ -289,8 +289,14 @@ class SchoolCrmController extends Controller
 
         $profile = $school->employerProfile;
         $jobSummary = JobPost::statusSummary($school->id);
+        $sharingFiles = Schema::hasTable('school_sharing_files')
+            ? \App\Models\SchoolSharingFile::where('school_user_id', $school->id)
+                ->withCount(['categories', 'entries'])
+                ->latest('id')
+                ->get()
+            : collect();
 
-        return view('admin.schools.show', compact('school', 'profile', 'jobSummary'));
+        return view('admin.schools.show', compact('school', 'profile', 'jobSummary', 'sharingFiles'));
     }
 
     public function edit($id)

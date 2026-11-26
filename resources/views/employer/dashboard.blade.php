@@ -209,6 +209,35 @@
         </div>
     @endif
 
+    {{-- Direct School Candidate Sharing Files --}}
+    @if(isset($sharingFiles) && $sharingFiles->count() > 0)
+        <div class="mb-8 bg-card-bg rounded-2xl border border-indigo-500/30 p-5 shadow-xl space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <h3 class="text-base font-bold text-text-main flex items-center gap-2">
+                    <i class="fas fa-folder-open text-indigo-400"></i>
+                    <span>Shared Candidate Files for Your School</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">{{ $sharingFiles->count() }}</span>
+                </h3>
+                <span class="text-[11px] text-text-dark/50"><i class="fas fa-shield-alt text-emerald-400 mr-1"></i> Curated Categories &amp; View-Only CVs</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                @foreach($sharingFiles as $sf)
+                    <a href="{{ route('shared-file.show', $sf->share_token) }}" target="_blank"
+                       class="p-4 rounded-xl bg-secondary-bg/60 border border-card-border hover:border-indigo-400/60 transition-all flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="text-sm font-bold text-text-main truncate">{{ $sf->title }}</div>
+                            <div class="text-[11px] text-text-dark/60 mt-0.5">
+                                {{ $sf->categories_count }} Categories · {{ $sf->entries_count }} Candidates
+                                @if($sf->hasPassword()) · <span class="text-amber-400"><i class="fas fa-lock text-[9px]"></i> Password Required</span> @endif
+                            </div>
+                        </div>
+                        <span class="px-3 py-1.5 rounded-lg bg-indigo-500/15 text-indigo-300 text-xs font-bold shrink-0">Open</span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div id="tour-emp-jobs" class="lg:col-span-2 space-y-8">
             @if($recentJobs->count() > 0)

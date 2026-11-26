@@ -570,11 +570,25 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/candidate/{id}/temporary-password', [CrmController::class, 'issueTemporaryPassword'])->name('crm.candidate.temporary-password');
     Route::post('/crm/candidate/{id}/school-discovery', [CrmController::class, 'updateSchoolDiscovery'])->name('crm.candidate.school-discovery');
     Route::post('/crm/candidates/bulk-school-discovery', [CrmController::class, 'bulkUpdateSchoolDiscovery'])->name('crm.candidate.bulk-school-discovery');
+    Route::post('/crm/candidates/add-to-sharing-file', [CrmController::class, 'addToSharingFile'])->name('crm.candidate.add-to-sharing-file');
 
     // School Candidate Profile Access Requests & Audit Log
     Route::get('/access-requests', [CandidateAccessRequestController::class, 'index'])->name('access-requests.index');
     Route::get('/access-requests/{id}', [CandidateAccessRequestController::class, 'show'])->name('access-requests.show');
     Route::post('/access-requests/{id}/review', [CandidateAccessRequestController::class, 'review'])->name('access-requests.review');
+
+    // Per-School Candidate Sharing Files & Categories
+    Route::get('/sharing-files', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'index'])->name('sharing-files.index');
+    Route::post('/sharing-files', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'store'])->name('sharing-files.store');
+    Route::get('/sharing-files/{id}', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'show'])->name('sharing-files.show');
+    Route::put('/sharing-files/{id}', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'update'])->name('sharing-files.update');
+    Route::delete('/sharing-files/{id}', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'destroy'])->name('sharing-files.destroy');
+    Route::post('/sharing-files/{id}/password', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'updatePassword'])->name('sharing-files.password');
+    Route::post('/sharing-files/{id}/share-email', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'shareEmail'])->name('sharing-files.share-email');
+    Route::post('/sharing-files/{id}/categories', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'storeCategory'])->name('sharing-files.categories.store');
+    Route::delete('/sharing-files/{id}/categories/{categoryId}', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'destroyCategory'])->name('sharing-files.categories.destroy');
+    Route::post('/sharing-files/{id}/candidates/{entryId}/move', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'moveCandidateCategory'])->name('sharing-files.candidates.move');
+    Route::delete('/sharing-files/{id}/candidates/{entryId}', [App\Http\Controllers\Admin\SchoolSharingFileController::class, 'removeCandidate'])->name('sharing-files.candidates.remove');
 
     // Applications & Transactions
     Route::get('/applications', [App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');
@@ -661,6 +675,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/referrals/email-test', [App\Http\Controllers\Admin\ReferralController::class, 'emailTest'])->name('referrals.email-test');
     Route::get('/referrals/{id}', [App\Http\Controllers\Admin\ReferralController::class, 'show'])->name('referrals.show');
 });
+
+// Public / Password-Protected School Candidate Sharing Files
+Route::get('/shared-file/{token}', [App\Http\Controllers\SharedFileController::class, 'show'])->name('shared-file.show');
+Route::post('/shared-file/{token}/unlock', [App\Http\Controllers\SharedFileController::class, 'unlock'])->name('shared-file.unlock');
+Route::post('/shared-file/{token}/lock', [App\Http\Controllers\SharedFileController::class, 'lock'])->name('shared-file.lock');
+Route::get('/shared-file/{token}/cv/{candidate}', [App\Http\Controllers\SharedFileController::class, 'viewCv'])->name('shared-file.cv');
+Route::get('/shared-file/{token}/photo/{candidate}', [App\Http\Controllers\SharedFileController::class, 'viewPhoto'])->name('shared-file.photo');
 
 // Public Referral Shortlink & Token Routes
 Route::get('/r/{code}', [ReferralController::class, 'handleShortLink'])->name('referral.shortlink');

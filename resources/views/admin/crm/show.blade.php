@@ -432,6 +432,72 @@
                             @endif
                         </div>
                     @endif
+
+                    {{-- Add to School Sharing File / Category --}}
+                    @if(isset($sharingFiles) && \Illuminate\Support\Facades\Schema::hasTable('school_sharing_files'))
+                        <div class="mt-3 p-3.5 rounded-xl border border-blue-100 bg-blue-50/40 space-y-2.5 text-xs">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700">
+                                    <i class="fas fa-folder-plus mr-1"></i> Add to School Sharing File
+                                </span>
+                                <a href="{{ route('admin.sharing-files.index') }}" class="text-[10px] font-bold text-blue-600 hover:underline">Manage Files</a>
+                            </div>
+
+                            @if($sharingFiles->count() > 0)
+                                <form action="{{ route('admin.crm.candidate.add-to-sharing-file') }}" method="POST" class="space-y-2">
+                                    @csrf
+                                    <input type="hidden" name="candidate_ids[]" value="{{ $candidate->id }}">
+                                    <select id="showSharingFileSelect" name="sharing_file_id" required onchange="syncShowFileCategories(this.value)"
+                                            class="w-full rounded-lg border border-blue-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-gray-700">
+                                        <option value="">-- Select School File --</option>
+                                        @foreach($sharingFiles as $sf)
+                                            <option value="{{ $sf->id }}">
+                                                {{ $sf->school?->employerProfile?->school_name ?: ($sf->school?->name ?? 'School') }} — {{ $sf->title }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <select id="showSharingCategorySelect" name="category_id"
+                                            class="w-full rounded-lg border border-blue-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-gray-700">
+                                        <option value="">-- Select Existing Category --</option>
+                                    </select>
+                                    <input type="text" name="new_category_name" maxlength="120"
+                                           placeholder="Or create new category (e.g. TGT Hindi)"
+                                           class="w-full rounded-lg border border-blue-200 bg-white px-2.5 py-1.5 text-[11px] text-gray-700">
+                                    <button type="submit" class="w-full py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold cursor-pointer">
+                                        Add to School File / Category
+                                    </button>
+                                </form>
+                                <script>
+                                    const showSharingCatsMap = @json($sharingFiles->mapWithKeys(fn ($sf) => [$sf->id => $sf->categories->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->values()]));
+                                    function syncShowFileCategories(fileId) {
+                                        const sel = document.getElementById('showSharingCategorySelect');
+                                        sel.innerHTML = '<option value="">-- Select Existing Category --</option>';
+                                        (showSharingCatsMap[fileId] || []).forEach(c => {
+                                            const opt = document.createElement('option');
+                                            opt.value = c.id;
+                                            opt.textContent = c.name;
+                                            sel.appendChild(opt);
+                                        });
+                                    }
+                                </script>
+                            @else
+                                <p class="text-[11px] text-gray-500">Create a School Sharing File first to assign this candidate.</p>
+                            @endif
+
+                            @if(isset($candidateSharingEntries) && $candidateSharingEntries->count() > 0)
+                                <div class="pt-2 border-t border-blue-100 space-y-1">
+                                    <span class="text-[10px] font-bold uppercase text-blue-700 block">Assigned Files ({{ $candidateSharingEntries->count() }})</span>
+                                    @foreach($candidateSharingEntries as $cse)
+                                        <div class="flex items-center justify-between gap-2 text-[11px]">
+                                            <a href="{{ route('admin.sharing-files.show', ['id' => $cse->sharing_file_id, 'category_id' => $cse->category_id]) }}" class="font-semibold text-blue-700 hover:underline truncate">
+                                                {{ $cse->sharingFile?->title }} · {{ $cse->category?->name }}
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
 
                 @if($candidate->profile)

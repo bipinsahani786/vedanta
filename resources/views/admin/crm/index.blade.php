@@ -723,6 +723,11 @@
             <i class="fas fa-school"></i> School Visibility
         </button>
     @endif
+    @if(\Illuminate\Support\Facades\Schema::hasTable('school_sharing_files'))
+        <button type="button" onclick="openBulkAddToSharingModal()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer">
+            <i class="fas fa-folder-plus"></i> Add to School File / Category
+        </button>
+    @endif
     <button type="button" onclick="deselectAllCandidates()" class="text-xs text-text-dark/50 hover:text-red-400 font-semibold px-2 cursor-pointer">
         Cancel
     </button>
@@ -858,6 +863,81 @@
         </form>
     </div>
 </div>
+
+<!-- Bulk Add to School Sharing File / Category Modal -->
+@if(\Illuminate\Support\Facades\Schema::hasTable('school_sharing_files'))
+<div id="bulkAddToSharingModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-card-bg border border-card-border rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+        <button type="button" onclick="closeBulkAddToSharingModal()" class="absolute top-4 right-4 text-text-dark/50 hover:text-text-main cursor-pointer">
+            <i class="fas fa-times text-lg"></i>
+        </button>
+
+        <h3 class="text-lg font-bold text-text-main mb-1 flex items-center gap-2">
+            <i class="fas fa-folder-plus text-amber-500"></i> Add Candidates to School File
+        </h3>
+        <p class="text-xs text-text-dark/60 mb-4">
+            Assign <span id="sharingModalSelectedCount" class="font-bold text-amber-500">0</span> selected candidate(s) into a school sharing file &amp; category.
+        </p>
+
+        @if(isset($sharingFiles) && $sharingFiles->count() > 0)
+            <form action="{{ route('admin.crm.candidate.add-to-sharing-file') }}" method="POST" class="space-y-4">
+                @csrf
+                <input type="hidden" name="select_all_matching" id="bulkSharingSelectAllMatching" value="0">
+                <input type="hidden" name="excluded_ids_csv" id="bulkSharingExcludedCsv" value="">
+                @foreach(['status', 'search', 'subject_id', 'experience', 'qualification_id', 'state_id', 'city_id', 'gender', 'english_fluency', 'availability', 'salary', 'plan_amount'] as $filterKey)
+                    @if(request()->filled($filterKey))
+                        <input type="hidden" name="{{ $filterKey }}" value="{{ request($filterKey) }}">
+                    @endif
+                @endforeach
+                <div id="bulkSharingCandidateInputs"></div>
+
+                <div>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wider mb-1.5">School Sharing File <span class="text-red-500">*</span></label>
+                    <select name="sharing_file_id" required onchange="syncBulkSharingCategories(this.value)"
+                            class="w-full bg-secondary-bg border border-card-border rounded-xl px-3 py-2.5 text-sm text-text-main">
+                        <option value="">-- Select School File --</option>
+                        @foreach($sharingFiles as $sf)
+                            <option value="{{ $sf->id }}">
+                                {{ $sf->school?->employerProfile?->school_name ?: ($sf->school?->name ?? 'School') }} — {{ $sf->title }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wider mb-1.5">Category Inside File</label>
+                    <select id="bulkSharingCategorySelect" name="category_id"
+                            class="w-full bg-secondary-bg border border-card-border rounded-xl px-3 py-2.5 text-sm text-text-main">
+                        <option value="">-- Select Existing Category --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-text-dark/70 uppercase tracking-wider mb-1.5">Or Create New Category (Optional)</label>
+                    <input type="text" name="new_category_name" maxlength="120" placeholder="e.g., TGT Hindi, PGT Maths, PRT Hindi"
+                           class="w-full bg-secondary-bg border border-card-border rounded-xl px-3 py-2 text-sm text-text-main">
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeBulkAddToSharingModal()" class="px-4 py-2 bg-secondary-bg text-text-dark/70 text-xs font-bold rounded-xl cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-sm">
+                        Add to Category
+                    </button>
+                </div>
+            </form>
+        @else
+            <div class="p-4 rounded-xl bg-secondary-bg border border-card-border text-xs text-text-dark/70 space-y-2">
+                <p>No school sharing files exist yet.</p>
+                <a href="{{ route('admin.sharing-files.index') }}" class="inline-block px-4 py-2 rounded-lg bg-blue-600 text-white font-bold">
+                    Create School Sharing File First
+                </a>
+            </div>
+        @endif
+    </div>
+</div>
+@endif
 
 @endsection
 
@@ -1041,6 +1121,31 @@
 
     function closeBulkSchoolDiscoveryModal() {
         document.getElementById('bulkSchoolDiscoveryModal').classList.add('hidden');
+    }
+
+    const bulkSharingCatsMap = @json(isset($sharingFiles) ? $sharingFiles->mapWithKeys(fn ($sf) => [$sf->id => $sf->categories->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->values()]) : []);
+
+    function syncBulkSharingCategories(fileId) {
+        const sel = document.getElementById('bulkSharingCategorySelect');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Select Existing Category --</option>';
+        (bulkSharingCatsMap[fileId] || []).forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.name;
+            sel.appendChild(opt);
+        });
+    }
+
+    function openBulkAddToSharingModal() {
+        if (!syncBulkSelectionInputs('bulkSharingCandidateInputs', 'bulkSharingSelectAllMatching', 'bulkSharingExcludedCsv', 'sharingModalSelectedCount')) {
+            return;
+        }
+        document.getElementById('bulkAddToSharingModal').classList.remove('hidden');
+    }
+
+    function closeBulkAddToSharingModal() {
+        document.getElementById('bulkAddToSharingModal').classList.add('hidden');
     }
 
     function toggleNotificationFields(type) {

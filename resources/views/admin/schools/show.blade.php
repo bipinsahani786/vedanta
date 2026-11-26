@@ -311,6 +311,39 @@
             @endif
         </div>
 
+        <!-- Candidate Sharing Files for This School -->
+        @if(isset($sharingFiles))
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
+                    <h3 class="text-base font-bold text-gray-900">
+                        <i class="fas fa-folder-open text-blue-600 mr-2"></i>Candidate Sharing Files ({{ $sharingFiles->count() }})
+                    </h3>
+                    <a href="{{ route('admin.sharing-files.index', ['school_user_id' => $school->id]) }}"
+                       class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs">
+                        <i class="fas fa-plus mr-1"></i> Create / Manage Sharing Files
+                    </a>
+                </div>
+                @if($sharingFiles->count() > 0)
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        @foreach($sharingFiles as $sf)
+                            <a href="{{ route('admin.sharing-files.show', $sf->id) }}"
+                               class="p-3.5 rounded-xl border border-gray-200 hover:border-blue-400 bg-gray-50/70 flex items-center justify-between gap-2 transition-colors">
+                                <div class="min-w-0">
+                                    <div class="font-bold text-gray-900 truncate">{{ $sf->title }}</div>
+                                    <div class="text-[11px] text-gray-500 mt-0.5">{{ $sf->categories_count }} categories · {{ $sf->entries_count }} candidates</div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 {{ $sf->hasPassword() ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700' }}">
+                                    {{ $sf->hasPassword() ? 'Locked' : 'Open' }}
+                                </span>
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-xs text-gray-500">No sharing files created for this school yet.</p>
+                @endif
+            </div>
+        @endif
+
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-base font-bold text-gray-900"><i class="fas fa-briefcase text-blue-600 mr-2"></i>Jobs Posted by This School</h3>

@@ -221,6 +221,10 @@
                         <span class="ml-auto bg-amber-400 text-[#031b4e] text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $pendingAccessReqCount }}</span>
                     @endif
                 </a>
+                <a href="{{ route('admin.sharing-files.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.sharing-files.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-folder-open w-5 text-center"></i> School Sharing Files
+                </a>
                 <a href="{{ route('admin.standalone-agreements.index') }}"
                     class="sidebar-link {{ request()->routeIs('admin.standalone-agreements.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-paper-plane w-5 text-center"></i> Send Agreement

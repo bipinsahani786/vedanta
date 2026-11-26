@@ -76,6 +76,14 @@ class DashboardController extends Controller
         $forceWalkthrough = request()->boolean('tour');
         $shouldStartWalkthrough = $forceWalkthrough || ($walkthroughKey ? ! \Illuminate\Support\Facades\Cache::get($walkthroughKey, false) : false);
 
+        $sharingFiles = \Illuminate\Support\Facades\Schema::hasTable('school_sharing_files')
+            ? \App\Models\SchoolSharingFile::where('school_user_id', $userId)
+                ->where('is_active', true)
+                ->withCount(['categories', 'entries'])
+                ->latest('id')
+                ->get()
+            : collect();
+
         return view('employer.dashboard', compact(
             'stats',
             'recentJobs',
@@ -85,6 +93,7 @@ class DashboardController extends Controller
             'recentAccessRequests',
             'quickCategories',
             'quickSubjects',
+            'sharingFiles',
             'shouldStartWalkthrough',
             'forceWalkthrough'
         ));
