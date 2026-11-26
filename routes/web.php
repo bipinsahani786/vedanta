@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CrmController;
 use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\QualificationController;
+use App\Http\Controllers\Admin\SchoolCrmController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\StateController;
 use App\Http\Controllers\Admin\SubjectController;
@@ -579,6 +580,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/leads/bulk-delete', [ContactLeadController::class, 'bulkDestroy'])->name('leads.bulk-delete');
 
     // Frontend Management
+
+    // Dedicated Schools CRM
+    Route::get('/schools', [SchoolCrmController::class, 'index'])->name('schools.index');
+    Route::get('/schools/create', [SchoolCrmController::class, 'create'])->name('schools.create');
+    Route::post('/schools', [SchoolCrmController::class, 'store'])->name('schools.store');
+    Route::get('/schools/{id}', [SchoolCrmController::class, 'show'])->name('schools.show');
+    Route::get('/schools/{id}/edit', [SchoolCrmController::class, 'edit'])->name('schools.edit');
+    Route::put('/schools/{id}', [SchoolCrmController::class, 'update'])->name('schools.update');
+    Route::post('/schools/{id}/photo', [SchoolCrmController::class, 'updatePhoto'])->name('schools.photo');
+    Route::post('/schools/{id}/toggle-status', [SchoolCrmController::class, 'toggleStatus'])->name('schools.toggle-status');
 
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
