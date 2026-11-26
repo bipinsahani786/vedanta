@@ -86,7 +86,7 @@
                     <div class="font-semibold text-text-main group-hover:text-accent-blue transition-colors">{{ $app->candidate->name }}</div>
                     <div class="text-xs text-text-dark/50">{{ $app->candidate->email }}</div>
                     <div class="text-[10px] text-text-dark/40 mt-1">
-                        <a href="{{ route('admin.crm.show', $app->candidate->id) }}" class="text-accent-blue hover:underline">View Profile</a>
+                        <a href="{{ route('admin.crm.show', $app->candidate->id) }}" class="text-accent-blue hover:underline font-semibold">View Details</a>
                     </div>
                 </td>
                 <td>

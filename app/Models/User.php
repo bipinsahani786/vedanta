@@ -33,7 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected static function booted()
     {
         static::creating(function ($user) {
-            if (empty($user->referral_code)) {
+            if (empty($user->getAttributes()['referral_code'] ?? null)) {
                 $user->referral_code = self::generateUniqueReferralCode();
             }
         });

@@ -118,6 +118,11 @@
                             </td>
                             <td class="text-right whitespace-nowrap">
                                 <div class="flex items-center justify-end gap-2">
+                                    @if($user->role === 'candidate')
+                                        <a href="{{ route('admin.crm.show', $user->id) }}" class="px-2.5 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors inline-flex items-center gap-1" title="View Candidate Details">
+                                            <i class="fas fa-id-card"></i> View Details
+                                        </a>
+                                    @endif
                                     @if($user->is_active)
                                         <a href="{{ route('admin.users.impersonate', $user->id) }}" target="_blank" class="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors" title="Login as User">
                                             <i class="fas fa-sign-in-alt"></i>

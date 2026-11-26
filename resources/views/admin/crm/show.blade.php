@@ -67,15 +67,27 @@
             <!-- Banner / Header -->
             <div class="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-white flex flex-col sm:flex-row justify-between items-start relative gap-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative z-10 w-full">
-                    @if($candidate->profile && $candidate->profile->profile_photo_path)
-                        <img src="{{ Storage::url($candidate->profile->profile_photo_path) }}" alt="{{ $candidate->name }}" class="w-16 h-16 shrink-0 rounded-full object-cover shadow-sm border-4 border-white">
-                    @elseif($candidate->profile && $candidate->profile->live_photo_path)
-                        <img src="{{ Storage::url($candidate->profile->live_photo_path) }}" alt="{{ $candidate->name }}" class="w-16 h-16 shrink-0 rounded-full object-cover shadow-sm border-4 border-white">
-                    @else
-                        <div class="w-16 h-16 shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-extrabold shadow-sm border-4 border-white">
-                            {{ strtoupper(substr($candidate->name, 0, 1)) }}
-                        </div>
-                    @endif
+                    @php
+                        $primaryPhotoPath = $candidate->profile?->profile_photo_path ?: ($candidate->profile?->live_photo_path ?: $candidate->profile?->passport_photo_path);
+                        $primaryPhotoUrl = $primaryPhotoPath ? Storage::url($primaryPhotoPath) : '';
+                        $primaryPhotoLabel = $candidate->profile?->profile_photo_path ? 'Profile Photo' : ($candidate->profile?->live_photo_path ? 'Live / ID Photo' : ($candidate->profile?->passport_photo_path ? 'Passport Photo' : 'Profile Photo'));
+                        $adminPhotoUploadUrl = route('admin.crm.candidate.photo', $candidate->id);
+                    @endphp
+                    <button type="button"
+                            onclick='openAdminPhotoModal(@json($candidate->name), @json($candidate->profile?->vpa_id ?? ""), @json($primaryPhotoUrl), @json($adminPhotoUploadUrl), @json($primaryPhotoLabel))'
+                            class="relative group shrink-0 rounded-full focus:outline-none cursor-pointer"
+                            title="Click to enlarge or update photo">
+                        @if($primaryPhotoUrl)
+                            <img src="{{ $primaryPhotoUrl }}" alt="{{ $candidate->name }}" class="w-16 h-16 shrink-0 rounded-full object-cover shadow-sm border-4 border-white group-hover:ring-4 group-hover:ring-blue-400/50 transition-all">
+                        @else
+                            <div class="w-16 h-16 shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-extrabold shadow-sm border-4 border-white group-hover:ring-4 group-hover:ring-blue-400/50 transition-all">
+                                {{ strtoupper(substr($candidate->name, 0, 1)) }}
+                            </div>
+                        @endif
+                        <span class="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-blue-600 text-white border-2 border-white flex items-center justify-center text-[10px] shadow group-hover:scale-110 transition-transform">
+                            <i class="fas {{ $primaryPhotoUrl ? 'fa-search-plus' : 'fa-camera' }}"></i>
+                        </span>
+                    </button>
                     <div class="min-w-0">
                         <div class="flex items-center gap-2.5 flex-wrap">
                             <h3 class="text-xl font-extrabold text-gray-900 break-words">{{ $candidate->name }}</h3>
@@ -210,6 +222,50 @@
                     </div>
                 @endif
 
+                <!-- Account & Registration Overview (Always visible even if profile incomplete) -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
+                        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Contact, Account &amp; Registration Overview</h4>
+                        <button type="button"
+                                onclick='openAdminPhotoModal(@json($candidate->name), @json($candidate->profile?->vpa_id ?? ""), @json($primaryPhotoUrl), @json($adminPhotoUploadUrl), @json($primaryPhotoLabel))'
+                                class="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200 transition-colors inline-flex items-center gap-1 cursor-pointer">
+                            <i class="fas fa-camera"></i> {{ $primaryPhotoUrl ? 'View / Update Photo' : 'Upload Photo' }}
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                            <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Candidate ID / User ID</div>
+                            <div class="text-xs font-mono font-bold text-gray-800">{{ $candidate->profile?->vpa_id ?? 'Not Assigned' }} (#{{ $candidate->id }})</div>
+                        </div>
+                        <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                            <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Account &amp; Email</div>
+                            <div class="text-xs font-bold {{ $candidate->is_active ? 'text-emerald-700' : 'text-red-600' }}">
+                                {{ $candidate->is_active ? 'Active Account' : 'Inactive' }}
+                                <span class="text-gray-400 font-normal">· {{ $candidate->email_verified_at ? 'Email Verified' : 'Email Unverified' }}</span>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                            <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Registered On</div>
+                            <div class="text-xs font-medium text-gray-800">{{ $candidate->created_at ? $candidate->created_at->format('M d, Y h:i A') : 'N/A' }}</div>
+                        </div>
+                        <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                            <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Verification &amp; Views</div>
+                            <div class="text-xs font-bold {{ $candidate->profile?->is_verified ? 'text-blue-700' : 'text-gray-600' }}">
+                                {{ $candidate->profile?->is_verified ? 'Verified Badge' : 'Unverified' }}
+                                <span class="text-gray-400 font-normal">· {{ $candidate->profile?->views_count ?? 0 }} Views</span>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                            <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Referral Code</div>
+                            <div class="text-xs font-mono font-bold text-gray-700">{{ $candidate->referral_code ?? 'N/A' }}</div>
+                        </div>
+                        <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                            <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Referred By</div>
+                            <div class="text-xs font-medium text-gray-800">{{ $candidate->referredBy?->name ?? 'Direct Signup' }}</div>
+                        </div>
+                    </div>
+                </div>
+
                 @if($candidate->profile)
                     <!-- Personal Info -->
                     <div class="mb-6">
@@ -226,6 +282,11 @@
                             <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100 col-span-2">
                                 <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Address</div>
                                 <div class="text-sm font-medium text-gray-800">{{ $candidate->profile->address ?? 'N/A' }}</div>
+                                @if($candidate->profile->latitude && $candidate->profile->longitude)
+                                    <a href="https://www.google.com/maps/search/?api=1&query={{ $candidate->profile->latitude }},{{ $candidate->profile->longitude }}" target="_blank" class="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline">
+                                        <i class="fas fa-map-pin"></i> GPS: {{ $candidate->profile->latitude }}, {{ $candidate->profile->longitude }}
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -242,6 +303,12 @@
                                 <div class="text-[10px] text-blue-400 uppercase font-bold mb-0.5 flex items-center gap-1"><i class="fas fa-book"></i> Subject</div>
                                 <div class="text-sm font-bold text-blue-900">{{ $candidate->profile->subject?->name ?? 'N/A' }}</div>
                             </div>
+                            @if($candidate->profile->specialization)
+                                <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-50 col-span-2">
+                                    <div class="text-[10px] text-blue-400 uppercase font-bold mb-0.5 flex items-center gap-1"><i class="fas fa-tag"></i> Specialization</div>
+                                    <div class="text-sm font-bold text-blue-900">{{ $candidate->profile->specialization->name }}</div>
+                                </div>
+                            @endif
                             <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-50">
                                 <div class="text-[10px] text-orange-400 uppercase font-bold mb-0.5 flex items-center gap-1"><i class="fas fa-graduation-cap"></i> Highest Qualification</div>
                                 <div class="text-sm font-bold text-orange-900">{{ $candidate->profile->highestQualification?->name ?? 'N/A' }}</div>
@@ -249,6 +316,14 @@
                             <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-50">
                                 <div class="text-[10px] text-emerald-500 uppercase font-bold mb-0.5 flex items-center gap-1"><i class="fas fa-briefcase"></i> Experience</div>
                                 <div class="text-sm font-bold text-emerald-900">{{ $candidate->profile->experience_years ?? 0 }} Years</div>
+                            </div>
+                            <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                                <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Current School / Institution</div>
+                                <div class="text-sm font-medium text-gray-800">{{ $candidate->profile->current_school ?? 'N/A' }}</div>
+                            </div>
+                            <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                                <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">English Fluency</div>
+                                <div class="text-sm font-medium text-gray-800 capitalize">{{ $candidate->profile->english_fluency ?? 'N/A' }}</div>
                             </div>
 
                             @if($candidate->profile->other_qualifications)
@@ -369,22 +444,106 @@
                                 <div class="text-[10px] text-gray-400 uppercase font-bold mb-1">Plan Details</div>
                                 <div class="text-sm font-bold text-gray-800">{{ $candidate->profile->plan_type ? ucfirst($candidate->profile->plan_type) : 'Standard' }} Plan</div>
                             </div>
-                            <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100 col-span-2 flex justify-between items-center">
-                                <div>
-                                    <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Transaction ID</div>
-                                    <div class="font-mono text-xs font-bold text-gray-600">{{ $candidate->profile->payment_id ?? 'No Transaction' }}</div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Paid On</div>
-                                    <div class="text-xs font-medium text-gray-600">{{ $candidate->profile->registration_completed_at ? $candidate->profile->registration_completed_at->format('M d, Y') : 'N/A' }}</div>
+                            <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                                <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Paid / Pending Dues</div>
+                                <div class="text-xs font-bold text-emerald-700">
+                                    ₹{{ number_format($candidate->profile->paid_amount ?? 0) }}
+                                    @if(($candidate->profile->pending_amount ?? 0) > 0)
+                                        <span class="text-rose-600 ml-1">/ Due ₹{{ number_format($candidate->profile->pending_amount) }}</span>
+                                    @endif
                                 </div>
                             </div>
+                            <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                                <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Applications Quota</div>
+                                <div class="text-xs font-bold text-gray-800">{{ $candidate->profile->used_applications ?? 0 }} / {{ $candidate->profile->total_allowed_applications ?? 0 }} Used</div>
+                            </div>
+                            <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                                <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Plan Start / Validity</div>
+                                <div class="text-xs font-medium text-gray-700">
+                                    {{ $candidate->profile->plan_started_at ? $candidate->profile->plan_started_at->format('M d, Y') : 'N/A' }}
+                                    @if($candidate->profile->plan_validity_date)
+                                        <span class="text-[10px] text-gray-500 block">Valid till {{ $candidate->profile->plan_validity_date->format('M d, Y') }} ({{ $candidate->profile->plan_status_badge }})</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100 col-span-2 flex justify-between items-center">
+                                <div>
+                                    <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Transaction ID &amp; Agreement ID</div>
+                                    <div class="font-mono text-xs font-bold text-gray-600">{{ $candidate->profile->payment_id ?? 'No Transaction' }}</div>
+                                    <div class="font-mono text-[10px] text-gray-500 mt-0.5">Agr: {{ $candidate->profile->agreement_id ?? 'Not Assigned' }}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Completed / Signed On</div>
+                                    <div class="text-xs font-medium text-gray-600">{{ $candidate->profile->registration_completed_at ? $candidate->profile->registration_completed_at->format('M d, Y') : 'N/A' }}</div>
+                                    <div class="text-[10px] text-gray-500 mt-0.5">Terms: {{ $candidate->profile->is_terms_agreed ? 'Agreed' : 'Pending' }}</div>
+                                </div>
+                            </div>
+                            @if($isAgrDone)
+                            <div class="bg-blue-50/40 p-3 rounded-xl border border-blue-100 col-span-2 sm:col-span-3">
+                                <div class="text-[10px] text-blue-600 uppercase font-bold mb-1">Agreement Signature Audit Details</div>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-gray-700">
+                                    <div><span class="text-gray-400 block text-[10px]">Type</span><strong>{{ $candidate->profile->signature_type ? ucfirst($candidate->profile->signature_type) : 'Signed' }}</strong></div>
+                                    <div><span class="text-gray-400 block text-[10px]">Signed At</span><strong>{{ $candidate->profile->agreement_signed_at ? $candidate->profile->agreement_signed_at->format('M d, Y h:i A') : 'N/A' }}</strong></div>
+                                    <div><span class="text-gray-400 block text-[10px]">IP Address</span><span class="font-mono">{{ $candidate->profile->signature_ip_address ?? 'N/A' }}</span></div>
+                                    <div class="truncate" title="{{ $candidate->profile->signature_device_info ?? '' }}"><span class="text-gray-400 block text-[10px]">Device</span><span>{{ $candidate->profile->signature_device_info ?? 'N/A' }}</span></div>
+                                </div>
+                                @if($candidate->profile->signature_type === 'type' && $candidate->profile->signature_data)
+                                    <div class="mt-2 pt-2 border-t border-blue-100/70 text-xs text-gray-600">
+                                        Signature Name: <strong class="italic text-gray-900">{{ $candidate->profile->signature_data }}</strong>
+                                    </div>
+                                @endif
+                            </div>
+                            @endif
                         </div>
                     </div>
 
-                    <!-- Documents -->
+                    <!-- Photos & Documents Gallery -->
                     <div class="mb-6">
-                        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Documents</h4>
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Collected Photos &amp; Documents</h4>
+                            <button type="button"
+                                    onclick='openAdminPhotoModal(@json($candidate->name), @json($candidate->profile?->vpa_id ?? ""), @json($primaryPhotoUrl), @json($adminPhotoUploadUrl), "Profile Photo")'
+                                    class="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer">
+                                <i class="fas fa-camera mr-1"></i> Update Photo
+                            </button>
+                        </div>
+                        @if($candidate->profile->profile_photo_path || $candidate->profile->live_photo_path || $candidate->profile->passport_photo_path)
+                            <div class="grid grid-cols-3 gap-2.5 mb-3">
+                                @if($candidate->profile->profile_photo_path)
+                                    <button type="button"
+                                            onclick='openAdminPhotoModal(@json($candidate->name), @json($candidate->profile?->vpa_id ?? ""), @json(Storage::url($candidate->profile->profile_photo_path)), @json($adminPhotoUploadUrl), "Profile Photo")'
+                                            class="group text-left bg-amber-50/70 hover:bg-amber-100/80 border border-amber-200/80 rounded-xl p-2 transition-all cursor-pointer">
+                                        <img src="{{ Storage::url($candidate->profile->profile_photo_path) }}" alt="Profile Photo" class="w-full h-16 object-cover rounded-lg mb-1.5 group-hover:opacity-90">
+                                        <div class="text-[10px] font-bold text-amber-800 flex items-center justify-between">
+                                            <span>Profile Photo</span>
+                                            <i class="fas fa-expand-alt text-[9px]"></i>
+                                        </div>
+                                    </button>
+                                @endif
+                                @if($candidate->profile->live_photo_path)
+                                    <button type="button"
+                                            onclick='openAdminPhotoModal(@json($candidate->name), @json($candidate->profile?->vpa_id ?? ""), @json(Storage::url($candidate->profile->live_photo_path)), @json($adminPhotoUploadUrl), "Live / ID Photo")'
+                                            class="group text-left bg-rose-50/70 hover:bg-rose-100/80 border border-rose-200/80 rounded-xl p-2 transition-all cursor-pointer">
+                                        <img src="{{ Storage::url($candidate->profile->live_photo_path) }}" alt="Live Photo" class="w-full h-16 object-cover rounded-lg mb-1.5 group-hover:opacity-90">
+                                        <div class="text-[10px] font-bold text-rose-800 flex items-center justify-between">
+                                            <span>Live Photo</span>
+                                            <i class="fas fa-expand-alt text-[9px]"></i>
+                                        </div>
+                                    </button>
+                                @endif
+                                @if($candidate->profile->passport_photo_path)
+                                    <button type="button"
+                                            onclick='openAdminPhotoModal(@json($candidate->name), @json($candidate->profile?->vpa_id ?? ""), @json(Storage::url($candidate->profile->passport_photo_path)), @json($adminPhotoUploadUrl), "Passport Photo")'
+                                            class="group text-left bg-blue-50/70 hover:bg-blue-100/80 border border-blue-200/80 rounded-xl p-2 transition-all cursor-pointer">
+                                        <img src="{{ Storage::url($candidate->profile->passport_photo_path) }}" alt="Passport Photo" class="w-full h-16 object-cover rounded-lg mb-1.5 group-hover:opacity-90">
+                                        <div class="text-[10px] font-bold text-blue-800 flex items-center justify-between">
+                                            <span>Passport Photo</span>
+                                            <i class="fas fa-expand-alt text-[9px]"></i>
+                                        </div>
+                                    </button>
+                                @endif
+                            </div>
+                        @endif
                         <div class="flex flex-wrap gap-2">
                             @if($candidate->profile->resume_path)
                                 <a href="{{ Storage::url($candidate->profile->resume_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors">
@@ -402,14 +561,14 @@
                                 </a>
                             @endif
                             @if($candidate->profile->profile_photo_path)
-                                <a href="{{ Storage::url($candidate->profile->profile_photo_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-100 text-amber-700 rounded-lg text-xs font-bold transition-colors">
+                                <button type="button" onclick='openAdminPhotoModal(@json($candidate->name), @json($candidate->profile?->vpa_id ?? ""), @json(Storage::url($candidate->profile->profile_photo_path)), @json($adminPhotoUploadUrl), "Profile Photo")' class="inline-flex items-center gap-2 px-3 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-100 text-amber-700 rounded-lg text-xs font-bold transition-colors cursor-pointer">
                                     <i class="fas fa-image"></i> Profile Photo
-                                </a>
+                                </button>
                             @endif
                             @if($candidate->profile->live_photo_path)
-                                <a href="{{ Storage::url($candidate->profile->live_photo_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-100 text-rose-700 rounded-lg text-xs font-bold transition-colors">
+                                <button type="button" onclick='openAdminPhotoModal(@json($candidate->name), @json($candidate->profile?->vpa_id ?? ""), @json(Storage::url($candidate->profile->live_photo_path)), @json($adminPhotoUploadUrl), "Live / ID Photo")' class="inline-flex items-center gap-2 px-3 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-100 text-rose-700 rounded-lg text-xs font-bold transition-colors cursor-pointer">
                                     <i class="fas fa-camera"></i> Live Photo
-                                </a>
+                                </button>
                             @endif
                              @if($candidate->profile->agreement_pdf_path || $candidate->profile->is_agreement_signed || $candidate->profile->signature_data)
                                  <a href="{{ Route::has('admin.crm.candidate.download-agreement') ? route('admin.crm.candidate.download-agreement', $candidate->id) : url('/admin/crm/candidate/'.$candidate->id.'/download-agreement') }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-100 text-teal-700 rounded-lg text-xs font-bold transition-colors" title="Click to view/download signed agreement (auto-generates if missing)">
@@ -1056,6 +1215,7 @@
             </form>
         </div>
     </div>
+@include('admin.crm.partials.photo-modal')
 @endsection
 
 @push('scripts')

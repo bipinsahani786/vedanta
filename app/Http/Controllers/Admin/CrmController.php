@@ -425,9 +425,19 @@ class CrmController extends Controller
     public function index(Request $request)
     {
         $query = User::where('role', 'candidate')
-            ->with(['profile', 'applications.jobPost', 'applications' => function ($q) {
-                $q->where('status', 'hired');
-            }]);
+            ->with([
+                'profile.category',
+                'profile.subject',
+                'profile.specialization',
+                'profile.highestQualification',
+                'profile.preferredState',
+                'profile.preferredCity',
+                'referredBy',
+                'applications.jobPost',
+                'applications' => function ($q) {
+                    $q->where('status', 'hired');
+                },
+            ]);
 
         // Search text (Name, Email, Phone, Candidate ID / VPA ID)
         if ($search = trim($request->input('search', ''))) {
@@ -591,7 +601,16 @@ class CrmController extends Controller
     public function show($id)
     {
         $candidate = User::where('role', 'candidate')
-            ->with(['profile', 'applications.jobPost'])
+            ->with([
+                'profile.category',
+                'profile.subject',
+                'profile.specialization',
+                'profile.highestQualification',
+                'profile.preferredState',
+                'profile.preferredCity',
+                'referredBy',
+                'applications.jobPost',
+            ])
             ->findOrFail($id);
 
         $followUps = CrmFollowUp::where('candidate_id', $id)->with('admin')->orderBy('created_at', 'desc')->get();
@@ -1152,6 +1171,29 @@ class CrmController extends Controller
         }
 
         return back()->with('success', 'Candidate verification removed.');
+    }
+
+    /**
+     * Update candidate profile photo directly from the Admin CRM panel.
+     */
+    public function updatePhoto(Request $request, $id)
+    {
+        $request->validate([
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'profile_photo.required' => 'Please select a photo to upload.',
+            'profile_photo.image' => 'The selected file must be a valid image (JPG, PNG, WEBP).',
+            'profile_photo.mimes' => 'Only JPG, JPEG, PNG, and WEBP images are allowed.',
+            'profile_photo.max' => 'Profile photo size must not exceed 5MB.',
+        ]);
+
+        $candidate = User::where('role', 'candidate')->findOrFail($id);
+        $profile = $candidate->profile ?: $candidate->profile()->firstOrCreate([]);
+
+        $path = $request->file('profile_photo')->store('profile_photos', 'public');
+        $profile->update(['profile_photo_path' => $path]);
+
+        return back()->with('success', 'Candidate profile photo updated successfully.');
     }
 
     public function assignJob(Request $request, $id)

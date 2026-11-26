@@ -518,6 +518,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/crm/invoice/{id}/remind', [CrmController::class, 'sendInvoiceReminder'])->name('crm.invoice.remind');
     Route::post('/crm/invoice/{id}/adjust', [CrmController::class, 'adjustInvoice'])->name('crm.invoice.adjust');
     Route::post('/crm/candidate/{id}/toggle-verification', [CrmController::class, 'toggleVerification'])->name('crm.candidate.verify');
+    Route::post('/crm/candidate/{id}/photo', [CrmController::class, 'updatePhoto'])->name('crm.candidate.photo');
     Route::post('/crm/candidate/{id}/rate', [CrmController::class, 'rateCandidate'])->name('crm.candidate.rate');
     Route::get('/crm/candidate/{id}/magic-login', [CrmController::class, 'magicLogin'])->name('crm.candidate.magic-login');
     Route::post('/crm/candidate/{id}/remind', [CrmController::class, 'sendOnboardingReminder'])->name('crm.candidate.remind');

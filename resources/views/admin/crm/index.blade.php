@@ -80,7 +80,8 @@
     </a>
 </div>
 
-{{-- Filter/Search Bar --}}
+{{-- Filter/Search Bar & View Mode Wrapper --}}
+<div x-data="{ viewMode: localStorage.getItem('crm_view_mode') || 'table' }">
 <div class="bg-card-bg rounded-t-2xl border-x border-t border-card-border p-4">
     <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
         <div class="text-sm text-text-dark/50 font-medium flex flex-wrap items-center gap-2">
@@ -92,9 +93,25 @@
                 </span>
             @endif
         </div>
-        <button type="button" onclick="document.getElementById('advanced-filters').classList.toggle('hidden')" class="text-sm font-semibold text-accent-blue flex items-center gap-2 hover:text-accent-blue-hover transition-colors">
-            <i class="fas fa-filter"></i> Advanced Filters
-        </button>
+        <div class="flex items-center gap-3">
+            <div class="bg-secondary-bg border border-card-border rounded-xl p-1 flex items-center gap-1">
+                <button type="button"
+                        @click="viewMode = 'table'; localStorage.setItem('crm_view_mode', 'table')"
+                        :class="viewMode === 'table' ? 'bg-accent-blue text-white shadow-sm' : 'text-text-dark/60 hover:text-text-main'"
+                        class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1">
+                    <i class="fas fa-list"></i> Table
+                </button>
+                <button type="button"
+                        @click="viewMode = 'cards'; localStorage.setItem('crm_view_mode', 'cards')"
+                        :class="viewMode === 'cards' ? 'bg-accent-blue text-white shadow-sm' : 'text-text-dark/60 hover:text-text-main'"
+                        class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1">
+                    <i class="fas fa-th-large"></i> Cards
+                </button>
+            </div>
+            <button type="button" onclick="document.getElementById('advanced-filters').classList.toggle('hidden')" class="text-sm font-semibold text-accent-blue flex items-center gap-2 hover:text-accent-blue-hover transition-colors cursor-pointer">
+                <i class="fas fa-filter"></i> Advanced Filters
+            </button>
+        </div>
     </div>
 
     <form action="{{ route('admin.crm.index') }}" method="GET" class="space-y-4">
@@ -165,8 +182,93 @@
     </form>
 </div>
 
+{{-- Candidate View Details Cards Grid --}}
+<div x-show="viewMode === 'cards'" x-cloak class="bg-card-bg rounded-b-2xl border border-card-border p-5 shadow-xl">
+    @if($candidates->count() > 0)
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            @foreach($candidates as $candidate)
+                @php
+                    $cp = $candidate->profile;
+                    $cardPhotoPath = $cp?->profile_photo_path ?: ($cp?->live_photo_path ?: $cp?->passport_photo_path);
+                    $cardPhotoUrl = $cardPhotoPath ? Storage::url($cardPhotoPath) : '';
+                    $cardUploadUrl = route('admin.crm.candidate.photo', $candidate->id);
+                    $isDone = $cp && $cp->isRegistrationCompleted();
+                @endphp
+                <div class="rounded-2xl border border-card-border bg-secondary-bg/40 p-5 flex flex-col justify-between gap-4 hover:border-accent-blue/50 transition-all shadow-sm">
+                    <div>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <button type="button"
+                                        onclick='openAdminPhotoModal(@json($candidate->name), @json($cp?->vpa_id ?? ""), @json($cardPhotoUrl), @json($cardUploadUrl), "Profile Photo")'
+                                        class="relative group shrink-0 rounded-full focus:outline-none cursor-pointer"
+                                        title="Click to enlarge or update photo">
+                                    @if($cardPhotoUrl)
+                                        <img src="{{ $cardPhotoUrl }}" alt="{{ $candidate->name }}" class="w-12 h-12 rounded-full object-cover border-2 border-card-border group-hover:border-accent-blue transition-colors">
+                                    @else
+                                        <div class="w-12 h-12 rounded-full bg-accent-blue/15 text-accent-blue flex items-center justify-center font-extrabold text-base border border-accent-blue/30">
+                                            {{ strtoupper(substr($candidate->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                    <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-accent-blue text-white text-[8px] flex items-center justify-center shadow">
+                                        <i class="fas {{ $cardPhotoUrl ? 'fa-search-plus' : 'fa-camera' }}"></i>
+                                    </span>
+                                </button>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <h4 class="font-bold text-text-main truncate">{{ $candidate->name }}</h4>
+                                        @if($cp?->is_verified)
+                                            <i class="fas fa-check-circle text-blue-500 text-xs" title="Verified"></i>
+                                        @endif
+                                    </div>
+                                    <div class="text-[11px] font-mono text-text-dark/60">{{ $cp?->vpa_id ?? 'No VPA ID' }}</div>
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 {{ $isDone ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30' }}">
+                                {{ $isDone ? 'Complete' : 'Pending' }}
+                            </span>
+                        </div>
+
+                        <div class="mt-3 text-xs text-text-dark/70 space-y-1">
+                            <div class="truncate"><i class="fas fa-envelope w-4 text-text-dark/40"></i> {{ $candidate->email }}</div>
+                            <div><i class="fas fa-phone-alt w-4 text-text-dark/40"></i> {{ $candidate->phone }}</div>
+                            <div><i class="fas fa-map-marker-alt w-4 text-text-dark/40"></i> {{ $cp?->preferredCity?->name ?? 'N/A' }}, {{ $cp?->preferredState?->name ?? 'N/A' }}</div>
+                        </div>
+
+                        <div class="mt-3 pt-3 border-t border-card-border/70 grid grid-cols-2 gap-2 text-xs">
+                            <div><span class="text-[10px] text-text-dark/40 block uppercase font-bold">Category</span><span class="font-semibold text-text-main">{{ $cp?->category?->name ?? 'N/A' }}</span></div>
+                            <div><span class="text-[10px] text-text-dark/40 block uppercase font-bold">Subject</span><span class="font-semibold text-text-main">{{ $cp?->subject?->name ?? 'N/A' }}</span></div>
+                            <div><span class="text-[10px] text-text-dark/40 block uppercase font-bold">Qualification</span><span class="font-medium text-text-main">{{ $cp?->highestQualification?->name ?? 'N/A' }}</span></div>
+                            <div><span class="text-[10px] text-text-dark/40 block uppercase font-bold">Exp / Plan</span><span class="font-medium text-text-main">{{ $cp?->experience_years ?? 0 }} yrs · {{ $cp?->plan_type ? ucfirst($cp->plan_type) : 'Unpaid' }}</span></div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-card-border/70 flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-1.5">
+                            @if($cp?->resume_path)
+                                <a href="{{ Storage::url($cp->resume_path) }}" target="_blank" class="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 text-[11px] font-bold">CV</a>
+                            @endif
+                            <button type="button"
+                                    onclick='openAdminPhotoModal(@json($candidate->name), @json($cp?->vpa_id ?? ""), @json($cardPhotoUrl), @json($cardUploadUrl), "Profile Photo")'
+                                    class="px-2 py-1 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-[11px] font-bold cursor-pointer">
+                                Photo
+                            </button>
+                        </div>
+                        <a href="{{ route('admin.crm.show', $candidate->id) }}"
+                           class="px-3.5 py-1.5 rounded-xl bg-accent-blue text-white hover:bg-accent-blue-hover text-xs font-bold inline-flex items-center gap-1.5 shadow-sm transition-colors">
+                            <span>View Details</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @else
+        <div class="py-12 text-center text-text-dark/50 text-sm">No candidates found.</div>
+    @endif
+</div>
+
 {{-- Data Table --}}
-<div class="bg-card-bg rounded-b-2xl border border-card-border overflow-x-auto shadow-xl">
+<div x-show="viewMode === 'table'" class="bg-card-bg rounded-b-2xl border border-card-border overflow-x-auto shadow-xl">
     <table class="w-full text-left border-collapse admin-table">
         <thead>
             <tr>
@@ -212,23 +314,71 @@
                     @endif
                 </td>
                 <td>
-                    <div class="font-semibold text-text-main group-hover:text-accent-blue transition-colors">{{ $candidate->name }}</div>
-                    @if($candidate->profile && $candidate->profile->vpa_id)
-                        <div class="text-[10px] font-mono text-text-dark/60 bg-secondary-bg px-1.5 py-0.5 rounded border border-card-border w-max mt-0.5" title="Vedanta Candidate ID">
-                            <i class="fas fa-id-badge w-3"></i> {{ $candidate->profile->vpa_id }}
-                        </div>
-                    @endif
-                    <div class="text-xs text-text-dark/50 flex flex-col gap-0.5 mt-1">
-                        <span><i class="fas fa-envelope text-[10px] w-3"></i> {{ $candidate->email }}</span>
-                        <span><i class="fas fa-phone-alt text-[10px] w-3"></i> {{ $candidate->phone }}</span>
-                    </div>
-                    @if($candidate->profile && $candidate->profile->plan_type === 'standard' && !$candidate->profile->is_fee_paid)
-                        <div class="mt-2">
-                            <span class="bg-red-500/10 text-red-500 px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold w-max" title="Standard Plan Placement Fee Pending">
-                                <i class="fas fa-exclamation-triangle"></i> ₹500 Due
+                    @php
+                        $rowPhotoPath = $candidate->profile?->profile_photo_path ?: ($candidate->profile?->live_photo_path ?: $candidate->profile?->passport_photo_path);
+                        $rowPhotoUrl = $rowPhotoPath ? Storage::url($rowPhotoPath) : '';
+                        $rowUploadUrl = route('admin.crm.candidate.photo', $candidate->id);
+                    @endphp
+                    <div class="flex items-start gap-3">
+                        <button type="button"
+                                onclick='openAdminPhotoModal(@json($candidate->name), @json($candidate->profile?->vpa_id ?? ""), @json($rowPhotoUrl), @json($rowUploadUrl), "Profile Photo")'
+                                class="relative group shrink-0 rounded-full focus:outline-none cursor-pointer mt-0.5"
+                                title="Click to enlarge or update photo">
+                            @if($rowPhotoUrl)
+                                <img src="{{ $rowPhotoUrl }}" alt="{{ $candidate->name }}" class="w-10 h-10 rounded-full object-cover border border-card-border group-hover:border-accent-blue transition-colors">
+                            @else
+                                <div class="w-10 h-10 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center text-sm font-bold border border-accent-blue/20">
+                                    {{ strtoupper(substr($candidate->name, 0, 1)) }}
+                                </div>
+                            @endif
+                            <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-accent-blue text-white text-[8px] flex items-center justify-center shadow">
+                                <i class="fas {{ $rowPhotoUrl ? 'fa-search-plus' : 'fa-camera' }}"></i>
                             </span>
+                        </button>
+                        <div class="min-w-0">
+                            <div class="font-semibold text-text-main group-hover:text-accent-blue transition-colors flex items-center gap-1.5 flex-wrap">
+                                <span>{{ $candidate->name }}</span>
+                                @if($candidate->profile?->is_verified)
+                                    <i class="fas fa-check-circle text-blue-500 text-xs" title="Verified"></i>
+                                @endif
+                            </div>
+                            @if($candidate->profile && $candidate->profile->vpa_id)
+                                <div class="text-[10px] font-mono text-text-dark/60 bg-secondary-bg px-1.5 py-0.5 rounded border border-card-border w-max mt-0.5" title="Vedanta Candidate ID">
+                                    <i class="fas fa-id-badge w-3"></i> {{ $candidate->profile->vpa_id }}
+                                </div>
+                            @endif
+                            <div class="text-xs text-text-dark/50 flex flex-col gap-0.5 mt-1">
+                                <span><i class="fas fa-envelope text-[10px] w-3"></i> {{ $candidate->email }}</span>
+                                <span><i class="fas fa-phone-alt text-[10px] w-3"></i> {{ $candidate->phone }}</span>
+                            </div>
+                            @if($candidate->profile)
+                                <div class="flex flex-wrap gap-1 mt-1.5 text-[10px]">
+                                    @if($candidate->profile->category?->name)
+                                        <span class="px-1.5 py-0.5 rounded bg-blue-500/10 text-accent-blue font-semibold">{{ $candidate->profile->category->name }}</span>
+                                    @endif
+                                    @if($candidate->profile->subject?->name)
+                                        <span class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 font-semibold">{{ $candidate->profile->subject->name }}</span>
+                                    @endif
+                                    @if($candidate->profile->highestQualification?->name)
+                                        <span class="px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 font-semibold">{{ $candidate->profile->highestQualification->name }}</span>
+                                    @endif
+                                    <span class="px-1.5 py-0.5 rounded bg-secondary-bg text-text-dark/60 border border-card-border font-medium">{{ $candidate->profile->experience_years ?? 0 }} yrs</span>
+                                    @if($candidate->profile->preferredCity?->name || $candidate->profile->preferredState?->name)
+                                        <span class="px-1.5 py-0.5 rounded bg-secondary-bg text-text-dark/60 border border-card-border font-medium">
+                                            {{ $candidate->profile->preferredCity?->name ?? 'N/A' }}, {{ $candidate->profile->preferredState?->name ?? '' }}
+                                        </span>
+                                    @endif
+                                </div>
+                            @endif
+                            @if($candidate->profile && $candidate->profile->plan_type === 'standard' && !$candidate->profile->is_fee_paid)
+                                <div class="mt-2">
+                                    <span class="bg-red-500/10 text-red-500 px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold w-max" title="Standard Plan Placement Fee Pending">
+                                        <i class="fas fa-exclamation-triangle"></i> ₹500 Due
+                                    </span>
+                                </div>
+                            @endif
                         </div>
-                    @endif
+                    </div>
                 </td>
                 <td>
                     @php
@@ -344,8 +494,8 @@
                                 </button>
                             </form>
                         @endif
-                        <a href="{{ route('admin.crm.show', $candidate->id) }}" class="px-3 py-1.5 rounded-lg bg-accent-blue/10 text-accent-blue hover:bg-accent-blue hover:text-white text-xs font-semibold transition-colors flex items-center gap-1">
-                            Manage CRM <i class="fas fa-arrow-right text-[10px]"></i>
+                        <a href="{{ route('admin.crm.show', $candidate->id) }}" class="px-3 py-1.5 rounded-lg bg-accent-blue/10 text-accent-blue hover:bg-accent-blue hover:text-white text-xs font-semibold transition-colors flex items-center gap-1 whitespace-nowrap">
+                            View Details <i class="fas fa-arrow-right text-[10px]"></i>
                         </a>
                     </div>
                 </td>
@@ -371,6 +521,9 @@
     {{ $candidates->links('pagination::tailwind') }}
 </div>
 @endif
+</div>
+
+@include('admin.crm.partials.photo-modal')
 
 {{-- Rating Modal --}}
 <div id="ratingModal" class="fixed inset-0 z-[105] hidden">
