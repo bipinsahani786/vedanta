@@ -43,6 +43,32 @@
         @endforeach
     </div>
 
+    <!-- Agreement Review Quick Filter Strip -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-xs px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-xs font-bold text-gray-700">
+            <i class="fas fa-file-signature text-indigo-600"></i>
+            <span>School Agreements:</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+            @php
+                $agreementFilters = [
+                    ['key' => 'agreement_pending', 'label' => 'Pending Approval', 'count' => $stats['agreement_pending'] ?? 0, 'activeClass' => 'bg-amber-600 text-white border-amber-600', 'idleClass' => 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'],
+                    ['key' => 'agreement_approved', 'label' => 'Approved', 'count' => $stats['agreement_approved'] ?? 0, 'activeClass' => 'bg-emerald-600 text-white border-emerald-600', 'idleClass' => 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'],
+                    ['key' => 'agreement_rejected', 'label' => 'Rejected', 'count' => $stats['agreement_rejected'] ?? 0, 'activeClass' => 'bg-rose-600 text-white border-rose-600', 'idleClass' => 'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100'],
+                    ['key' => 'agreement_not_uploaded', 'label' => 'Not Uploaded', 'count' => $stats['agreement_not_uploaded'] ?? 0, 'activeClass' => 'bg-gray-700 text-white border-gray-700', 'idleClass' => 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'],
+                ];
+            @endphp
+            @foreach($agreementFilters as $af)
+                @php $isAgFilterActive = request('status') === $af['key']; @endphp
+                <a href="{{ request()->fullUrlWithQuery(['status' => $isAgFilterActive ? null : $af['key'], 'page' => null]) }}"
+                   class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border transition-colors {{ $isAgFilterActive ? $af['activeClass'] : $af['idleClass'] }}">
+                    <span>{{ $af['label'] }}</span>
+                    <span class="px-1.5 py-0.2 rounded-md text-[10px] {{ $isAgFilterActive ? 'bg-white/20 text-white' : 'bg-white/80' }}">{{ $af['count'] }}</span>
+                </a>
+            @endforeach
+        </div>
+    </div>
+
     <!-- Search & View Switcher -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-5 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
@@ -62,6 +88,12 @@
                     <option value="profile_complete" {{ request('status') === 'profile_complete' ? 'selected' : '' }}>Profile &amp; Photo Complete</option>
                     <option value="profile_incomplete" {{ request('status') === 'profile_incomplete' ? 'selected' : '' }}>Missing Details / Photo</option>
                     <option value="with_jobs" {{ request('status') === 'with_jobs' ? 'selected' : '' }}>With Posted Jobs</option>
+                    <optgroup label="Agreement Status">
+                        <option value="agreement_pending" {{ request('status') === 'agreement_pending' ? 'selected' : '' }}>Agreement Pending Approval ({{ $stats['agreement_pending'] ?? 0 }})</option>
+                        <option value="agreement_approved" {{ request('status') === 'agreement_approved' ? 'selected' : '' }}>Agreement Approved ({{ $stats['agreement_approved'] ?? 0 }})</option>
+                        <option value="agreement_rejected" {{ request('status') === 'agreement_rejected' ? 'selected' : '' }}>Agreement Rejected ({{ $stats['agreement_rejected'] ?? 0 }})</option>
+                        <option value="agreement_not_uploaded" {{ request('status') === 'agreement_not_uploaded' ? 'selected' : '' }}>Agreement Not Uploaded ({{ $stats['agreement_not_uploaded'] ?? 0 }})</option>
+                    </optgroup>
                 </select>
 
                 <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer">
@@ -143,11 +175,33 @@
                                     <div class="truncate"><i class="fas fa-map-marker-alt w-4 text-gray-400"></i> {{ $sp?->address ?: 'Address not saved' }}</div>
                                 </div>
 
+                                @php
+                                    $cardHasAgreementFile = $sp && !empty($sp->agreement_path);
+                                    $cardAgStatus = $sp?->agreement_status ?: ($cardHasAgreementFile ? 'pending' : 'not_uploaded');
+                                    $cardAgBadge = match ($cardAgStatus) {
+                                        'approved' => 'bg-emerald-100 text-emerald-700',
+                                        'pending' => 'bg-amber-100 text-amber-700',
+                                        'rejected' => 'bg-rose-100 text-rose-700',
+                                        default => 'bg-gray-100 text-gray-600',
+                                    };
+                                    $cardAgLabel = match ($cardAgStatus) {
+                                        'approved' => 'Agreement: Approved',
+                                        'pending' => 'Agreement: Pending Review',
+                                        'rejected' => 'Agreement: Rejected',
+                                        default => 'Agreement: Not Uploaded',
+                                    };
+                                @endphp
                                 <div class="mt-3 flex flex-wrap gap-1 text-[10px] font-bold">
                                     <span class="px-1.5 py-0.5 rounded {{ $hasName ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">Name {{ $hasName ? '✓' : '✗' }}</span>
                                     <span class="px-1.5 py-0.5 rounded {{ $hasContact ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">Contact {{ $hasContact ? '✓' : '✗' }}</span>
                                     <span class="px-1.5 py-0.5 rounded {{ $hasAddress ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">Address {{ $hasAddress ? '✓' : '✗' }}</span>
                                     <span class="px-1.5 py-0.5 rounded {{ $hasPhoto ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">Photo {{ $hasPhoto ? '✓' : '✗' }}</span>
+                                </div>
+                                <div class="mt-2">
+                                    <a href="{{ route('admin.schools.show', $school->id) }}#agreement-section"
+                                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold {{ $cardAgBadge }} hover:opacity-85">
+                                        <i class="fas fa-file-signature text-[9px]"></i> {{ $cardAgLabel }}
+                                    </a>
                                 </div>
                             </div>
 
@@ -252,6 +306,28 @@
                                 </div>
                                 <div class="font-semibold text-gray-700">
                                     {{ $school->job_posts_count }} Jobs <span class="text-emerald-600">({{ $school->live_jobs_count }} Live)</span>
+                                </div>
+                                @php
+                                    $tableHasAgreementFile = $sp && !empty($sp->agreement_path);
+                                    $tableAgStatus = $sp?->agreement_status ?: ($tableHasAgreementFile ? 'pending' : 'not_uploaded');
+                                    $tableAgBadge = match ($tableAgStatus) {
+                                        'approved' => 'bg-emerald-100 text-emerald-700',
+                                        'pending' => 'bg-amber-100 text-amber-700',
+                                        'rejected' => 'bg-rose-100 text-rose-700',
+                                        default => 'bg-gray-100 text-gray-600',
+                                    };
+                                    $tableAgLabel = match ($tableAgStatus) {
+                                        'approved' => 'Agreement: Approved',
+                                        'pending' => 'Agreement: Pending Review',
+                                        'rejected' => 'Agreement: Rejected',
+                                        default => 'Agreement: Not Uploaded',
+                                    };
+                                @endphp
+                                <div>
+                                    <a href="{{ route('admin.schools.show', $school->id) }}#agreement-section"
+                                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold {{ $tableAgBadge }} hover:opacity-85">
+                                        <i class="fas fa-file-signature text-[9px]"></i> {{ $tableAgLabel }}
+                                    </a>
                                 </div>
                             </td>
 

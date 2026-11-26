@@ -22,6 +22,31 @@
         </a>
     </div>
 
+    {{-- Flash Messages --}}
+    @if(session('success'))
+        <div class="mb-6 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-3.5 rounded-2xl flex items-center gap-3 text-sm font-medium">
+            <i class="fas fa-check-circle text-lg"></i>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 bg-red-500/10 border border-red-500/30 text-red-400 px-5 py-3.5 rounded-2xl flex items-center gap-3 text-sm font-medium">
+            <i class="fas fa-exclamation-circle text-lg"></i>
+            <span>{{ session('error') }}</span>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="mb-6 bg-red-500/10 border border-red-500/30 text-red-400 px-5 py-3.5 rounded-2xl text-sm">
+            <ul class="list-disc list-inside space-y-0.5">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- Stats Cards --}}
     <div id="tour-emp-stats" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10 reveal">
         <a href="{{ route('employer.jobs.index') }}" class="block bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group hover:border-accent-yellow/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
@@ -180,6 +205,90 @@
         </div>
 
         <div class="lg:col-span-1 space-y-8">
+            {{-- Institution Agreement Download, Upload & Approval Status --}}
+            @php
+                $ep = $employerProfile ?? auth()->user()->employerProfile;
+                $agrStatus = $ep->agreement_status ?? 'not_uploaded';
+                $hasUploadedAgr = $ep && !empty($ep->agreement_path);
+                $statusBadgeMap = [
+                    'approved' => ['label' => 'Approved', 'classes' => 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30', 'icon' => 'fa-check-circle'],
+                    'pending' => ['label' => 'Pending Approval', 'classes' => 'bg-amber-500/15 text-amber-400 border-amber-500/30', 'icon' => 'fa-clock'],
+                    'rejected' => ['label' => 'Rejected — Re-upload', 'classes' => 'bg-rose-500/15 text-rose-400 border-rose-500/30', 'icon' => 'fa-times-circle'],
+                    'not_uploaded' => ['label' => 'Not Uploaded', 'classes' => 'bg-slate-500/15 text-slate-300 border-slate-500/30', 'icon' => 'fa-file-contract'],
+                ];
+                $agrMeta = $statusBadgeMap[$agrStatus] ?? $statusBadgeMap['not_uploaded'];
+            @endphp
+            <div class="bg-card-bg rounded-2xl border border-card-border overflow-hidden shadow-xl reveal">
+                <div class="px-6 py-4 border-b border-card-border flex items-center justify-between gap-2 bg-secondary-bg/30">
+                    <h3 class="font-bold text-text-main flex items-center gap-2 text-sm">
+                        <i class="fas fa-file-signature text-accent-yellow"></i>
+                        <span>Institution Agreement</span>
+                    </h3>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border {{ $agrMeta['classes'] }}">
+                        <i class="fas {{ $agrMeta['icon'] }} text-[10px]"></i>
+                        <span>{{ $agrMeta['label'] }}</span>
+                    </span>
+                </div>
+
+                <div class="p-5 space-y-4">
+                    <p class="text-xs text-text-dark/70 leading-relaxed">
+                        Download your prefilled Institution Recruitment Agreement, sign/stamp it, and upload the completed copy for Admin verification.
+                    </p>
+
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('employer.agreement.template') }}"
+                           class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-accent-yellow text-[#031b4e] hover:brightness-110 text-xs font-extrabold transition-all shadow-sm">
+                            <i class="fas fa-download"></i>
+                            <span>Download Agreement PDF</span>
+                        </a>
+
+                        @if($hasUploadedAgr)
+                            <a href="{{ route('employer.agreement.uploaded') }}" target="_blank"
+                               class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-secondary-bg hover:bg-card-border/50 text-text-main border border-card-border text-xs font-bold transition-all">
+                                <i class="fas fa-eye text-accent-blue"></i>
+                                <span>View Uploaded Agreement</span>
+                            </a>
+                        @endif
+                    </div>
+
+                    @if($agrStatus === 'rejected' && !empty($ep?->agreement_rejection_reason))
+                        <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300">
+                            <p class="font-bold text-rose-400 mb-0.5"><i class="fas fa-exclamation-triangle mr-1"></i> Rejection Reason:</p>
+                            <p>{{ $ep->agreement_rejection_reason }}</p>
+                        </div>
+                    @endif
+
+                    @if($ep?->agreement_uploaded_at)
+                        <p class="text-[11px] text-text-dark/50">
+                            Last uploaded: <strong class="text-text-main">{{ $ep->agreement_uploaded_at->copy()->timezone('Asia/Kolkata')->format('d M Y, h:i A') }} IST</strong>
+                        </p>
+                    @endif
+
+                    @if($agrStatus !== 'approved')
+                        <form action="{{ route('employer.agreement.upload') }}" method="POST" enctype="multipart/form-data" class="pt-3 border-t border-card-border/60 space-y-3">
+                            @csrf
+                            <div>
+                                <label for="employer_agreement_file" class="block text-[11px] font-bold uppercase tracking-wider text-text-dark/70 mb-1.5">
+                                    {{ $hasUploadedAgr ? 'Re-upload Signed Agreement' : 'Upload Signed Agreement' }}
+                                </label>
+                                <input type="file" id="employer_agreement_file" name="agreement_file" accept=".pdf,.jpg,.jpeg,.png" required
+                                       class="w-full text-xs text-text-main bg-secondary-bg border border-card-border rounded-xl p-2 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-accent-blue file:text-white cursor-pointer">
+                                <span class="text-[10px] text-text-dark/50 mt-1 block">Accepted: PDF, JPG, PNG (Max 10MB)</span>
+                            </div>
+                            <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-accent-blue hover:bg-accent-blue-hover text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                <i class="fas fa-upload"></i>
+                                <span>{{ $hasUploadedAgr ? 'Replace & Submit for Approval' : 'Upload Signed Agreement' }}</span>
+                            </button>
+                        </form>
+                    @else
+                        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2">
+                            <i class="fas fa-shield-alt text-emerald-400"></i>
+                            <span>Verified &amp; Approved{{ $ep?->agreement_reviewed_at ? ' on ' . $ep->agreement_reviewed_at->copy()->timezone('Asia/Kolkata')->format('d M Y') : '' }}.</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             {{-- Recent Notifications --}}
             <div class="bg-card-bg rounded-2xl border border-card-border overflow-hidden shadow-sm reveal">
                 <div class="px-6 py-4 border-b border-card-border flex justify-between items-center bg-secondary-bg/30">

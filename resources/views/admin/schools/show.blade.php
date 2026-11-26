@@ -185,6 +185,132 @@
             </div>
         </div>
 
+        <!-- Institution Agreement Review Section -->
+        @php
+            $hasAgreementFile = $profile && !empty($profile->agreement_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($profile->agreement_path);
+            $agStatus = $profile?->agreement_status ?: ($hasAgreementFile ? 'pending' : 'not_uploaded');
+            $agBadgeMap = [
+                'approved' => ['label' => 'Approved', 'class' => 'bg-emerald-100 text-emerald-800 border-emerald-200'],
+                'pending' => ['label' => 'Pending Approval', 'class' => 'bg-amber-100 text-amber-800 border-amber-200'],
+                'rejected' => ['label' => 'Rejected', 'class' => 'bg-rose-100 text-rose-800 border-rose-200'],
+                'not_uploaded' => ['label' => 'Not Uploaded', 'class' => 'bg-gray-100 text-gray-700 border-gray-200'],
+            ];
+            $agBadge = $agBadgeMap[$agStatus] ?? $agBadgeMap['not_uploaded'];
+        @endphp
+        <div id="agreement-section" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <h3 class="text-base font-bold text-gray-900">
+                        <i class="fas fa-file-signature text-indigo-600 mr-2"></i>Institution Agreement
+                    </h3>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border {{ $agBadge['class'] }}">
+                        {{ $agBadge['label'] }}
+                    </span>
+                </div>
+
+                <a href="{{ route('admin.schools.agreement.template', $school->id) }}"
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors">
+                    <i class="fas fa-file-pdf text-rose-600"></i> Download Blank PDF
+                </a>
+            </div>
+
+            @if($hasAgreementFile)
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <span class="text-[10px] font-bold uppercase text-gray-400 block mb-0.5">Uploaded On</span>
+                        <span class="font-semibold text-gray-800">
+                            {{ $profile->agreement_uploaded_at ? $profile->agreement_uploaded_at->timezone('Asia/Kolkata')->format('d M Y, h:i A') . ' IST' : 'Recorded' }}
+                        </span>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <span class="text-[10px] font-bold uppercase text-gray-400 block mb-0.5">Last Reviewed</span>
+                        <span class="font-semibold text-gray-800">
+                            {{ $profile->agreement_reviewed_at ? $profile->agreement_reviewed_at->timezone('Asia/Kolkata')->format('d M Y, h:i A') . ' IST' : 'Awaiting Review' }}
+                        </span>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <span class="text-[10px] font-bold uppercase text-gray-400 block mb-0.5">Reviewed By</span>
+                        <span class="font-semibold text-gray-800">
+                            {{ $profile->reviewer?->name ?? '—' }}
+                        </span>
+                    </div>
+                </div>
+
+                @if($agStatus === 'rejected' && !empty($profile->agreement_rejection_reason))
+                    <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800">
+                        <p class="font-bold mb-0.5"><i class="fas fa-exclamation-circle mr-1"></i> Rejection Reason</p>
+                        <p class="whitespace-pre-line">{{ $profile->agreement_rejection_reason }}</p>
+                    </div>
+                @endif
+
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <a href="{{ route('admin.schools.agreement.file', $school->id) }}" target="_blank"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition-colors">
+                        <i class="fas fa-eye"></i> View Uploaded Agreement
+                    </a>
+                    <a href="{{ route('admin.schools.agreement.file', ['id' => $school->id, 'download' => 1]) }}"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200 transition-colors">
+                        <i class="fas fa-download"></i> Download Signed Copy
+                    </a>
+                </div>
+
+                <div x-data="{ showRejectForm: {{ $errors->has('rejection_reason') ? 'true' : 'false' }} }" class="pt-3 border-t border-gray-100 space-y-3">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        @if($agStatus !== 'approved')
+                            <form action="{{ route('admin.schools.agreement.approve', $school->id) }}" method="POST"
+                                  onsubmit="return confirm('Approve this school\'s uploaded agreement?')">
+                                @csrf
+                                <button type="submit"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs cursor-pointer transition-colors">
+                                    <i class="fas fa-check-circle"></i> Approve Agreement
+                                </button>
+                            </form>
+                        @endif
+
+                        <button type="button" @click="showRejectForm = !showRejectForm"
+                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold cursor-pointer transition-colors">
+                            <i class="fas fa-times-circle"></i>
+                            <span>{{ $agStatus === 'rejected' ? 'Update Rejection Reason' : 'Reject Agreement' }}</span>
+                        </button>
+                    </div>
+
+                    <form x-show="showRejectForm" x-cloak action="{{ route('admin.schools.agreement.reject', $school->id) }}" method="POST"
+                          class="bg-rose-50/70 border border-rose-200 rounded-xl p-4 space-y-3">
+                        @csrf
+                        <div>
+                            <label for="rejection_reason" class="block text-xs font-bold text-rose-900 mb-1">
+                                Rejection Reason <span class="text-rose-600">*</span>
+                            </label>
+                            <textarea id="rejection_reason" name="rejection_reason" rows="3" required maxlength="1000"
+                                      placeholder="Explain why the uploaded agreement is rejected (e.g., missing signature/seal, unclear scan, wrong page)..."
+                                      class="w-full rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs text-gray-800 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 outline-none">{{ old('rejection_reason', $profile->agreement_rejection_reason) }}</textarea>
+                            @error('rejection_reason')
+                                <p class="text-xs text-rose-700 font-semibold mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="flex items-center justify-end gap-2">
+                            <button type="button" @click="showRejectForm = false"
+                                    class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 text-xs font-bold cursor-pointer">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    class="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold cursor-pointer shadow-xs">
+                                Confirm Rejection
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @else
+                <div class="p-4 rounded-xl bg-gray-50 border border-dashed border-gray-200 text-xs text-gray-600 flex items-center gap-3">
+                    <i class="fas fa-info-circle text-gray-400 text-base"></i>
+                    <div>
+                        <p class="font-bold text-gray-800">Signed agreement not uploaded yet</p>
+                        <p class="text-gray-500 mt-0.5">The school can download the agreement PDF from their employer dashboard, sign &amp; stamp it, and upload it back here for your approval.</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-base font-bold text-gray-900"><i class="fas fa-briefcase text-blue-600 mr-2"></i>Jobs Posted by This School</h3>

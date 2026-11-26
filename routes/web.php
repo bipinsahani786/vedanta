@@ -28,6 +28,7 @@ use App\Http\Controllers\Candidate\RegistrationWizardController;
 use App\Http\Controllers\Candidate\SavedJobController;
 use App\Http\Controllers\Candidate\ServiceChargeController;
 use App\Http\Controllers\CandidateAuthController;
+use App\Http\Controllers\Employer\AgreementController as EmployerAgreementController;
 use App\Http\Controllers\Employer\ApplicantController;  
 use App\Http\Controllers\Employer\DashboardController;
 use App\Http\Controllers\EmployerAuthController;
@@ -494,6 +495,10 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
 
     Route::get('/applicants', [ApplicantController::class, 'index'])->name('applicants.index');
     Route::post('/candidate/{id}/track-view', [ApplicantController::class, 'trackView'])->name('candidate.trackView');
+
+    Route::get('/agreement/template', [EmployerAgreementController::class, 'downloadTemplate'])->name('agreement.template');
+    Route::post('/agreement/upload', [EmployerAgreementController::class, 'upload'])->name('agreement.upload');
+    Route::get('/agreement/uploaded', [EmployerAgreementController::class, 'downloadUploaded'])->name('agreement.uploaded');
 });
 
 // Global Impersonation Leave Route
@@ -591,6 +596,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/schools/{id}', [SchoolCrmController::class, 'update'])->name('schools.update');
     Route::post('/schools/{id}/photo', [SchoolCrmController::class, 'updatePhoto'])->name('schools.photo');
     Route::post('/schools/{id}/toggle-status', [SchoolCrmController::class, 'toggleStatus'])->name('schools.toggle-status');
+    Route::get('/schools/{id}/agreement/template', [SchoolCrmController::class, 'downloadAgreementTemplate'])->name('schools.agreement.template');
+    Route::get('/schools/{id}/agreement/file', [SchoolCrmController::class, 'viewUploadedAgreement'])->name('schools.agreement.file');
+    Route::post('/schools/{id}/agreement/approve', [SchoolCrmController::class, 'approveAgreement'])->name('schools.agreement.approve');
+    Route::post('/schools/{id}/agreement/reject', [SchoolCrmController::class, 'rejectAgreement'])->name('schools.agreement.reject');
 
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users.index');

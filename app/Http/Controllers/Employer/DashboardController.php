@@ -27,11 +27,12 @@ class DashboardController extends Controller
         ];
 
         $recentJobs = JobPost::where('user_id', $userId)->latest()->take(5)->get();
+        $employerProfile = auth()->user()->employerProfile;
 
         $walkthroughKey = $userId ? "platform_walkthrough_done:employer:{$userId}" : null;
         $forceWalkthrough = request()->boolean('tour');
         $shouldStartWalkthrough = $forceWalkthrough || ($walkthroughKey ? ! \Illuminate\Support\Facades\Cache::get($walkthroughKey, false) : false);
 
-        return view('employer.dashboard', compact('stats', 'recentJobs', 'shouldStartWalkthrough', 'forceWalkthrough'));
+        return view('employer.dashboard', compact('stats', 'recentJobs', 'employerProfile', 'shouldStartWalkthrough', 'forceWalkthrough'));
     }
 }

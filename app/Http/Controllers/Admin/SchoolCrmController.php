@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\EmployerProfile;
 use App\Models\JobPost;
 use App\Models\User;
+use App\Notifications\EmployerAgreementReviewed;
+use App\Services\EmployerAgreementService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -41,6 +44,7 @@ class SchoolCrmController extends Controller
         }
 
         $baseQuery = clone $query;
+        $hasAgreementCol = Schema::hasColumn('employer_profiles', 'agreement_status');
 
         $withProfileDetails = function ($q) {
             $q->whereNotNull('school_name')->where('school_name', '!=', '')
@@ -56,6 +60,21 @@ class SchoolCrmController extends Controller
             'profile_complete' => (clone $baseQuery)->whereHas('employerProfile', $withProfileDetails)->count(),
             'profile_incomplete' => (clone $baseQuery)->whereDoesntHave('employerProfile', $withProfileDetails)->count(),
             'with_jobs' => (clone $baseQuery)->whereHas('jobPosts')->count(),
+            'agreement_pending' => $hasAgreementCol
+                ? (clone $baseQuery)->whereHas('employerProfile', fn ($q) => $q->where('agreement_status', 'pending'))->count()
+                : 0,
+            'agreement_approved' => $hasAgreementCol
+                ? (clone $baseQuery)->whereHas('employerProfile', fn ($q) => $q->where('agreement_status', 'approved'))->count()
+                : 0,
+            'agreement_rejected' => $hasAgreementCol
+                ? (clone $baseQuery)->whereHas('employerProfile', fn ($q) => $q->where('agreement_status', 'rejected'))->count()
+                : 0,
+            'agreement_not_uploaded' => $hasAgreementCol
+                ? (clone $baseQuery)->where(function ($q) {
+                    $q->whereDoesntHave('employerProfile')
+                        ->orWhereHas('employerProfile', fn ($ep) => $ep->whereNull('agreement_path')->orWhere('agreement_status', 'not_uploaded'));
+                })->count()
+                : (clone $baseQuery)->count(),
         ];
 
         $status = (string) $request->input('status', '');
@@ -69,6 +88,17 @@ class SchoolCrmController extends Controller
             $query->whereDoesntHave('employerProfile', $withProfileDetails);
         } elseif ($status === 'with_jobs') {
             $query->whereHas('jobPosts');
+        } elseif ($hasAgreementCol && $status === 'agreement_pending') {
+            $query->whereHas('employerProfile', fn ($q) => $q->where('agreement_status', 'pending'));
+        } elseif ($hasAgreementCol && $status === 'agreement_approved') {
+            $query->whereHas('employerProfile', fn ($q) => $q->where('agreement_status', 'approved'));
+        } elseif ($hasAgreementCol && $status === 'agreement_rejected') {
+            $query->whereHas('employerProfile', fn ($q) => $q->where('agreement_status', 'rejected'));
+        } elseif ($hasAgreementCol && $status === 'agreement_not_uploaded') {
+            $query->where(function ($q) {
+                $q->whereDoesntHave('employerProfile')
+                    ->orWhereHas('employerProfile', fn ($ep) => $ep->whereNull('agreement_path')->orWhere('agreement_status', 'not_uploaded'));
+            });
         }
 
         $schools = $query->with(['employerProfile'])
@@ -248,7 +278,7 @@ class SchoolCrmController extends Controller
     {
         $school = User::where('role', 'employer')
             ->with([
-                'employerProfile',
+                'employerProfile.reviewer',
                 'jobPosts' => function ($q) {
                     $q->with(['category', 'subject', 'state', 'city'])
                         ->withCount('applications')
@@ -384,5 +414,104 @@ class SchoolCrmController extends Controller
         $stateLabel = $school->is_active ? 'activated' : 'deactivated';
 
         return back()->with('success', "School account ({$school->name}) has been {$stateLabel}.");
+    }
+
+    public function downloadAgreementTemplate($id, EmployerAgreementService $agreementService)
+    {
+        $school = User::where('role', 'employer')->with('employerProfile')->findOrFail($id);
+        $profile = $school->employerProfile ?: $school->employerProfile()->create([
+            'school_name' => $school->name,
+            'contact_person' => $school->name,
+        ]);
+
+        return $agreementService->buildTemplatePdfResponse($school, $profile);
+    }
+
+    public function viewUploadedAgreement(Request $request, $id, EmployerAgreementService $agreementService)
+    {
+        $school = User::where('role', 'employer')->with('employerProfile')->findOrFail($id);
+        $profile = $school->employerProfile;
+
+        if (! $profile || empty($profile->agreement_path) || ! Storage::disk('public')->exists($profile->agreement_path)) {
+            return back()->with('error', 'No uploaded agreement file was found for this school.');
+        }
+
+        $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+        return $agreementService->streamUploadedAgreement($profile, $disposition);
+    }
+
+    public function approveAgreement($id)
+    {
+        if (! Schema::hasColumn('employer_profiles', 'agreement_status')) {
+            return back()->with('error', 'Agreement workflow columns are not migrated yet. Please run php artisan migrate --force.');
+        }
+
+        $school = User::where('role', 'employer')->with('employerProfile')->findOrFail($id);
+        $profile = $school->employerProfile;
+
+        if (! $profile || empty($profile->agreement_path) || ! Storage::disk('public')->exists($profile->agreement_path)) {
+            return back()->with('error', 'This school has not uploaded a signed agreement yet.');
+        }
+
+        $profile->update([
+            'agreement_status' => 'approved',
+            'agreement_reviewed_at' => now(),
+            'agreement_reviewed_by' => auth()->id(),
+            'agreement_rejection_reason' => null,
+        ]);
+
+        try {
+            $school->notify(new EmployerAgreementReviewed($profile->fresh(), 'approved'));
+        } catch (Throwable $e) {
+            Log::warning('Failed to notify school on agreement approval', [
+                'school_id' => $school->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return redirect(route('admin.schools.show', $school->id) . '#agreement-section')
+            ->with('success', 'School agreement approved successfully.');
+    }
+
+    public function rejectAgreement(Request $request, $id)
+    {
+        if (! Schema::hasColumn('employer_profiles', 'agreement_status')) {
+            return back()->with('error', 'Agreement workflow columns are not migrated yet. Please run php artisan migrate --force.');
+        }
+
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string|max:1000',
+        ], [
+            'rejection_reason.required' => 'Please enter a reason before rejecting the agreement.',
+        ]);
+
+        $school = User::where('role', 'employer')->with('employerProfile')->findOrFail($id);
+        $profile = $school->employerProfile;
+
+        if (! $profile || empty($profile->agreement_path) || ! Storage::disk('public')->exists($profile->agreement_path)) {
+            return back()->with('error', 'No uploaded agreement file was found for this school.');
+        }
+
+        $reason = trim($validated['rejection_reason']);
+
+        $profile->update([
+            'agreement_status' => 'rejected',
+            'agreement_reviewed_at' => now(),
+            'agreement_reviewed_by' => auth()->id(),
+            'agreement_rejection_reason' => $reason,
+        ]);
+
+        try {
+            $school->notify(new EmployerAgreementReviewed($profile->fresh(), 'rejected', $reason));
+        } catch (Throwable $e) {
+            Log::warning('Failed to notify school on agreement rejection', [
+                'school_id' => $school->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return redirect(route('admin.schools.show', $school->id) . '#agreement-section')
+            ->with('success', 'School agreement rejected and school notified with reason.');
     }
 }
