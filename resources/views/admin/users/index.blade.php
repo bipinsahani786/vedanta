@@ -2,6 +2,24 @@
 
 @section('title', 'Users Management')
 
+@section('actions')
+    @php
+        $exportParams = request()->only(['role', 'status', 'search']);
+    @endphp
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="{{ route('admin.users.export', array_merge($exportParams, ['format' => 'xlsx'])) }}"
+           class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 shadow-sm">
+            <i class="fas fa-file-excel"></i>
+            <span>Export Excel (.xlsx)</span>
+        </a>
+        <a href="{{ route('admin.users.export', array_merge($exportParams, ['format' => 'csv'])) }}"
+           class="px-4 py-2 bg-[#031b4e] hover:bg-blue-900 text-white rounded-xl text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-2 shadow-sm">
+            <i class="fas fa-file-csv"></i>
+            <span>Export CSV (.csv)</span>
+        </a>
+    </div>
+@endsection
+
 @section('content')
     <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Total Users -->
@@ -61,6 +79,9 @@
             <form action="{{ route('admin.users.index') }}" method="GET" class="w-full sm:w-auto">
                 @if(request('role'))
                     <input type="hidden" name="role" value="{{ request('role') }}">
+                @endif
+                @if(request('status'))
+                    <input type="hidden" name="status" value="{{ request('status') }}">
                 @endif
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
