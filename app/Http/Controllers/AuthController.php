@@ -28,34 +28,39 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $request->session()->regenerate();
+            $request->session()->forget(['admin_id', 'impersonate_admin_id']);
             $user = Auth::user();
+
+            $mustChangePassword = $user->isCandidate() && $user->requiresPasswordChange();
 
             if ($request->wantsJson() || $request->ajax()) {
                 $isRegistered = $user->canViewJobProtectedDetails();
                 return response()->json([
                     'success' => true,
                     'is_registered' => $isRegistered,
+                    'must_change_password' => $mustChangePassword,
                     'user' => [
                         'id' => $user->id,
                         'name' => $user->name,
                         'role' => $user->role,
                     ],
-                    'redirect' => $request->input('return_to', $user->role === 'candidate' ? '/candidate/dashboard' : '/admin/dashboard'),
+                    'redirect' => $mustChangePassword
+                        ? route('candidate.force-password.show')
+                        : $request->input('return_to', $user->role === 'candidate' ? '/candidate/dashboard' : '/admin/dashboard'),
                 ]);
+            }
+
+            if ($mustChangePassword) {
+                return redirect()
+                    ->route('candidate.force-password.show')
+                    ->with('warning', 'You logged in with a temporary password. Please set a new private password to continue.');
             }
 
             if ($request->filled('return_to')) {
                 return redirect($request->input('return_to'));
             }
 
-            if ($user->role === 'admin') {
-                return redirect()->intended('/admin/dashboard');
-            } elseif ($user->role === 'employer') {
-                return redirect()->intended('/employer/dashboard');
-            } else {
-                session()->flash('candidate_just_logged_in', true);
-                return redirect()->intended('/candidate/dashboard');
-            }
+            return $this->redirectAuthenticatedUser($user);
         }
 
         if ($request->wantsJson() || $request->ajax()) {
@@ -139,17 +144,32 @@ class AuthController extends Controller
 
             Auth::login($user, true); // login and remember
             $request->session()->regenerate();
+            $request->session()->forget(['admin_id', 'impersonate_admin_id']);
 
-            if ($user->role === 'admin') {
-                return redirect()->intended('/admin/dashboard');
-            } elseif ($user->role === 'employer') {
-                return redirect()->intended('/employer/dashboard');
-            } else {
-                session()->flash('candidate_just_logged_in', true);
-                return redirect()->intended('/candidate/dashboard');
-            }
+            return $this->redirectAuthenticatedUser($user);
         }
 
         return back()->withErrors(['otp' => 'Invalid or expired OTP.']);
+    }
+
+    protected function redirectAuthenticatedUser(User $user)
+    {
+        if ($user->role === 'admin') {
+            return redirect()->intended('/admin/dashboard');
+        }
+
+        if ($user->role === 'employer') {
+            return redirect()->intended('/employer/dashboard');
+        }
+
+        if ($user->requiresPasswordChange()) {
+            return redirect()
+                ->route('candidate.force-password.show')
+                ->with('warning', 'You signed in with a temporary password. Please set a new private password to continue.');
+        }
+
+        session()->flash('candidate_just_logged_in', true);
+
+        return redirect()->intended('/candidate/dashboard');
     }
 }

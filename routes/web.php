@@ -35,6 +35,7 @@ use App\Http\Controllers\JobAlertSubscriptionController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Admin\StandaloneAgreementController;
+use App\Http\Controllers\Candidate\ForcePasswordController;
 use App\Http\Controllers\PhonePeWebhookController;
 use App\Http\Controllers\ResumeBuilderController;
 use App\Http\Controllers\StandaloneAgreementSignController;
@@ -170,6 +171,10 @@ Route::prefix('candidate')->name('candidate.')->group(function () {
 
 // Candidate Routes (Unverified but Auth Required)
 Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.')->group(function () {
+    // Forced Temporary Password Rotation
+    Route::get('/force-password', [ForcePasswordController::class, 'show'])->name('force-password.show');
+    Route::post('/force-password', [ForcePasswordController::class, 'update'])->name('force-password.update');
+
     // Registration Wizard
     Route::get('/wizard', [RegistrationWizardController::class, 'show'])->name('wizard');
     Route::post('/wizard/step1', [RegistrationWizardController::class, 'saveStep1'])->name('wizard.step1');
@@ -547,6 +552,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/agreements/{agreement}/expire', [StandaloneAgreementController::class, 'expire'])->name('standalone-agreements.expire');
     Route::get('/agreements/{agreement}/pdf', [StandaloneAgreementController::class, 'pdf'])->name('standalone-agreements.pdf');
     Route::post('/crm/candidate/{id}/send-email', [CrmController::class, 'sendCandidateEmail'])->name('crm.candidate.send-email');
+    Route::post('/crm/candidate/{id}/password-reset-link', [CrmController::class, 'sendPasswordResetLink'])->name('crm.candidate.password-reset-link');
+    Route::post('/crm/candidate/{id}/temporary-password', [CrmController::class, 'issueTemporaryPassword'])->name('crm.candidate.temporary-password');
 
     // Applications & Transactions
     Route::get('/applications', [App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('applications.index');

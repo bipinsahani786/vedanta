@@ -265,6 +265,74 @@
                         </div>
                     </div>
 
+                    <!-- Password Security & Recovery Controls -->
+                    @php
+                        $issuedTemp = session('issued_temp_password');
+                        $showIssuedBanner = is_array($issuedTemp) && (int) ($issuedTemp['candidate_id'] ?? 0) === (int) $candidate->id && !empty($issuedTemp['password']);
+                    @endphp
+                    <div class="mt-3 p-3.5 rounded-xl border {{ $candidate->requiresPasswordChange() ? 'bg-amber-50/70 border-amber-200' : 'bg-slate-50 border-gray-200' }}">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-600 flex items-center gap-1.5">
+                                <i class="fas fa-shield-alt text-blue-600"></i> Password &amp; Recovery
+                            </span>
+                            @if($candidate->requiresPasswordChange())
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900">
+                                    Temp Password Active · Must Change Next Login
+                                </span>
+                            @else
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">
+                                    Encrypted · Hidden
+                                </span>
+                            @endif
+                        </div>
+
+                        <p class="text-[11px] text-gray-500 leading-relaxed mb-2.5">
+                            Passwords are stored encrypted and cannot be viewed by admins.
+                            @if($candidate->temp_password_issued_at && $candidate->requiresPasswordChange())
+                                Temp password issued {{ $candidate->temp_password_issued_at->copy()->timezone('Asia/Kolkata')->format('M d, Y h:i A') }} IST.
+                            @elseif($candidate->password_changed_at)
+                                Last changed {{ $candidate->password_changed_at->copy()->timezone('Asia/Kolkata')->format('M d, Y h:i A') }} IST.
+                            @endif
+                        </p>
+
+                        @if($showIssuedBanner)
+                            <div class="mb-2.5 p-2.5 rounded-lg bg-white border border-amber-300 shadow-sm">
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1">
+                                    One-Time Temporary Password (Shown Once Only)
+                                </div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <code id="issuedTempPasswordText" class="text-xs font-mono font-extrabold text-gray-900 bg-gray-100 px-2.5 py-1 rounded select-all">{{ $issuedTemp['password'] }}</code>
+                                    <button type="button" onclick="copyIssuedTempPassword(this)" class="text-[11px] font-bold px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer">
+                                        <i class="fas fa-copy mr-1"></i> <span>Copy</span>
+                                    </button>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1">
+                                    Not stored in readable form. Candidate will be forced to set a new password upon next login.
+                                </p>
+                            </div>
+                        @endif
+
+                        @if($errors->has('temporary_password'))
+                            <div class="mb-2.5 p-2 rounded-lg bg-red-50 border border-red-200 text-[11px] text-red-700 font-semibold">
+                                {{ $errors->first('temporary_password') }}
+                            </div>
+                        @endif
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <form action="{{ route('admin.crm.candidate.password-reset-link', $candidate->id) }}" method="POST" class="inline"
+                                  onsubmit="return confirm('Send self-service password reset link to {{ addslashes($candidate->email) }}?');">
+                                @csrf
+                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-bold transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs">
+                                    <i class="fas fa-envelope-open-text"></i> Send Reset Link
+                                </button>
+                            </form>
+
+                            <button type="button" onclick="openTempPasswordModal()" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs">
+                                <i class="fas fa-key"></i> Set Temporary Password
+                            </button>
+                        </div>
+                    </div>
+
                     @php
                         $latestFu = $followUps->first();
                         $openFuCount = $followUps->where('status', 'open')->count();
@@ -1203,6 +1271,68 @@
     </div>
 </div>
 
+<!-- Issue Temporary Password Modal -->
+<div id="tempPasswordModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 hidden">
+    <div class="absolute inset-0" onclick="closeTempPasswordModal()"></div>
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-100 relative z-10">
+        <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+            <div>
+                <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
+                    <i class="fas fa-key text-amber-600"></i> Issue Temporary Password
+                </h3>
+                <p class="text-[11px] text-gray-500 mt-0.5">{{ $candidate->name }} ({{ $candidate->email }})</p>
+            </div>
+            <button type="button" onclick="closeTempPasswordModal()" class="text-gray-400 hover:text-gray-600 text-lg font-bold">&times;</button>
+        </div>
+
+        <form method="POST" action="{{ route('admin.crm.candidate.temporary-password', $candidate->id) }}" class="space-y-4">
+            @csrf
+
+            <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed">
+                <i class="fas fa-lock mr-1"></i>
+                Existing passwords are stored one-way hashed and cannot be retrieved. Issuing a temporary password forces <strong>{{ $candidate->name }}</strong> to create a new password on their next login.
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Generation Method</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 text-xs font-semibold text-gray-800">
+                        <input type="radio" name="mode" value="auto" checked onchange="toggleTempPasswordMode()" class="text-amber-600 focus:ring-amber-500">
+                        <span>Auto-Generate</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 text-xs font-semibold text-gray-800">
+                        <input type="radio" name="mode" value="manual" onchange="toggleTempPasswordMode()" class="text-amber-600 focus:ring-amber-500">
+                        <span>Custom Temporary</span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="manualTempPasswordGroup" class="hidden">
+                <label for="manual_temp_password" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Custom Temporary Password <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="manual_temp_password" name="temporary_password" minlength="8" maxlength="64" autocomplete="off"
+                       placeholder="At least 8 characters"
+                       class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500 font-mono">
+            </div>
+
+            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                <input type="checkbox" name="send_email" value="1" checked class="rounded border-gray-300 text-amber-600 focus:ring-amber-500">
+                <span>Email temporary login instructions to <strong>{{ $candidate->email }}</strong></span>
+            </label>
+
+            <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                <button type="button" onclick="closeTempPasswordModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-200 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2 bg-amber-600 text-white rounded-xl text-xs font-bold hover:bg-amber-700 transition-colors shadow-sm">
+                    Issue Temporary Password
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Edit Invoice Modal -->
 <div id="editInvoiceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden">
     <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-gray-100 relative mx-4">
@@ -1559,6 +1689,45 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Processing...';
         }
         return true;
+    }
+
+    function openTempPasswordModal() {
+        document.getElementById('tempPasswordModal').classList.remove('hidden');
+    }
+
+    function closeTempPasswordModal() {
+        document.getElementById('tempPasswordModal').classList.add('hidden');
+    }
+
+    function toggleTempPasswordMode() {
+        const selected = document.querySelector('#tempPasswordModal input[name="mode"]:checked')?.value || 'auto';
+        const group = document.getElementById('manualTempPasswordGroup');
+        const input = document.getElementById('manual_temp_password');
+        if (selected === 'manual') {
+            group.classList.remove('hidden');
+            input.required = true;
+            input.focus();
+        } else {
+            group.classList.add('hidden');
+            input.required = false;
+            input.value = '';
+        }
+    }
+
+    function copyIssuedTempPassword(btn) {
+        const el = document.getElementById('issuedTempPasswordText');
+        if (!el) return;
+        const text = el.textContent.trim();
+        if (!navigator.clipboard) {
+            window.prompt('Copy temporary password:', text);
+            return;
+        }
+        navigator.clipboard.writeText(text).then(function () {
+            const label = btn.querySelector('span');
+            const prev = label.textContent;
+            label.textContent = 'Copied!';
+            setTimeout(() => { label.textContent = prev; }, 1600);
+        });
     }
 </script>
 @endpush

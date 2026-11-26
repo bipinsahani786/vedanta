@@ -24,7 +24,26 @@ class IsCandidate
                 return redirect()->route('login')->with('error', 'Your account has been deactivated. Please contact support.');
             }
 
+            $isImpersonating = $request->session()->has('impersonate_admin_id')
+                || $request->session()->has('admin_id');
 
+            if (
+                !$isImpersonating
+                && $user->requiresPasswordChange()
+                && !$request->routeIs('candidate.force-password.*')
+                && !$request->routeIs('logout')
+            ) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'message' => 'Please change your temporary password before continuing.',
+                        'redirect' => route('candidate.force-password.show'),
+                    ], 403);
+                }
+
+                return redirect()
+                    ->route('candidate.force-password.show')
+                    ->with('warning', 'You signed in with a temporary password. Please set a new private password to continue.');
+            }
 
             return $next($request);
         }

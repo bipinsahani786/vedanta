@@ -136,9 +136,7 @@ class ProfileController extends Controller
             return back()->with('password_error', 'Current password is incorrect.');
         }
 
-        $user->update([
-            'password' => \Illuminate\Support\Facades\Hash::make($request->new_password),
-        ]);
+        $user->completePasswordUpdate($request->new_password);
 
         return back()->with('password_success', 'Password updated successfully!');
     }

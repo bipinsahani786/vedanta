@@ -42,8 +42,12 @@
                     <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" required class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" name="password" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" placeholder="Leave blank to keep current">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Set Temporary Password</label>
+                    <input type="password" name="password" class="w-full rounded-lg border-gray-300 shadow-sm text-sm py-2.5 px-3 focus:ring-blue-500 focus:border-blue-500" placeholder="Leave blank to keep current password">
+                    <label class="mt-1.5 inline-flex items-center gap-1.5 text-[11px] text-gray-600 cursor-pointer">
+                        <input type="checkbox" name="require_password_change" value="1" checked class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <span>Require password change on next login (existing passwords are encrypted and hidden)</span>
+                    </label>
                 </div>
             </div>
         </div>

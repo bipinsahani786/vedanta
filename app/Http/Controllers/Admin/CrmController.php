@@ -13,6 +13,7 @@ use App\Mail\PaymentReminderMail;
 use App\Mail\ProfileApprovedMail;
 use App\Mail\RegistrationSuccessMail;
 use App\Mail\ServiceChargeInvoiceMail;
+use App\Mail\TemporaryPasswordMail;
 use App\Models\CandidateProfile;
 use App\Models\CandidateRating;
 use App\Models\Category;
@@ -37,6 +38,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
@@ -268,11 +270,15 @@ class CrmController extends Controller
                 'phone' => $request->phone,
             ];
 
-            if ($request->filled('password')) {
-                $userData['password'] = Hash::make($request->password);
-            }
-
             $user->update($userData);
+
+            if ($request->filled('password')) {
+                if ($request->boolean('require_password_change', true)) {
+                    $user->issueTemporaryPassword($request->password);
+                } else {
+                    $user->completePasswordUpdate($request->password);
+                }
+            }
 
             $otherQualsArray = is_array($request->other_qualifications) ? $request->other_qualifications : ($request->other_qualifications ? explode(',', $request->other_qualifications) : []);
             if ($request->filled('custom_qualification')) {
@@ -1557,5 +1563,104 @@ class CrmController extends Controller
 
             return back()->with('error', 'Failed to send email: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Trigger a self-service password reset email link for the candidate (never exposes or stores plain password).
+     */
+    public function sendPasswordResetLink($id)
+    {
+        $candidate = User::where('role', 'candidate')->findOrFail($id);
+
+        if (!$candidate->email) {
+            return back()->with('error', 'Candidate does not have a registered email address.');
+        }
+
+        try {
+            $status = Password::broker()->sendResetLink(['email' => $candidate->email]);
+
+            if ($status === Password::RESET_LINK_SENT) {
+                return back()->with('success', "Self-service password reset link sent to {$candidate->email}. Existing passwords are encrypted and never visible.");
+            }
+
+            return back()->with('error', __($status));
+        } catch (Throwable $e) {
+            Log::error('Admin password reset link failed', [
+                'candidate_id' => $candidate->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Failed to send password reset email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Issue a one-time temporary password (stored hashed only) and force change on next login.
+     */
+    public function issueTemporaryPassword(Request $request, $id)
+    {
+        $candidate = User::where('role', 'candidate')->findOrFail($id);
+
+        $validated = $request->validate([
+            'mode' => 'nullable|in:auto,manual',
+            'temporary_password' => 'required_if:mode,manual|nullable|string|min:8|max:64',
+            'send_email' => 'nullable|boolean',
+        ], [
+            'temporary_password.required_if' => 'Please enter a temporary password or switch to Auto-Generate.',
+            'temporary_password.min' => 'Temporary password must be at least 8 characters.',
+        ]);
+
+        $mode = $validated['mode'] ?? 'auto';
+        $plainTemporary = $mode === 'manual'
+            ? (string) $validated['temporary_password']
+            : self::generateTemporaryPassword();
+
+        // Only a one-way hash is saved; readable password is never stored anywhere in DB or logs.
+        $candidate->issueTemporaryPassword($plainTemporary);
+
+        $shouldEmail = $request->boolean('send_email', true) && !empty($candidate->email);
+        $emailSent = false;
+        $emailError = null;
+
+        if ($shouldEmail) {
+            try {
+                Mail::to($candidate->email)->send(new TemporaryPasswordMail($candidate, $plainTemporary));
+                $emailSent = true;
+            } catch (Throwable $e) {
+                Log::warning('Failed to email temporary password notice', [
+                    'candidate_id' => $candidate->id,
+                    'error' => $e->getMessage(),
+                ]);
+                $emailError = $e->getMessage();
+            }
+        }
+
+        session()->flash('issued_temp_password', [
+            'candidate_id' => $candidate->id,
+            'password' => $plainTemporary,
+            'emailed' => $emailSent,
+            'email_error' => $emailError,
+        ]);
+
+        $msg = "Temporary password issued for {$candidate->name}. They will be required to change it on next login.";
+        if ($emailSent) {
+            $msg .= " Notification sent to {$candidate->email}.";
+        } elseif ($emailError) {
+            $msg .= ' (Email delivery failed — please share the one-time password shown below securely.)';
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    private static function generateTemporaryPassword(): string
+    {
+        $digits = (string) random_int(1000, 9999);
+        $letters = '';
+        $alphabet = 'abcdefghjkmnpqrstuvwxyz';
+        for ($i = 0; $i < 4; $i++) {
+            $letters .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+        }
+
+        return "Vpa@{$digits}{$letters}";
     }
 }

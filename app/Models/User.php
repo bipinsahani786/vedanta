@@ -27,6 +27,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'must_change_password' => 'boolean',
+            'password_changed_at' => 'datetime',
+            'temp_password_issued_at' => 'datetime',
         ];
     }
 
@@ -157,6 +160,54 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isCandidate(): bool
     {
         return $this->role === 'candidate';
+    }
+
+    public function requiresPasswordChange(): bool
+    {
+        return array_key_exists('must_change_password', $this->getAttributes())
+            && (bool) $this->must_change_password;
+    }
+
+    /**
+     * Store only a one-way hash of the temporary password and require rotation on next login.
+     */
+    public function issueTemporaryPassword(string $plainTemporaryPassword): void
+    {
+        $updates = [
+            'password' => \Illuminate\Support\Facades\Hash::make($plainTemporaryPassword),
+        ];
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'must_change_password')) {
+            $updates['must_change_password'] = true;
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'temp_password_issued_at')) {
+            $updates['temp_password_issued_at'] = now();
+        }
+
+        $this->forceFill($updates)
+            ->setRememberToken(\Illuminate\Support\Str::random(60));
+        $this->save();
+    }
+
+    /**
+     * Hash and persist a user-chosen password and clear any temporary password lock.
+     */
+    public function completePasswordUpdate(string $newPlainPassword): void
+    {
+        $updates = [
+            'password' => \Illuminate\Support\Facades\Hash::make($newPlainPassword),
+        ];
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'must_change_password')) {
+            $updates['must_change_password'] = false;
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'password_changed_at')) {
+            $updates['password_changed_at'] = now();
+        }
+
+        $this->forceFill($updates)
+            ->setRememberToken(\Illuminate\Support\Str::random(60));
+        $this->save();
     }
 
     public function canViewJobProtectedDetails(?JobPost $job = null): bool
