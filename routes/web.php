@@ -583,6 +583,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
+    Route::get('/users/import-template', [UserController::class, 'downloadImportTemplate'])->name('users.import-template');
+    Route::post('/users/import', [UserController::class, 'import'])->name('users.import');
     Route::post('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
     Route::get('/users/{id}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
 
