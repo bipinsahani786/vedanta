@@ -198,6 +198,17 @@
             </div>
         @endif
     @endforeach
+    @if($errors->has('profile_photo'))
+        <div class="rounded-2xl border px-4 py-3 flex items-center justify-between gap-3 text-xs sm:text-sm shadow-sm bg-rose-500/15 border-rose-500/35 text-rose-200">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fas fa-exclamation-circle text-rose-400 shrink-0"></i>
+                <span class="font-semibold">{{ $errors->first('profile_photo') }}</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-rose-300/70 hover:text-white p-1 shrink-0" aria-label="Dismiss">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </div>
+    @endif
 
     {{-- Top Welcome & Profile Strength Banner --}}
     <div class="bg-gradient-to-r from-[#031544] via-[#092b7a] to-[#1e0e47] border border-blue-400/25 rounded-3xl p-6 sm:p-7 text-white shadow-[0_10px_35px_rgba(3,27,78,0.45)] relative overflow-hidden">
@@ -209,22 +220,39 @@
         <div class="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-6">
             {{-- Left: Candidate Info & Meta Badges --}}
             <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 text-center sm:text-left flex-1 min-w-0 w-full">
-                {{-- Avatar with Verified Badge --}}
-                <div class="relative shrink-0 group">
-                    @if($profile->profile_photo_path)
-                        <img src="{{ asset('storage/' . $profile->profile_photo_path) }}" alt="{{ auth()->user()->name }}"
-                            class="w-20 h-20 sm:w-22 sm:h-22 rounded-full object-cover ring-4 ring-white/20 shadow-2xl transition-transform duration-300 group-hover:scale-105">
-                    @else
-                        <div class="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-gradient-to-br from-accent-blue via-blue-600 to-indigo-800 flex items-center justify-center text-3xl font-black ring-4 ring-white/20 shadow-2xl transition-transform duration-300 group-hover:scale-105">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                        </div>
-                    @endif
+                {{-- Avatar with Click-to-Preview Lightbox & Change Photo Action --}}
+                <div class="flex flex-col items-center gap-2 shrink-0">
+                    <div class="relative group">
+                        <button type="button"
+                                @click="$dispatch('open-photo-modal')"
+                                class="relative block rounded-full focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer"
+                                title="{{ $hasPhoto ? 'Click to view large photo' : 'Click to view or upload photo' }}">
+                            @if($profile->profile_photo_path)
+                                <img src="{{ asset('storage/' . $profile->profile_photo_path) }}" alt="{{ auth()->user()->name }}"
+                                    class="w-20 h-20 sm:w-22 sm:h-22 rounded-full object-cover ring-4 ring-white/20 shadow-2xl transition-transform duration-300 group-hover:scale-105">
+                            @else
+                                <div class="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-gradient-to-br from-accent-blue via-blue-600 to-indigo-800 flex items-center justify-center text-3xl font-black ring-4 ring-white/20 shadow-2xl transition-transform duration-300 group-hover:scale-105">
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                </div>
+                            @endif
+                            <span class="absolute inset-0 rounded-full bg-slate-950/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm pointer-events-none">
+                                <i class="fas {{ $hasPhoto ? 'fa-search-plus' : 'fa-camera' }}"></i>
+                            </span>
+                        </button>
 
-                    @if($profile->is_verified || $profile->is_fee_paid)
-                        <span class="absolute bottom-0.5 right-0.5 w-6 h-6 rounded-full bg-emerald-500 ring-2 ring-[#031544] flex items-center justify-center text-[10px] text-white shadow-lg" title="Verified Candidate">
-                            <i class="fas fa-check"></i>
-                        </span>
-                    @endif
+                        @if($profile->is_verified || $profile->is_fee_paid)
+                            <span class="absolute bottom-0.5 right-0.5 w-6 h-6 rounded-full bg-emerald-500 ring-2 ring-[#031544] flex items-center justify-center text-[10px] text-white shadow-lg pointer-events-none" title="Verified Candidate">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        @endif
+                    </div>
+
+                    <button type="button"
+                            @click="$dispatch('trigger-photo-upload')"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 text-[10px] font-bold text-sky-200 hover:text-white transition-all cursor-pointer whitespace-nowrap">
+                        <i class="fas fa-camera text-[9px] text-sky-300"></i>
+                        <span>{{ $hasPhoto ? 'Change Photo' : 'Upload Photo' }}</span>
+                    </button>
                 </div>
 
                 {{-- Text Info --}}
@@ -1457,6 +1485,131 @@
 
         </div>
 
+    </div>
+
+    {{-- Candidate Photo Lightbox Preview & Direct Photo Upload Modal --}}
+    <div x-data="{
+            photoModalOpen: false,
+            uploading: false,
+            uploadError: '',
+            currentPhotoUrl: @js($hasPhoto ? asset('storage/' . $profile->profile_photo_path) : ''),
+            pickPhoto() {
+                this.uploadError = '';
+                if (this.$refs.photoInput) {
+                    this.$refs.photoInput.click();
+                }
+            },
+            handlePhotoChange(event) {
+                const file = event.target.files && event.target.files[0];
+                if (!file) return;
+                this.uploadError = '';
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    this.uploadError = 'Please select a valid JPG, PNG, or WEBP image.';
+                    this.photoModalOpen = true;
+                    event.target.value = '';
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    this.uploadError = 'Photo size must be 5MB or smaller.';
+                    this.photoModalOpen = true;
+                    event.target.value = '';
+                    return;
+                }
+                this.uploading = true;
+                this.$refs.photoForm.submit();
+            }
+        }"
+        @open-photo-modal.window="photoModalOpen = true"
+        @trigger-photo-upload.window="pickPhoto()"
+        @keydown.escape.window="photoModalOpen = false">
+
+        <form x-ref="photoForm" action="{{ route('candidate.profile.photo') }}" method="POST" enctype="multipart/form-data" class="hidden">
+            @csrf
+            <input x-ref="photoInput" type="file" name="profile_photo" accept="image/jpeg,image/png,image/jpg,image/webp" @change="handlePhotoChange($event)">
+        </form>
+
+        <div x-show="photoModalOpen"
+             x-cloak
+             class="fixed inset-0 z-[998] flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="candidate-photo-modal-title">
+            <div x-show="photoModalOpen"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click="if (!uploading) photoModalOpen = false"
+                 class="fixed inset-0 bg-slate-950/85 backdrop-blur-md"></div>
+
+            <div x-show="photoModalOpen"
+                 x-transition:enter="transition ease-out duration-200 transform"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150 transform"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="relative z-10 w-full max-w-lg rounded-3xl bg-gradient-to-b from-[#0a1b4d] to-[#040e2d] border border-sky-400/30 p-5 sm:p-6 text-white shadow-2xl space-y-4">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <h3 id="candidate-photo-modal-title" class="text-base sm:text-lg font-black text-white truncate">
+                            {{ auth()->user()->name }}
+                        </h3>
+                        @if($profile->vpa_id)
+                            <p class="text-[11px] font-mono text-sky-300 font-bold">{{ $profile->vpa_id }}</p>
+                        @endif
+                    </div>
+                    <button type="button"
+                            @click="if (!uploading) photoModalOpen = false"
+                            class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center border border-white/15 transition-colors cursor-pointer"
+                            title="Close preview">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+
+                <div x-show="uploadError" x-cloak class="rounded-xl bg-rose-500/15 border border-rose-500/35 px-3 py-2 text-xs text-rose-200 font-semibold flex items-center gap-2">
+                    <i class="fas fa-exclamation-circle text-rose-400"></i>
+                    <span x-text="uploadError"></span>
+                </div>
+
+                <div class="rounded-2xl bg-slate-950/70 border border-white/10 p-3 flex items-center justify-center min-h-[240px] max-h-[65vh] overflow-hidden">
+                    @if($profile->profile_photo_path)
+                        <img src="{{ asset('storage/' . $profile->profile_photo_path) }}"
+                             alt="{{ auth()->user()->name }}"
+                             class="max-h-[60vh] w-auto max-w-full rounded-xl object-contain shadow-xl">
+                    @else
+                        <div class="flex flex-col items-center justify-center py-8 text-center space-y-3">
+                            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-accent-blue via-blue-600 to-indigo-800 flex items-center justify-center text-4xl font-black ring-4 ring-white/20 shadow-xl">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </div>
+                            <p class="text-xs text-slate-300">No profile photo uploaded yet.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+                    <span class="text-[11px] text-slate-400">JPG, PNG, WEBP (max 5MB)</span>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button type="button"
+                                @click="photoModalOpen = false"
+                                :disabled="uploading"
+                                class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold text-slate-200 transition-colors cursor-pointer">
+                            Close
+                        </button>
+                        <button type="button"
+                                @click="pickPhoto()"
+                                :disabled="uploading"
+                                class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-400 to-blue-600 hover:brightness-110 text-white text-xs font-black shadow-md flex items-center gap-1.5 transition-all cursor-pointer">
+                            <i class="fas" :class="uploading ? 'fa-spinner fa-spin' : 'fa-camera'"></i>
+                            <span x-text="uploading ? 'Uploading...' : (currentPhotoUrl ? 'Update Photo' : 'Upload Photo')"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>

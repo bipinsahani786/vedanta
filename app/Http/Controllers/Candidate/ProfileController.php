@@ -258,4 +258,28 @@ class ProfileController extends Controller
         return redirect()->route('candidate.dashboard')
             ->with('success', 'Verification request submitted successfully! Our team will review your profile shortly.');
     }
+
+    /**
+     * Update only the candidate's profile photo from the dashboard.
+     */
+    public function updatePhoto(Request $request)
+    {
+        $request->validate([
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'profile_photo.required' => 'Please select a photo to upload.',
+            'profile_photo.image' => 'The selected file must be a valid image (JPG, PNG, WEBP).',
+            'profile_photo.mimes' => 'Only JPG, JPEG, PNG, and WEBP images are allowed.',
+            'profile_photo.max' => 'Profile photo size must not exceed 5MB.',
+        ]);
+
+        $user = auth()->user();
+        $profile = $user->profile ?: $user->profile()->firstOrCreate([]);
+
+        $path = $request->file('profile_photo')->store('profile_photos', 'public');
+        $profile->update(['profile_photo_path' => $path]);
+
+        return redirect()->route('candidate.dashboard')
+            ->with('success', 'Profile photo updated successfully!');
+    }
 }

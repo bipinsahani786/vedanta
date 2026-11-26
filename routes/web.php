@@ -398,8 +398,9 @@ Route::middleware(['auth', 'candidate'])->prefix('candidate')->name('candidate.'
         ));
     })->name('dashboard');
 
-    // Resume View & Verification Request Routes
+    // Resume View, Photo Update & Verification Request Routes
     Route::get('/resume/view', [ProfileController::class, 'viewResume'])->name('resume.view');
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
     Route::post('/verification/request', [ProfileController::class, 'requestVerification'])->name('verification.request');
 
     // Saved Jobs Routes
