@@ -14,10 +14,13 @@ class DashboardController extends Controller
     {
         $userId = auth()->id();
         
+        $jobSummary = JobPost::statusSummary($userId);
+
         $stats = [
-            'total_jobs' => JobPost::where('user_id', $userId)->count(),
-            'active_jobs' => JobPost::where('user_id', $userId)->where('status', 'approved')->count(),
-            'pending_jobs' => JobPost::where('user_id', $userId)->where('status', 'pending')->count(),
+            'total_jobs' => $jobSummary['total'],
+            'active_jobs' => $jobSummary['live'],
+            'pending_jobs' => $jobSummary['pending'],
+            'rejected_jobs' => $jobSummary['rejected'],
             'total_candidates' => JobApplication::whereHas('jobPost', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             })->whereIn('status', ['shortlisted', 'hired'])->count(),

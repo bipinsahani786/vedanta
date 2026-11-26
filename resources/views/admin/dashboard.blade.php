@@ -136,7 +136,7 @@
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pending Jobs</p>
-                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-amber-600 transition-colors">{{ number_format($pendingJobs->count()) }}</h3>
+                <h3 class="text-3xl font-bold text-gray-900 group-hover:text-amber-600 transition-colors">{{ number_format($pendingJobsCount) }}</h3>
             </div>
             <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                 <i class="fas fa-clock"></i>
@@ -180,6 +180,47 @@
             <span>Late Fees: <strong class="text-amber-600">₹{{ number_format($totalLateFees) }}</strong></span>
         </div>
     </a>
+</div>
+
+{{-- Jobs Summary Grid --}}
+<div class="mb-8">
+    <h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
+        <i class="fas fa-briefcase text-[#00a8e8]"></i> Jobs Summary
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Jobs -->
+        <a href="{{ route('admin.jobs.index', ['status' => 'all']) }}" class="block p-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Total Jobs</p>
+            <h4 class="text-3xl font-bold text-gray-900 mb-3">{{ number_format($totalJobs) }}</h4>
+            <div class="mt-4 flex items-center text-xs">
+                <span class="text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-md">All Job Posts</span>
+            </div>
+        </a>
+        <!-- Live Jobs -->
+        <a href="{{ route('admin.jobs.index', ['status' => 'approved']) }}" class="block p-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Live Jobs</p>
+            <h4 class="text-3xl font-bold text-emerald-600 mb-3">{{ number_format($activeJobs) }}</h4>
+            <div class="mt-4 flex items-center text-xs">
+                <span class="text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-md">Approved & Active</span>
+            </div>
+        </a>
+        <!-- Pending Jobs -->
+        <a href="{{ route('admin.jobs.index', ['status' => 'pending']) }}" class="block p-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pending Jobs</p>
+            <h4 class="text-3xl font-bold text-amber-500 mb-3">{{ number_format($pendingJobsCount) }}</h4>
+            <div class="mt-4 flex items-center text-xs">
+                <span class="text-amber-600 font-medium bg-amber-50 px-2 py-0.5 rounded-md">Awaiting Review</span>
+            </div>
+        </a>
+        <!-- Rejected Jobs -->
+        <a href="{{ route('admin.jobs.index', ['status' => 'rejected']) }}" class="block p-5 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm hover:-translate-y-1 transition-all cursor-pointer">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Rejected Jobs</p>
+            <h4 class="text-3xl font-bold text-rose-500 mb-3">{{ number_format($rejectedJobs) }}</h4>
+            <div class="mt-4 flex items-center text-xs">
+                <span class="text-rose-600 font-medium bg-rose-50 px-2 py-0.5 rounded-md">Declined</span>
+            </div>
+        </a>
+    </div>
 </div>
 
 {{-- Application Analytics Grid --}}

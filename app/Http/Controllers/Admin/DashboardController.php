@@ -40,7 +40,11 @@ class DashboardController extends Controller
         // Statistics
         $totalCandidates = User::where('role', 'candidate')->count();
         $totalSchools = User::where('role', 'employer')->count();
-        $activeJobs = JobPost::where('status', 'approved')->count();
+        $jobSummary = JobPost::statusSummary();
+        $totalJobs = $jobSummary['total'];
+        $activeJobs = $jobSummary['live'];
+        $pendingJobsCount = $jobSummary['pending'];
+        $rejectedJobs = $jobSummary['rejected'];
         $placements = JobApplication::where('status', 'hired')->count();
 
         // Application Metrics with Date Filters
@@ -131,7 +135,10 @@ class DashboardController extends Controller
             'totalCollections',
             'totalCandidates',
             'totalSchools',
+            'totalJobs',
             'activeJobs',
+            'pendingJobsCount',
+            'rejectedJobs',
             'placements',
             'recentCandidates',
             'pendingJobs',

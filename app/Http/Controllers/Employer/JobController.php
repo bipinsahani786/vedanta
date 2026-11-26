@@ -16,14 +16,16 @@ class JobController extends Controller
 {
     public function index(Request $request)
     {
-        $query = JobPost::where('user_id', auth()->id());
+        $userId = auth()->id();
+        $stats = JobPost::statusSummary($userId);
+        $query = JobPost::where('user_id', $userId);
 
-        if ($request->filled('status')) {
+        if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
         $jobs = $query->latest()->paginate(10)->withQueryString();
-        return view('employer.jobs.index', compact('jobs'));
+        return view('employer.jobs.index', compact('jobs', 'stats'));
     }
 
     public function create()

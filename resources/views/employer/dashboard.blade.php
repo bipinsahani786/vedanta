@@ -23,7 +23,7 @@
     </div>
 
     {{-- Stats Cards --}}
-    <div id="tour-emp-stats" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 reveal">
+    <div id="tour-emp-stats" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10 reveal">
         <a href="{{ route('employer.jobs.index') }}" class="block bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group hover:border-accent-yellow/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
             <div class="absolute -right-6 -top-6 w-24 h-24 bg-accent-yellow/10 rounded-full blur-xl group-hover:bg-accent-yellow/20 transition-all duration-500"></div>
             <div class="flex items-center justify-between mb-4 relative z-10">
@@ -49,7 +49,7 @@
                 </span>
             </div>
             <h3 class="text-3xl font-bold text-text-main relative z-10 group-hover:text-green-500 transition-colors">{{ $stats['active_jobs'] }}</h3>
-            <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1 relative z-10">Active Jobs</p>
+            <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1 relative z-10">Active / Live Jobs</p>
         </a>
 
         <a href="{{ route('employer.jobs.index', ['status' => 'pending']) }}" class="block bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group hover:border-blue-500/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
@@ -64,6 +64,20 @@
             </div>
             <h3 class="text-3xl font-bold text-text-main relative z-10 group-hover:text-blue-500 transition-colors">{{ $stats['pending_jobs'] }}</h3>
             <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1 relative z-10">Pending Approval</p>
+        </a>
+
+        <a href="{{ route('employer.jobs.index', ['status' => 'rejected']) }}" class="block bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group hover:border-red-500/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            <div class="absolute -right-6 -top-6 w-24 h-24 bg-red-500/10 rounded-full blur-xl group-hover:bg-red-500/20 transition-all duration-500"></div>
+            <div class="flex items-center justify-between mb-4 relative z-10">
+                <div class="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <span class="text-xs font-bold text-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    View <i class="fas fa-arrow-right text-[10px]"></i>
+                </span>
+            </div>
+            <h3 class="text-3xl font-bold text-text-main relative z-10 group-hover:text-red-500 transition-colors">{{ $stats['rejected_jobs'] ?? 0 }}</h3>
+            <p class="text-xs font-semibold text-text-dark/50 uppercase tracking-wide mt-1 relative z-10">Rejected Jobs</p>
         </a>
 
         <a href="{{ route('employer.applicants.index') }}" class="block bg-card-bg rounded-2xl border border-card-border p-6 shadow-xl relative overflow-hidden group hover:border-purple-500/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">

@@ -1,8 +1,14 @@
 @extends('layouts.admin')
 
 @php
-    $isPendingView = request('status') === 'pending';
-    $title = $isPendingView ? 'Job Approvals' : 'Live Jobs';
+    $statusParam = request('status');
+    $isPendingView = $statusParam === 'pending';
+    $title = match ($statusParam) {
+        'pending' => 'Job Approvals',
+        'rejected' => 'Rejected Jobs',
+        'all' => 'All Jobs',
+        default => 'Live Jobs',
+    };
 @endphp
 
 @section('title', $title)
@@ -16,6 +22,9 @@
 @section('content')
 
 {{-- Analytics Cards --}}
+<div class="text-xs font-bold uppercase tracking-wider text-text-dark/60 mb-3 flex items-center gap-2">
+    <i class="fas fa-chart-bar text-accent-blue"></i> Jobs Summary
+</div>
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
     <a href="{{ request()->fullUrlWithQuery(['status' => 'all', 'page' => null]) }}" class="bg-card-bg border {{ request('status') === 'all' ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-blue-500 transition-all">
         <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>

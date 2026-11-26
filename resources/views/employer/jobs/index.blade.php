@@ -28,6 +28,39 @@
         </div>
     @endif
 
+    {{-- Jobs Summary Cards --}}
+    <div class="mb-6">
+        <div class="text-xs font-bold uppercase tracking-wider text-text-dark/60 mb-3 flex items-center gap-2">
+            <i class="fas fa-chart-bar text-accent-yellow"></i> Jobs Summary
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{{ route('employer.jobs.index') }}"
+               class="bg-card-bg border {{ (!request('status') || request('status') === 'all') ? 'border-accent-yellow shadow-md ring-1 ring-accent-yellow' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-accent-yellow transition-all">
+                <div class="absolute inset-0 bg-accent-yellow/5 group-hover:bg-accent-yellow/10 transition-colors"></div>
+                <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Total Jobs</p>
+                <h4 class="text-2xl font-extrabold text-accent-yellow relative z-10">{{ $stats['total'] ?? $jobs->total() }}</h4>
+            </a>
+            <a href="{{ route('employer.jobs.index', ['status' => 'approved']) }}"
+               class="bg-card-bg border {{ request('status') === 'approved' ? 'border-green-500 shadow-md ring-1 ring-green-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-green-500 transition-all">
+                <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
+                <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Live Jobs</p>
+                <h4 class="text-2xl font-extrabold text-green-500 relative z-10">{{ $stats['live'] ?? 0 }}</h4>
+            </a>
+            <a href="{{ route('employer.jobs.index', ['status' => 'pending']) }}"
+               class="bg-card-bg border {{ request('status') === 'pending' ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-blue-500 transition-all">
+                <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
+                <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Pending Approval</p>
+                <h4 class="text-2xl font-extrabold text-blue-400 relative z-10">{{ $stats['pending'] ?? 0 }}</h4>
+            </a>
+            <a href="{{ route('employer.jobs.index', ['status' => 'rejected']) }}"
+               class="bg-card-bg border {{ request('status') === 'rejected' ? 'border-red-500 shadow-md ring-1 ring-red-500' : 'border-card-border' }} rounded-xl p-4 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group hover:border-red-500 transition-all">
+                <div class="absolute inset-0 bg-red-500/5 group-hover:bg-red-500/10 transition-colors"></div>
+                <p class="text-[10px] text-text-dark/60 font-bold uppercase tracking-wider mb-1 relative z-10">Rejected Jobs</p>
+                <h4 class="text-2xl font-extrabold text-red-500 relative z-10">{{ $stats['rejected'] ?? 0 }}</h4>
+            </a>
+        </div>
+    </div>
+
     <div class="bg-card-bg rounded-2xl border border-card-border overflow-hidden shadow-xl">
         <table class="w-full text-left border-collapse">
             <thead>

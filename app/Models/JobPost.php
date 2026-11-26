@@ -52,6 +52,27 @@ class JobPost extends Model
         return $this->hasMany(JobApplication::class, 'job_post_id');
     }
 
+    /**
+     * Aggregate job counts grouped by moderation status.
+     *
+     * @return array{total: int, live: int, pending: int, rejected: int}
+     */
+    public static function statusSummary(?int $userId = null): array
+    {
+        $counts = static::query()
+            ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
+            ->selectRaw('status, COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        return [
+            'total' => (int) $counts->sum(),
+            'live' => (int) ($counts['approved'] ?? 0),
+            'pending' => (int) ($counts['pending'] ?? 0),
+            'rejected' => (int) ($counts['rejected'] ?? 0),
+        ];
+    }
+
     public function getSuggestedCandidates($limit = 5)
     {
         return CandidateProfile::with(['user', 'category', 'subject', 'highestQualification', 'preferredState', 'preferredCity'])

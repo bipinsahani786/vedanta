@@ -24,7 +24,7 @@
                 'badge' => 'Metrics',
                 'icon' => 'fa-chart-bar',
                 'title' => 'Hiring Overview Cards',
-                'description' => 'Monitor Total Jobs Posted, Active Approved Jobs, Pending Approvals, and Shortlisted or Hired Candidates in real time.',
+                'description' => 'Monitor Total Jobs Posted, Active / Live Jobs, Pending Approval, Rejected Jobs, and Shortlisted or Hired Candidates in real time.',
                 'optional' => false,
             ],
             [
