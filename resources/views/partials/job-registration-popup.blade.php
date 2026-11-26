@@ -35,17 +35,17 @@
                 </div>
 
                 <!-- Right Teacher Visual -->
-                <div class="relative w-28 sm:w-32 h-28 sm:h-32 flex-shrink-0 -mr-2 -mt-1">
+                <div class="relative w-28 sm:w-32 h-28 sm:h-32 flex-shrink-0 mb-2">
                     <!-- Script Note -->
-                    <div class="absolute top-0 right-1 text-right pointer-events-none select-none z-20">
+                    <div class="absolute top-1.5 right-2 text-right pointer-events-none select-none z-20">
                         <span class="text-[9px] text-amber-200/95 font-serif italic font-bold leading-tight block drop-shadow" style="font-family: 'Playfair Display', serif;">
                             Your<br>Teaching Career<br>Starts Here
                         </span>
                     </div>
 
                     <!-- Teacher Photo -->
-                    <div class="w-full h-full relative overflow-hidden">
-                        <img src="{{ asset('images/educator_popup.jpg') }}" alt="Educator" class="w-full h-full object-cover object-top scale-105" style="-webkit-mask-image: linear-gradient(to left, black 65%, transparent 100%), linear-gradient(to top, transparent 0%, black 20%); mask-image: linear-gradient(to left, black 65%, transparent 100%), linear-gradient(to top, transparent 0%, black 20%);">
+                    <div class="w-full h-full relative overflow-hidden rounded-2xl border border-white/20 shadow-lg">
+                        <img src="{{ asset('images/educator_popup.jpg') }}" alt="Educator" class="w-full h-full object-cover object-top rounded-2xl">
                     </div>
 
                     <!-- Floating Pill Badge -->
