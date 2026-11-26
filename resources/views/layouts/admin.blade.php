@@ -205,6 +205,10 @@
                     class="sidebar-link {{ request()->routeIs('admin.crm.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-users-cog w-5 text-center"></i> Candidates CRM
                 </a>
+                <a href="{{ route('admin.standalone-agreements.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.standalone-agreements.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
+                    <i class="fas fa-paper-plane w-5 text-center"></i> Send Agreement
+                </a>
                 <a href="{{ route('admin.applications.index') }}"
                     class="sidebar-link {{ request()->routeIs('admin.applications.*') ? 'active' : '' }} px-4 py-2.5 rounded-lg flex items-center gap-3 text-sm">
                     <i class="fas fa-file-signature w-5 text-center"></i> Job Applications

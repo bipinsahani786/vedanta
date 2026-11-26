@@ -34,8 +34,10 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JobAlertSubscriptionController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\Admin\StandaloneAgreementController;
 use App\Http\Controllers\PhonePeWebhookController;
 use App\Http\Controllers\ResumeBuilderController;
+use App\Http\Controllers\StandaloneAgreementSignController;
 use App\Models\JobPost;
 use App\Models\PaymentTransaction;
 use App\Models\ReferralWallet;
@@ -110,6 +112,13 @@ Route::post('/job-alerts/resubscribe/{token}', [JobAlertSubscriptionController::
 // Resume Builder (Public)
 Route::get('/resume-builder', [ResumeBuilderController::class, 'index'])->name('resume.builder');
 Route::post('/resume-builder/download', [ResumeBuilderController::class, 'download'])->name('resume.builder.download');
+
+// Standalone Direct Agreement Signing (Public Tokenized Access)
+Route::get('/agreement/sign/{token}', [StandaloneAgreementSignController::class, 'show'])->name('standalone-agreement.show');
+Route::post('/agreement/sign/{token}', [StandaloneAgreementSignController::class, 'submit'])
+    ->middleware('throttle:15,1')
+    ->name('standalone-agreement.submit');
+Route::get('/agreement/sign/{token}/download', [StandaloneAgreementSignController::class, 'download'])->name('standalone-agreement.download');
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -530,6 +539,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/crm/candidate/{id}/download-agreement', [CrmController::class, 'downloadAgreement'])->name('crm.candidate.download-agreement');
     Route::get('/crm/candidate/{id}/preview-agreement', [CrmController::class, 'previewAgreement'])->name('crm.candidate.preview-agreement');
     Route::post('/crm/candidate/{id}/fulfill-payment', [CrmController::class, 'manualPaymentFulfill'])->name('crm.candidate.fulfill-payment');
+
+    // Standalone Agreements (No candidate registration/payment prerequisite)
+    Route::get('/agreements', [StandaloneAgreementController::class, 'index'])->name('standalone-agreements.index');
+    Route::post('/agreements/send', [StandaloneAgreementController::class, 'store'])->name('standalone-agreements.store');
+    Route::post('/agreements/{agreement}/resend', [StandaloneAgreementController::class, 'resend'])->name('standalone-agreements.resend');
+    Route::post('/agreements/{agreement}/expire', [StandaloneAgreementController::class, 'expire'])->name('standalone-agreements.expire');
+    Route::get('/agreements/{agreement}/pdf', [StandaloneAgreementController::class, 'pdf'])->name('standalone-agreements.pdf');
     Route::post('/crm/candidate/{id}/send-email', [CrmController::class, 'sendCandidateEmail'])->name('crm.candidate.send-email');
 
     // Applications & Transactions
