@@ -255,43 +255,113 @@
     @if(isset($activeAnnouncement) && $activeAnnouncement)
         @php
             $noticeKey = 'vpa_notice_closed_' . $activeAnnouncement->id . '_' . ($activeAnnouncement->updated_at?->timestamp ?? 0);
+            $noticeStyleKey = $activeAnnouncement->style ?? 'info';
             $bannerStyles = [
                 'info' => [
-                    'wrap' => 'bg-gradient-to-r from-[#062356] via-[#0b3578] to-[#062356] border-blue-400/30 text-white',
-                    'badge' => 'bg-[#129aef] text-white',
-                    'btn' => 'bg-white text-[#040e2d] hover:bg-blue-50',
+                    'wrap' => 'vpa-notice-animated vpa-notice-info border-sky-300/40 text-white',
+                    'badge' => 'bg-white text-[#040e2d]',
+                    'btn' => 'bg-[#ffb800] text-[#040e2d] hover:bg-yellow-300',
                     'icon' => 'fa-bullhorn text-[#ffb800]',
                 ],
                 'warning' => [
-                    'wrap' => 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 border-amber-300 text-slate-950',
+                    'wrap' => 'vpa-notice-animated vpa-notice-warning border-amber-200 text-slate-950',
                     'badge' => 'bg-[#040e2d] text-[#ffb800]',
                     'btn' => 'bg-[#040e2d] text-white hover:bg-slate-800',
                     'icon' => 'fa-exclamation-circle text-[#040e2d]',
                 ],
                 'success' => [
-                    'wrap' => 'bg-gradient-to-r from-emerald-800 via-emerald-700 to-emerald-800 border-emerald-400/30 text-white',
-                    'badge' => 'bg-emerald-400 text-slate-950',
-                    'btn' => 'bg-white text-emerald-900 hover:bg-emerald-50',
-                    'icon' => 'fa-check-circle text-emerald-300',
+                    'wrap' => 'vpa-notice-animated vpa-notice-success border-emerald-300/40 text-white',
+                    'badge' => 'bg-white text-emerald-900',
+                    'btn' => 'bg-[#ffb800] text-[#040e2d] hover:bg-yellow-300',
+                    'icon' => 'fa-check-circle text-emerald-200',
                 ],
                 'urgent' => [
-                    'wrap' => 'bg-gradient-to-r from-rose-800 via-rose-700 to-rose-800 border-rose-400/30 text-white',
+                    'wrap' => 'vpa-notice-animated vpa-notice-urgent border-rose-300/50 text-white',
                     'badge' => 'bg-white text-rose-800',
                     'btn' => 'bg-[#ffb800] text-[#040e2d] hover:bg-yellow-300',
                     'icon' => 'fa-bell text-[#ffb800]',
                 ],
             ];
-            $bannerTheme = $bannerStyles[$activeAnnouncement->style ?? 'info'] ?? $bannerStyles['info'];
+            $bannerTheme = $bannerStyles[$noticeStyleKey] ?? $bannerStyles['info'];
         @endphp
+        <style>
+            .vpa-notice-animated {
+                position: relative;
+                overflow: hidden;
+                background-size: 300% 300%;
+                animation: vpaNoticeGradientFlow 5.5s ease-in-out infinite, vpaNoticeAttentionBlink 1.8s ease-in-out infinite;
+            }
+            .vpa-notice-animated::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -35%;
+                width: 30%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+                transform: skewX(-22deg);
+                pointer-events: none;
+                animation: vpaNoticeShimmer 3.2s ease-in-out infinite;
+            }
+            .vpa-notice-info {
+                background-image: linear-gradient(110deg, #062356, #0ea5e9, #1d4ed8, #0284c7, #062356);
+            }
+            .vpa-notice-warning {
+                background-image: linear-gradient(110deg, #f59e0b, #fde047, #f97316, #fbbf24, #f59e0b);
+            }
+            .vpa-notice-success {
+                background-image: linear-gradient(110deg, #065f46, #10b981, #059669, #14b8a6, #065f46);
+            }
+            .vpa-notice-urgent {
+                background-image: linear-gradient(110deg, #881337, #e11d48, #dc2626, #be123c, #881337);
+            }
+            .vpa-notice-badge-blink {
+                animation: vpaNoticeBadgePulse 1.4s ease-in-out infinite;
+            }
+            .vpa-notice-icon-blink {
+                animation: vpaNoticeIconFlash 1.2s ease-in-out infinite;
+            }
+            @keyframes vpaNoticeGradientFlow {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+            @keyframes vpaNoticeAttentionBlink {
+                0%, 100% { filter: brightness(1); box-shadow: inset 0 0 0 rgba(255, 255, 255, 0); }
+                50% { filter: brightness(1.16); box-shadow: inset 0 0 22px rgba(255, 255, 255, 0.16); }
+            }
+            @keyframes vpaNoticeShimmer {
+                0% { left: -35%; }
+                55%, 100% { left: 120%; }
+            }
+            @keyframes vpaNoticeBadgePulse {
+                0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55); }
+                50% { transform: scale(1.04); box-shadow: 0 0 12px 2px rgba(255, 255, 255, 0.65); }
+            }
+            @keyframes vpaNoticeIconFlash {
+                0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+                25% { opacity: 0.72; transform: scale(1.15) rotate(-10deg); }
+                50% { opacity: 1; transform: scale(1.18) rotate(10deg); }
+                75% { opacity: 0.8; transform: scale(1.1) rotate(-6deg); }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .vpa-notice-animated,
+                .vpa-notice-animated::after,
+                .vpa-notice-badge-blink,
+                .vpa-notice-icon-blink {
+                    animation: none !important;
+                }
+            }
+        </style>
         <div id="site-announcement-banner"
              role="region"
              aria-label="Announcement"
-             class="relative z-[104] w-full border-b px-4 sm:px-6 lg:px-[5%] py-2.5 shadow-sm {{ $bannerTheme['wrap'] }}">
-            <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+             class="relative z-[104] w-full border-b px-4 sm:px-6 lg:px-[5%] py-2.5 shadow-md {{ $bannerTheme['wrap'] }}">
+            <div class="relative z-10 max-w-7xl mx-auto flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap min-w-0 flex-1">
-                    <i class="fas {{ $bannerTheme['icon'] }} text-sm shrink-0"></i>
+                    <i class="fas {{ $bannerTheme['icon'] }} text-sm shrink-0 vpa-notice-icon-blink"></i>
                     @if($activeAnnouncement->title)
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider shrink-0 {{ $bannerTheme['badge'] }}">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider shrink-0 vpa-notice-badge-blink {{ $bannerTheme['badge'] }}">
                             {{ $activeAnnouncement->title }}
                         </span>
                     @endif
@@ -300,7 +370,7 @@
                     </p>
                     @if($activeAnnouncement->hasSafeLink())
                         <a href="{{ trim($activeAnnouncement->link_url) }}"
-                           class="px-3 py-1 rounded-lg text-[11px] font-extrabold transition-colors shrink-0 inline-flex items-center gap-1 shadow-sm {{ $bannerTheme['btn'] }}">
+                           class="px-3 py-1 rounded-lg text-[11px] font-extrabold transition-all shrink-0 inline-flex items-center gap-1 shadow-sm {{ $bannerTheme['btn'] }}">
                             <span>{{ $activeAnnouncement->link_text ?: 'Learn More' }}</span>
                             <i class="fas fa-arrow-right text-[9px]"></i>
                         </a>
